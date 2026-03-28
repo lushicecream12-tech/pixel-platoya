@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixel PlatoYA</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="screen loading-screen" id="loading-screen" aria-hidden="true" hidden>
+        <div class="loading-stage">
+          <h1 class="game-title loading-title">Pixel PlatoYA</h1>
+
+          <div class="loading-panel">
+            <p class="loading-fill-text" id="loading-fill-text">Ladowanie... 0%</p>
+            <div class="loading-progress-shell" aria-hidden="true">
+              <div class="loading-progress-fill" id="loading-progress-fill"></div>
+            </div>
+            <p class="progress-value" id="progress-value">0%</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen app-screen active" id="app-screen" aria-hidden="false">
+        <header class="panel hud-panel">
+          <p class="hud-title">Pixel PlatoYA</p>
+
+          <div class="hud-tools">
+            <div class="balance-box" id="balance-target">
+              <div class="balance-icon-frame">
+                <img
+                  class="balance-icon asset-image"
+                  src="./monety_1.png"
+                  alt="Monety"
+                  data-fallback-text="M"
+                />
+                <div class="asset-fallback">M</div>
+              </div>
+              <p class="balance-label">Saldo monet</p>
+              <p class="balance-value" id="coin-balance">0</p>
+            </div>
+            <div class="balance-box">
+              <div class="balance-icon-frame">
+                <img
+                  class="balance-icon asset-image"
+                  src="./monety_2.png"
+                  alt="Puchary"
+                  data-fallback-text="P"
+                />
+                <div class="asset-fallback">P</div>
+              </div>
+              <p class="balance-label">Puchary</p>
+              <p class="balance-value" id="trophy-balance">0</p>
+            </div>
+            <div class="balance-box">
+              <div class="balance-icon-frame">
+                <img
+                  class="balance-icon asset-image"
+                  src=""
+                  alt="Diamenty"
+                  data-fallback-text="D"
+                />
+                <div class="asset-fallback">D</div>
+              </div>
+              <p class="balance-label">Diamenty</p>
+              <p class="balance-value" id="diamond-balance">0</p>
+            </div>
+          </div>
+        </header>
+
+        <section class="screen-view active" id="lobby-view">
+          <div class="panel lobby-panel">
+            <div class="lobby-topbar">
+              <h2 class="section-title">Lobby</h2>
+              <button
+                class="circle-icon-button lobby-settings-button"
+                id="lobby-settings-button"
+                type="button"
+                aria-label="Ustawienia"
+              >
+                &#9881;
+              </button>
+            </div>
+
+            <div class="lobby-layout">
+              <button class="pixel-button lobby-nav-button top-button" data-view="game">
+                GRAJ
+              </button>
+
+              <button class="pixel-button lobby-nav-button left-button" data-view="store">
+                SKLEP
+              </button>
+
+              <div class="showcase-stage">
+                <div class="avatar-wrapper">
+                  <div class="avatar-frame">
+                    <img
+                      id="lobby-avatar"
+                      class="avatar-image asset-image"
+                      src="./postac_1.png"
+                      alt="Postac gracza"
+                      data-fallback-text="POSTAC"
+                    />
+                    <div class="avatar-fallback asset-fallback">POSTAC</div>
+                  </div>
+                </div>
+
+                <div class="pet-wrapper" id="pet-wrapper">
+                  <div class="pet-frame">
+                    <img
+                      id="lobby-pet"
+                      class="pet-image asset-image"
+                      src=""
+                      alt="PlatoYa"
+                      data-fallback-text="PLATOYA"
+                    />
+                    <div class="pet-fallback asset-fallback">PLATOYA</div>
+                  </div>
+                </div>
+              </div>
+
+              <button class="pixel-button lobby-nav-button right-button" data-view="inventory">
+                SZAFA
+              </button>
+
+              <button class="pixel-button lobby-nav-button bottom-button" data-view="trophies">
+                ALEJA PUCHARÓW
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen-view" id="store-view" aria-hidden="true">
+          <div class="panel section-panel">
+            <div class="section-header">
+              <div>
+                <h2 class="section-title">Sklep</h2>
+                <p class="section-subtitle">Codziennie o 09:00 pojawiaja sie 2 losowe sklepowe postacie. Na koncu znajdziesz katalog wszystkich skinow.</p>
+              </div>
+              <button class="pixel-button small-button" data-view="lobby">WROC</button>
+            </div>
+
+            <div class="card-grid" id="store-grid"></div>
+          </div>
+        </section>
+
+        <section class="screen-view" id="inventory-view" aria-hidden="true">
+          <div class="panel section-panel">
+            <div class="section-header">
+              <div>
+                <h2 class="section-title">Szafa</h2>
+                <p class="section-subtitle">Tutaj zakladasz postac, PlatoYasa i bron.</p>
+              </div>
+              <button class="pixel-button small-button" data-view="lobby">WROC</button>
+            </div>
+
+            <div class="wardrobe-overview" id="wardrobe-overview"></div>
+
+            <div class="tab-row">
+              <button
+                class="pixel-button tab-button active"
+                data-tab-group="inventory"
+                data-tab="characters"
+              >
+                Postacie
+              </button>
+              <button class="pixel-button tab-button" data-tab-group="inventory" data-tab="pets">
+                PlatoYas
+              </button>
+              <button class="pixel-button tab-button" data-tab-group="inventory" data-tab="weapons">
+                Bronie
+              </button>
+            </div>
+
+            <div class="card-grid" id="inventory-grid"></div>
+          </div>
+        </section>
+
+        <section class="screen-view" id="game-view" aria-hidden="true">
+          <div class="panel section-panel">
+            <div class="section-header">
+              <div>
+                <h2 class="section-title">Gra</h2>
+                <p class="section-subtitle">Strzalki poruszaja postacia, a spacja strzela. W trybie telefonowym uzyj joysticka i przycisku strzalu.</p>
+                <p class="section-subtitle" id="game-mode-info"></p>
+              </div>
+              <button class="pixel-button small-button" id="game-back-button" data-view="lobby">WROC</button>
+            </div>
+
+            <div class="game-stage" id="game-stage">
+              <div class="game-map" id="game-map">
+                <div class="wave-banner" id="wave-banner" hidden>
+                  <div class="wave-banner-box">
+                    <p class="wave-banner-title" id="wave-banner-title">FALA 1</p>
+                    <p class="wave-banner-label">Start za</p>
+                    <p class="wave-banner-countdown" id="wave-banner-countdown">3</p>
+                  </div>
+                </div>
+                <div class="water-fields-layer" id="water-fields-layer"></div>
+                <div class="entity player-entity" id="player-entity">
+                  <p class="entity-health player-health" id="player-health-label">3000 pz</p>
+                  <div class="player-visual">
+                    <div class="player-shield" id="player-shield" hidden></div>
+                    <div class="player-sprite-frame">
+                      <img
+                        id="game-player-image"
+                        class="entity-image asset-image"
+                        src="./postac_1.png"
+                        alt="Postac"
+                        data-fallback-text="POSTAC"
+                      />
+                      <div class="asset-fallback">POSTAC</div>
+                    </div>
+                  </div>
+                  <div class="ammo-bars" id="ammo-bars"></div>
+                </div>
+
+                <div class="entity pet-entity" id="game-pet-entity" hidden>
+                  <div class="pet-cooldown-bar" id="pet-cooldown-bar" hidden>
+                    <div class="pet-cooldown-fill" id="pet-cooldown-fill"></div>
+                  </div>
+                  <div class="pet-sprite-frame">
+                    <img
+                      id="game-pet-image"
+                      class="entity-image asset-image"
+                      src=""
+                      alt="PlatoYa"
+                      data-fallback-text="PLATOYA"
+                    />
+                    <div class="asset-fallback">PLATOYA</div>
+                  </div>
+                </div>
+
+                <div class="pet-pack-layer" id="pet-pack-layer"></div>
+                <div class="barriers-layer" id="barriers-layer"></div>
+                <div class="pickups-layer" id="pickups-layer"></div>
+                <div class="projectiles-layer" id="projectiles-layer"></div>
+                <div class="robots-layer" id="robots-layer"></div>
+                <div class="effects-layer" id="effects-layer"></div>
+              </div>
+
+              <div class="touch-controls" id="touch-controls" hidden>
+                <div class="touch-control-left">
+                  <div class="touch-joystick" id="touch-joystick" aria-label="Joystick poruszania">
+                    <div class="touch-joystick-base">
+                      <div class="touch-joystick-thumb" id="touch-joystick-thumb"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="touch-control-right">
+                  <button class="touch-fire-button" id="touch-fire-button" type="button">STRZAL</button>
+                </div>
+              </div>
+
+              <div class="game-result-overlay" id="game-result-overlay" hidden>
+                <div class="game-result-content">
+                  <div class="game-result-panel">
+                    <p class="game-result-kicker" id="game-result-status">Koniec rundy</p>
+                    <h3 class="game-result-heading">Podsumowanie</h3>
+                    <p class="game-result-note" id="game-result-note">Sprawdzmy, ile udalo sie zdobyc w tej rundzie.</p>
+
+                    <div class="game-result-hero">
+                      <div class="avatar-frame game-result-avatar">
+                        <img
+                          id="game-result-image"
+                          class="avatar-image asset-image"
+                          src="./postac_1.png"
+                          alt="Postac"
+                          data-fallback-text="POSTAC"
+                        />
+                        <div class="asset-fallback">POSTAC</div>
+                      </div>
+                    </div>
+
+                    <div class="game-result-stats">
+                      <article class="game-result-stat-card">
+                        <p class="game-result-stat-label">Fale</p>
+                        <p class="game-result-stat-value" id="game-result-wave">0</p>
+                      </article>
+
+                      <article class="game-result-stat-card">
+                        <p class="game-result-stat-label">Roboty</p>
+                        <p class="game-result-stat-value" id="game-result-robots">0</p>
+                      </article>
+
+                      <article class="game-result-stat-card">
+                        <p class="game-result-stat-label">Puchary</p>
+                        <p class="game-result-stat-value" id="game-result-trophies">0</p>
+                      </article>
+                    </div>
+
+                    <button class="pixel-button game-result-button" id="game-result-button" hidden>POWRÓT DO LOBBY</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen-view" id="trophies-view" aria-hidden="true">
+          <div class="panel section-panel">
+            <div class="section-header">
+              <div>
+                <h2 class="section-title">Aleja Pucharów</h2>
+                <p class="section-subtitle">Zbieraj puchary w walce i odbieraj kolejne nagrody w jednej, ciągłej alei.</p>
+              </div>
+              <button class="pixel-button small-button" data-view="lobby">WROC</button>
+            </div>
+
+            <div class="panel world-header-panel">
+              <div class="world-header-meta">
+                <div class="world-header-copy">
+                  <p class="item-title" id="world-title">Aleja Pucharów</p>
+                  <p class="item-note">Twój postęp: <span id="world-progress-value">0</span> pucharów</p>
+                </div>
+                <div class="world-header-actions">
+                  <p class="super-alley-status" id="super-alley-status">Aktywuj Aleję Super, aby odbierać różowe nagrody premium.</p>
+                  <button class="pixel-button small-button super-alley-button" id="super-alley-button">
+                    AKTYWUJ ALEJĘ SUPER
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="trophy-road-grid" id="trophy-grid"></div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div class="alley-intro-backdrop" id="alley-intro-backdrop" hidden>
+      <div class="alley-intro-scene" id="alley-intro-scene" role="dialog" aria-modal="true" aria-label="Witaj w Swiecie Magikow">
+        <div class="alley-intro-lights" aria-hidden="true">
+          <span class="alley-intro-ray ray-1"></span>
+          <span class="alley-intro-ray ray-2"></span>
+          <span class="alley-intro-ray ray-3"></span>
+          <span class="alley-intro-ray ray-4"></span>
+          <span class="alley-intro-ray ray-5"></span>
+          <span class="alley-intro-ray ray-6"></span>
+        </div>
+        <div class="alley-intro-glow" aria-hidden="true"></div>
+
+        <div class="alley-intro-card">
+          <div class="item-art alley-intro-art">
+            <img
+              id="alley-intro-image"
+              class="modal-image asset-image"
+              src="./ładowanie_1.png"
+              alt="Witaj w Swiecie Magikow"
+              data-fallback-text="MAGICY"
+            />
+            <div class="asset-fallback">MAGICY</div>
+          </div>
+          <p class="alley-intro-title" id="alley-intro-title">Witaj w Świecie Magików</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="super-alley-backdrop" id="super-alley-backdrop" hidden>
+      <div class="super-alley-scene" id="super-alley-scene" role="dialog" aria-modal="true" aria-label="Aktywacja Alei Super">
+        <div class="alley-intro-lights" aria-hidden="true">
+          <span class="alley-intro-ray ray-1"></span>
+          <span class="alley-intro-ray ray-2"></span>
+          <span class="alley-intro-ray ray-3"></span>
+          <span class="alley-intro-ray ray-4"></span>
+          <span class="alley-intro-ray ray-5"></span>
+          <span class="alley-intro-ray ray-6"></span>
+        </div>
+        <div class="alley-intro-glow" aria-hidden="true"></div>
+
+        <div class="super-alley-card">
+          <p class="super-alley-kicker">Aleja Super</p>
+          <div class="item-art alley-intro-art super-alley-art">
+            <img
+              id="super-alley-image"
+              class="modal-image asset-image"
+              src="./ładowanie_1.png"
+              alt="Aktywacja Alei Super"
+              data-fallback-text="SUPER"
+            />
+            <div class="asset-fallback">SUPER</div>
+          </div>
+          <p class="alley-intro-title super-alley-title" id="super-alley-title">Aktywuj Aleję Super</p>
+          <p class="super-alley-copy" id="super-alley-copy">
+            Odblokuj specjalne nagrody premium i odbieraj je z różowym błyskiem.
+          </p>
+          <div class="super-alley-actions" id="super-alley-actions">
+            <button class="pixel-button super-alley-option" id="super-alley-coins-button">10000 monet</button>
+            <button class="pixel-button super-alley-option" id="super-alley-cash-button">11,99zł</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-backdrop" id="settings-backdrop" hidden>
+      <div class="panel settings-panel" id="settings-panel" role="dialog" aria-modal="true" aria-label="Ustawienia">
+        <div class="settings-panel-header">
+          <div class="settings-heading">
+            <p class="settings-kicker">Pixel PlatoYA</p>
+            <h3 class="modal-title">Ustawienia</h3>
+          </div>
+          <button
+            class="circle-icon-button settings-close-button"
+            id="settings-close-button"
+            type="button"
+            aria-label="Zamknij ustawienia"
+          >
+            X
+          </button>
+        </div>
+
+        <p class="settings-copy">Tutaj wlaczysz tryb telefonowy oraz znajdziesz reset konta.</p>
+
+        <div class="settings-option">
+          <div class="settings-option-copy">
+            <p class="settings-option-title">Tryb telefonowy</p>
+            <p class="settings-option-text" id="settings-phone-status">
+              Wylaczony. Sterowanie zostaje na strzalkach i spacji.
+            </p>
+          </div>
+          <button class="pixel-button small-button settings-toggle-button" id="phone-mode-toggle" type="button">
+            WLACZ
+          </button>
+        </div>
+
+        <button class="pixel-button settings-reset-button" id="account-reset-button" data-account-reset type="button">
+          RESET KONTA
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="modal-backdrop" hidden>
+      <div class="panel modal-box" id="modal-box" role="dialog" aria-modal="true">
+        <h3 class="modal-title" id="modal-title">Pixel PlatoYA</h3>
+        <div class="pixel-spinner" id="modal-spinner" hidden></div>
+        <div class="modal-visual" id="modal-visual" hidden>
+          <img id="modal-image" class="modal-image asset-image" src="" alt="" data-fallback-text="NAGRODA" />
+          <div class="asset-fallback">NAGRODA</div>
+        </div>
+        <p class="modal-message" id="modal-message"></p>
+        <button class="pixel-button dialog-button" id="modal-confirm">OK</button>
+      </div>
+    </div>
+
+    <div class="chest-backdrop" id="chest-backdrop" hidden>
+      <div class="panel chest-box" id="chest-box" role="dialog" aria-modal="true">
+        <h3 class="modal-title" id="chest-title">Drewniana Skrzynia</h3>
+        <div class="chest-scene" id="chest-scene">
+          <button class="chest-button" id="chest-open-button" aria-label="Otwórz skrzynię">
+            <div class="chest-shell chest-closed" id="chest-closed-shell">
+              <img
+                id="chest-image"
+                class="modal-image asset-image"
+                src="./skrzynia_1.png"
+                alt="Drewniana Skrzynia"
+                data-fallback-text="SKRZYNIA"
+              />
+              <div class="asset-fallback">SKRZYNIA</div>
+            </div>
+
+            <div class="chest-shell chest-opened-shell" id="chest-opened-shell" aria-hidden="true">
+              <div class="chest-half chest-half-top">
+                <img id="chest-left-image" class="modal-image chest-half-image" src="./skrzynia_1.png" alt="" />
+              </div>
+              <div class="chest-half chest-half-bottom">
+                <img id="chest-right-image" class="modal-image chest-half-image" src="./skrzynia_1.png" alt="" />
+              </div>
+            </div>
+          </button>
+
+          <div class="chest-burst-layer" id="chest-burst-layer" aria-hidden="true"></div>
+
+          <div class="chest-remaining" id="chest-remaining">0</div>
+        </div>
+
+        <p class="modal-message chest-message" id="chest-message">Naciśnij, żeby otworzyć.</p>
+
+        <button class="chest-reward-card" id="chest-reward-card" hidden>
+          <div class="chest-reward-row">
+            <div class="modal-visual chest-reward-visual">
+              <img
+                id="chest-reward-image"
+                class="modal-image asset-image"
+                src=""
+                alt=""
+                data-fallback-text="NAGRODA"
+              />
+              <div class="asset-fallback">NAGRODA</div>
+            </div>
+            <div class="chest-reward-copy">
+              <p class="item-title" id="chest-reward-title">Nagroda</p>
+              <p class="item-note chest-reward-count" id="chest-reward-count"></p>
+              <p class="item-note" id="chest-reward-note"></p>
+            </div>
+          </div>
+        </button>
+
+        <button class="pixel-button dialog-button" id="chest-close-button" hidden>ZAMKNIJ</button>
+      </div>
+    </div>
+
+    <div class="alley-reward-backdrop" id="alley-reward-backdrop" hidden>
+      <div class="alley-reward-scene" id="alley-reward-scene" role="dialog" aria-modal="true" aria-label="Nagroda z Alei">
+        <div class="alley-reward-lights" aria-hidden="true">
+          <span class="alley-reward-ray ray-1"></span>
+          <span class="alley-reward-ray ray-2"></span>
+          <span class="alley-reward-ray ray-3"></span>
+          <span class="alley-reward-ray ray-4"></span>
+          <span class="alley-reward-ray ray-5"></span>
+          <span class="alley-reward-ray ray-6"></span>
+        </div>
+        <div class="alley-reward-glow" aria-hidden="true"></div>
+        <div class="alley-reward-burst-layer" id="alley-reward-burst-layer" aria-hidden="true"></div>
+
+        <div class="alley-reward-card" id="alley-reward-card">
+          <div class="item-art alley-reward-art">
+            <img
+              id="alley-reward-image"
+              class="modal-image asset-image"
+              src=""
+              alt=""
+              data-fallback-text="NAGRODA"
+            />
+            <div class="asset-fallback">NAGRODA</div>
+          </div>
+          <p class="alley-reward-name" id="alley-reward-name">Nagroda</p>
+          <p class="alley-reward-count" id="alley-reward-count" hidden></p>
+        </div>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

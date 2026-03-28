@@ -1,2 +1,33 @@
-# pixel-platoya
-.
+# Pixel PlatoYA
+
+Przegladarkowa gra pixel-art stworzona w czystym HTML, CSS i JavaScript.
+
+## Zawartosc repozytorium
+
+Repo zawiera komplet plikow gry:
+
+- `index.html`
+- `styles.css`
+- `script.js`
+- grafiki PNG/JPEG
+- dzwieki MP3
+
+## Jak uruchomic
+
+1. Otworz `index.html` w przegladarce.
+2. Najwygodniej uruchomic projekt z lokalnego serwera statycznego, ale nie jest to wymagane.
+
+## Sterowanie
+
+- komputer: strzalki do ruchu, spacja do strzalu
+- telefon: joystick ekranowy i przycisk strzalu
+
+## Funkcje gry
+
+- lobby, sklep, szafa i aleja pucharow
+- odblokowywanie postaci, PlatoYasow i nagrod
+- lokalny zapis postepu w `localStorage`
+
+## Publikacja
+
+Projekt nadaje sie do publikacji jako repozytorium GitHub oraz do wystawienia przez GitHub Pages.
