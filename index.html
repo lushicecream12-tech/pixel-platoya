@@ -57,7 +57,7 @@
               <div class="balance-icon-frame">
                 <img
                   class="balance-icon asset-image"
-                  src=""
+                  src="./diamenty_.png"
                   alt="Diamenty"
                   data-fallback-text="D"
                 />
@@ -387,9 +387,85 @@
             Odblokuj specjalne nagrody premium i odbieraj je z różowym błyskiem.
           </p>
           <div class="super-alley-actions" id="super-alley-actions">
-            <button class="pixel-button super-alley-option" id="super-alley-coins-button">10000 monet</button>
-            <button class="pixel-button super-alley-option" id="super-alley-cash-button">11,99zł</button>
+            <button class="pixel-button super-alley-option" id="super-alley-coins-button">
+              <span class="price-inline" data-currency="diamonds">
+                <span class="price-amount">119 x</span>
+                <img class="price-icon" src="./diamenty_.png" alt="Diamenty" />
+              </span>
+            </button>
+            <button class="pixel-button super-alley-option" id="super-alley-cash-button">19,99zł</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="super-alley-backdrop winter-bundle-backdrop" id="winter-bundle-backdrop" hidden>
+      <div class="super-alley-scene winter-bundle-scene" id="winter-bundle-scene" role="dialog" aria-modal="true" aria-label="Zakup pakietu zimowego">
+        <div class="alley-intro-lights" aria-hidden="true">
+          <span class="alley-intro-ray ray-1"></span>
+          <span class="alley-intro-ray ray-2"></span>
+          <span class="alley-intro-ray ray-3"></span>
+          <span class="alley-intro-ray ray-4"></span>
+          <span class="alley-intro-ray ray-5"></span>
+          <span class="alley-intro-ray ray-6"></span>
+        </div>
+        <div class="alley-intro-glow" aria-hidden="true"></div>
+
+        <div class="super-alley-card winter-bundle-card">
+          <p class="super-alley-kicker">Pakiet Zimowego Świata</p>
+          <div class="item-art alley-intro-art super-alley-art">
+            <img
+              id="winter-bundle-image"
+              class="modal-image asset-image"
+              src="./pakiet_1.png"
+              alt="Pakiet Zimowego Świata"
+              data-fallback-text="PAKIET"
+            />
+            <div class="asset-fallback">PAKIET</div>
+          </div>
+          <p class="alley-intro-title super-alley-title" id="winter-bundle-title">Kup Pakiet Zimowego Świata</p>
+          <p class="super-alley-copy winter-bundle-copy" id="winter-bundle-copy">
+            Zimowy pakiet z dwiema postaciami i wspolna wizualizacja nagrod.
+          </p>
+          <div class="super-alley-actions winter-bundle-actions" id="winter-bundle-actions">
+            <button class="pixel-button super-alley-option" id="winter-bundle-confirm-button">Potwierdz zakup</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="super-alley-backdrop store-character-purchase-backdrop" id="store-character-purchase-backdrop" hidden>
+      <div class="super-alley-scene store-character-purchase-scene" id="store-character-purchase-scene" role="dialog" aria-modal="true" aria-label="Potwierdzenie zakupu postaci">
+        <div class="alley-intro-lights" aria-hidden="true">
+          <span class="alley-intro-ray ray-1"></span>
+          <span class="alley-intro-ray ray-2"></span>
+          <span class="alley-intro-ray ray-3"></span>
+          <span class="alley-intro-ray ray-4"></span>
+          <span class="alley-intro-ray ray-5"></span>
+          <span class="alley-intro-ray ray-6"></span>
+        </div>
+        <div class="alley-intro-glow" aria-hidden="true"></div>
+
+        <div class="super-alley-card store-character-purchase-card">
+          <p class="super-alley-kicker">Dzisiejsza postac sklepu</p>
+          <div class="item-art alley-intro-art super-alley-art">
+            <img
+              id="store-character-purchase-image"
+              class="modal-image asset-image"
+              src=""
+              alt=""
+              data-fallback-text="POSTAC"
+            />
+            <div class="asset-fallback">POSTAC</div>
+          </div>
+          <p class="alley-intro-title super-alley-title" id="store-character-purchase-title">Postac sklepowa</p>
+          <p class="super-alley-copy store-character-purchase-copy" id="store-character-purchase-copy">
+            Potwierdz zakup postaci ze sklepu.
+          </p>
+          <div class="super-alley-actions store-character-purchase-actions" id="store-character-purchase-actions">
+            <button class="pixel-button super-alley-option" id="store-character-purchase-confirm-button">Potwierdz zakup</button>
+          </div>
+          <p class="store-character-purchase-missing" id="store-character-purchase-missing" hidden>Brakuje ci 0 monet.</p>
         </div>
       </div>
     </div>
@@ -527,6 +603,52 @@
           </div>
           <p class="alley-reward-name" id="alley-reward-name">Nagroda</p>
           <p class="alley-reward-count" id="alley-reward-count" hidden></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="alley-reward-backdrop bundle-unlock-backdrop" id="bundle-unlock-backdrop" hidden>
+      <div class="alley-reward-scene bundle-unlock-scene" role="dialog" aria-modal="true" aria-label="Odblokowano postacie z pakietu">
+        <div class="alley-reward-lights" aria-hidden="true">
+          <span class="alley-reward-ray ray-1"></span>
+          <span class="alley-reward-ray ray-2"></span>
+          <span class="alley-reward-ray ray-3"></span>
+          <span class="alley-reward-ray ray-4"></span>
+          <span class="alley-reward-ray ray-5"></span>
+          <span class="alley-reward-ray ray-6"></span>
+        </div>
+        <div class="alley-reward-glow" aria-hidden="true"></div>
+
+        <div class="bundle-unlock-card" id="bundle-unlock-card">
+          <p class="bundle-unlock-kicker">Odblokowano postacie</p>
+          <div class="bundle-unlock-grid">
+            <div class="bundle-unlock-entry">
+              <div class="item-art bundle-unlock-art">
+                <img
+                  id="bundle-unlock-image-left"
+                  class="modal-image asset-image"
+                  src="./postac_15.png"
+                  alt="Łyżwiarka Lily"
+                  data-fallback-text="LILY"
+                />
+                <div class="asset-fallback">LILY</div>
+              </div>
+              <p class="bundle-unlock-name" id="bundle-unlock-name-left">Łyżwiarka Lily</p>
+            </div>
+            <div class="bundle-unlock-entry">
+              <div class="item-art bundle-unlock-art">
+                <img
+                  id="bundle-unlock-image-right"
+                  class="modal-image asset-image"
+                  src="./postac_16.png"
+                  alt="Łyżwiaż Leo"
+                  data-fallback-text="LEO"
+                />
+                <div class="asset-fallback">LEO</div>
+              </div>
+              <p class="bundle-unlock-name" id="bundle-unlock-name-right">Łyżwiaż Leo</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

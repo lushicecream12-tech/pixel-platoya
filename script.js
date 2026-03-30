@@ -2,19 +2,23 @@ const TOTAL_LOADING_TIME = 10000;
 const STEP_INTERVAL_MIN = 200;
 const STEP_INTERVAL_MAX = 950;
 const STORAGE_KEY = "pixel-platoya-save-v1";
-const SUPER_ALLEY_COIN_PRICE = 10000;
-const SUPER_ALLEY_CASH_PRICE_LABEL = "11,99zł";
+const SUPER_ALLEY_DIAMOND_PRICE = 119;
+const SUPER_ALLEY_CASH_PRICE_LABEL = "19,99zł";
 const MAGICIANS_WORLD_END_TROPHIES = 2000;
-const WINTER_WORLD_UNLOCK_TROPHIES = 2001;
 const WINTER_WORLD_START_TROPHIES = 2050;
+const WINTER_WORLD_UNLOCK_REWARD_ID = "alley-2000-millo-jako-elfie";
+const TROPHY_NODE_WIDTH = 220;
+const TROPHY_NODE_GAP = 20;
+const TROPHY_DIAMOND_IMAGE = "./diamenty_.png";
 const SUPER_ALLEY_REWARD_THRESHOLDS = {
-  alley: new Set([200, 300, 500, 600, 750, 900, 1000, 1150, 1250, 1350, 1500, 1650, 1750, 1850, 1950]),
-  winter: new Set([2150, 2250, 2350, 2500, 2600, 2700, 2800, 2900, 3000]),
+  alley: new Set([100, 250, 350, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1750, 1850, 1950]),
+  winter: new Set([2100, 2250, 2350, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500, 3600, 3750, 3850, 3950]),
 };
 const SOUND_EFFECT_SOURCES = {
   shot2: ["./strzał_2.mp3", "./strzal_2.mp3"],
   shot3: ["./strzał_3.mp3", "./strzal_3.mp3"],
   shot4: ["./strzał_4.mp3", "./strzal_4.mp3"],
+  shotNora: ["./strzał_nora.mp3", "./strzal_nora.mp3"],
   walkingLoop: ["./chodzenie_1.mp3"],
   coins: ["./dźwięk_1.mp3", "./dzwiek_1.mp3"],
   characterUnlock: ["./character_1.mp3"],
@@ -27,7 +31,10 @@ const SOUND_EFFECT_SOURCES = {
   dogVoice: ["./pies_1.mp3"],
   parrotVoice: ["./papuga_1.mp3"],
   catVoice: ["./kot_1.mp3"],
+  snowflakeVoice: ["./kot_2.mp3"],
   crowVoice: ["./kruk_1.mp3"],
+  bearVoice: ["./niedzwiedz_1.mp3"],
+  owlVoice: ["./sowa_1.mp3"],
   monkeyVoice: ["./małpka_1.mp3", "./malpka_1.mp3"],
 };
 
@@ -48,16 +55,20 @@ const GAME_RULES = {
   fireIntervalMs: 1000,
   dogSpeed: 180,
   dogDamagePerSecond: 100,
-  balloonDogSpeedMultiplier: 0.5,
-  balloonDogDamagePerSecond: 150,
-  balloonDogHp: 300,
-  balloonDogMaxCount: 5,
   monkeyLeapSpeed: 320,
   monkeyDamagePerSecond: 200,
   monkeyHealPerSecond: 200,
   parrotCastIntervalMs: 4000,
   parrotStunDurationMs: 4000,
   parrotRangeAreaFactor: 0.33,
+  polarBearCastIntervalMs: 4000,
+  polarBearSecondShotDelayMs: 500,
+  polarBearProjectileDamage: 50,
+  snowflakeShieldDurationMs: 3000,
+  snowflakeShieldCooldownMs: 10000,
+  owlShieldDurationMs: 3000,
+  owlShieldCooldownMs: 10000,
+  owlHealAmount: Math.round(3000 * 0.2),
   lpsotkaCastIntervalMs: 5000,
   snakeWallActiveMs: 5000,
   snakeWallCooldownMs: 5000,
@@ -108,7 +119,7 @@ const CATALOG = {
     {
       id: "roslinna-krolowa-linda",
       name: "Roslinna Krolowa Linda",
-      price: 9990,
+      price: 10000,
       cashPriceLabel: "",
       image: "./postac_4.png",
       storeNote: "Skorka premium Lindy z królewskim atakiem natury.",
@@ -116,7 +127,7 @@ const CATALOG = {
     {
       id: "magiczna-lidsay",
       name: "Magiczna Lidsay",
-      price: 9990,
+      price: 10000,
       cashPriceLabel: "",
       image: "./postac_10.png",
       storeNote: "Magiczna postac sklepowa z atakiem jak Magik Millo.",
@@ -124,7 +135,7 @@ const CATALOG = {
     {
       id: "elfie-wojowniczka",
       name: "Elfie Wojowniczka",
-      price: 9990,
+      price: 10000,
       cashPriceLabel: "",
       image: "./postac_5.png",
       storeNote: "Skorka Elfie gotowa do walki.",
@@ -132,7 +143,7 @@ const CATALOG = {
     {
       id: "elfie-w-swojej-naturze",
       name: "Elfie w swojej naturze",
-      price: 9900,
+      price: 10000,
       cashPriceLabel: "",
       image: "./postac_6.png",
       storeNote: "Naturalna wersja Elfie ze swoim atakiem.",
@@ -181,6 +192,71 @@ const CATALOG = {
       image: "./postac_12.png",
       unlockWorld: "winter",
       storeNote: "Nagroda z dalszego konca Swiata Zimowego.",
+    },
+    {
+      id: "tricky-renifer",
+      name: "Tricky Renifer",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./postac_13.png",
+      unlockWorld: "winter",
+      storeNote: "Nagroda za sam koniec Swiata Zimowego.",
+    },
+    {
+      id: "leo",
+      name: "Leo",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./postac_17.png",
+      unlockWorld: "winter",
+      storeNote: "Nagroda za final Swiata Zimowego.",
+    },
+    {
+      id: "leo-skoczek-narciarski",
+      name: "Leo Skoczek Narciarski",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./postac_14.png",
+      unlockWorld: "winter",
+      storeNote: "Nagroda Super ze Swiata Zimowego.",
+    },
+    {
+      id: "lyzwiarka-lily",
+      name: "Łyżwiarka Lily",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./postac_15.png",
+      unlockWorld: "winter",
+      storeNote: "Postac z zimowego pakietu.",
+    },
+    {
+      id: "lyzwiarz-leo",
+      name: "Łyżwiaż Leo",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./postac_16.png",
+      unlockWorld: "winter",
+      storeNote: "Postac z zimowego pakietu.",
+    },
+    {
+      id: "mistrzyni-lyzwiarstwa-lily",
+      name: "Mistrzyni Łyżwiarstwa Lily",
+      price: 10000,
+      cashPriceLabel: "",
+      image: "./postac_18.png",
+      unlockWorld: "winter",
+      storeNote: "Zimowa sklepowa postac z atakiem jak Lily.",
+    },
+    {
+      id: "nora",
+      name: "NORA",
+      price: 20000,
+      cashPriceLabel: "",
+      image: "./postac_nora.png",
+      previewVideo: "./nora_1.mov",
+      unlockWorld: "winter",
+      storeWorld: "winter",
+      storeNote: "Animowany zimowy skin z własnym atakiem i dźwiękiem.",
     },
   ],
   pets: [
@@ -233,21 +309,44 @@ const CATALOG = {
       name: "Małpka Jasnoksiężnik",
       price: 2500,
       originalPrice: 3000,
-      image: "./platoya_8.png",
+      image: "./platoya_malpka.png",
       categoryId: "magicy",
       rarityLabel: "Legendarny PlatoYa",
       rarityClass: "legendary",
       description: "Przeskakuje na najblizszego robota i zadaje mu 200 pz na sekunde. Po pokonaniu celu wraca do ciebie i leczy o 200 pz na sekunde, dopoki nie odzyskasz calego zycia.",
     },
     {
-      id: "dmuchany-pies",
-      name: "Dmuchany pies",
-      price: 5000,
-      image: "./platoya_4.png",
+      id: "niedzwiedz-polarny",
+      name: "Niedźwiedź Polarny",
+      price: 0,
+      image: "./platoya_6.png",
       categoryId: "balonowi",
-      rarityLabel: "Ultralegendarny PlatoYa",
+      unlockWorld: "winter",
+      rarityLabel: "Zimowy PlatoYa",
+      rarityClass: "legendary",
+      description: "Co 4 sekundy wypuszcza dwa lodowe strzaly po 50 pz z opoznieniem 0,5 s.",
+    },
+    {
+      id: "sniezynka",
+      name: "Śnieżynka",
+      price: 0,
+      image: "./platoya_7.png",
+      categoryId: "balonowi",
+      unlockWorld: "winter",
+      rarityLabel: "Super PlatoYa",
       rarityClass: "ultra",
-      description: "Zadaje robotom 150 pz na sekunde. Po wyczyszczeniu mapy dubluje sie, az do maksymalnie 5 dmuchanych psow.",
+      description: "Co 10 sekund daje ci na 3 sekundy zimowa tarcze, ktora chroni przed obrazeniami.",
+    },
+    {
+      id: "sowa",
+      name: "Sowa",
+      price: 0,
+      image: "./platoya_9.png",
+      categoryId: "balonowi",
+      unlockWorld: "winter",
+      rarityLabel: "Super PlatoYa",
+      rarityClass: "ultra",
+      description: "Wcisnij W, aby na 3 sekundy zatrzymac ruch, wlaczyc zimowa tarcze i po niej odnowic 20% zycia.",
     },
   ],
   coins: [
@@ -256,6 +355,17 @@ const CATALOG = {
   ],
   trophies: [
     { id: "trophies-1000", name: "1000 pucharow", price: 1, amount: 1000, image: "./monety_1.png" },
+  ],
+  bundles: [
+    {
+      id: "winter-ice-pack",
+      name: "Pakiet Zimowego Swiata",
+      cashPriceLabel: "19,99zł",
+      image: "./pakiet_1.png",
+      storeWorld: "winter",
+      rewardCharacterIds: ["lyzwiarka-lily", "lyzwiarz-leo"],
+      description: "Zawiera postacie Łyżwiarka Lily i Łyżwiaż Leo.",
+    },
   ],
   crates: [
     {
@@ -305,80 +415,110 @@ const PET_CATEGORIES = [
   },
 ];
 
+const INVENTORY_WORLD_GROUPS = [
+  {
+    id: "magicians",
+    label: "Swiat Magikow",
+  },
+  {
+    id: "winter",
+    label: "Swiat Zimowy",
+  },
+];
+
 const TROPHY_WORLDS = [
   {
     id: "alley",
     name: "Swiat Magikow",
     threshold: 0,
     rewards: [
-      { id: "magicians-20-coins", trophies: 20, type: "coins", amount: 100, label: "100 monet" },
-      { id: "magicians-50-crate", trophies: 50, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "magicians-100-dog", trophies: 100, type: "pet", itemId: "pies-magik", label: "PlatoYa Pies Magik" },
-      { id: "magicians-150-coins", trophies: 150, type: "coins", amount: 100, label: "100 monet" },
-      { id: "magicians-200-crate", trophies: 200, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "magicians-250-coins", trophies: 250, type: "coins", amount: 100, label: "100 monet" },
-      { id: "magicians-300-parrot", trophies: 300, type: "pet", itemId: "papuga-manipulantka", label: "PlatoYa Papuga Manipulantka" },
-      { id: "magicians-350-crate", trophies: 350, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "magicians-400-coins", trophies: 400, type: "coins", amount: 100, label: "100 monet" },
-      { id: "magicians-450-crate", trophies: 450, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-500-elfie", trophies: 500, type: "character", itemId: "elfie", label: "Postać Elfie" },
-      { id: "alley-550-coins", trophies: 550, type: "coins", amount: 100, label: "100 monet" },
+      { id: "alley-50-coins", trophies: 50, type: "coins", amount: 300, label: "300 monet" },
+      { id: "alley-100-crate", trophies: 100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "alley-150-diamonds", trophies: 150, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "alley-200-pies-magik", trophies: 200, type: "pet", itemId: "pies-magik", label: "Pies Magik" },
+      { id: "alley-250-crate", trophies: 250, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "alley-300-coins", trophies: 300, type: "coins", amount: 3000, label: "3000 monet" },
+      { id: "alley-350-crate", trophies: 350, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "alley-400-diamonds", trophies: 400, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "alley-450-crate", trophies: 450, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "alley-500-elfie", trophies: 500, type: "character", itemId: "elfie", label: "Elfie" },
+      { id: "alley-550-coins", trophies: 550, type: "coins", amount: 300, label: "300 monet" },
       { id: "alley-600-crate", trophies: 600, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-650-coins", trophies: 650, type: "coins", amount: 100, label: "100 monet" },
+      { id: "alley-650-diamonds", trophies: 650, type: "diamonds", amount: 3, label: "3 diamenty" },
       { id: "alley-700-crate", trophies: 700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-750-lpsotka", trophies: 750, type: "pet", itemId: "l-psotka", label: "PlatoYa L'Psotka" },
-      { id: "alley-800-crate", trophies: 800, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-850-coins", trophies: 850, type: "coins", amount: 100, label: "100 monet" },
+      { id: "alley-750-coins", trophies: 750, type: "coins", amount: 300, label: "300 monet" },
+      { id: "alley-800-l-psotka", trophies: 800, type: "pet", itemId: "l-psotka", label: "PlatoYa L'Psotka" },
+      { id: "alley-850-diamonds", trophies: 850, type: "diamonds", amount: 3, label: "3 diamenty" },
       { id: "alley-900-crate", trophies: 900, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-950-coins", trophies: 950, type: "coins", amount: 100, label: "100 monet" },
-      { id: "alley-1000-linda", trophies: 1000, type: "character", itemId: "linda", label: "Postać Linda" },
-      { id: "alley-1050-crate", trophies: 1050, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-1100-coins", trophies: 1100, type: "coins", amount: 100, label: "100 monet" },
-      { id: "alley-1150-crate", trophies: 1150, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-1200-coins", trophies: 1200, type: "coins", amount: 100, label: "100 monet" },
-      { id: "alley-1250-el-kruk", trophies: 1250, type: "pet", itemId: "el-kruk", label: "PlatoYa El Kruk" },
-      { id: "alley-1300-coins", trophies: 1300, type: "coins", amount: 100, label: "100 monet" },
-      { id: "alley-1350-crate", trophies: 1350, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-1400-coins", trophies: 1400, type: "coins", amount: 100, label: "100 monet" },
-      { id: "alley-1450-crate", trophies: 1450, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-1500-elfie-linda", trophies: 1500, type: "character", itemId: "elfie-jako-linda", label: "Elfie jako Linda" },
-      { id: "alley-1550-crate", trophies: 1550, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-1600-coins", trophies: 1600, type: "coins", amount: 100, label: "100 monet" },
-      { id: "alley-1650-crate", trophies: 1650, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-1700-coins", trophies: 1700, type: "coins", amount: 100, label: "100 monet" },
-      { id: "alley-1750-linda-wojownicza-ksiezniczka", trophies: 1750, type: "character", itemId: "linda-wojownicza-ksiezniczka", label: "Linda Wojownicza Ksiezniczka" },
-      { id: "alley-1800-coins", trophies: 1800, type: "coins", amount: 100, label: "100 monet" },
-      { id: "alley-1850-crate", trophies: 1850, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-1900-coins", trophies: 1900, type: "coins", amount: 100, label: "100 monet" },
-      { id: "alley-1950-crate", trophies: 1950, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-2000-millo-elfie", trophies: 2000, type: "character", itemId: "millo-jako-elfie", label: "Millo jako Elfie" },
+      { id: "alley-950-coins", trophies: 950, type: "coins", amount: 300, label: "300 monet" },
+      { id: "alley-1000-linda", trophies: 1000, type: "character", itemId: "linda", label: "Linda" },
+      { id: "alley-1050-diamonds", trophies: 1050, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "alley-1100-crate", trophies: 1100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "alley-1150-coins", trophies: 1150, type: "coins", amount: 300, label: "300 monet" },
+      { id: "alley-1200-crate", trophies: 1200, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "alley-1250-diamonds", trophies: 1250, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "alley-1300-el-kruk", trophies: 1300, type: "pet", itemId: "el-kruk", label: "El Kruk" },
+      { id: "alley-1350-coins", trophies: 1350, type: "coins", amount: 300, label: "300 monet" },
+      { id: "alley-1400-crate", trophies: 1400, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "alley-1450-diamonds", trophies: 1450, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "alley-1500-elfie-jako-linda", trophies: 1500, type: "character", itemId: "elfie-jako-linda", label: "Elfie jako Linda" },
+      { id: "alley-1550-coins", trophies: 1550, type: "coins", amount: 300, label: "300 monet" },
+      { id: "alley-1600-crate", trophies: 1600, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "alley-1650-diamonds", trophies: 1650, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "alley-1700-crate", trophies: 1700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "alley-1750-linda-wojownicza-ksiezniczka", trophies: 1750, type: "character", itemId: "linda-wojownicza-ksiezniczka", label: "Linda Wojownicza Księżniczka" },
+      { id: "alley-1800-coins", trophies: 1800, type: "coins", amount: 300, label: "300 monet" },
+      { id: "alley-1850-crate", trophies: 1850, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "alley-1900-diamonds", trophies: 1900, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "alley-1950-coins", trophies: 1950, type: "coins", amount: 5000, label: "5000 monet" },
+      { id: "alley-2000-millo-jako-elfie", trophies: 2000, type: "character", itemId: "millo-jako-elfie", label: "Millo jako Elfie" },
     ],
   },
   {
     id: "winter",
     name: "Swiat Zimowy",
-    threshold: WINTER_WORLD_START_TROPHIES,
+    threshold: MAGICIANS_WORLD_END_TROPHIES,
     rewards: [
-      { id: "winter-2050-crate", trophies: 2050, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2100-coins", trophies: 2100, type: "coins", amount: 500, label: "500 monet" },
-      { id: "winter-2150-crate", trophies: 2150, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2200-coins", trophies: 2200, type: "coins", amount: 500, label: "500 monet" },
+      { id: "winter-2050-coins", trophies: 2050, type: "coins", amount: 300, label: "300 monet" },
+      { id: "winter-2100-crate", trophies: 2100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "winter-2150-diamonds", trophies: 2150, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "winter-2200-niedzwiedz-polarny", trophies: 2200, type: "pet", itemId: "niedzwiedz-polarny", label: "Niedźwiedź Polarny" },
       { id: "winter-2250-crate", trophies: 2250, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2300-coins", trophies: 2300, type: "coins", amount: 500, label: "500 monet" },
+      { id: "winter-2300-coins", trophies: 2300, type: "coins", amount: 3000, label: "3000 monet" },
       { id: "winter-2350-crate", trophies: 2350, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2400-coins", trophies: 2400, type: "coins", amount: 500, label: "500 monet" },
-      { id: "winter-2450-crate", trophies: 2450, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2500-lily", trophies: 2500, type: "character", itemId: "lily", label: "Postac Lily" },
-      { id: "winter-2550-coins", trophies: 2550, type: "coins", amount: 500, label: "500 monet" },
+      { id: "winter-2400-diamonds", trophies: 2400, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "winter-2450-crate", trophies: 2450, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "winter-2500-lily", trophies: 2500, type: "character", itemId: "lily", label: "Lily" },
+      { id: "winter-2550-coins", trophies: 2550, type: "coins", amount: 300, label: "300 monet" },
       { id: "winter-2600-crate", trophies: 2600, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2650-coins", trophies: 2650, type: "coins", amount: 500, label: "500 monet" },
+      { id: "winter-2650-diamonds", trophies: 2650, type: "diamonds", amount: 3, label: "3 diamenty" },
       { id: "winter-2700-crate", trophies: 2700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2750-coins", trophies: 2750, type: "coins", amount: 500, label: "500 monet" },
-      { id: "winter-2800-crate", trophies: 2800, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2850-coins", trophies: 2850, type: "coins", amount: 500, label: "500 monet" },
+      { id: "winter-2750-coins", trophies: 2750, type: "coins", amount: 300, label: "300 monet" },
+      { id: "winter-2800-sniezynka", trophies: 2800, type: "pet", itemId: "sniezynka", label: "PlatoYa Śnieżynka" },
+      { id: "winter-2850-diamonds", trophies: 2850, type: "diamonds", amount: 3, label: "3 diamenty" },
       { id: "winter-2900-crate", trophies: 2900, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2950-coins", trophies: 2950, type: "coins", amount: 500, label: "500 monet" },
-      { id: "winter-3000-tricky", trophies: 3000, type: "character", itemId: "tricky", label: "Postac Tricky" },
+      { id: "winter-2950-coins", trophies: 2950, type: "coins", amount: 300, label: "300 monet" },
+      { id: "winter-3000-tricky", trophies: 3000, type: "character", itemId: "tricky", label: "Tricky" },
+      { id: "winter-3050-diamonds", trophies: 3050, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "winter-3100-crate", trophies: 3100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "winter-3150-coins", trophies: 3150, type: "coins", amount: 300, label: "300 monet" },
+      { id: "winter-3200-crate", trophies: 3200, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "winter-3250-diamonds", trophies: 3250, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "winter-3300-sowa", trophies: 3300, type: "pet", itemId: "sowa", label: "PlatoYa Sowa" },
+      { id: "winter-3350-coins", trophies: 3350, type: "coins", amount: 300, label: "300 monet" },
+      { id: "winter-3400-crate", trophies: 3400, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "winter-3450-diamonds", trophies: 3450, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "winter-3500-tricky-renifer", trophies: 3500, type: "character", itemId: "tricky-renifer", label: "Tricky Renifer" },
+      { id: "winter-3550-coins", trophies: 3550, type: "coins", amount: 300, label: "300 monet" },
+      { id: "winter-3600-crate", trophies: 3600, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "winter-3650-diamonds", trophies: 3650, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "winter-3700-crate", trophies: 3700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "winter-3750-leo-skoczek-narciarski", trophies: 3750, type: "character", itemId: "leo-skoczek-narciarski", label: "Leo Skoczek Narciarski" },
+      { id: "winter-3800-coins", trophies: 3800, type: "coins", amount: 300, label: "300 monet" },
+      { id: "winter-3850-crate", trophies: 3850, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
+      { id: "winter-3900-diamonds", trophies: 3900, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "winter-3950-coins", trophies: 3950, type: "coins", amount: 5000, label: "5000 monet" },
+      { id: "winter-4000-leo", trophies: 4000, type: "character", itemId: "leo", label: "Leo" },
     ],
   },
 ];
@@ -411,6 +551,22 @@ const superAlleyCopy = document.getElementById("super-alley-copy");
 const superAlleyActions = document.getElementById("super-alley-actions");
 const superAlleyCoinsButton = document.getElementById("super-alley-coins-button");
 const superAlleyCashButton = document.getElementById("super-alley-cash-button");
+const winterBundleBackdrop = document.getElementById("winter-bundle-backdrop");
+const winterBundleScene = document.getElementById("winter-bundle-scene");
+const winterBundleImage = document.getElementById("winter-bundle-image");
+const winterBundleTitle = document.getElementById("winter-bundle-title");
+const winterBundleCopy = document.getElementById("winter-bundle-copy");
+const winterBundleActions = document.getElementById("winter-bundle-actions");
+const winterBundleConfirmButton = document.getElementById("winter-bundle-confirm-button");
+const storeCharacterPurchaseBackdrop = document.getElementById("store-character-purchase-backdrop");
+const storeCharacterPurchaseScene = document.getElementById("store-character-purchase-scene");
+const storeCharacterPurchaseImage = document.getElementById("store-character-purchase-image");
+const storeCharacterPurchaseArtFrame = storeCharacterPurchaseImage?.parentElement || null;
+const storeCharacterPurchaseTitle = document.getElementById("store-character-purchase-title");
+const storeCharacterPurchaseCopy = document.getElementById("store-character-purchase-copy");
+const storeCharacterPurchaseActions = document.getElementById("store-character-purchase-actions");
+const storeCharacterPurchaseConfirmButton = document.getElementById("store-character-purchase-confirm-button");
+const storeCharacterPurchaseMissing = document.getElementById("store-character-purchase-missing");
 const coinBalance = document.getElementById("coin-balance");
 const trophyBalance = document.getElementById("trophy-balance");
 const diamondBalance = document.getElementById("diamond-balance");
@@ -423,6 +579,7 @@ const settingsCloseButton = document.getElementById("settings-close-button");
 const settingsPhoneStatus = document.getElementById("settings-phone-status");
 const phoneModeToggle = document.getElementById("phone-mode-toggle");
 const lobbyAvatar = document.getElementById("lobby-avatar");
+const lobbyAvatarFrame = lobbyAvatar?.parentElement || null;
 const lobbyPet = document.getElementById("lobby-pet");
 const petWrapper = document.getElementById("pet-wrapper");
 const storeGrid = document.getElementById("store-grid");
@@ -459,9 +616,16 @@ const chestBurstLayer = document.getElementById("chest-burst-layer");
 const alleyRewardBackdrop = document.getElementById("alley-reward-backdrop");
 const alleyRewardCard = document.getElementById("alley-reward-card");
 const alleyRewardImage = document.getElementById("alley-reward-image");
+const alleyRewardArtFrame = alleyRewardImage?.parentElement || null;
 const alleyRewardName = document.getElementById("alley-reward-name");
 const alleyRewardCount = document.getElementById("alley-reward-count");
 const alleyRewardBurstLayer = document.getElementById("alley-reward-burst-layer");
+const bundleUnlockBackdrop = document.getElementById("bundle-unlock-backdrop");
+const bundleUnlockCard = document.getElementById("bundle-unlock-card");
+const bundleUnlockImageLeft = document.getElementById("bundle-unlock-image-left");
+const bundleUnlockImageRight = document.getElementById("bundle-unlock-image-right");
+const bundleUnlockNameLeft = document.getElementById("bundle-unlock-name-left");
+const bundleUnlockNameRight = document.getElementById("bundle-unlock-name-right");
 
 const gameStage = document.getElementById("game-stage");
 const gameMap = document.getElementById("game-map");
@@ -473,6 +637,7 @@ const playerEntity = document.getElementById("player-entity");
 const playerHealthLabel = document.getElementById("player-health-label");
 const playerShield = document.getElementById("player-shield");
 const gamePlayerImage = document.getElementById("game-player-image");
+const gamePlayerFrame = gamePlayerImage?.parentElement || null;
 const gamePetEntity = document.getElementById("game-pet-entity");
 const gamePetImage = document.getElementById("game-pet-image");
 const petCooldownBar = document.getElementById("pet-cooldown-bar");
@@ -492,6 +657,7 @@ const robotsLayer = document.getElementById("robots-layer");
 const effectsLayer = document.getElementById("effects-layer");
 const gameResultOverlay = document.getElementById("game-result-overlay");
 const gameResultImage = document.getElementById("game-result-image");
+const gameResultAvatarFrame = gameResultImage?.parentElement || null;
 const gameResultStatus = document.getElementById("game-result-status");
 const gameResultNote = document.getElementById("game-result-note");
 const gameResultWave = document.getElementById("game-result-wave");
@@ -528,8 +694,17 @@ let introSequenceRunning = false;
 let resultReturnBusy = false;
 let backgroundMusicReady = false;
 let superAlleyBusy = false;
+let winterBundleBusy = false;
+let winterBundleStage = "offer";
+let activeWinterBundle = null;
+let storeCharacterPurchaseBusy = false;
+let activeStoreCharacterPurchase = null;
+let trophyWorldBatchClaimBusy = false;
+let winterWorldRevealPending = false;
 let walkingLoopAudio = null;
 let soundEffectsAudioContext = null;
+let bundleUnlockTimer = null;
+let bundleUnlockResolve = null;
 const audioBoostMap = new WeakMap();
 
 bindEvents();
@@ -580,6 +755,7 @@ function bindEvents() {
   inventoryGrid.addEventListener("click", handleInventoryClick);
   trophyGrid.addEventListener("click", handleTrophyClick);
   trophyGrid.addEventListener("scroll", () => {
+    clampTrophyRoadScrollPosition();
     syncTrophyRoadThemeFromScroll();
   }, { passive: true });
   if (lobbySettingsButton) {
@@ -629,6 +805,18 @@ function bindEvents() {
     });
   }
 
+  if (winterBundleConfirmButton) {
+    winterBundleConfirmButton.addEventListener("click", async () => {
+      await confirmWinterBundlePurchase();
+    });
+  }
+
+  if (storeCharacterPurchaseConfirmButton) {
+    storeCharacterPurchaseConfirmButton.addEventListener("click", async () => {
+      await confirmStoreCharacterPurchase();
+    });
+  }
+
   modalConfirm.addEventListener("click", async () => {
     if (typeof modalAction === "function") {
       await modalAction();
@@ -659,6 +847,30 @@ function bindEvents() {
     superAlleyBackdrop.addEventListener("click", (event) => {
       if (event.target === superAlleyBackdrop && !superAlleyBusy) {
         closeSuperAlleyBackdrop();
+      }
+    });
+  }
+
+  if (winterBundleBackdrop) {
+    winterBundleBackdrop.addEventListener("click", (event) => {
+      if (event.target === winterBundleBackdrop && !winterBundleBusy && winterBundleStage === "offer") {
+        closeWinterBundlePurchase();
+      }
+    });
+  }
+
+  if (storeCharacterPurchaseBackdrop) {
+    storeCharacterPurchaseBackdrop.addEventListener("click", (event) => {
+      if (event.target === storeCharacterPurchaseBackdrop && !storeCharacterPurchaseBusy) {
+        closeStoreCharacterPurchase();
+      }
+    });
+  }
+
+  if (bundleUnlockBackdrop) {
+    bundleUnlockBackdrop.addEventListener("click", (event) => {
+      if (event.target === bundleUnlockBackdrop) {
+        closeBundleUnlockScene();
       }
     });
   }
@@ -730,6 +942,57 @@ function bindEvents() {
       return;
     }
 
+    if (
+      event.key === "Escape" &&
+      winterBundleBackdrop &&
+      !winterBundleBackdrop.hidden &&
+      !winterBundleBusy &&
+      winterBundleStage === "offer"
+    ) {
+      closeWinterBundlePurchase();
+      return;
+    }
+
+    if (
+      event.key === "Escape" &&
+      storeCharacterPurchaseBackdrop &&
+      !storeCharacterPurchaseBackdrop.hidden &&
+      !storeCharacterPurchaseBusy
+    ) {
+      closeStoreCharacterPurchase();
+      return;
+    }
+
+    if (event.key === "Escape" && bundleUnlockBackdrop && !bundleUnlockBackdrop.hidden) {
+      closeBundleUnlockScene();
+      return;
+    }
+
+    if (
+      (event.key === "Enter" || event.key === " ") &&
+      winterBundleBackdrop &&
+      !winterBundleBackdrop.hidden &&
+      winterBundleStage === "offer" &&
+      !winterBundleBusy
+    ) {
+      event.preventDefault();
+      void confirmWinterBundlePurchase();
+      return;
+    }
+
+    if (
+      (event.key === "Enter" || event.key === " ") &&
+      storeCharacterPurchaseBackdrop &&
+      !storeCharacterPurchaseBackdrop.hidden &&
+      !storeCharacterPurchaseBusy &&
+      storeCharacterPurchaseActions &&
+      !storeCharacterPurchaseActions.hidden
+    ) {
+      event.preventDefault();
+      void confirmStoreCharacterPurchase();
+      return;
+    }
+
     if (event.key === "Escape" && settingsBackdrop && !settingsBackdrop.hidden) {
       closeSettingsPanel();
       return;
@@ -761,7 +1024,7 @@ function bindEvents() {
 
   window.setInterval(() => {
     if (ui.currentView === "store") {
-      renderStore();
+      refreshStoreViewTick();
     }
   }, 1000);
 }
@@ -841,7 +1104,9 @@ function shouldPlayBackgroundMusic() {
     ui.currentView !== "game" &&
     appScreen.classList.contains("active") &&
     (!alleyIntroBackdrop || alleyIntroBackdrop.hidden) &&
-    (!superAlleyBackdrop || superAlleyBackdrop.hidden)
+    (!superAlleyBackdrop || superAlleyBackdrop.hidden) &&
+    (!winterBundleBackdrop || winterBundleBackdrop.hidden) &&
+    (!bundleUnlockBackdrop || bundleUnlockBackdrop.hidden)
   );
 }
 
@@ -902,7 +1167,7 @@ function ensureBoostedMediaElement(audio, gainValue = 1) {
   return context;
 }
 
-function playOneShotSound(effectName, volume = 0.74) {
+function playOneShotSound(effectName, volume = 0.74, gainBoost = 1) {
   const source = getAvailableSoundSource(effectName);
 
   if (!source) {
@@ -912,6 +1177,12 @@ function playOneShotSound(effectName, volume = 0.74) {
   const audio = new Audio(source);
   audio.preload = "auto";
   audio.volume = volume;
+  if (gainBoost > 1) {
+    const context = ensureBoostedMediaElement(audio, gainBoost);
+    if (context && context.state === "suspended") {
+      void context.resume().catch(() => {});
+    }
+  }
   audio.addEventListener("error", () => {
     unavailableSoundSources.add(source);
   }, { once: true });
@@ -972,6 +1243,10 @@ function stopWalkingLoop() {
 }
 
 function hasMovementInput() {
+  if (isOwlShieldActive()) {
+    return false;
+  }
+
   return Boolean(
     game.keys.up
     || game.keys.down
@@ -1161,8 +1436,20 @@ function getPetVoiceEffect(petId) {
     return "dogVoice";
   }
 
+  if (petId === "niedzwiedz-polarny") {
+    return "bearVoice";
+  }
+
   if (petId === "papuga-manipulantka") {
     return "parrotVoice";
+  }
+
+  if (petId === "sniezynka") {
+    return "snowflakeVoice";
+  }
+
+  if (petId === "sowa") {
+    return "owlVoice";
   }
 
   if (petId === "l-psotka") {
@@ -1308,14 +1595,19 @@ function renderAll() {
   syncTouchControlsVisibility();
   syncTabs();
   syncBrokenAssets(document);
+  syncAnimatedAssets(document);
 }
 
 function getTrophyWorldById(worldId) {
   return TROPHY_WORLDS.find((world) => world.id === worldId) || TROPHY_WORLDS[0];
 }
 
+function hasClaimedWinterUnlockReward() {
+  return isTrophyRewardClaimed("alley", WINTER_WORLD_UNLOCK_REWARD_ID);
+}
+
 function isWinterWorldUnlocked() {
-  return state.trophies >= WINTER_WORLD_UNLOCK_TROPHIES;
+  return hasClaimedWinterUnlockReward() && !winterWorldRevealPending;
 }
 
 function getGlobalVisualWorldTheme() {
@@ -1331,7 +1623,8 @@ function syncGlobalVisualTheme() {
 }
 
 function getActiveTrophyWorldId() {
-  return ui.trophyWorldId || state.activeTrophyWorld || TROPHY_WORLDS[0].id;
+  const worldId = ui.trophyWorldId || state.activeTrophyWorld || TROPHY_WORLDS[0].id;
+  return worldId === "winter" && !isWinterWorldUnlocked() ? "alley" : worldId;
 }
 
 function getActiveTrophyWorld() {
@@ -1339,26 +1632,15 @@ function getActiveTrophyWorld() {
 }
 
 function getTrophyRoadThemeFromScroll() {
-  if (!trophyGrid) {
-    return getActiveTrophyWorldId();
+  if (!isWinterWorldUnlocked()) {
+    return "alley";
   }
-
-  if (trophyGrid.clientWidth <= 0) {
-    return getActiveTrophyWorldId();
-  }
-
-  const divider = trophyGrid.querySelector('[data-world-divider="winter"]');
-
-  if (!divider) {
-    return TROPHY_WORLDS[0].id;
-  }
-
-  const viewportCenter = trophyGrid.scrollLeft + (trophyGrid.clientWidth / 2);
-  return viewportCenter >= divider.offsetLeft ? "winter" : "alley";
+  return "winter";
 }
 
 function setActiveTrophyWorld(worldId) {
-  const world = getTrophyWorldById(worldId);
+  const normalizedWorldId = worldId === "winter" && !isWinterWorldUnlocked() ? "alley" : worldId;
+  const world = getTrophyWorldById(normalizedWorldId);
 
   ui.trophyWorldId = world.id;
   state.activeTrophyWorld = world.id;
@@ -1376,6 +1658,80 @@ function setActiveTrophyWorld(worldId) {
   }
 
   renderSuperAlleyControls();
+}
+
+function getTrophyWorldSection(worldId) {
+  if (!trophyGrid) {
+    return null;
+  }
+
+  return trophyGrid.querySelector(`[data-trophy-world="${worldId}"]`);
+}
+
+function getTrophyRoadPeekWidth(mode = "locked") {
+  if (!trophyGrid) {
+    return mode === "completed" ? 540 : 360;
+  }
+
+  if (mode === "completed") {
+    const twoRewardPeek = (TROPHY_NODE_WIDTH * 2) + TROPHY_NODE_GAP + 80;
+    return clamp(Math.min(twoRewardPeek, trophyGrid.clientWidth - 44), 360, 620);
+  }
+
+  return Math.max(320, Math.min(420, Math.round(trophyGrid.clientWidth * 0.38)));
+}
+
+function scrollTrophyRoadToWorld(worldId) {
+  if (!trophyGrid) {
+    return;
+  }
+
+  const section = getTrophyWorldSection(worldId);
+
+  if (!section) {
+    return;
+  }
+
+  const maxScroll = Math.max(0, trophyGrid.scrollWidth - trophyGrid.clientWidth);
+  let targetScrollLeft = section.offsetLeft;
+
+  if (worldId === "winter") {
+    targetScrollLeft = isWinterWorldUnlocked()
+      ? section.offsetLeft - getTrophyRoadPeekWidth("completed")
+      : section.offsetLeft - trophyGrid.clientWidth + getTrophyRoadPeekWidth("locked");
+  }
+
+  trophyGrid.scrollLeft = clamp(targetScrollLeft, 0, maxScroll);
+  clampTrophyRoadScrollPosition();
+  syncTrophyRoadThemeFromScroll();
+}
+
+function clampTrophyRoadScrollPosition() {
+  if (!trophyGrid) {
+    return;
+  }
+
+  const maxScroll = Math.max(0, trophyGrid.scrollWidth - trophyGrid.clientWidth);
+  let nextScrollLeft = clamp(trophyGrid.scrollLeft, 0, maxScroll);
+  const winterSection = getTrophyWorldSection("winter");
+
+  if (winterSection) {
+    const winterStart = winterSection.offsetLeft;
+
+    if (isWinterWorldUnlocked()) {
+      const peekWidth = getTrophyRoadPeekWidth("completed");
+      const minScroll = clamp(winterStart - peekWidth, 0, maxScroll);
+      nextScrollLeft = Math.max(nextScrollLeft, minScroll);
+    } else {
+      const peekWidth = getTrophyRoadPeekWidth("locked");
+      const maxLockedScroll = clamp(winterStart - trophyGrid.clientWidth + peekWidth, 0, maxScroll);
+      nextScrollLeft = Math.min(nextScrollLeft, maxLockedScroll);
+    }
+  }
+
+  if (Math.abs(nextScrollLeft - trophyGrid.scrollLeft) > 1) {
+    trophyGrid.scrollLeft = nextScrollLeft;
+  }
 }
 
 function syncTrophyRoadThemeFromScroll() {
@@ -1399,8 +1755,8 @@ function setSuperAlleyActiveForWorld(worldId, isActive) {
 
 function getSuperAlleyOfferCopy(worldId) {
   return worldId === "winter"
-    ? `Wybierz aktywację za ${SUPER_ALLEY_COIN_PRICE} monet lub ${SUPER_ALLEY_CASH_PRICE_LABEL} i odblokuj jasnoniebieskie nagrody premium.`
-    : `Wybierz aktywację za ${SUPER_ALLEY_COIN_PRICE} monet lub ${SUPER_ALLEY_CASH_PRICE_LABEL} i odblokuj różowe nagrody premium.`;
+    ? `Wybierz aktywację za ${SUPER_ALLEY_DIAMOND_PRICE} klejnotow lub ${SUPER_ALLEY_CASH_PRICE_LABEL} i odblokuj jasnoniebieskie nagrody premium.`
+    : `Wybierz aktywację za ${SUPER_ALLEY_DIAMOND_PRICE} klejnotow lub ${SUPER_ALLEY_CASH_PRICE_LABEL} i odblokuj różowe nagrody premium.`;
 }
 
 function getSuperAlleyUnlockedCopy(worldId) {
@@ -1425,14 +1781,14 @@ function getSuperAlleyBlockedContent(worldId) {
   if (worldId === "winter" && !isWinterWorldUnlocked()) {
     return {
       title: "Najpierw ukoncz Swiat Magikow",
-      copy: "Po przekroczeniu 2000 pucharow odblokujesz zimowa Aleje Super i jej jasnoniebieskie nagrody premium.",
+      copy: "Po odebraniu Millo jako Elfie odblokujesz zimowa Aleje Super i jej jasnoniebieskie nagrody premium.",
     };
   }
 
   if (worldId === "alley" && isWinterWorldUnlocked()) {
     return {
       title: "Ukończyles juz Swiat Magikow, nie mozesz go aktywowac",
-      copy: "Po 2000 pucharow mozesz aktywowac juz tylko zimowa Aleje Super.",
+      copy: "Po odebraniu Millo jako Elfie mozesz aktywowac juz tylko zimowa Aleje Super.",
     };
   }
 
@@ -1485,15 +1841,13 @@ function renderLobby() {
   const equippedCharacter = getOwnedItem("characters", state.equippedCharacter);
   const equippedPet = getOwnedItem("pets", state.equippedPet);
 
-  if (equippedCharacter) {
-    lobbyAvatar.src = equippedCharacter.image;
-    lobbyAvatar.alt = equippedCharacter.name;
-    lobbyAvatar.classList.remove("broken");
-  } else {
-    lobbyAvatar.src = "";
-    lobbyAvatar.alt = "Postac";
-    lobbyAvatar.classList.add("broken");
-  }
+  renderPreviewAssetIntoFrame(lobbyAvatarFrame, equippedCharacter, {
+    elementId: "lobby-avatar",
+    imageClass: "avatar-image asset-image",
+    videoClass: "avatar-image asset-video",
+    fallbackText: "POSTAC",
+    alt: equippedCharacter?.name || "Postac",
+  });
 
   if (equippedPet) {
     petWrapper.hidden = false;
@@ -1512,9 +1866,11 @@ function renderStore() {
   ensureStoreOffersCurrent();
   storeGrid.className = "store-main";
   const crate = CATALOG.crates[0];
+  const winterBundle = CATALOG.bundles[0];
   const dailyCharacters = getCurrentStoreOfferItems("characters", { includeOwned: true });
 
   const booths = [
+    buildWinterBundleBooth(winterBundle),
     buildDailyCharacterBooth(dailyCharacters),
     buildCrateShopBooth(crate),
     buildCoinBooth(),
@@ -1524,14 +1880,156 @@ function renderStore() {
 
   storeGrid.innerHTML = booths.join("");
   syncBrokenAssets(storeGrid);
+  syncAnimatedAssets(storeGrid);
+}
+
+function getStoreOffersSignature() {
+  const characterIds = Array.isArray(state.storeOffers?.characterIds)
+    ? state.storeOffers.characterIds.join("|")
+    : "";
+  const nextRefreshAt = Number(state.storeOffers?.nextRefreshAt || 0);
+  return `${characterIds}@${nextRefreshAt}`;
+}
+
+function updateStoreRefreshNote() {
+  if (!storeGrid) {
+    return;
+  }
+
+  const refreshNote = storeGrid.querySelector(".store-refresh-note");
+
+  if (!refreshNote) {
+    return;
+  }
+
+  refreshNote.textContent = `Nowe oferty codziennie o 09:00. Za ${formatRemainingTime(getStoreRefreshRemainingMs())}.`;
+}
+
+function refreshStoreViewTick() {
+  const previousSignature = getStoreOffersSignature();
+  ensureStoreOffersCurrent();
+
+  if (previousSignature !== getStoreOffersSignature()) {
+    renderStore();
+    return;
+  }
+
+  updateStoreRefreshNote();
+}
+
+function hasCompletedMagiciansWorld() {
+  return hasClaimedWinterUnlockReward();
+}
+
+function getCurrencyIconSrc(currency = "coins") {
+  return currency === "diamonds" ? TROPHY_DIAMOND_IMAGE : "./monety_1.png";
+}
+
+function getCurrencyIconAlt(currency = "coins") {
+  return currency === "diamonds" ? "Diamenty" : "Monety";
+}
+
+function buildCurrencyAmountMarkup(amount, currency = "coins") {
+  return `
+    <span class="price-inline" data-currency="${currency}">
+      <span class="price-amount">${amount} x</span>
+      <img class="price-icon" src="${getCurrencyIconSrc(currency)}" alt="${getCurrencyIconAlt(currency)}" />
+    </span>
+  `;
+}
+
+function buildCurrencyPriceChipMarkup(amount, currency = "coins") {
+  return `
+    <div class="item-price price-chip" data-currency="${currency}">
+      ${buildCurrencyAmountMarkup(amount, currency)}
+    </div>
+  `;
+}
+
+function buildPreviewAssetMarkup(item, options = {}) {
+  const fallbackText = options.fallbackText || item?.name || "NAGRODA";
+  const alt = options.alt || item?.name || fallbackText;
+  const imageClass = options.imageClass || "item-image asset-image";
+  const videoClass = options.videoClass || imageClass.replace("asset-image", "asset-video");
+  const imageSrc = options.imageSrc || item?.image || "";
+  const previewVideo = options.usePreviewVideo === false ? "" : item?.previewVideo || "";
+  const elementId = options.elementId ? ` id="${options.elementId}"` : "";
+
+  if (previewVideo) {
+    return `
+      <video
+        ${elementId}
+        class="${videoClass}"
+        src="${previewVideo}"
+        poster="${imageSrc}"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+        aria-label="${alt}"
+      ></video>
+      <div class="asset-fallback">${fallbackText}</div>
+    `;
+  }
+
+  return `
+    <img
+      ${elementId}
+      class="${imageClass}"
+      src="${imageSrc}"
+      alt="${alt}"
+      data-fallback-text="${fallbackText}"
+    />
+    <div class="asset-fallback">${fallbackText}</div>
+  `;
+}
+
+function renderPreviewAssetIntoFrame(frame, item, options = {}) {
+  if (!frame) {
+    return;
+  }
+
+  if (!item) {
+    const fallbackText = options.fallbackText || "POSTAC";
+    frame.innerHTML = `
+      <img
+        ${options.elementId ? `id="${options.elementId}"` : ""}
+        class="${options.imageClass || "avatar-image asset-image"} broken"
+        src=""
+        alt="${fallbackText}"
+        data-fallback-text="${fallbackText}"
+      />
+      <div class="asset-fallback">${fallbackText}</div>
+    `;
+    return;
+  }
+
+  frame.innerHTML = buildPreviewAssetMarkup(item, options);
+  syncBrokenAssets(frame);
+  syncAnimatedAssets(frame);
+}
+
+function isStoreCharacterVisibleInShop(item) {
+  if (!item) {
+    return false;
+  }
+
+  const worldTheme = getStoreCharacterWorldTheme(item).id;
+  return isWinterWorldUnlocked() ? worldTheme === "winter" : worldTheme === "magicians";
 }
 
 function buildStoreOfferCard(kind, item, options = {}) {
   const price = Number(options.price ?? item.price ?? 0);
-  const priceLabel = options.priceLabel || `${price} monet`;
+  const currency = options.currency || "coins";
   const alreadyOwned = isSinglePurchaseStoreItem(kind) && isOwned(kind, item.id);
-  const buttonLabel = alreadyOwned ? "POSIADASZ" : options.buttonLabel || `KUP ZA ${price}`;
-  const disabled = alreadyOwned || Boolean(options.disabled) || state.coins < price;
+  const buttonLabel = alreadyOwned
+    ? "POSIADASZ"
+    : options.buttonLabel || buildCurrencyAmountMarkup(price, currency);
+  const disabled =
+    alreadyOwned ||
+    Boolean(options.disabled) ||
+    (!options.allowInsufficientPreview && state.coins < price);
   const note =
     Object.prototype.hasOwnProperty.call(options, "note")
       ? options.note
@@ -1543,28 +2041,35 @@ function buildStoreOfferCard(kind, item, options = {}) {
     ? `<p class="item-note store-price-old">${options.oldPrice}</p>`
     : "";
   const extraAction = options.extraAction || "";
+  const worldTheme = kind === "characters" ? getStoreCharacterWorldTheme(item) : null;
+  const worldRibbon = worldTheme
+    ? `<p class="store-world-ribbon" data-store-world="${worldTheme.id}">${worldTheme.label}</p>`
+    : "";
+  const worldAttr = worldTheme ? ` data-store-world="${worldTheme.id}"` : "";
+  const worldCardClass = worldTheme ? " store-world-card" : "";
+  const buttonAttributes = options.buttonAttributes || "";
 
   return `
-    <article class="item-card store-compact-card">
+    <article class="item-card store-compact-card${worldCardClass}"${worldAttr}>
+      ${worldRibbon}
       <div class="item-art">
-        <img
-          class="item-image asset-image"
-          src="${item.image}"
-          alt="${item.name}"
-          data-fallback-text="${item.name}"
-        />
-        <div class="asset-fallback">${item.name}</div>
+        ${buildPreviewAssetMarkup(item, {
+          imageClass: "item-image asset-image",
+          videoClass: "item-image asset-video",
+          fallbackText: item.name,
+          alt: item.name,
+        })}
       </div>
       <p class="item-title">${item.name}</p>
       ${badge}
       ${oldPrice}
-      <p class="item-price">${priceLabel}</p>
       ${note ? `<p class="item-note">${note}</p>` : ""}
       <div class="card-actions">
         <button
           class="pixel-button small-button"
           data-store-buy="${item.id}"
           data-store-kind="${kind}"
+          ${buttonAttributes}
           ${disabled ? "disabled" : ""}
         >
           ${buttonLabel}
@@ -1575,6 +2080,77 @@ function buildStoreOfferCard(kind, item, options = {}) {
   `;
 }
 
+function isBundleOwned(bundle) {
+  if (!bundle || !Array.isArray(bundle.rewardCharacterIds) || bundle.rewardCharacterIds.length === 0) {
+    return false;
+  }
+
+  return bundle.rewardCharacterIds.every((characterId) => state.ownedCharacters.includes(characterId));
+}
+
+function getBundleRewardCharacters(bundle) {
+  if (!bundle || !Array.isArray(bundle.rewardCharacterIds)) {
+    return [];
+  }
+
+  return bundle.rewardCharacterIds
+    .map((characterId) => CATALOG.characters.find((item) => item.id === characterId) || null)
+    .filter(Boolean);
+}
+
+function getStoreCharacterWorldTheme(item) {
+  const worldId = item?.storeWorld || item?.worldTheme || item?.unlockWorld;
+
+  if (worldId === "winter") {
+    return { id: "winter", label: "SWIAT ZIMOWY" };
+  }
+
+  return { id: "magicians", label: "SWIAT MAGIKOW" };
+}
+
+function buildWinterBundleBooth(bundle) {
+  if (!bundle || !hasCompletedMagiciansWorld() || isBundleOwned(bundle)) {
+    return "";
+  }
+
+  const worldTheme = getStoreCharacterWorldTheme(bundle);
+  const buttonLabel = bundle.cashPriceLabel;
+
+  return `
+    <section class="store-booth store-package-booth">
+      <div class="store-booth-copy">
+        <p class="item-title">Pakiet przedpremierowy</p>
+        <p class="item-note">Zimowy pakiet z dwiema postaciami i wspolna wizualizacja nagrod.</p>
+      </div>
+      <div class="store-booth-grid">
+        <article class="item-card store-compact-card store-package-card">
+          <p class="store-world-ribbon" data-store-world="${worldTheme.id}">${worldTheme.label}</p>
+          <div class="item-art">
+            ${buildPreviewAssetMarkup(bundle, {
+              imageClass: "item-image asset-image",
+              videoClass: "item-image asset-video",
+              fallbackText: bundle.name,
+              alt: bundle.name,
+              usePreviewVideo: false,
+            })}
+          </div>
+          <p class="item-title">${bundle.name}</p>
+          <p class="item-note">${bundle.description}</p>
+          <div class="card-actions">
+            <button
+              class="pixel-button small-button"
+              data-store-cash-buy="${bundle.id}"
+              data-store-cash-kind="bundles"
+            >
+              ${buttonLabel}
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+  `;
+}
+
 function buildDailyCharacterBooth(items = []) {
   const refreshIn = formatRemainingTime(getStoreRefreshRemainingMs());
   const cards = items.length > 0
@@ -1582,8 +2158,9 @@ function buildDailyCharacterBooth(items = []) {
       .slice(0, 2)
       .map((item) => buildStoreOfferCard("characters", item, {
         price: item.price,
-        buttonLabel: "KUP!",
         note: "",
+        allowInsufficientPreview: true,
+        buttonAttributes: 'data-store-offer-source="daily-characters"',
       }))
       .join("")
     : `
@@ -1607,7 +2184,7 @@ function buildDailyCharacterBooth(items = []) {
 }
 
 function getStoreCatalogCharacters() {
-  return CATALOG.characters.filter((item) => Number(item.price || 0) > 0 && !isWorldLockedItem(item));
+  return getStoreOfferCandidates("characters");
 }
 
 function buildStoreCatalogBooth() {
@@ -1625,23 +2202,27 @@ function buildStoreCatalogBooth() {
       </div>
       <div class="store-catalog-grid">
         ${items
-          .map((item) => `
-            <article class="item-card store-compact-card store-catalog-card">
+          .map((item) => {
+            const worldTheme = getStoreCharacterWorldTheme(item);
+
+            return `
+            <article class="item-card store-compact-card store-catalog-card store-world-card" data-store-world="${worldTheme.id}">
+              <p class="store-world-ribbon" data-store-world="${worldTheme.id}">${worldTheme.label}</p>
               <div class="item-art">
-                <img
-                  class="item-image asset-image"
-                  src="${item.image}"
-                  alt="${item.name}"
-                  data-fallback-text="${item.name}"
-                />
-                <div class="asset-fallback">${item.name}</div>
+                ${buildPreviewAssetMarkup(item, {
+                  imageClass: "item-image asset-image",
+                  videoClass: "item-image asset-video",
+                  fallbackText: item.name,
+                  alt: item.name,
+                })}
               </div>
               <p class="item-title">${item.name}</p>
-              <p class="item-price">${item.price} monet</p>
+              ${buildCurrencyPriceChipMarkup(item.price, "coins")}
               <p class="item-note">${item.storeNote || "Sklepowa postac kolekcjonerska."}</p>
               <span class="item-badge">${isOwned("characters", item.id) ? "POSIADASZ" : "KATALOG"}</span>
             </article>
-          `)
+          `;
+          })
           .join("")}
       </div>
     </section>
@@ -1650,8 +2231,8 @@ function buildStoreCatalogBooth() {
 
 function buildCrateShopBooth(crate) {
   const packs = [
-    { id: "crate-pack-1", amount: 1, price: 6000 },
-    { id: "crate-pack-2", amount: 2, price: 11000 },
+    { id: "crate-pack-1", amount: 1, price: 20 },
+    { id: "crate-pack-2", amount: 2, price: 35 },
   ];
 
   return `
@@ -1677,10 +2258,9 @@ function buildCrateShopBooth(crate) {
                   <div class="asset-fallback">${crate.fallbackText}</div>
                 </div>
                 <p class="item-title">${pack.amount} x Drewniana Skrzynia</p>
-                <p class="item-price">${pack.price} monet</p>
                 <div class="card-actions">
-                  <button class="pixel-button small-button" data-buy-crate-pack="${pack.id}" ${state.coins >= pack.price ? "" : "disabled"}>
-                    KUP ZA ${pack.price}
+                  <button class="pixel-button small-button" data-buy-crate-pack="${pack.id}" ${state.diamonds >= pack.price ? "" : "disabled"}>
+                    ${buildCurrencyAmountMarkup(pack.price, "diamonds")}
                   </button>
                 </div>
               </article>
@@ -1714,10 +2294,9 @@ function buildCoinBooth() {
                   <div class="asset-fallback">${item.name}</div>
                 </div>
                 <p class="item-title">${item.name}</p>
-                <p class="item-price">${item.priceLabel}</p>
                 <div class="card-actions">
                   <button class="pixel-button small-button" data-store-buy="${item.id}" data-store-kind="coins">
-                    KUP
+                    ${item.priceLabel}
                   </button>
                 </div>
               </article>
@@ -1741,8 +2320,6 @@ function buildTrophyBooth() {
       <div class="store-booth-grid">
         ${buildStoreOfferCard("trophies", item, {
           price: 1,
-          priceLabel: "1 moneta",
-          buttonLabel: "KUP!",
           note: "",
         })}
       </div>
@@ -1752,11 +2329,15 @@ function buildTrophyBooth() {
 
 function ensureStoreOffersCurrent(force = false) {
   const now = Date.now();
+  const characterPool = getStoreOfferCandidates("characters");
+  const characterPoolIds = new Set(characterPool.map((item) => item.id));
+  const expectedCharacterCount = Math.min(2, characterPool.length);
   if (
     force ||
     !state.storeOffers ||
     !Array.isArray(state.storeOffers.characterIds) ||
-    state.storeOffers.characterIds.length !== 2 ||
+    state.storeOffers.characterIds.length !== expectedCharacterCount ||
+    state.storeOffers.characterIds.some((itemId) => !characterPoolIds.has(itemId)) ||
     now >= Number(state.storeOffers.nextRefreshAt || 0)
   ) {
     regenerateStoreOffers(now);
@@ -1775,7 +2356,11 @@ function regenerateStoreOffers(now = Date.now()) {
 
 function getStoreOfferCandidates(kind) {
   const items = CATALOG[kind];
-  return items.filter((item) => Number(item.price || 0) > 0 && !isWorldLockedItem(item));
+  return items.filter((item) => (
+    Number(item.price || 0) > 0 &&
+    !isWorldLockedItem(item) &&
+    (kind !== "characters" || isStoreCharacterVisibleInShop(item))
+  ));
 }
 
 function getCurrentStoreOfferItems(kind, options = {}) {
@@ -1783,7 +2368,11 @@ function getCurrentStoreOfferItems(kind, options = {}) {
   const ids = kind === "characters" ? state.storeOffers.characterIds : state.storeOffers.petIds;
   return (Array.isArray(ids) ? ids : [])
     .map((itemId) => CATALOG[kind].find((item) => item.id === itemId))
-    .filter((item) => item && (includeOwned || !isOwned(kind, item.id)));
+    .filter((item) => (
+      item &&
+      (kind !== "characters" || isStoreCharacterVisibleInShop(item)) &&
+      (includeOwned || !isOwned(kind, item.id))
+    ));
 }
 
 function pickRandomItems(items, count) {
@@ -1823,6 +2412,190 @@ function formatRemainingTime(ms) {
   return `${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
 }
 
+function getClaimableTrophyRewards(worldId) {
+  const world = getTrophyWorldById(worldId);
+
+  if (!world) {
+    return [];
+  }
+
+  return world.rewards.filter((reward) => {
+    if (state.trophies < reward.trophies || isTrophyRewardClaimed(worldId, reward)) {
+      return false;
+    }
+
+    if (isSuperAlleyReward(worldId, reward) && !isSuperAlleyActiveForWorld(worldId)) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+function getTrophyWorldProgressPercent(world) {
+  const rewards = Array.isArray(world?.rewards) ? world.rewards : [];
+
+  if (rewards.length === 0) {
+    return 0;
+  }
+
+  const totalWidth = (rewards.length * TROPHY_NODE_WIDTH) + (Math.max(0, rewards.length - 1) * TROPHY_NODE_GAP);
+  const getRewardCenterPercent = (index) => {
+    const center = (index * (TROPHY_NODE_WIDTH + TROPHY_NODE_GAP)) + (TROPHY_NODE_WIDTH / 2);
+    return clamp((center / totalWidth) * 100, 0, 100);
+  };
+
+  if (state.trophies <= world.threshold) {
+    return 0;
+  }
+
+  for (let index = 0; index < rewards.length; index += 1) {
+    const reward = rewards[index];
+    const previousThreshold = index === 0 ? world.threshold : rewards[index - 1].trophies;
+    const previousPercent = index === 0 ? 0 : getRewardCenterPercent(index - 1);
+    const nextPercent = getRewardCenterPercent(index);
+
+    if (state.trophies <= reward.trophies) {
+      const localProgress = clamp(
+        (state.trophies - previousThreshold) / Math.max(1, reward.trophies - previousThreshold),
+        0,
+        1
+      );
+      return previousPercent + ((nextPercent - previousPercent) * localProgress);
+    }
+  }
+
+  return 100;
+}
+
+function getTrophyWorldOverlayConfig(worldId) {
+  if (worldId === "winter" && !isWinterWorldUnlocked()) {
+    return {
+      theme: "winter",
+      visibility: "always",
+      align: "start",
+      image: "./ładowanie_2.png",
+      fallbackText: "ZIMA",
+      message: "NAJPIERW ZAKOŃCZ ŚWIAT MAGIKÓW",
+    };
+  }
+
+  if (worldId === "alley" && isWinterWorldUnlocked()) {
+    const claimableRewards = getClaimableTrophyRewards("alley");
+
+    return {
+      theme: "alley",
+      visibility: "always",
+      align: "end",
+      image: "./ładowanie_1.png",
+      fallbackText: "MAGIA",
+      message: "UKOŃCZYŁEŚ JUŻ ŚWIAT MAGIKÓW",
+      actionWorldId: claimableRewards.length > 0 ? "alley" : "",
+      actionLabel: claimableRewards.length > 0 ? "Odbierz nagrody ze Świata Magików" : "",
+    };
+  }
+
+  return null;
+}
+
+function renderTrophyWorldOverlay(overlay) {
+  if (!overlay) {
+    return "";
+  }
+
+  return `
+    <div
+      class="trophy-world-overlay"
+      data-overlay-theme="${overlay.theme}"
+      data-overlay-align="${overlay.align}"
+    >
+      <div class="trophy-world-overlay-scrim"></div>
+      <div class="trophy-world-overlay-panel" data-overlay-align="${overlay.align}">
+        <div class="trophy-world-overlay-visual">
+          <div class="trophy-world-overlay-glow" data-overlay-theme="${overlay.theme}"></div>
+          <div class="trophy-world-overlay-art">
+            <img
+              class="item-image asset-image"
+              src="${overlay.image}"
+              alt="${overlay.message}"
+              data-fallback-text="${overlay.fallbackText}"
+            />
+            <div class="asset-fallback">${overlay.fallbackText}</div>
+          </div>
+        </div>
+        <p class="trophy-world-overlay-copy" data-overlay-theme="${overlay.theme}">${overlay.message}</p>
+        ${overlay.actionWorldId && overlay.actionLabel ? `
+          <button
+            class="pixel-button trophy-world-overlay-action"
+            data-batch-claim-world="${overlay.actionWorldId}"
+            ${trophyWorldBatchClaimBusy ? "disabled" : ""}
+          >
+            ${overlay.actionLabel}
+          </button>
+        ` : ""}
+      </div>
+    </div>
+  `;
+}
+
+function getTrophyRewardUiState(worldId, reward) {
+  const claimed = isTrophyRewardClaimed(worldId, reward);
+  const unlocked = state.trophies >= reward.trophies;
+  const requiresSuperAlley = isSuperAlleyReward(worldId, reward);
+  const superAlleyBlocked = requiresSuperAlley && !isSuperAlleyActiveForWorld(worldId);
+  const missingTrophies = Math.max(0, reward.trophies - state.trophies);
+
+  if (claimed) {
+    return {
+      claimed,
+      unlocked,
+      requiresSuperAlley,
+      superAlleyBlocked,
+      stateId: "claimed",
+      statusLabel: "ODEBRANE",
+      buttonLabel: "ODEBRANE",
+      buttonDisabled: true,
+    };
+  }
+
+  if (!unlocked) {
+    return {
+      claimed,
+      unlocked,
+      requiresSuperAlley,
+      superAlleyBlocked,
+      stateId: "locked",
+      statusLabel: "JESZCZE ZBIERAJ",
+      buttonLabel: `BRAKUJE ${missingTrophies}`,
+      buttonDisabled: true,
+    };
+  }
+
+  if (superAlleyBlocked) {
+    return {
+      claimed,
+      unlocked,
+      requiresSuperAlley,
+      superAlleyBlocked,
+      stateId: "super-locked",
+      statusLabel: "TYLKO Z AKTYWACJĄ SUPER",
+      buttonLabel: "TYLKO SUPER",
+      buttonDisabled: true,
+    };
+  }
+
+  return {
+    claimed,
+    unlocked,
+    requiresSuperAlley,
+    superAlleyBlocked,
+    stateId: "ready",
+    statusLabel: "GOTOWE DO ODBIORU",
+    buttonLabel: "ODBIERZ",
+    buttonDisabled: false,
+  };
+}
+
 function renderTrophyRoad() {
   if (!trophyGrid || !worldProgressValue || !worldTitle) {
     return;
@@ -1832,76 +2605,26 @@ function renderTrophyRoad() {
   worldProgressValue.textContent = String(state.trophies);
   const roadParts = [];
 
-  TROPHY_WORLDS.forEach((world, worldIndex) => {
-    if (worldIndex > 0) {
-      const previousWorld = TROPHY_WORLDS[worldIndex - 1];
-      const previousThreshold = previousWorld.rewards[previousWorld.rewards.length - 1].trophies;
-      const currentThreshold = world.rewards[0].trophies;
-      const segmentRange = Math.max(1, currentThreshold - previousThreshold);
-      const connectorProgress = clamp(
-        ((state.trophies - previousThreshold) / segmentRange) * 100,
-        0,
-        100
-      );
+  TROPHY_WORLDS.forEach((world) => {
+    const worldParts = [];
+    const worldProgress = getTrophyWorldProgressPercent(world);
+    const progressLabels = world.rewards.map((reward) => `
+      <span class="trophy-world-progress-label">${reward.trophies}</span>
+    `).join("");
 
-      roadParts.push(`
-        <div class="trophy-world-gap" data-world-divider="${world.id}" data-gap-theme="${world.id}">
-          <p class="trophy-world-gap-label">Przejscie ${previousThreshold} -> ${currentThreshold}</p>
-          <p class="trophy-world-gap-title">${world.name}</p>
-          <div class="trophy-world-gap-track">
-            <div class="trophy-world-gap-fill" style="width:${connectorProgress}%;"></div>
-          </div>
-        </div>
-      `);
-    }
-
-    world.rewards.forEach((reward, index) => {
-      const claimed = isTrophyRewardClaimed(world.id, reward);
-      const unlocked = state.trophies >= reward.trophies;
-      const requiresSuperAlley = isSuperAlleyReward(world.id, reward);
-      const superAlleyBlocked = requiresSuperAlley && !isSuperAlleyActiveForWorld(world.id);
-      const previousThreshold = index === 0 ? world.threshold : world.rewards[index - 1].trophies;
-      const segmentRange = Math.max(1, reward.trophies - previousThreshold);
-      const connectorProgress = clamp(
-        ((state.trophies - previousThreshold) / segmentRange) * 100,
-        0,
-        100
-      );
+    world.rewards.forEach((reward) => {
+      const rewardUiState = getTrophyRewardUiState(world.id, reward);
       const rewardImage = getTrophyRewardImage(reward);
-      const extraAction = reward.type === "crate"
-        ? `<button class="circle-icon-button" data-chest-odds="${world.id}" aria-label="Szanse skrzyni">?</button>`
-        : "";
-      const rewardStateNote = claimed
-        ? "Nagroda odebrana."
-        : !unlocked
-          ? `Brakuje ${reward.trophies - state.trophies} pucharow.`
-          : superAlleyBlocked
-            ? "Wymaga aktywacji Alei Super tego swiata."
-            : "Nagroda gotowa do odbioru.";
-      const buttonLabel = claimed
-        ? "ODEBRANE"
-        : unlocked && superAlleyBlocked
-          ? "TYLKO SUPER"
-          : "ODBIERZ";
-      const buttonDisabled = !unlocked || claimed || superAlleyBlocked;
 
-      if (index > 0) {
-        roadParts.push(`
-          <div class="trophy-connector">
-            <div class="trophy-connector-track">
-              <div class="trophy-connector-fill" style="width:${connectorProgress}%;"></div>
-            </div>
-          </div>
-        `);
-      }
-
-      roadParts.push(`
+      worldParts.push(`
         <article
-          class="item-card trophy-node ${requiresSuperAlley ? "super-alley-reward" : ""}"
+          class="item-card trophy-node ${rewardUiState.requiresSuperAlley ? "super-alley-reward" : ""}"
           data-world-theme="${world.id}"
-          ${requiresSuperAlley ? `data-super-theme="${world.id}"` : ""}
+          data-node-state="${rewardUiState.stateId}"
+          ${rewardUiState.requiresSuperAlley ? `data-super-theme="${world.id}"` : ""}
         >
-          ${requiresSuperAlley ? `<p class="super-alley-reward-badge" data-super-theme="${world.id}">TYLKO Z AKTYWACJĄ SUPER</p>` : ""}
+          ${rewardUiState.stateId === "claimed" ? `<p class="trophy-node-check" aria-hidden="true">✓</p>` : ""}
+          <p class="trophy-node-status" data-node-state="${rewardUiState.stateId}">${rewardUiState.statusLabel}</p>
           <div class="item-art">
             <img
               class="item-image asset-image"
@@ -1911,27 +2634,47 @@ function renderTrophyRoad() {
             />
             <div class="asset-fallback">${rewardImage.fallbackText}</div>
           </div>
-          <p class="item-title">${world.name}</p>
-          <p class="item-price reward-threshold">${reward.trophies} pucharow</p>
-          <p class="item-note">Nagroda: ${reward.label}</p>
-          <p class="item-note">${rewardStateNote}</p>
+          <p class="trophy-node-reward">${reward.label}</p>
           <div class="card-actions">
             <button
               class="pixel-button small-button"
               data-trophy-claim="${world.id}:${reward.id}"
-              ${buttonDisabled ? "disabled" : ""}
+              ${rewardUiState.buttonDisabled ? "disabled" : ""}
             >
-              ${buttonLabel}
+              ${rewardUiState.buttonLabel}
             </button>
-            ${extraAction}
           </div>
         </article>
       `);
     });
+
+    const worldOverlay = getTrophyWorldOverlayConfig(world.id);
+
+    roadParts.push(`
+      <section
+        class="trophy-world-section"
+        data-trophy-world="${world.id}"
+        data-overlay-visibility="${worldOverlay ? worldOverlay.visibility : "never"}"
+      >
+        <div class="trophy-world-cards">
+          ${worldParts.join("")}
+        </div>
+        <div class="trophy-world-progress" data-world-theme="${world.id}">
+          <div class="trophy-world-progress-track">
+            <div class="trophy-world-progress-fill" style="width:${worldProgress}%;"></div>
+          </div>
+          <div class="trophy-world-progress-labels">
+            ${progressLabels}
+          </div>
+        </div>
+        ${renderTrophyWorldOverlay(worldOverlay)}
+      </section>
+    `);
   });
 
   trophyGrid.innerHTML = roadParts.join("");
   trophyGrid.scrollLeft = Math.min(previousScrollLeft, Math.max(0, trophyGrid.scrollWidth - trophyGrid.clientWidth));
+  clampTrophyRoadScrollPosition();
 
   syncBrokenAssets(trophyGrid);
   syncTrophyRoadThemeFromScroll();
@@ -1939,12 +2682,20 @@ function renderTrophyRoad() {
 
 function renderInventory() {
   renderWardrobeOverview();
-  inventoryGrid.className = "card-grid wardrobe-grid";
   const items = getOwnedItems(ui.inventoryTab);
+
+  if (ui.inventoryTab === "characters" || ui.inventoryTab === "pets") {
+    inventoryGrid.className = "inventory-world-sections";
+    inventoryGrid.innerHTML = buildInventoryWorldSections(ui.inventoryTab);
+    syncBrokenAssets(inventoryGrid);
+    return;
+  }
+
+  inventoryGrid.className = "card-grid wardrobe-grid";
 
   if (items.length === 0) {
     inventoryGrid.innerHTML = `
-      <article class="empty-card">
+      <article class="empty-card wardrobe-empty-card">
         <div class="empty-card-art"></div>
         <p class="empty-card-title">Szafa jest pusta</p>
         <p class="empty-card-note">Kup cos w sklepie albo odbierz nagrode z Alei.</p>
@@ -1953,26 +2704,39 @@ function renderInventory() {
     return;
   }
 
-  inventoryGrid.innerHTML = items
+  inventoryGrid.innerHTML = buildInventoryCards(ui.inventoryTab, items);
+
+  syncBrokenAssets(inventoryGrid);
+}
+
+function getInventoryItemWorldFilterId(kind, item) {
+  if (!item || (kind !== "characters" && kind !== "pets")) {
+    return null;
+  }
+
+  return item.unlockWorld === "winter" ? "winter" : "magicians";
+}
+
+function buildInventoryCards(kind, items) {
+  return items
     .map((item) => {
-      const equipped = isEquipped(ui.inventoryTab, item.id);
+      const equipped = isEquipped(kind, item.id);
       const buttonLabel = equipped ? "AKTYWNE" : "ZALOZ";
-      const note = getInventoryNote(ui.inventoryTab, equipped);
+      const note = getInventoryNote(kind, equipped);
 
       return `
         <article class="item-card wardrobe-card ${equipped ? "active" : ""}">
           <div class="item-art">
-            <img
-              class="item-image asset-image"
-              src="${item.image}"
-              alt="${item.name}"
-              data-fallback-text="${item.name}"
-            />
-            <div class="asset-fallback">${item.name}</div>
+            ${buildPreviewAssetMarkup(item, {
+              imageClass: "item-image asset-image",
+              videoClass: "item-image asset-video",
+              fallbackText: item.name,
+              alt: item.name,
+            })}
           </div>
           <p class="item-title">${item.name}</p>
           ${
-            ui.inventoryTab === "pets"
+            kind === "pets"
               ? `<span class="rarity-badge ${item.rarityClass}">${item.rarityLabel}</span>`
               : ""
           }
@@ -1982,7 +2746,7 @@ function renderInventory() {
             <button
               class="pixel-button small-button"
               data-inventory-equip="${item.id}"
-              data-inventory-kind="${ui.inventoryTab}"
+              data-inventory-kind="${kind}"
               ${equipped ? "disabled" : ""}
             >
               ${buttonLabel}
@@ -1992,8 +2756,43 @@ function renderInventory() {
       `;
     })
     .join("");
+}
 
-  syncBrokenAssets(inventoryGrid);
+function buildInventoryWorldSections(kind) {
+  const items = getOwnedItems(kind);
+
+  return INVENTORY_WORLD_GROUPS.map((group) => {
+    const groupItems = items.filter((item) => getInventoryItemWorldFilterId(kind, item) === group.id);
+    const content = groupItems.length > 0
+      ? buildInventoryCards(kind, groupItems)
+      : buildInventoryWorldEmptyCard(kind, group.label);
+
+    return `
+      <section class="inventory-world-section">
+        <p class="inventory-world-heading">${group.label}:</p>
+        <div class="card-grid wardrobe-grid inventory-world-grid">
+          ${content}
+        </div>
+      </section>
+    `;
+  }).join("");
+}
+
+function buildInventoryWorldEmptyCard(kind, worldLabel) {
+  const title = kind === "pets"
+    ? `Brak PlatoYasow z ${worldLabel}`
+    : `Brak postaci z ${worldLabel}`;
+  const note = worldLabel === "Swiat Zimowy"
+    ? "Gdy odblokujesz kolejne zimowe nagrody, pojawia sie tutaj."
+    : "Kup cos w sklepie albo odbierz nagrode z Alei, aby uzupelnic te miejsce.";
+
+  return `
+    <article class="empty-card wardrobe-empty-card">
+      <div class="empty-card-art"></div>
+      <p class="empty-card-title">${title}</p>
+      <p class="empty-card-note">${note}</p>
+    </article>
+  `;
 }
 
 function getInventoryNote(kind, equipped) {
@@ -2052,13 +2851,22 @@ function renderWardrobeOverview() {
         <article class="wardrobe-slot">
           <p class="wardrobe-slot-label">${slot.label}</p>
           <div class="item-art wardrobe-slot-art">
-            <img
-              class="item-image asset-image ${item ? "" : "broken"}"
-              src="${image}"
-              alt="${name}"
-              data-fallback-text="${fallback}"
-            />
-            <div class="asset-fallback">${fallback}</div>
+            ${item
+              ? buildPreviewAssetMarkup(item, {
+                imageClass: "item-image asset-image",
+                videoClass: "item-image asset-video",
+                fallbackText: fallback,
+                alt: name,
+              })
+              : `
+                <img
+                  class="item-image asset-image broken"
+                  src="${image}"
+                  alt="${name}"
+                  data-fallback-text="${fallback}"
+                />
+                <div class="asset-fallback">${fallback}</div>
+              `}
           </div>
           <p class="item-title">${name}</p>
           <p class="wardrobe-slot-note">${note}</p>
@@ -2075,15 +2883,13 @@ function renderGameLoadout() {
   const pet = getOwnedItem("pets", state.equippedPet);
   syncAmmoSlotsUI();
 
-  if (character) {
-    gamePlayerImage.src = character.image;
-    gamePlayerImage.alt = character.name;
-    gamePlayerImage.classList.remove("broken");
-  } else {
-    gamePlayerImage.src = "";
-    gamePlayerImage.alt = "Postac";
-    gamePlayerImage.classList.add("broken");
-  }
+  renderPreviewAssetIntoFrame(gamePlayerFrame, character, {
+    elementId: "game-player-image",
+    imageClass: "entity-image asset-image",
+    videoClass: "entity-image asset-video",
+    fallbackText: character?.name || "POSTAC",
+    alt: character?.name || "Postac",
+  });
 
   if (pet) {
     gamePetEntity.hidden = false;
@@ -2181,6 +2987,11 @@ function handleStoreClick(event) {
     return;
   }
 
+  if (kind === "characters" && button.dataset.storeOfferSource === "daily-characters") {
+    openStoreCharacterPurchase(item);
+    return;
+  }
+
   if (state.coins < item.price) {
     openModal({
       title: "Za malo monet",
@@ -2235,6 +3046,17 @@ function handleInventoryClick(event) {
 }
 
 function handleTrophyClick(event) {
+  const batchClaimButton = event.target.closest("[data-batch-claim-world]");
+
+  if (batchClaimButton) {
+    if (trophyWorldBatchClaimBusy) {
+      return;
+    }
+
+    void claimWorldRewardsSequentially(batchClaimButton.dataset.batchClaimWorld);
+    return;
+  }
+
   const chestOddsButton = event.target.closest("[data-chest-odds]");
 
   if (chestOddsButton) {
@@ -2252,11 +3074,11 @@ function handleTrophyClick(event) {
   const world = TROPHY_WORLDS.find((entry) => entry.id === worldId);
   const reward = world?.rewards.find((entry) => entry.id === rewardId);
 
-  if (!world || !reward || state.trophies < reward.trophies || isTrophyRewardClaimed(worldId, reward)) {
+  if (trophyWorldBatchClaimBusy || !world || !reward || state.trophies < reward.trophies || isTrophyRewardClaimed(worldId, reward)) {
     return;
   }
 
-  claimTrophyReward(world, reward);
+  void claimTrophyReward(world, reward);
 }
 
 function buyItem(kind, item) {
@@ -2301,6 +3123,7 @@ function buyItem(kind, item) {
   void showRewardShowcase({
     image: item.image,
     name: item.name,
+    previewVideo: item.previewVideo || "",
     soundEffectName:
       kind === "pets"
         ? getPetVoiceEffect(item.id)
@@ -2311,26 +3134,10 @@ function buyItem(kind, item) {
 }
 
 function openTrophyRoadIntro() {
-  if (isWinterWorldUnlocked() && !state.seenWinterWorldIntro) {
-    state.seenTrophyRoadIntro = true;
-    state.seenWinterWorldIntro = true;
-    saveState();
-    void playAlleyIntroSequence([
-      {
-        title: "To koniec Świata Magików",
-        image: "./ładowanie_1.png",
-        fallbackText: "MAGICY",
-        theme: "alley",
-        durationMs: 2400,
-      },
-      {
-        title: "Witaj w Świecie Zimowym!",
-        image: "./ładowanie_2.png",
-        fallbackText: "ZIMA",
-        theme: "winter",
-        durationMs: 3000,
-      },
-    ]);
+  if (hasClaimedWinterUnlockReward() && !state.seenWinterWorldIntro) {
+    winterWorldRevealPending = true;
+    renderAll();
+    void playWinterWorldUnlockSequence();
     return;
   }
 
@@ -2342,6 +3149,35 @@ function openTrophyRoadIntro() {
   saveState();
 
   void playAlleyIntro();
+}
+
+async function playWinterWorldUnlockSequence() {
+  state.seenTrophyRoadIntro = true;
+  state.seenWinterWorldIntro = true;
+  saveState();
+
+  await playAlleyIntroSequence([
+    {
+      title: "To koniec Świata Magików",
+      image: "./ładowanie_1.png",
+      fallbackText: "MAGICY",
+      theme: "alley",
+      durationMs: 2400,
+    },
+    {
+      title: "Odblokowano Świat Zimowy!",
+      image: "./ładowanie_2.png",
+      fallbackText: "ZIMA",
+      theme: "winter",
+      durationMs: 3000,
+    },
+  ]);
+
+  winterWorldRevealPending = false;
+  setActiveTrophyWorld("winter");
+  saveState();
+  renderAll();
+  scrollTrophyRoadToWorld("winter");
 }
 
 function setAlleyIntroStep({
@@ -2506,7 +3342,7 @@ function setSuperAlleySceneMode(mode = "offer", worldId = getActiveTrophyWorldId
   superAlleyActions.hidden = successMode || Boolean(blockedContent);
 
   if (superAlleyCoinsButton) {
-    superAlleyCoinsButton.textContent = `${SUPER_ALLEY_COIN_PRICE} monet`;
+    superAlleyCoinsButton.innerHTML = buildCurrencyAmountMarkup(SUPER_ALLEY_DIAMOND_PRICE, "diamonds");
     superAlleyCoinsButton.disabled = superAlleyBusy;
   }
 
@@ -2575,10 +3411,10 @@ async function activateSuperAlley(paymentMethod) {
     return;
   }
 
-  if (paymentMethod === "coins" && state.coins < SUPER_ALLEY_COIN_PRICE) {
+  if (paymentMethod === "coins" && state.diamonds < SUPER_ALLEY_DIAMOND_PRICE) {
     openModal({
-      title: "Za mało monet",
-      message: `Potrzebujesz ${SUPER_ALLEY_COIN_PRICE} monet, aby aktywowac Aleje Super tego swiata.`,
+      title: "Za mało klejnotow",
+      message: `Potrzebujesz ${SUPER_ALLEY_DIAMOND_PRICE} klejnotow, aby aktywowac Aleje Super tego swiata.`,
       buttonText: "OK",
       dismissible: true,
       onConfirm: closeModal,
@@ -2590,7 +3426,7 @@ async function activateSuperAlley(paymentMethod) {
   setSuperAlleySceneMode("offer", worldId);
 
   if (paymentMethod === "coins") {
-    state.coins -= SUPER_ALLEY_COIN_PRICE;
+    state.diamonds -= SUPER_ALLEY_DIAMOND_PRICE;
   }
 
   setSuperAlleyActiveForWorld(worldId, true);
@@ -2603,7 +3439,52 @@ async function activateSuperAlley(paymentMethod) {
   renderSuperAlleyControls();
 }
 
-function claimTrophyReward(world, reward) {
+async function claimWorldRewardsSequentially(worldId) {
+  if (trophyWorldBatchClaimBusy) {
+    return;
+  }
+
+  const world = getTrophyWorldById(worldId);
+  const rewards = getClaimableTrophyRewards(worldId);
+
+  if (!world || rewards.length === 0) {
+    return;
+  }
+
+  trophyWorldBatchClaimBusy = true;
+  renderTrophyRoad();
+
+  try {
+    for (const reward of rewards) {
+      await claimTrophyReward(world, reward, { batchMode: true });
+      await wait(120);
+    }
+  } finally {
+    trophyWorldBatchClaimBusy = false;
+    renderAll();
+  }
+}
+
+async function claimTrophyCrateRewardInBatch(crate, rewards = []) {
+  await showRewardShowcase({
+    image: crate.image,
+    name: crate.name,
+    countLabel: "Skrzynia z Alei",
+    mode: "crate",
+    autoCloseMs: 1500,
+    soundEffectName: "crateAward",
+  });
+  playOneShotSound("crateOpen", 0.84);
+  incrementOpenedCrateCount(crate.id);
+  saveState();
+  await wait(120);
+  await grantChestRewardsDirect(rewards);
+}
+
+async function claimTrophyReward(world, reward, options = {}) {
+  const batchMode = Boolean(options.batchMode);
+  const hadWinterUnlockRewardClaimed = hasClaimedWinterUnlockReward();
+
   if (isSuperAlleyReward(world.id, reward) && !isSuperAlleyActiveForWorld(world.id)) {
     openSuperAlleyOffer(world.id);
     return;
@@ -2614,6 +3495,12 @@ function claimTrophyReward(world, reward) {
   }
 
   state.claimedTrophyRewards[world.id].push(reward.id);
+  const winterUnlockClaimedNow = !hadWinterUnlockRewardClaimed && hasClaimedWinterUnlockReward();
+
+  if (winterUnlockClaimedNow) {
+    winterWorldRevealPending = true;
+    state.seenWinterWorldIntro = false;
+  }
 
   if (reward.type === "coins") {
     state.coins += reward.amount;
@@ -2626,7 +3513,11 @@ function claimTrophyReward(world, reward) {
 
     if (crate) {
       const preparedSession = createChestSession(crate);
-      void showCrateRewardScene(crate, preparedSession.rewards, preparedSession.chestNumber);
+      if (batchMode) {
+        await claimTrophyCrateRewardInBatch(crate, preparedSession.rewards);
+      } else {
+        void showCrateRewardScene(crate, preparedSession.rewards, preparedSession.chestNumber);
+      }
     }
     return;
   } else if (reward.type === "pet") {
@@ -2643,17 +3534,56 @@ function claimTrophyReward(world, reward) {
   renderAll();
 
   if (reward.type === "pet" || reward.type === "character") {
-    void showAlleyRewardScene(reward);
+    const finishWinterUnlock = async () => {
+      if (!winterUnlockClaimedNow) {
+        return;
+      }
+
+      if (ui.currentView === "trophies") {
+        await wait(140);
+        await playWinterWorldUnlockSequence();
+      }
+    };
+
+    if (batchMode) {
+      await showAlleyRewardScene(reward);
+      await finishWinterUnlock();
+    } else {
+      void Promise.resolve(showAlleyRewardScene(reward)).then(finishWinterUnlock);
+    }
     return;
   }
 
   if (reward.type === "coins") {
-    void showCoinRewardScene(reward.amount, {
-      title: "Monety z Alei",
-      autoCloseMs: 2500,
-    }).then(async () => {
+    if (batchMode) {
+      await showCoinRewardScene(reward.amount, {
+        title: "Monety z Alei",
+        autoCloseMs: 2200,
+      });
       await animateCoinsToBalance();
-    });
+    } else {
+      void showCoinRewardScene(reward.amount, {
+        title: "Monety z Alei",
+        autoCloseMs: 2500,
+      }).then(async () => {
+        await animateCoinsToBalance();
+      });
+    }
+    return;
+  }
+
+  if (reward.type === "diamonds") {
+    if (batchMode) {
+      await showDiamondRewardScene(reward.amount, {
+        title: "Diamenty z Alei",
+        autoCloseMs: 2200,
+      });
+    } else {
+      void showDiamondRewardScene(reward.amount, {
+        title: "Diamenty z Alei",
+        autoCloseMs: 2500,
+      });
+    }
     return;
   }
 
@@ -2680,7 +3610,15 @@ function isTrophyRewardClaimed(worldId, reward) {
 }
 
 function isWorldLockedItem(item) {
-  return Boolean(item && item.unlockWorld);
+  if (!item || !item.unlockWorld) {
+    return false;
+  }
+
+  if (item.unlockWorld === "winter") {
+    return !isWinterWorldUnlocked();
+  }
+
+  return false;
 }
 
 function getTrophyRewardImage(reward) {
@@ -2689,7 +3627,7 @@ function getTrophyRewardImage(reward) {
   }
 
   if (reward.type === "diamonds") {
-    return { src: "", fallbackText: "DIA" };
+    return { src: TROPHY_DIAMOND_IMAGE, fallbackText: "DIAMENTY" };
   }
 
   if (reward.type === "crate") {
@@ -2730,7 +3668,301 @@ function getWorldLockedMessage(item) {
   return "Ten przedmiot odblokujesz w dalszej części Alei Pucharów.";
 }
 
+function setWinterBundleSceneMode(mode = "offer", bundle = activeWinterBundle) {
+  if (
+    !bundle ||
+    !winterBundleScene ||
+    !winterBundleTitle ||
+    !winterBundleCopy ||
+    !winterBundleActions ||
+    !winterBundleImage
+  ) {
+    return;
+  }
+
+  const successMode = mode === "success";
+  winterBundleStage = successMode ? "success" : "offer";
+  winterBundleScene.dataset.theme = "winter";
+  if (winterBundleBackdrop) {
+    winterBundleBackdrop.dataset.theme = "winter";
+  }
+  winterBundleScene.classList.toggle("success-mode", successMode);
+  winterBundleImage.src = bundle.image;
+  winterBundleImage.alt = bundle.name;
+  winterBundleImage.dataset.fallbackText = "PAKIET";
+  const fallback = winterBundleImage.nextElementSibling;
+  if (fallback) {
+    fallback.textContent = "PAKIET";
+  }
+  winterBundleTitle.textContent = successMode ? "Kupiono Pakiet" : "Kup Pakiet Zimowego Świata";
+  winterBundleCopy.textContent = successMode
+    ? "Łyżwiarka Lily i Łyżwiaż Leo trafiaja do zimowej szafy."
+    : "Potwierdz zakup, aby odblokowac Łyżwiarkę Lily i Łyżwiaża Leo.";
+  winterBundleActions.hidden = successMode;
+
+  if (winterBundleConfirmButton) {
+    winterBundleConfirmButton.textContent = "Potwierdz zakup";
+    winterBundleConfirmButton.disabled = winterBundleBusy;
+  }
+}
+
+function openWinterBundlePurchase(bundle) {
+  if (
+    !bundle ||
+    !winterBundleBackdrop ||
+    winterBundleBusy ||
+    isBundleOwned(bundle) ||
+    !hasCompletedMagiciansWorld()
+  ) {
+    return;
+  }
+
+  activeWinterBundle = bundle;
+  winterBundleBusy = false;
+  setWinterBundleSceneMode("offer", bundle);
+  playOneShotSound("superIntro", 0.82);
+  winterBundleBackdrop.hidden = false;
+  syncBrokenAssets(winterBundleBackdrop);
+  syncBackgroundMusic();
+}
+
+function closeWinterBundlePurchase(shouldSyncMusic = true, options = {}) {
+  const keepBundle = Boolean(options.keepBundle);
+  const resetBusy = Object.prototype.hasOwnProperty.call(options, "resetBusy")
+    ? Boolean(options.resetBusy)
+    : true;
+
+  if (!winterBundleBackdrop || !winterBundleScene) {
+    return;
+  }
+
+  winterBundleBackdrop.hidden = true;
+  delete winterBundleBackdrop.dataset.theme;
+  delete winterBundleScene.dataset.theme;
+  winterBundleScene.classList.remove("success-mode");
+  winterBundleStage = "offer";
+
+  if (winterBundleConfirmButton) {
+    winterBundleConfirmButton.disabled = false;
+  }
+
+  if (!keepBundle) {
+    activeWinterBundle = null;
+  }
+
+  if (resetBusy) {
+    winterBundleBusy = false;
+  }
+
+  if (shouldSyncMusic) {
+    syncBackgroundMusic();
+  }
+}
+
+async function confirmWinterBundlePurchase() {
+  if (!activeWinterBundle || !winterBundleBackdrop || winterBundleBusy || winterBundleStage !== "offer") {
+    return;
+  }
+
+  winterBundleBusy = true;
+
+  if (winterBundleConfirmButton) {
+    winterBundleConfirmButton.disabled = true;
+  }
+
+  const bundle = activeWinterBundle;
+  const rewardCharacters = getBundleRewardCharacters(bundle);
+
+  rewardCharacters.forEach((character) => {
+    if (!state.ownedCharacters.includes(character.id)) {
+      state.ownedCharacters.push(character.id);
+    }
+  });
+
+  saveState();
+  playOneShotSound("characterUnlock", 0.8);
+  setWinterBundleSceneMode("success", bundle);
+  syncBrokenAssets(winterBundleBackdrop);
+  await wait(2800);
+  closeWinterBundlePurchase(false, { keepBundle: true, resetBusy: false });
+  await showBundleUnlockScene(rewardCharacters);
+  activeWinterBundle = null;
+  winterBundleBusy = false;
+  renderAll();
+  syncBackgroundMusic();
+}
+
+function showBundleUnlockScene(characters = []) {
+  if (
+    characters.length < 2 ||
+    !bundleUnlockBackdrop ||
+    !bundleUnlockCard ||
+    !bundleUnlockImageLeft ||
+    !bundleUnlockImageRight ||
+    !bundleUnlockNameLeft ||
+    !bundleUnlockNameRight
+  ) {
+    return Promise.resolve();
+  }
+
+  closeBundleUnlockScene();
+  const [leftCharacter, rightCharacter] = characters;
+
+  bundleUnlockImageLeft.src = leftCharacter.image;
+  bundleUnlockImageLeft.alt = leftCharacter.name;
+  bundleUnlockImageLeft.dataset.fallbackText = leftCharacter.name;
+  bundleUnlockNameLeft.textContent = leftCharacter.name;
+
+  bundleUnlockImageRight.src = rightCharacter.image;
+  bundleUnlockImageRight.alt = rightCharacter.name;
+  bundleUnlockImageRight.dataset.fallbackText = rightCharacter.name;
+  bundleUnlockNameRight.textContent = rightCharacter.name;
+
+  bundleUnlockBackdrop.hidden = false;
+  bundleUnlockCard.classList.remove("show");
+  void bundleUnlockCard.offsetWidth;
+  bundleUnlockCard.classList.add("show");
+  syncBrokenAssets(bundleUnlockBackdrop);
+
+  return new Promise((resolve) => {
+    bundleUnlockResolve = resolve;
+    bundleUnlockTimer = window.setTimeout(() => {
+      closeBundleUnlockScene();
+    }, 3400);
+  });
+}
+
+function closeBundleUnlockScene() {
+  if (bundleUnlockTimer) {
+    window.clearTimeout(bundleUnlockTimer);
+    bundleUnlockTimer = null;
+  }
+
+  if (!bundleUnlockBackdrop || !bundleUnlockCard) {
+    return;
+  }
+
+  bundleUnlockBackdrop.hidden = true;
+  bundleUnlockCard.classList.remove("show");
+
+  if (typeof bundleUnlockResolve === "function") {
+    const resolve = bundleUnlockResolve;
+    bundleUnlockResolve = null;
+    resolve();
+  }
+
+  syncBackgroundMusic();
+}
+
+function setStoreCharacterPurchaseScene(item = activeStoreCharacterPurchase) {
+  if (
+    !item ||
+    !storeCharacterPurchaseScene ||
+    !storeCharacterPurchaseArtFrame ||
+    !storeCharacterPurchaseTitle ||
+    !storeCharacterPurchaseCopy ||
+    !storeCharacterPurchaseActions ||
+    !storeCharacterPurchaseMissing
+  ) {
+    return;
+  }
+
+  const worldTheme = getStoreCharacterWorldTheme(item);
+  const missingCoins = Math.max(0, Number(item.price || 0) - state.coins);
+  const canAfford = missingCoins === 0;
+
+  if (worldTheme.id === "winter") {
+    storeCharacterPurchaseScene.dataset.theme = "winter";
+    if (storeCharacterPurchaseBackdrop) {
+      storeCharacterPurchaseBackdrop.dataset.theme = "winter";
+    }
+  } else {
+    delete storeCharacterPurchaseScene.dataset.theme;
+    if (storeCharacterPurchaseBackdrop) {
+      delete storeCharacterPurchaseBackdrop.dataset.theme;
+    }
+  }
+
+  renderPreviewAssetIntoFrame(storeCharacterPurchaseArtFrame, item, {
+    elementId: "store-character-purchase-image",
+    imageClass: "modal-image asset-image",
+    videoClass: "modal-image asset-video",
+    fallbackText: item.name,
+    alt: item.name,
+  });
+
+  storeCharacterPurchaseTitle.textContent = item.name;
+  storeCharacterPurchaseCopy.textContent = "Potwierdz zakup tej postaci.";
+  storeCharacterPurchaseActions.hidden = !canAfford;
+  storeCharacterPurchaseMissing.hidden = canAfford;
+  storeCharacterPurchaseMissing.textContent = `Brakuje ci ${missingCoins} monet.`;
+
+  if (storeCharacterPurchaseConfirmButton) {
+    storeCharacterPurchaseConfirmButton.disabled = storeCharacterPurchaseBusy;
+    storeCharacterPurchaseConfirmButton.textContent = "Potwierdz zakup";
+  }
+}
+
+function openStoreCharacterPurchase(item) {
+  if (!item || !storeCharacterPurchaseBackdrop || storeCharacterPurchaseBusy) {
+    return;
+  }
+
+  activeStoreCharacterPurchase = item;
+  storeCharacterPurchaseBusy = false;
+  setStoreCharacterPurchaseScene(item);
+  storeCharacterPurchaseBackdrop.hidden = false;
+  syncBrokenAssets(storeCharacterPurchaseBackdrop);
+  syncAnimatedAssets(storeCharacterPurchaseBackdrop);
+}
+
+function closeStoreCharacterPurchase() {
+  if (!storeCharacterPurchaseBackdrop || !storeCharacterPurchaseScene) {
+    return;
+  }
+
+  storeCharacterPurchaseBackdrop.hidden = true;
+  delete storeCharacterPurchaseBackdrop.dataset.theme;
+  delete storeCharacterPurchaseScene.dataset.theme;
+  activeStoreCharacterPurchase = null;
+  storeCharacterPurchaseBusy = false;
+
+  if (storeCharacterPurchaseConfirmButton) {
+    storeCharacterPurchaseConfirmButton.disabled = false;
+  }
+}
+
+async function confirmStoreCharacterPurchase() {
+  if (
+    !activeStoreCharacterPurchase ||
+    !storeCharacterPurchaseBackdrop ||
+    storeCharacterPurchaseBackdrop.hidden ||
+    storeCharacterPurchaseBusy
+  ) {
+    return;
+  }
+
+  if (state.coins < activeStoreCharacterPurchase.price) {
+    setStoreCharacterPurchaseScene(activeStoreCharacterPurchase);
+    return;
+  }
+
+  storeCharacterPurchaseBusy = true;
+  if (storeCharacterPurchaseConfirmButton) {
+    storeCharacterPurchaseConfirmButton.disabled = true;
+  }
+
+  const item = activeStoreCharacterPurchase;
+  closeStoreCharacterPurchase();
+  buyItem("characters", item);
+}
+
 function buyCashUnlock(kind, item) {
+  if (kind === "bundles") {
+    openWinterBundlePurchase(item);
+    return;
+  }
+
   openModal({
     title: item.name,
     message: "Autoryzowanie transakcji...",
@@ -2750,7 +3982,8 @@ function buyCashUnlock(kind, item) {
       dismissible: false,
       image: item.image,
       imageAlt: item.name,
-      onConfirm: () => {
+      onConfirm: async () => {
+        modalConfirm.disabled = true;
         closeModal();
         buyItem(kind, { ...item, price: 0 });
       },
@@ -2818,8 +4051,8 @@ function buyTrophyPack(item) {
 
 async function buyDiamondCratePack(packId) {
   const packs = {
-    "crate-pack-1": { amount: 1, price: 6000 },
-    "crate-pack-2": { amount: 2, price: 11000 },
+    "crate-pack-1": { amount: 1, price: 20 },
+    "crate-pack-2": { amount: 2, price: 35 },
   };
   const pack = packs[packId];
   const crate = CATALOG.crates.find((entry) => entry.id === "drewniana-skrzynia");
@@ -2828,10 +4061,10 @@ async function buyDiamondCratePack(packId) {
     return;
   }
 
-  if (state.coins < pack.price) {
+  if (state.diamonds < pack.price) {
     openModal({
-      title: "Za malo monet",
-      message: "Nie masz teraz tylu monet, zeby kupic te paczke skrzyn.",
+      title: "Za malo diamentow",
+      message: "Nie masz teraz tylu diamentow, zeby kupic te paczke skrzyn.",
       buttonText: "OK",
       dismissible: true,
       onConfirm: closeModal,
@@ -2839,7 +4072,7 @@ async function buyDiamondCratePack(packId) {
     return;
   }
 
-  state.coins -= pack.price;
+  state.diamonds -= pack.price;
   saveState();
   renderAll();
 
@@ -3227,6 +4460,7 @@ function closeModal() {
 function showRewardShowcase({
   image,
   name,
+  previewVideo = "",
   countLabel = "",
   mode = "default",
   autoCloseMs = 2800,
@@ -3239,17 +4473,30 @@ function showRewardShowcase({
   }
 
   if (soundEffectName) {
-    playOneShotSound(soundEffectName, mode === "coin" ? 0.82 : 0.8);
+    playOneShotSound(soundEffectName, mode === "coin" || mode === "diamond" ? 0.82 : 0.8);
   }
 
   closeAlleyRewardScene();
   alleyRewardBackdrop.classList.toggle("coin-mode", mode === "coin");
+  alleyRewardBackdrop.classList.toggle("diamond-mode", mode === "diamond");
   alleyRewardBackdrop.classList.toggle("trophy-mode", mode === "trophy");
   alleyRewardBackdrop.classList.toggle("payment-mode", mode === "payment");
   alleyRewardBackdrop.classList.toggle("crate-mode", mode === "crate");
-  alleyRewardImage.src = image;
-  alleyRewardImage.alt = name;
-  alleyRewardImage.classList.remove("broken");
+  renderPreviewAssetIntoFrame(
+    alleyRewardArtFrame,
+    {
+      image,
+      name,
+      previewVideo,
+    },
+    {
+      elementId: "alley-reward-image",
+      imageClass: "modal-image asset-image",
+      videoClass: "modal-image asset-video",
+      fallbackText: name,
+      alt: name,
+    },
+  );
   alleyRewardName.textContent = name;
   alleyRewardCount.textContent = countLabel;
   alleyRewardCount.hidden = !countLabel;
@@ -3268,6 +4515,7 @@ function showRewardShowcase({
     alleyRewardCard.classList.add("show");
   }
   syncBrokenAssets(alleyRewardBackdrop);
+  syncAnimatedAssets(alleyRewardBackdrop);
 
   return new Promise((resolve) => {
     alleyRewardResolve = resolve;
@@ -3309,6 +4557,7 @@ function showAlleyRewardScene(reward) {
   return showRewardShowcase({
     image: item.image,
     name: item.name,
+    previewVideo: item.previewVideo || "",
     soundEffectName:
       reward.type === "pet"
         ? getPetVoiceEffect(item.id)
@@ -3327,6 +4576,20 @@ function showCoinRewardScene(amount, options = {}) {
     name: title,
     countLabel: `+${amount} monet`,
     mode: "coin",
+    autoCloseMs,
+    soundEffectName: "coins",
+  });
+}
+
+function showDiamondRewardScene(amount, options = {}) {
+  const title = options.title || "Diamenty z Alei";
+  const autoCloseMs = options.autoCloseMs || 2500;
+
+  return showRewardShowcase({
+    image: TROPHY_DIAMOND_IMAGE,
+    name: title,
+    countLabel: `+${amount} diamenty`,
+    mode: "diamond",
     autoCloseMs,
     soundEffectName: "coins",
   });
@@ -3379,6 +4642,7 @@ function closeAlleyRewardScene() {
   }
 
   alleyRewardBackdrop.classList.remove("coin-mode");
+  alleyRewardBackdrop.classList.remove("diamond-mode");
   alleyRewardBackdrop.classList.remove("trophy-mode");
   alleyRewardBackdrop.classList.remove("payment-mode");
   alleyRewardBackdrop.classList.remove("crate-mode");
@@ -3524,10 +4788,8 @@ async function grantChestRewardsDirect(rewards = []) {
 
     if (reward.type === "diamonds") {
       applyChestReward(reward);
-      await showRewardShowcase({
-        image: reward.image || "./monety_1.png",
-        name: reward.title || "Diamenty",
-        countLabel: reward.countLabel || `+${reward.amount}`,
+      await showDiamondRewardScene(reward.amount, {
+        title: reward.title || "Diamenty ze skrzyni",
         autoCloseMs: 2500,
       });
       continue;
@@ -3537,6 +4799,7 @@ async function grantChestRewardsDirect(rewards = []) {
     await showRewardShowcase({
       image: reward.image,
       name: reward.title,
+      previewVideo: reward.item?.previewVideo || "",
       countLabel: reward.countLabel || "Nagroda ze skrzyni",
       autoCloseMs: 2300,
       soundEffectName:
@@ -3807,7 +5070,12 @@ function resetGameSession() {
   game.touch.firePointerId = null;
   game.pet.x = game.player.x + 70;
   game.pet.y = game.player.y + 36;
-  game.petPack = createBalloonDogPack();
+  game.petPack = [];
+
+  if (getEquippedPet()?.id === "sniezynka") {
+    game.pet.shieldCooldownMs = GAME_RULES.snowflakeShieldCooldownMs;
+  }
+
   updateTouchJoystickVisual(0, 0);
 
   if (touchFireButton) {
@@ -3901,27 +5169,6 @@ function refreshAmmoConfig() {
   }
 }
 
-function createBalloonDogPack() {
-  const pet = getEquippedPet();
-
-  if (!pet || pet.id !== "dmuchany-pies") {
-    return [];
-  }
-
-  return [createBalloonDog(game.player.x + 70, game.player.y + 34)];
-}
-
-function createBalloonDog(x, y) {
-  return {
-    id: `balloon-${Math.random().toString(36).slice(2, 9)}`,
-    x,
-    y,
-    hp: GAME_RULES.balloonDogHp,
-    attackTimer: 0,
-    targetId: null,
-  };
-}
-
 function updateGameBounds() {
   const rect = gameMap.getBoundingClientRect();
   game.width = rect.width;
@@ -3983,7 +5230,7 @@ function handleGameKey(event, isPressed) {
 
   const key = event.key;
 
-  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " ", "a", "A", "s", "S"].includes(key)) {
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " ", "a", "A", "s", "S", "w", "W"].includes(key)) {
     event.preventDefault();
   }
 
@@ -3997,6 +5244,8 @@ function handleGameKey(event, isPressed) {
     game.keys.right = isPressed;
   } else if (key === " ") {
     game.keys.fire = isPressed;
+  } else if (isPressed && (key === "w" || key === "W")) {
+    tryActivateOwlAbility();
   } else if (isPressed && (key === "a" || key === "A")) {
     setCatMode("a");
   } else if (isPressed && (key === "s" || key === "S")) {
@@ -4016,6 +5265,10 @@ function resetGameKeys() {
 }
 
 function updatePlayerMovement(deltaSeconds) {
+  if (isOwlShieldActive()) {
+    return;
+  }
+
   let dx = 0;
   let dy = 0;
 
@@ -4287,11 +5540,8 @@ function updateRobots(deltaSeconds) {
       return;
     }
 
-    const targetDog = getNearestBalloonDog(robot.x, robot.y);
-    const targetX = targetDog ? targetDog.x : game.player.x;
-    const targetY = targetDog ? targetDog.y : game.player.y;
-    const dx = targetX - robot.x;
-    const dy = targetY - robot.y;
+    const dx = game.player.x - robot.x;
+    const dy = game.player.y - robot.y;
     const distance = Math.hypot(dx, dy) || 1;
     const moveSpeed =
       robot.speed * fieldEffect.speedMultiplier * getRobotSlowMultiplier(robot);
@@ -4308,11 +5558,7 @@ function updateRobots(deltaSeconds) {
 
     while (robot.attackTimer >= 0.1) {
       robot.attackTimer -= 0.1;
-      if (targetDog) {
-        damageBalloonDog(targetDog, contactDamage);
-      } else {
-        damagePlayer(contactDamage);
-      }
+      damagePlayer(contactDamage);
     }
   });
 }
@@ -4339,6 +5585,8 @@ function updateProjectiles(deltaSeconds) {
     if (distance <= step + 20) {
       if (projectile.kind === "papuga") {
         stunRobot(target, GAME_RULES.parrotStunDurationMs);
+      } else if (projectile.kind === "polar-bear-shot") {
+        damageRobot(target, GAME_RULES.polarBearProjectileDamage, "niedzwiedz-polarny");
       } else if (projectile.kind === "lpsotka") {
         damageRobot(target, 150, "l-psotka");
 
@@ -4380,8 +5628,26 @@ function updatePet(deltaSeconds, deltaMs) {
     return;
   }
 
+  if (pet.id === "niedzwiedz-polarny") {
+    updatePolarBearPet(deltaSeconds, deltaMs);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
   if (pet.id === "kot-roslina") {
     updateCatPet(deltaSeconds, deltaMs);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === "sniezynka") {
+    updateSnowflakePet(deltaSeconds, deltaMs);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === "sowa") {
+    updateOwlPet(deltaSeconds, deltaMs);
     game.hadActiveRobots = hasRobots;
     return;
   }
@@ -4424,12 +5690,6 @@ function updatePet(deltaSeconds, deltaMs) {
 
   if (pet.id === "krab-syrena") {
     updateCrabPet(deltaSeconds, deltaMs);
-    game.hadActiveRobots = hasRobots;
-    return;
-  }
-
-  if (pet.id === "dmuchany-pies") {
-    updateBalloonDogPack(deltaSeconds, hasRobots);
     game.hadActiveRobots = hasRobots;
     return;
   }
@@ -4487,6 +5747,40 @@ function updateDogPet(deltaSeconds) {
   }
 }
 
+function firePolarBearShot() {
+  const target = findNearestRobot(game.pet.x, game.pet.y);
+
+  if (!target) {
+    return;
+  }
+
+  spawnProjectile({
+    x: game.pet.x,
+    y: game.pet.y - 10,
+    targetId: target.id,
+    kind: "polar-bear-shot",
+  });
+}
+
+function updatePolarBearPet(deltaSeconds, deltaMs) {
+  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+  game.pet.castTimerMsSecondary += deltaMs;
+
+  if (game.pet.castTimerMs > 0) {
+    game.pet.castTimerMs = Math.max(0, game.pet.castTimerMs - deltaMs);
+
+    if (game.pet.castTimerMs === 0) {
+      firePolarBearShot();
+    }
+  }
+
+  while (game.pet.castTimerMsSecondary >= GAME_RULES.polarBearCastIntervalMs) {
+    game.pet.castTimerMsSecondary -= GAME_RULES.polarBearCastIntervalMs;
+    firePolarBearShot();
+    game.pet.castTimerMs = GAME_RULES.polarBearSecondShotDelayMs;
+  }
+}
+
 function updateCatPet(deltaSeconds, deltaMs) {
   updateCatShield(deltaMs);
 
@@ -4511,6 +5805,11 @@ function updateCatPet(deltaSeconds, deltaMs) {
     game.pet.healTimerMs -= GAME_RULES.catHealIntervalMs;
     healPlayer(GAME_RULES.catHealAmount);
   }
+}
+
+function updateSnowflakePet(deltaSeconds, deltaMs) {
+  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+  updateSnowflakeShield(deltaMs);
 }
 
 function updateCrabPet(deltaSeconds, deltaMs) {
@@ -4692,105 +5991,6 @@ function updateOlympianPet(deltaSeconds, deltaMs) {
   }
 }
 
-function updateBalloonDogPack(deltaSeconds, hasRobots) {
-  if (!Array.isArray(game.petPack)) {
-    game.petPack = [];
-  }
-
-  const baseX = game.player.x + 70;
-  const baseY = game.player.y + 34;
-
-  if (!hasRobots) {
-    if (game.hadActiveRobots && game.petPack.length < GAME_RULES.balloonDogMaxCount) {
-      const targetCount = Math.min(
-        GAME_RULES.balloonDogMaxCount,
-        Math.max(2, game.petPack.length * 2)
-      );
-
-      while (game.petPack.length < targetCount) {
-        game.petPack.push(createBalloonDog(baseX, baseY));
-      }
-    }
-
-    game.petPack.forEach((dog, index) => {
-      dog.targetId = null;
-      dog.attackTimer = 0;
-      moveBalloonDogTowards(dog, getPackIdlePosition(index), deltaSeconds);
-    });
-
-    return;
-  }
-
-  game.petPack.forEach((dog) => {
-    let target = game.robots.find((robot) => robot.id === dog.targetId && !robot.dead);
-
-    if (!target) {
-      target = findNearestRobot(dog.x, dog.y);
-      dog.targetId = target ? target.id : null;
-    }
-
-    if (!target) {
-      return;
-    }
-
-    const dx = target.x - dog.x;
-    const dy = target.y - dog.y;
-    const distance = Math.hypot(dx, dy) || 1;
-
-    if (distance > 58) {
-      const step = GAME_RULES.dogSpeed * GAME_RULES.balloonDogSpeedMultiplier * deltaSeconds;
-      dog.x += (dx / distance) * step;
-      dog.y += (dy / distance) * step;
-      dog.attackTimer = 0;
-      return;
-    }
-
-    dog.attackTimer += deltaSeconds;
-
-    while (dog.attackTimer >= 1) {
-      dog.attackTimer -= 1;
-      damageRobot(target, GAME_RULES.balloonDogDamagePerSecond, "dmuchany-pies");
-
-      if (target.dead) {
-        const nextTarget = findNearestRobot(dog.x, dog.y);
-        dog.targetId = nextTarget ? nextTarget.id : null;
-        target = nextTarget;
-
-        if (!target) {
-          dog.attackTimer = 0;
-          break;
-        }
-      }
-    }
-  });
-
-}
-
-function moveBalloonDogTowards(dog, target, deltaSeconds) {
-  const dx = target.x - dog.x;
-  const dy = target.y - dog.y;
-  const distance = Math.hypot(dx, dy) || 1;
-
-  if (distance < 6) {
-    dog.x = target.x;
-    dog.y = target.y;
-    return;
-  }
-
-  const step = GAME_RULES.dogSpeed * GAME_RULES.balloonDogSpeedMultiplier * deltaSeconds;
-  dog.x += (dx / distance) * Math.min(step, distance);
-  dog.y += (dy / distance) * Math.min(step, distance);
-}
-
-function getPackIdlePosition(index) {
-  const row = Math.floor(index / 3);
-  const column = index % 3;
-  return {
-    x: game.player.x + 58 + column * 32,
-    y: game.player.y + 24 + row * 28,
-  };
-}
-
 function movePetTowards(targetX, targetY, deltaSeconds) {
   movePetTowardsWithSpeed(
     targetX,
@@ -4821,25 +6021,16 @@ function damagePlayer(amount) {
     return;
   }
 
+  if (isSnowflakeShieldActive() || isOwlShieldActive()) {
+    return;
+  }
+
   const reducedAmount = isCatShieldActive()
     ? Math.max(1, Math.round(amount * (1 - GAME_RULES.catShieldDamageReduction)))
     : amount;
 
   game.player.hp = Math.max(0, game.player.hp - reducedAmount);
   spawnFloatingText(game.player.x, game.player.y - 120, `-${reducedAmount}`, "hit");
-}
-
-function damageBalloonDog(dog, amount) {
-  if (!dog) {
-    return;
-  }
-
-  dog.hp = Math.max(0, dog.hp - amount);
-  spawnFloatingText(dog.x, dog.y - 92, `-${amount}`, "hit");
-
-  if (dog.hp <= 0) {
-    game.petPack = game.petPack.filter((entry) => entry.id !== dog.id);
-  }
 }
 
 function awardCoins(amount) {
@@ -5123,26 +6314,6 @@ function findNearestRobot(x, y) {
   return nearest;
 }
 
-function getNearestBalloonDog(x, y) {
-  if (getEquippedPet()?.id !== "dmuchany-pies" || game.petPack.length === 0) {
-    return null;
-  }
-
-  let nearest = null;
-  let nearestDistance = Infinity;
-
-  game.petPack.forEach((dog) => {
-    const distance = Math.hypot(dog.x - x, dog.y - y);
-
-    if (distance < nearestDistance) {
-      nearest = dog;
-      nearestDistance = distance;
-    }
-  });
-
-  return nearest;
-}
-
 function getEquippedPet() {
   return getOwnedItem("pets", state.equippedPet);
 }
@@ -5283,6 +6454,11 @@ function playProjectileSound(projectile) {
     return;
   }
 
+  if (visual.src === "./atak_nora.png") {
+    playOneShotSound("shotNora", 1, 3);
+    return;
+  }
+
   if (visual.src === "./atak_5.png") {
     playOneShotSound("shot4", 0.55);
   }
@@ -5309,6 +6485,10 @@ function getPlayerProjectileKind(ammoIndex) {
     return "millo-elfie-shot";
   }
 
+  if (character?.id === "nora") {
+    return "nora-shot";
+  }
+
   if (
     character?.id === "linda" ||
     character?.id === "roslinna-krolowa-linda" ||
@@ -5318,11 +6498,18 @@ function getPlayerProjectileKind(ammoIndex) {
     return "linda-shot";
   }
 
-  if (character?.id === "lily") {
+  if (
+    character?.id === "lily" ||
+    character?.id === "leo" ||
+    character?.id === "leo-skoczek-narciarski" ||
+    character?.id === "lyzwiarka-lily" ||
+    character?.id === "lyzwiarz-leo" ||
+    character?.id === "mistrzyni-lyzwiarstwa-lily"
+  ) {
     return "lily-shot";
   }
 
-  if (character?.id === "tricky") {
+  if (character?.id === "tricky" || character?.id === "tricky-renifer") {
     return "tricky-shot";
   }
 
@@ -5379,6 +6566,24 @@ function getPetCooldownState() {
     };
   }
 
+  if (pet.id === "sniezynka") {
+    return {
+      progress: game.pet.shieldActive
+        ? clamp(game.pet.shieldTimerMs / GAME_RULES.snowflakeShieldDurationMs, 0, 1)
+        : clamp(1 - (game.pet.shieldCooldownMs / GAME_RULES.snowflakeShieldCooldownMs), 0, 1),
+      kind: "sniezynka",
+    };
+  }
+
+  if (pet.id === "sowa") {
+    return {
+      progress: game.pet.shieldActive
+        ? clamp(game.pet.shieldTimerMs / GAME_RULES.owlShieldDurationMs, 0, 1)
+        : clamp(1 - (game.pet.shieldCooldownMs / GAME_RULES.owlShieldCooldownMs), 0, 1),
+      kind: "sowa",
+    };
+  }
+
   return null;
 }
 
@@ -5428,8 +6633,14 @@ function renderGameScene() {
   playerEntity.style.left = `${game.player.x}px`;
   playerEntity.style.top = `${game.player.y}px`;
   playerHealthLabel.textContent = `${Math.ceil(game.player.hp)} pz`;
-  playerShield.hidden = !isCatShieldActive();
-  playerShield.classList.toggle("blinking", isCatShieldActive() && game.pet.shieldTimerMs <= 2000);
+  const winterShieldActive = isSnowflakeShieldActive() || isOwlShieldActive();
+  playerShield.hidden = !isCatShieldActive() && !winterShieldActive;
+  playerShield.dataset.kind = winterShieldActive ? "winter" : "default";
+  playerShield.classList.toggle(
+    "blinking",
+    (isCatShieldActive() && game.pet.shieldTimerMs <= 2000) ||
+      (winterShieldActive && game.pet.shieldTimerMs <= 800)
+  );
 
   ammoFills.forEach((fill, index) => {
     fill.style.transform = `scaleX(${clamp(game.ammo[index] ?? 0, 0, 1)})`;
@@ -5438,7 +6649,7 @@ function renderGameScene() {
   const pet = getEquippedPet();
   const petCooldownState = getPetCooldownState();
 
-  if (pet && pet.id !== "dmuchany-pies") {
+  if (pet) {
     gamePetEntity.hidden = false;
     gamePetEntity.style.left = `${game.pet.x}px`;
     gamePetEntity.style.top = `${game.pet.y}px`;
@@ -5450,29 +6661,7 @@ function renderGameScene() {
     gamePetEntity.hidden = true;
     petCooldownBar.hidden = true;
     petCooldownBar.dataset.kind = "";
-  }
-
-  if (pet && pet.id === "dmuchany-pies") {
-    petPackLayer.innerHTML = game.petPack
-      .map(
-        (dog) => `
-          <div class="pet-entity" style="left:${dog.x}px; top:${dog.y}px;">
-            <p class="robot-health">${dog.hp} pz</p>
-            <div class="pet-sprite-frame">
-              <img
-                class="entity-image asset-image"
-                src="${pet.image}"
-                alt="${pet.name}"
-                data-fallback-text="${pet.name}"
-              />
-              <div class="asset-fallback">${pet.name}</div>
-            </div>
-          </div>
-        `
-      )
-      .join("");
-  } else {
-    petPackLayer.innerHTML = "";
+    delete playerShield.dataset.kind;
   }
 
   barriersLayer.innerHTML = game.barriers
@@ -5528,7 +6717,7 @@ function renderGameScene() {
         const visual = getProjectileVisual(projectile);
         return `
         <div class="projectile" style="left:${projectile.x}px; top:${projectile.y}px;">
-          <div class="projectile-shell${projectile.kind === "snake-shot" ? " snake-shot" : projectile.kind === "elfie-shot" ? " elfie-shot" : projectile.kind === "millo-elfie-shot" ? " millo-elfie-shot" : projectile.kind === "lpsotka" ? " lpsotka-shot" : projectile.kind === "linda-shot" ? " linda-shot" : projectile.kind === "lily-shot" ? " lily-shot" : projectile.kind === "tricky-shot" ? " tricky-shot" : ""}">
+          <div class="projectile-shell${projectile.kind === "snake-shot" ? " snake-shot" : projectile.kind === "elfie-shot" ? " elfie-shot" : projectile.kind === "millo-elfie-shot" ? " millo-elfie-shot" : projectile.kind === "lpsotka" ? " lpsotka-shot" : projectile.kind === "linda-shot" ? " linda-shot" : projectile.kind === "lily-shot" ? " lily-shot" : projectile.kind === "nora-shot" ? " nora-shot" : projectile.kind === "polar-bear-shot" ? " polar-bear-shot" : projectile.kind === "tricky-shot" ? " tricky-shot" : ""}">
             <img
               class="projectile-image asset-image"
               src="${visual.src}"
@@ -5550,9 +6739,13 @@ function renderGameScene() {
 function showGameResult() {
   const character = getOwnedItem("characters", state.equippedCharacter) || CATALOG.characters[0];
   const resultSoundEffect = getGameResultSoundEffect(game.resultStatus);
-  gameResultImage.src = character.image;
-  gameResultImage.alt = character.name;
-  gameResultImage.classList.remove("broken");
+  renderPreviewAssetIntoFrame(gameResultAvatarFrame, character, {
+    elementId: "game-result-image",
+    imageClass: "avatar-image asset-image",
+    videoClass: "avatar-image asset-video",
+    fallbackText: "POSTAC",
+    alt: character.name,
+  });
   gameResultStatus.textContent = game.resultStatus || "Koniec rundy";
   gameResultNote.textContent = game.resultNote || "Twoje statystyki z tej rundy.";
   gameResultWave.textContent = "0";
@@ -5698,6 +6891,11 @@ function isCatShieldActive() {
   return Boolean(pet && pet.id === "kot-roslina" && getCatMode() === "s" && game.pet.shieldActive);
 }
 
+function isSnowflakeShieldActive() {
+  const pet = getEquippedPet();
+  return Boolean(pet && pet.id === "sniezynka" && game.pet.shieldActive);
+}
+
 function updateCatShield(deltaMs) {
   if (game.pet.shieldActive) {
     game.pet.shieldTimerMs = Math.max(0, game.pet.shieldTimerMs - deltaMs);
@@ -5722,6 +6920,81 @@ function updateCatShield(deltaMs) {
     game.pet.shieldActive = true;
     game.pet.shieldTimerMs = GAME_RULES.catShieldDurationMs;
   }
+}
+
+function updateSnowflakeShield(deltaMs) {
+  if (game.pet.shieldActive) {
+    game.pet.shieldTimerMs = Math.max(0, game.pet.shieldTimerMs - deltaMs);
+
+    if (game.pet.shieldTimerMs === 0) {
+      game.pet.shieldActive = false;
+      game.pet.shieldCooldownMs = GAME_RULES.snowflakeShieldCooldownMs;
+    }
+
+    return;
+  }
+
+  if (game.pet.shieldCooldownMs > 0) {
+    game.pet.shieldCooldownMs = Math.max(0, game.pet.shieldCooldownMs - deltaMs);
+  }
+
+  if (game.pet.shieldCooldownMs === 0) {
+    game.pet.shieldActive = true;
+    game.pet.shieldTimerMs = GAME_RULES.snowflakeShieldDurationMs;
+  }
+}
+
+function isOwlShieldActive() {
+  const pet = getEquippedPet();
+  return Boolean(pet && pet.id === "sowa" && game.pet.shieldActive);
+}
+
+function tryActivateOwlAbility() {
+  const pet = getEquippedPet();
+
+  if (
+    !pet ||
+    pet.id !== "sowa" ||
+    game.pet.shieldActive ||
+    game.pet.shieldCooldownMs > 0 ||
+    ui.currentView !== "game" ||
+    !game.active
+  ) {
+    return;
+  }
+
+  game.pet.shieldActive = true;
+  game.pet.shieldTimerMs = GAME_RULES.owlShieldDurationMs;
+  game.pet.shieldCooldownMs = 0;
+  syncWalkingLoop();
+}
+
+function updateOwlShield(deltaMs) {
+  if (game.pet.shieldActive) {
+    game.pet.shieldTimerMs = Math.max(0, game.pet.shieldTimerMs - deltaMs);
+
+    if (game.pet.shieldTimerMs === 0) {
+      game.pet.shieldActive = false;
+      game.pet.shieldCooldownMs = GAME_RULES.owlShieldCooldownMs;
+
+      if (game.player.hp < GAME_RULES.playerMaxHp) {
+        healPlayer(GAME_RULES.owlHealAmount);
+      }
+
+      syncWalkingLoop();
+    }
+
+    return;
+  }
+
+  if (game.pet.shieldCooldownMs > 0) {
+    game.pet.shieldCooldownMs = Math.max(0, game.pet.shieldCooldownMs - deltaMs);
+  }
+}
+
+function updateOwlPet(deltaSeconds, deltaMs) {
+  updateOwlShield(deltaMs);
+  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
 }
 
 function updateCatAttackMode(deltaSeconds, deltaMs) {
@@ -5796,6 +7069,27 @@ function renderGameModeInfo() {
       gameModeInfo.textContent = game.player.hp < getPlayerMaxHp()
         ? "Małpka Jasnoksiężnik: po walce wróci do ciebie i leczy cię o 200 pz na sekundę."
         : "Małpka Jasnoksiężnik: skacze po najbliższych robotach i zadaje 200 pz na sekundę.";
+      return;
+    }
+
+    if (pet && pet.id === "niedzwiedz-polarny") {
+      gameModeInfo.textContent = "Niedźwiedź Polarny: co 4 s wypuszcza dwa strzaly po 50 pz z opoznieniem 0,5 s.";
+      return;
+    }
+
+    if (pet && pet.id === "sniezynka") {
+      gameModeInfo.textContent = game.pet.shieldActive
+        ? `Śnieżynka: zimowa tarcza aktywna jeszcze ${(game.pet.shieldTimerMs / 1000).toFixed(1)} s.`
+        : `Śnieżynka: kolejna zimowa tarcza za ${(game.pet.shieldCooldownMs / 1000).toFixed(1)} s.`;
+      return;
+    }
+
+    if (pet && pet.id === "sowa") {
+      gameModeInfo.textContent = game.pet.shieldActive
+        ? `Sowa: tarcza aktywna jeszcze ${(game.pet.shieldTimerMs / 1000).toFixed(1)} s. Po niej odzyskasz 20% zycia.`
+        : game.pet.shieldCooldownMs > 0
+          ? `Sowa: moc laduje sie ${(game.pet.shieldCooldownMs / 1000).toFixed(1)} s.`
+          : "Sowa: wcisnij W, aby na 3 s zatrzymac ruch, wlaczyc tarcze i odzyskac 20% zycia.";
       return;
     }
 
@@ -5880,6 +7174,34 @@ function syncBrokenAssets(scope) {
   });
 }
 
+function syncAnimatedAssets(scope) {
+  scope.querySelectorAll(".asset-video").forEach((video) => {
+    video.defaultMuted = true;
+    video.muted = true;
+    video.loop = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.addEventListener("error", () => {
+      video.classList.add("broken");
+    }, { once: true });
+
+    const startPlayback = () => {
+      video.classList.remove("broken");
+      const playAttempt = video.play();
+      if (playAttempt && typeof playAttempt.catch === "function") {
+        playAttempt.catch(() => {});
+      }
+    };
+
+    if (video.readyState >= 2) {
+      startPlayback();
+      return;
+    }
+
+    video.addEventListener("loadeddata", startPlayback, { once: true });
+  });
+}
+
 function getProjectileVisual(projectile) {
   if (projectile.kind && projectile.kind.startsWith("papuga")) {
     return { src: "./atak_2.png", alt: "Gwiazdy papugi", fallbackText: "GWIAZDY" };
@@ -5902,11 +7224,56 @@ function getProjectileVisual(projectile) {
   }
 
   if (projectile.kind === "lily-shot") {
-    return { src: "./atak_4.png", alt: "Atak Lily", fallbackText: "LILY" };
+    const equippedCharacter = getEquippedCharacter();
+    const isLeoVariant =
+      equippedCharacter?.id === "leo" ||
+      equippedCharacter?.id === "leo-skoczek-narciarski" ||
+      equippedCharacter?.id === "lyzwiarz-leo";
+    const isLilySkaterVariant = equippedCharacter?.id === "lyzwiarka-lily";
+    const isLilyMasterVariant = equippedCharacter?.id === "mistrzyni-lyzwiarstwa-lily";
+    const isSkiJumperVariant = equippedCharacter?.id === "leo-skoczek-narciarski";
+    const isSkaterLeoVariant = equippedCharacter?.id === "lyzwiarz-leo";
+    return {
+      src: "./atak_4.png",
+      alt: isSkiJumperVariant
+        ? "Atak Leo Skoczek Narciarski"
+        : isSkaterLeoVariant
+          ? "Atak Łyżwiaża Leo"
+          : isLilyMasterVariant
+            ? "Atak Mistrzyni Łyżwiarstwa Lily"
+          : isLilySkaterVariant
+            ? "Atak Łyżwiarki Lily"
+            : isLeoVariant
+              ? "Atak Leo"
+              : "Atak Lily",
+      fallbackText: isLeoVariant ? "LEO" : "LILY",
+    };
+  }
+
+  if (projectile.kind === "nora-shot") {
+    return {
+      src: "./atak_nora.png",
+      alt: "Atak Nory",
+      fallbackText: "NORA",
+    };
+  }
+
+  if (projectile.kind === "polar-bear-shot") {
+    return {
+      src: "./atak_4.png",
+      alt: "Atak Niedźwiedzia Polarnego",
+      fallbackText: "NIEDZWIEDZ",
+    };
   }
 
   if (projectile.kind === "tricky-shot") {
-    return { src: "./atak_5.png", alt: "Atak Tricky", fallbackText: "TRICKY" };
+    const equippedCharacter = getEquippedCharacter();
+    const isReindeerVariant = equippedCharacter?.id === "tricky-renifer";
+    return {
+      src: "./atak_5.png",
+      alt: isReindeerVariant ? "Atak Tricky Renifer" : "Atak Tricky",
+      fallbackText: isReindeerVariant ? "RENIFER" : "TRICKY",
+    };
   }
 
   const character = getEquippedCharacter();
