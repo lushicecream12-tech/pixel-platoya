@@ -8,8 +8,9 @@ const SUPER_ALLEY_CASH_PRICE_LABEL = "19,99zł";
 const MAGICIANS_WORLD_END_TROPHIES = 2000;
 const WINTER_WORLD_START_TROPHIES = 2050;
 const TOWER_WORLD_START_TROPHIES = 4050;
-const MULTIPLAYER_QUEUE_DURATION_MS = 30000;
-const MULTIPLAYER_MAX_PLAYERS = 5;
+const MULTIPLAYER_QUEUE_DURATION_MS = 10000;
+const MULTIPLAYER_START_COUNTDOWN_MS = 5000;
+const MULTIPLAYER_MAX_PLAYERS = 6;
 const MULTIPLAYER_HEARTBEAT_MS = 1500;
 const MULTIPLAYER_QUEUE_TICK_MS = 500;
 const MULTIPLAYER_PLAYER_STALE_MS = 6000;
@@ -736,6 +737,7 @@ const gameMap = document.getElementById("game-map");
 const waveBanner = document.getElementById("wave-banner");
 const waveBannerTitle = document.getElementById("wave-banner-title");
 const waveBannerCountdown = document.getElementById("wave-banner-countdown");
+const waveBannerPlayers = document.getElementById("wave-banner-players");
 const gameBackButton = document.getElementById("game-back-button");
 const multiplayerPlayersLayer = document.getElementById("multiplayer-players-layer");
 const playerEntity = document.getElementById("player-entity");
@@ -938,6 +940,10 @@ function bindEvents() {
 
   if (playRobotsButton) {
     playRobotsButton.addEventListener("click", () => {
+      if (!canUseMultiplayerChooserButton()) {
+        return;
+      }
+
       closeMultiplayerLobby({ cancelWaiting: false });
       ui.nextGameMode = "solo";
       showView("game");
@@ -946,6 +952,10 @@ function bindEvents() {
 
   if (playPlayersButton) {
     playPlayersButton.addEventListener("click", () => {
+      if (!canUseMultiplayerChooserButton()) {
+        return;
+      }
+
       if (!hasPlayerNickname()) {
         openNicknamePrompt(() => {
           startMultiplayerAction("queue");
@@ -5311,6 +5321,7 @@ function createMultiplayerState() {
     roomId: "",
     roomRef: null,
     playerRef: null,
+    playersRef: null,
     damageRef: null,
     projectileRef: null,
     selfId: "",
@@ -5328,6 +5339,7 @@ function createMultiplayerState() {
     playerOrder: [],
     playerCount: 0,
     players: {},
+    panelOpenedAt: 0,
     tickTimer: 0,
     heartbeatTimer: 0,
     queueActionBusy: false,
@@ -5471,6 +5483,22 @@ function updateMultiplayerLocalCache(roomData) {
   }, {});
 }
 
+function handleMultiplayerPlayersSnapshot(playersData) {
+  const nextRoomData = {
+    ...(multiplayer.roomData || {}),
+    players: playersData || {},
+  };
+  updateMultiplayerLocalCache(nextRoomData);
+
+  if (ui.currentView === "game" && game.active && game.mode === "multiplayer") {
+    renderGameScene();
+  }
+
+  if (!multiplayerBackdrop?.hidden) {
+    renderMultiplayerLobbyState();
+  }
+}
+
 function buildMultiplayerPlayerSlotsMarkup(players) {
   const slots = [];
 
@@ -5480,7 +5508,7 @@ function buildMultiplayerPlayerSlotsMarkup(players) {
     if (!player) {
       slots.push(`
         <div class="multiplayer-player-card empty">
-          <div class="multiplayer-player-avatar" aria-hidden="true"></div>
+          <div class="multiplayer-player-preview empty"><span>?</span></div>
           <p class="multiplayer-player-name">...</p>
         </div>
       `);
@@ -5489,10 +5517,26 @@ function buildMultiplayerPlayerSlotsMarkup(players) {
 
     const isSelf = player.id === multiplayer.selfId;
     const label = isSelf ? "TY" : (player.nickname || "GRACZ");
+    const character = CATALOG.characters.find((item) => item.id === player.characterId) || CATALOG.characters[0];
+    const pet = CATALOG.pets.find((item) => item.id === player.petId) || null;
 
     slots.push(`
       <div class="multiplayer-player-card${isSelf ? " self" : ""}">
-        <div class="multiplayer-player-avatar" aria-hidden="true"></div>
+        <div class="multiplayer-player-preview">
+          ${buildPreviewAssetMarkup(character, {
+            imageClass: "item-image asset-image",
+            videoClass: "item-image asset-video",
+            fallbackText: character.name || "POSTAC",
+            alt: character.name || "Postac",
+            usePreviewVideo: false,
+          })}
+        </div>
+        ${pet ? `
+          <div class="multiplayer-player-pet">
+            <img class="item-image asset-image" src="${pet.image}" alt="${pet.name}" data-fallback-text="PLATOYA" />
+            <div class="asset-fallback">PLATOYA</div>
+          </div>
+        ` : ""}
         <p class="multiplayer-player-name">${label}</p>
       </div>
     `);
@@ -5525,6 +5569,8 @@ function renderMultiplayerLobbyState() {
           .filter(Boolean)
       : activePlayers;
     multiplayerPlayerList.innerHTML = buildMultiplayerPlayerSlotsMarkup(listSource);
+    syncBrokenAssets(multiplayerPlayerList);
+    syncAnimatedAssets(multiplayerPlayerList);
   }
 
   if (multiplayerTimer) {
@@ -5532,7 +5578,7 @@ function renderMultiplayerLobbyState() {
       ? `START ZA ${Math.max(1, Math.ceil(timeLeftMs / 1000))} s`
       : launching
         ? "START!"
-        : "START ZA 30 s";
+        : "START ZA 10 s";
   }
 
   if (multiplayerCancelButton) {
@@ -5611,6 +5657,10 @@ function clearMultiplayerBindings() {
     multiplayer.projectileRef.off();
   }
 
+  if (multiplayer.playersRef) {
+    multiplayer.playersRef.off();
+  }
+
   if (multiplayer.playerRef) {
     multiplayer.playerRef.onDisconnect().cancel().catch(() => {});
   }
@@ -5645,6 +5695,7 @@ function resetMultiplayerState(options = {}) {
   multiplayer.roomId = "";
   multiplayer.roomRef = null;
   multiplayer.playerRef = null;
+  multiplayer.playersRef = null;
   multiplayer.damageRef = null;
   multiplayer.projectileRef = null;
   multiplayer.selfId = preserveSelfId ? existingSelfId : "";
@@ -5672,9 +5723,14 @@ function openMultiplayerLobby() {
     return;
   }
 
+  multiplayer.panelOpenedAt = Date.now();
   setMultiplayerPanelMode("chooser");
   multiplayerBackdrop.hidden = false;
   renderMultiplayerLobbyState();
+}
+
+function canUseMultiplayerChooserButton() {
+  return Date.now() - Number(multiplayer.panelOpenedAt || 0) >= 250;
 }
 
 async function removeSelfFromMultiplayerRoom() {
@@ -5753,11 +5809,16 @@ function bindMultiplayerRoom(roomId) {
   multiplayer.roomId = roomId;
   multiplayer.roomRef = db.ref(`multiplayerRooms/${roomId}`);
   multiplayer.playerRef = db.ref(`multiplayerRooms/${roomId}/players/${multiplayer.selfId}`);
+  multiplayer.playersRef = db.ref(`multiplayerRooms/${roomId}/players`);
   multiplayer.damageRef = db.ref(`multiplayerRooms/${roomId}/damageEvents`);
   multiplayer.projectileRef = db.ref(`multiplayerRooms/${roomId}/projectileEvents`);
 
   multiplayer.roomRef.on("value", (snapshot) => {
     handleMultiplayerRoomSnapshot(snapshot.val());
+  });
+
+  multiplayer.playersRef.on("value", (snapshot) => {
+    handleMultiplayerPlayersSnapshot(snapshot.val());
   });
 
   multiplayer.damageRef.limitToLast(120).on("child_added", (snapshot) => {
@@ -5815,6 +5876,7 @@ function handleMultiplayerRoomSnapshot(roomData) {
 
   if (roomData.status === "playing") {
     multiplayer.waiting = false;
+    void maybeAbortMultiplayerForDisconnect(roomData);
 
     if (!multiplayerBackdrop?.hidden) {
       renderMultiplayerLobbyState();
@@ -5847,6 +5909,36 @@ function handleMultiplayerRoomSnapshot(roomData) {
     multiplayer.waiting = false;
     renderMultiplayerLobbyState();
   }
+}
+
+async function maybeAbortMultiplayerForDisconnect(roomData) {
+  if (!multiplayer.roomRef || !roomData || roomData.status !== "playing" || roomData.result) {
+    return;
+  }
+
+  const now = Date.now();
+  const hasDisconnectedPlayer = getSortedRoomPlayersFromData(roomData).some(
+    (player) => player.connected === false || !isFreshMultiplayerPlayer(player, now)
+  );
+
+  if (!hasDisconnectedPlayer) {
+    return;
+  }
+
+  await multiplayer.roomRef.transaction((room) => {
+    if (!room || room.status !== "playing" || room.result) {
+      return room;
+    }
+
+    room.status = "finished";
+    room.updatedAt = Date.now();
+    room.result = {
+      reason: "disconnect",
+      finishedAt: Date.now(),
+      playerCount: Number(room.playerCount || Object.keys(room.players || {}).length || 0),
+    };
+    return room;
+  }).catch(() => {});
 }
 
 function handleMultiplayerDamageEvent(eventId, payload) {
@@ -6002,7 +6094,7 @@ async function startMultiplayerAction(mode) {
   ensureMultiplayerSelfId();
   multiplayer.joining = true;
   setMultiplayerStatus("Status: Szukam graczy", "waiting");
-  setMultiplayerNote("Szukam aktywnej kolejki. Jeśli żadnej nie ma, otwieram nową na 30 sekund.", "warning");
+  setMultiplayerNote("Szukam aktywnej kolejki. Jeśli żadnej nie ma, otwieram nową na 10 sekund.", "warning");
   renderMultiplayerLobbyState();
 
   try {
@@ -6725,6 +6817,7 @@ function createGameState() {
     currentWave: 0,
     pendingWave: 1,
     waveIntroMs: 3000,
+    multiplayerStartCountdownMs: 0,
     waveSpawnTimerMs: 0,
     waveRobotsRemaining: 0,
     currentWaveConfig: null,
@@ -6819,6 +6912,14 @@ function getMultiplayerPlacementTrophyDelta(place, totalPlayers) {
 }
 
 function getMultiplayerResultDetails(result) {
+  if (result?.reason === "disconnect") {
+    return {
+      placement: 0,
+      playerCount: Number(result?.playerCount || multiplayer.playerCount || getMultiplayerMatchPlayers().length || 1),
+      delta: 0,
+    };
+  }
+
   const placements = result?.placements || {};
   const placement = Number(placements[multiplayer.selfId] || 0) || Math.max(1, result?.playerCount || 1);
   const playerCount = Number(result?.playerCount || multiplayer.playerCount || getMultiplayerMatchPlayers().length || 1);
@@ -6845,6 +6946,7 @@ function startMultiplayerMatchSession(session) {
   multiplayer.pendingResult = null;
   multiplayer.syncAccumulatorMs = 0;
   game.waveIntroMs = 0;
+  game.multiplayerStartCountdownMs = MULTIPLAYER_START_COUNTDOWN_MS;
   game.pendingWave = 0;
   game.currentWave = 0;
   game.currentWaveConfig = null;
@@ -6888,6 +6990,7 @@ function syncMultiplayerPlayerState(force = false) {
   }
 
   multiplayer.playerRef.update(update).catch(() => {});
+  multiplayer.roomRef?.child("updatedAt").set(Date.now()).catch(() => {});
 }
 
 function sendMultiplayerDamage(amount, projectileKind = "player", targetPlayerId = "") {
@@ -7031,6 +7134,11 @@ function applyMultiplayerPendingResult() {
   let title = `Miejsce ${placement}`;
   let note = `Bitwa ${playerCount} graczy zakończona. Zmiana pucharów: ${deltaText}.`;
 
+  if (multiplayer.pendingResult.reason === "disconnect") {
+    title = "Mecz przerwany";
+    note = "Jeden z graczy wyszedł z meczu, więc bitwa została przerwana.";
+  }
+
   if (placement === 1) {
     title = "Zwyciestwo";
     note = `Wygrałeś bitwę ${playerCount} graczy. Zdobywasz ${deltaText} pucharów.`;
@@ -7116,6 +7224,7 @@ function resetGameSession() {
   game.currentWave = 0;
   game.pendingWave = 1;
   game.waveIntroMs = 3000;
+  game.multiplayerStartCountdownMs = 0;
   game.waveSpawnTimerMs = 0;
   game.waveRobotsRemaining = 0;
   game.currentWaveConfig = null;
@@ -7294,7 +7403,13 @@ function runGameFrame(timestamp) {
   game.lastFrameTime = timestamp;
 
   if (isMultiplayerMatchActive()) {
-    if (game.player.hp > 0) {
+    const preStartCountdownActive = game.multiplayerStartCountdownMs > 0;
+
+    if (preStartCountdownActive) {
+      game.multiplayerStartCountdownMs = Math.max(0, game.multiplayerStartCountdownMs - deltaMs);
+    }
+
+    if (game.player.hp > 0 && !preStartCountdownActive) {
       updatePlayerMovement(deltaSeconds);
       updateAmmo(deltaSeconds);
       tryAutoFire(timestamp);
@@ -8935,17 +9050,57 @@ function buildMultiplayerRemotePlayerMarkup(player) {
   `;
 }
 
+function buildMultiplayerShowcaseCardMarkup(player) {
+  const character = CATALOG.characters.find((item) => item.id === player.characterId) || CATALOG.characters[0];
+  const pet = CATALOG.pets.find((item) => item.id === player.petId) || null;
+  const label = player.id === multiplayer.selfId ? "TY" : (player.nickname || "GRACZ");
+
+  return `
+    <div class="multiplayer-showcase-card${player.id === multiplayer.selfId ? " self" : ""}">
+      <div class="multiplayer-showcase-character">
+        ${buildPreviewAssetMarkup(character, {
+          imageClass: "item-image asset-image",
+          videoClass: "item-image asset-video",
+          fallbackText: character.name || "POSTAC",
+          alt: character.name || "Postac",
+          usePreviewVideo: false,
+        })}
+      </div>
+      <div class="multiplayer-showcase-meta">
+        ${pet ? `
+          <div class="multiplayer-showcase-pet">
+            <img class="item-image asset-image" src="${pet.image}" alt="${pet.name}" data-fallback-text="PLATOYA" />
+            <div class="asset-fallback">PLATOYA</div>
+          </div>
+        ` : `<div class="multiplayer-showcase-pet empty"><span>PLATOYA</span></div>`}
+        <p class="multiplayer-showcase-name">${label}</p>
+      </div>
+    </div>
+  `;
+}
+
 function renderGameScene() {
   refreshAmmoConfig();
   delete gameMap.dataset.worldTheme;
   const multiplayerMode = game.mode === "multiplayer";
+  const multiplayerCountdownActive = multiplayerMode && game.multiplayerStartCountdownMs > 0;
   const showFirstRobotTutorial = isFirstRobotTutorialPaused();
   gameMap.classList.toggle("multiplayer-ffa", multiplayerMode);
   gameMap.classList.toggle("first-robot-tutorial", showFirstRobotTutorial);
   playerEntity.classList.toggle("tutorial-focus", showFirstRobotTutorial);
-  waveBanner.hidden = multiplayerMode || game.waveIntroMs <= 0;
-  waveBannerTitle.textContent = `FALA ${game.pendingWave}`;
-  waveBannerCountdown.textContent = String(Math.max(1, Math.ceil(game.waveIntroMs / 1000)));
+  waveBanner.hidden = (!multiplayerCountdownActive && game.waveIntroMs <= 0) || (multiplayerMode && !multiplayerCountdownActive);
+  waveBannerTitle.textContent = multiplayerCountdownActive ? "GRACZE GOTOWI" : `FALA ${game.pendingWave}`;
+  waveBannerCountdown.textContent = String(
+    Math.max(1, Math.ceil((multiplayerCountdownActive ? game.multiplayerStartCountdownMs : game.waveIntroMs) / 1000))
+  );
+  if (waveBannerPlayers) {
+    waveBannerPlayers.hidden = !multiplayerCountdownActive;
+    waveBannerPlayers.innerHTML = multiplayerCountdownActive
+      ? getMultiplayerMatchPlayers().map((player) => buildMultiplayerShowcaseCardMarkup(player)).join("")
+      : "";
+    syncBrokenAssets(waveBannerPlayers);
+    syncAnimatedAssets(waveBannerPlayers);
+  }
   playerEntity.style.left = `${game.player.x}px`;
   playerEntity.style.top = `${game.player.y}px`;
   playerHealthLabel.textContent = `${Math.ceil(game.player.hp)} pz`;
