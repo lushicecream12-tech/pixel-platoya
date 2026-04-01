@@ -85,12 +85,8 @@
             </div>
 
             <div class="lobby-layout">
-              <button class="pixel-button lobby-nav-button top-button" id="lobby-play-button" data-view="game">
+              <button class="pixel-button lobby-nav-button top-button" id="lobby-play-button" type="button">
                 GRAJ
-              </button>
-
-              <button class="pixel-button lobby-nav-button top-secondary-button" id="lobby-friends-button" type="button">
-                ZAGRAJ ZE ZNAJOMYM
               </button>
 
               <button class="pixel-button lobby-nav-button left-button" data-view="store">
@@ -203,6 +199,7 @@
                   </div>
                 </div>
                 <div class="water-fields-layer" id="water-fields-layer"></div>
+                <div class="multiplayer-players-layer" id="multiplayer-players-layer"></div>
                 <div class="entity player-entity" id="player-entity">
                   <p class="entity-health player-health" id="player-health-label">3000 pz</p>
                   <div class="player-visual">
@@ -379,44 +376,50 @@
     </div>
 
     <div class="settings-backdrop multiplayer-backdrop" id="multiplayer-backdrop" hidden>
-      <div class="panel settings-panel multiplayer-panel" role="dialog" aria-modal="true" aria-label="Zagraj ze znajomym">
+      <div class="panel settings-panel multiplayer-panel" role="dialog" aria-modal="true" aria-label="Wybierz tryb gry">
         <div class="settings-panel-header multiplayer-panel-header">
           <div class="settings-heading">
             <p class="settings-kicker">Multiplayer</p>
-            <p class="section-title multiplayer-title">Zagraj ze znajomym</p>
+            <p class="section-title multiplayer-title" id="multiplayer-title">Wybierz tryb gry</p>
           </div>
           <button class="circle-icon-button" id="multiplayer-close-button" type="button" aria-label="Zamknij">
             ×
           </button>
         </div>
 
-        <div class="multiplayer-summary">
-          <p class="multiplayer-chip" id="multiplayer-own-nick">Twój nick: Gracz</p>
-          <p class="multiplayer-chip">Tryb: 1v1</p>
-          <p class="multiplayer-chip multiplayer-chip-status" id="multiplayer-status-chip">Status: Gotowy</p>
+        <div class="play-mode-choice" id="play-mode-choice">
+          <p class="multiplayer-note">
+            Wybierz tryb walki.
+          </p>
+
+          <div class="multiplayer-actions">
+            <button class="pixel-button" id="play-robots-button" type="button">GRAJ Z ROBOTAMI</button>
+            <button class="pixel-button" id="play-players-button" type="button">GRAJ Z GRACZAMI</button>
+          </div>
         </div>
 
-        <div class="multiplayer-actions multiplayer-quick-actions">
-          <button class="pixel-button subtle-button" id="multiplayer-copy-nick-button" type="button">SKOPIUJ MÓJ NICK</button>
-          <button class="pixel-button subtle-button" id="multiplayer-edit-nick-button" type="button">ZMIEŃ NICK</button>
-        </div>
+        <div class="multiplayer-queue-panel" id="multiplayer-queue-panel" hidden>
+          <div class="multiplayer-queue-hero">
+            <p class="multiplayer-queue-status multiplayer-chip-status" id="multiplayer-status-chip">SZUKANIE</p>
 
-        <label class="multiplayer-field">
-          <span class="multiplayer-label">Nick znajomego</span>
-          <input class="multiplayer-input" id="multiplayer-friend-input" type="text" maxlength="18" placeholder="Wpisz nick znajomego" />
-        </label>
+            <div class="multiplayer-queue-loader" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
 
-        <p class="multiplayer-note" id="multiplayer-note">
-          Wpisz nick znajomego. Prawdziwe połączenie 1v1 dokończę po podpięciu backendu multiplayer.
-        </p>
+            <p class="multiplayer-queue-count" id="multiplayer-own-nick">1/5</p>
+          </div>
 
-        <div class="multiplayer-actions multiplayer-actions-double">
-          <button class="pixel-button" id="multiplayer-create-button" type="button">STWÓRZ POKÓJ</button>
-          <button class="pixel-button" id="multiplayer-join-button" type="button">DOŁĄCZ PO NICKU</button>
-        </div>
+          <p class="multiplayer-timer" id="multiplayer-timer">START ZA 30 s</p>
 
-        <div class="multiplayer-actions" id="multiplayer-cancel-wrap" hidden>
-          <button class="pixel-button subtle-button" id="multiplayer-cancel-button" type="button">ANULUJ OCZEKIWANIE</button>
+          <p class="multiplayer-queue-note" id="multiplayer-note">Dobieram graczy...</p>
+
+          <div class="multiplayer-player-list" id="multiplayer-player-list"></div>
+
+          <div class="multiplayer-actions">
+            <button class="pixel-button subtle-button" id="multiplayer-cancel-button" type="button">WYJDŹ Z KOLEJKI</button>
+          </div>
         </div>
       </div>
     </div>

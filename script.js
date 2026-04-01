@@ -8,6 +8,12 @@ const SUPER_ALLEY_CASH_PRICE_LABEL = "19,99zł";
 const MAGICIANS_WORLD_END_TROPHIES = 2000;
 const WINTER_WORLD_START_TROPHIES = 2050;
 const TOWER_WORLD_START_TROPHIES = 4050;
+const MULTIPLAYER_QUEUE_DURATION_MS = 30000;
+const MULTIPLAYER_MAX_PLAYERS = 5;
+const MULTIPLAYER_HEARTBEAT_MS = 1500;
+const MULTIPLAYER_QUEUE_TICK_MS = 500;
+const MULTIPLAYER_PLAYER_STALE_MS = 6000;
+const MULTIPLAYER_ROOM_STALE_MS = 45000;
 const TROPHY_NODE_WIDTH = 220;
 const TROPHY_NODE_GAP = 20;
 const TROPHY_ICON_IMAGE = "./monety_2.png";
@@ -712,15 +718,17 @@ const nicknameNote = document.getElementById("nickname-note");
 const nicknameSaveButton = document.getElementById("nickname-save-button");
 const multiplayerBackdrop = document.getElementById("multiplayer-backdrop");
 const multiplayerCloseButton = document.getElementById("multiplayer-close-button");
+const multiplayerTitle = document.getElementById("multiplayer-title");
+const playModeChoice = document.getElementById("play-mode-choice");
+const playRobotsButton = document.getElementById("play-robots-button");
+const playPlayersButton = document.getElementById("play-players-button");
+const multiplayerQueuePanel = document.getElementById("multiplayer-queue-panel");
 const multiplayerOwnNick = document.getElementById("multiplayer-own-nick");
 const multiplayerStatusChip = document.getElementById("multiplayer-status-chip");
-const multiplayerFriendInput = document.getElementById("multiplayer-friend-input");
 const multiplayerNote = document.getElementById("multiplayer-note");
-const multiplayerCreateButton = document.getElementById("multiplayer-create-button");
-const multiplayerJoinButton = document.getElementById("multiplayer-join-button");
-const multiplayerCopyNickButton = document.getElementById("multiplayer-copy-nick-button");
+const multiplayerTimer = document.getElementById("multiplayer-timer");
+const multiplayerPlayerList = document.getElementById("multiplayer-player-list");
 const multiplayerEditNickButton = document.getElementById("multiplayer-edit-nick-button");
-const multiplayerCancelWrap = document.getElementById("multiplayer-cancel-wrap");
 const multiplayerCancelButton = document.getElementById("multiplayer-cancel-button");
 
 const gameStage = document.getElementById("game-stage");
@@ -729,6 +737,7 @@ const waveBanner = document.getElementById("wave-banner");
 const waveBannerTitle = document.getElementById("wave-banner-title");
 const waveBannerCountdown = document.getElementById("wave-banner-countdown");
 const gameBackButton = document.getElementById("game-back-button");
+const multiplayerPlayersLayer = document.getElementById("multiplayer-players-layer");
 const playerEntity = document.getElementById("player-entity");
 const playerHealthLabel = document.getElementById("player-health-label");
 const playerShield = document.getElementById("player-shield");
@@ -825,6 +834,12 @@ function bindEvents() {
     });
   });
 
+  if (lobbyPlayButton) {
+    lobbyPlayButton.addEventListener("click", () => {
+      openMultiplayerLobby();
+    });
+  }
+
   document.querySelectorAll("[data-view='lobby']").forEach((button) => {
     button.addEventListener("click", () => {
       if (button === gameBackButton && ui.currentView === "game" && game.active) {
@@ -884,19 +899,6 @@ function bindEvents() {
     });
   }
 
-  if (lobbyFriendsButton) {
-    lobbyFriendsButton.addEventListener("click", () => {
-      if (!hasPlayerNickname()) {
-        openNicknamePrompt(() => {
-          openMultiplayerLobby();
-        });
-        return;
-      }
-
-      openMultiplayerLobby();
-    });
-  }
-
   if (nicknameSaveButton) {
     nicknameSaveButton.addEventListener("click", () => {
       submitNicknamePrompt();
@@ -934,40 +936,38 @@ function bindEvents() {
     });
   }
 
-  if (multiplayerCreateButton) {
-    multiplayerCreateButton.addEventListener("click", () => {
-      startMultiplayerAction("create");
+  if (playRobotsButton) {
+    playRobotsButton.addEventListener("click", () => {
+      closeMultiplayerLobby({ cancelWaiting: false });
+      ui.nextGameMode = "solo";
+      showView("game");
     });
   }
 
-  if (multiplayerJoinButton) {
-    multiplayerJoinButton.addEventListener("click", () => {
-      startMultiplayerAction("join");
-    });
-  }
-
-  if (multiplayerFriendInput) {
-    multiplayerFriendInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        startMultiplayerAction("join");
+  if (playPlayersButton) {
+    playPlayersButton.addEventListener("click", () => {
+      if (!hasPlayerNickname()) {
+        openNicknamePrompt(() => {
+          startMultiplayerAction("queue");
+        });
+        return;
       }
-    });
-  }
 
-  if (multiplayerCopyNickButton) {
-    multiplayerCopyNickButton.addEventListener("click", async () => {
-      await copyMultiplayerNickname();
+      startMultiplayerAction("queue");
     });
   }
 
   if (multiplayerEditNickButton) {
     multiplayerEditNickButton.addEventListener("click", () => {
       const reopenLobby = !multiplayerBackdrop?.hidden;
-      closeMultiplayerLobby();
+      closeMultiplayerLobby({ cancelWaiting: false });
       openNicknamePrompt(() => {
         if (reopenLobby) {
-          openMultiplayerLobby();
+          if (multiplayer.waiting && !multiplayer.matchActive) {
+            startMultiplayerAction("queue");
+          } else {
+            openMultiplayerLobby();
+          }
         }
       });
     });
@@ -5309,23 +5309,28 @@ function createMultiplayerState() {
     firebaseApp: null,
     firebaseDb: null,
     roomId: "",
-    role: "",
     roomRef: null,
+    playerRef: null,
     damageRef: null,
+    projectileRef: null,
+    selfId: "",
     waiting: false,
+    joining: false,
     matchActive: false,
     resultApplied: false,
     pendingResult: null,
     syncAccumulatorMs: 0,
     processedDamageEventIds: new Set(),
-    opponent: {
-      nickname: "Przeciwnik",
-      characterId: "magik-millo",
-      x: 0,
-      y: 0,
-      hp: GAME_RULES.playerMaxHp,
-      connected: false,
-    },
+    processedProjectileEventIds: new Set(),
+    roomData: null,
+    roomStatus: "idle",
+    countdownEndsAt: 0,
+    playerOrder: [],
+    playerCount: 0,
+    players: {},
+    tickTimer: 0,
+    heartbeatTimer: 0,
+    queueActionBusy: false,
   };
 }
 
@@ -5363,18 +5368,44 @@ function normalizeMultiplayerNickname(nickname) {
   return sanitizePlayerNickname(nickname).toLowerCase();
 }
 
+function ensureMultiplayerSelfId() {
+  if (!multiplayer.selfId) {
+    multiplayer.selfId = `player-${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`;
+  }
+
+  return multiplayer.selfId;
+}
+
 function buildMultiplayerProfile() {
   const characterId = state.equippedCharacter || "magik-millo";
   return {
     nickname: getPlayerNickname(),
     nicknameNormalized: normalizeMultiplayerNickname(getPlayerNickname()),
     characterId,
+    petId: state.equippedPet || "",
     hp: getPlayerMaxHp(),
     x: 0,
     y: 0,
     joinedAt: Date.now(),
     lastSeenAt: Date.now(),
+    connected: true,
+    alive: true,
+    placement: 0,
   };
+}
+
+function setMultiplayerPanelMode(mode = "chooser") {
+  if (playModeChoice) {
+    playModeChoice.hidden = mode !== "chooser";
+  }
+
+  if (multiplayerQueuePanel) {
+    multiplayerQueuePanel.hidden = mode !== "queue";
+  }
+
+  if (multiplayerTitle) {
+    multiplayerTitle.textContent = mode === "chooser" ? "Wybierz tryb gry" : "Graj z graczami";
+  }
 }
 
 function setMultiplayerNote(message, tone = "info") {
@@ -5400,103 +5431,174 @@ function setMultiplayerStatus(label, stateName = "ready") {
   multiplayerStatusChip.dataset.state = stateName;
 }
 
+function getSortedRoomPlayersFromData(roomData, options = {}) {
+  const includeDisconnected = options.includeDisconnected !== false;
+
+  return Object.entries(roomData?.players || {})
+    .map(([id, player]) => ({
+      id,
+      ...(player || {}),
+    }))
+    .filter((player) => includeDisconnected || player.connected !== false)
+    .sort(
+      (first, second) =>
+        Number(first.joinedAt || 0) - Number(second.joinedAt || 0) ||
+        first.id.localeCompare(second.id)
+    );
+}
+
+function isFreshMultiplayerPlayer(player, now = Date.now()) {
+  return Number(player?.lastSeenAt || player?.joinedAt || 0) >= now - MULTIPLAYER_PLAYER_STALE_MS;
+}
+
+function getActiveMultiplayerPlayers(roomData, now = Date.now()) {
+  return getSortedRoomPlayersFromData(roomData).filter(
+    (player) => player.connected !== false && isFreshMultiplayerPlayer(player, now)
+  );
+}
+
+function updateMultiplayerLocalCache(roomData) {
+  multiplayer.roomData = roomData || null;
+  multiplayer.roomStatus = roomData?.status || "idle";
+  multiplayer.countdownEndsAt = Number(roomData?.countdownEndsAt || 0);
+  multiplayer.playerOrder = Array.isArray(roomData?.playerOrder)
+    ? roomData.playerOrder.filter((playerId) => roomData?.players?.[playerId])
+    : getSortedRoomPlayersFromData(roomData).map((player) => player.id);
+  multiplayer.playerCount = Number(roomData?.playerCount || multiplayer.playerOrder.length || 0);
+  multiplayer.players = getSortedRoomPlayersFromData(roomData).reduce((accumulator, player) => {
+    accumulator[player.id] = player;
+    return accumulator;
+  }, {});
+}
+
+function buildMultiplayerPlayerSlotsMarkup(players) {
+  const slots = [];
+
+  for (let index = 0; index < MULTIPLAYER_MAX_PLAYERS; index += 1) {
+    const player = players[index];
+
+    if (!player) {
+      slots.push(`
+        <div class="multiplayer-player-card empty">
+          <div class="multiplayer-player-avatar" aria-hidden="true"></div>
+          <p class="multiplayer-player-name">...</p>
+        </div>
+      `);
+      continue;
+    }
+
+    const isSelf = player.id === multiplayer.selfId;
+    const label = isSelf ? "TY" : (player.nickname || "GRACZ");
+
+    slots.push(`
+      <div class="multiplayer-player-card${isSelf ? " self" : ""}">
+        <div class="multiplayer-player-avatar" aria-hidden="true"></div>
+        <p class="multiplayer-player-name">${label}</p>
+      </div>
+    `);
+  }
+
+  return slots.join("");
+}
+
 function renderMultiplayerLobbyState() {
-  if (!multiplayerOwnNick) {
+  if (!multiplayerOwnNick || !multiplayerStatusChip || !multiplayerNote) {
     return;
   }
 
-  const nickname = getPlayerNickname();
   const hasConfig = hasFirebaseMultiplayerConfig();
-  const waitingForOpponent = multiplayer.waiting && !multiplayer.matchActive;
-  const connected = multiplayer.matchActive || Boolean(ui.pendingMultiplayerLaunch);
+  const queueOpen = multiplayer.waiting && !multiplayer.matchActive;
+  const launching = multiplayer.matchActive || Boolean(ui.pendingMultiplayerLaunch);
+  const now = Date.now();
+  const activePlayers = getActiveMultiplayerPlayers(multiplayer.roomData, now);
+  const timeLeftMs = Math.max(0, multiplayer.countdownEndsAt - now);
+  const displayCount = launching
+    ? Math.max(2, multiplayer.playerCount || activePlayers.length || 0)
+    : activePlayers.length;
 
-  multiplayerOwnNick.textContent = `Twój nick: ${nickname}`;
+  multiplayerOwnNick.textContent = `${displayCount}/${MULTIPLAYER_MAX_PLAYERS}`;
 
-  if (multiplayerCancelWrap) {
-    multiplayerCancelWrap.hidden = !waitingForOpponent;
+  if (multiplayerPlayerList) {
+    const listSource = multiplayer.roomStatus === "playing"
+      ? multiplayer.playerOrder
+          .map((playerId) => multiplayer.players[playerId])
+          .filter(Boolean)
+      : activePlayers;
+    multiplayerPlayerList.innerHTML = buildMultiplayerPlayerSlotsMarkup(listSource);
   }
 
-  if (multiplayerCreateButton) {
-    multiplayerCreateButton.disabled = waitingForOpponent || connected || !hasConfig;
+  if (multiplayerTimer) {
+    multiplayerTimer.textContent = queueOpen
+      ? `START ZA ${Math.max(1, Math.ceil(timeLeftMs / 1000))} s`
+      : launching
+        ? "START!"
+        : "START ZA 30 s";
   }
 
-  if (multiplayerJoinButton) {
-    multiplayerJoinButton.disabled = waitingForOpponent || connected || !hasConfig;
-  }
-
-  if (multiplayerFriendInput) {
-    multiplayerFriendInput.disabled = waitingForOpponent || connected;
-  }
-
-  if (multiplayerCopyNickButton) {
-    multiplayerCopyNickButton.disabled = !nickname;
+  if (multiplayerCancelButton) {
+    multiplayerCancelButton.textContent = queueOpen ? "WYJDŹ Z KOLEJKI" : "ZAMKNIJ";
   }
 
   if (!hasConfig) {
     setMultiplayerStatus("Status: Firebase off", "error");
     setMultiplayerNote(
-      "Multiplayer jest przygotowany, ale bez działającego configu Firebase nie połączy dwóch graczy.",
+      "Multiplayer graczy potrzebuje działającego Firebase, inaczej nie połączy kolejki.",
       "error"
     );
     return;
   }
 
-  if (connected) {
-    setMultiplayerStatus("Status: Połączono", "playing");
+  if (launching) {
+    setMultiplayerStatus("START", "playing");
     setMultiplayerNote(
-      `Połączono z graczem ${multiplayer.opponent.nickname || "Przeciwnik"}. Za chwilę startuje pojedynek 1v1.`,
+      "Arena gotowa.",
       "success"
     );
     return;
   }
 
-  if (waitingForOpponent) {
-    setMultiplayerStatus("Status: Czekam", "waiting");
+  if (multiplayer.roomStatus === "cancelled") {
+    setMultiplayerStatus("STOP", "error");
+    setMultiplayerNote("Za mało graczy.", "error");
+    return;
+  }
+
+  if (queueOpen) {
+    setMultiplayerStatus(
+      activePlayers.length >= 2 ? "DOBIERANIE" : "SZUKANIE",
+      "waiting"
+    );
     setMultiplayerNote(
-      `Pokój jest gotowy. Powiedz znajomemu, żeby wpisał nick ${nickname} i kliknął DOŁĄCZ PO NICKU.`,
-      "warning"
+      activePlayers.length >= 2
+        ? "Jeszcze chwila..."
+        : "Czekam na drugiego gracza...",
+      activePlayers.length >= 2 ? "success" : "warning"
     );
     return;
   }
 
-  setMultiplayerStatus("Status: Gotowy", "ready");
+  setMultiplayerStatus("GOTOWE", "ready");
   setMultiplayerNote(
-    "Stwórz pokój albo wpisz nick znajomego. Dołączanie działa po nicku hosta, nie po kodzie.",
+    "Wybierz tryb gry.",
     "info"
   );
 }
 
-async function copyMultiplayerNickname() {
-  const nickname = getPlayerNickname();
-
-  if (!nickname) {
-    setMultiplayerNote("Najpierw ustaw swój nick.", "warning");
-    return;
+function clearMultiplayerIntervals() {
+  if (multiplayer.tickTimer) {
+    window.clearInterval(multiplayer.tickTimer);
+    multiplayer.tickTimer = 0;
   }
 
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(nickname);
-      setMultiplayerNote(`Skopiowano nick ${nickname}.`, "success");
-      return;
-    }
-  } catch (error) {
-    // Fallback below.
+  if (multiplayer.heartbeatTimer) {
+    window.clearInterval(multiplayer.heartbeatTimer);
+    multiplayer.heartbeatTimer = 0;
   }
-
-  setMultiplayerNote(`Skopiuj ręcznie swój nick: ${nickname}.`, "warning");
 }
 
-function cancelMultiplayerWaitingRoom() {
-  if (multiplayer.waiting && !multiplayer.matchActive && multiplayer.roomRef) {
-    multiplayer.roomRef.remove().catch(() => {});
-  }
+function clearMultiplayerBindings() {
+  clearMultiplayerIntervals();
 
-  resetMultiplayerState();
-  renderMultiplayerLobbyState();
-}
-
-function resetMultiplayerState() {
   if (multiplayer.roomRef) {
     multiplayer.roomRef.off();
   }
@@ -5505,145 +5607,245 @@ function resetMultiplayerState() {
     multiplayer.damageRef.off();
   }
 
+  if (multiplayer.projectileRef) {
+    multiplayer.projectileRef.off();
+  }
+
+  if (multiplayer.playerRef) {
+    multiplayer.playerRef.onDisconnect().cancel().catch(() => {});
+  }
+}
+
+function startMultiplayerIntervals() {
+  clearMultiplayerIntervals();
+
+  multiplayer.tickTimer = window.setInterval(() => {
+    if (multiplayer.roomStatus === "queueing" && multiplayer.waiting && !multiplayer.matchActive) {
+      void maybeEvaluateMultiplayerQueueRoom();
+    }
+
+    if (!multiplayerBackdrop?.hidden) {
+      renderMultiplayerLobbyState();
+    }
+  }, MULTIPLAYER_QUEUE_TICK_MS);
+
+  multiplayer.heartbeatTimer = window.setInterval(() => {
+    if (multiplayer.roomStatus === "queueing" && multiplayer.waiting && !multiplayer.matchActive) {
+      void syncMultiplayerQueuePresence();
+    }
+  }, MULTIPLAYER_HEARTBEAT_MS);
+}
+
+function resetMultiplayerState(options = {}) {
+  const preserveSelfId = options.preserveSelfId !== false;
+  const existingSelfId = multiplayer.selfId;
+
+  clearMultiplayerBindings();
+
   multiplayer.roomId = "";
-  multiplayer.role = "";
   multiplayer.roomRef = null;
+  multiplayer.playerRef = null;
   multiplayer.damageRef = null;
+  multiplayer.projectileRef = null;
+  multiplayer.selfId = preserveSelfId ? existingSelfId : "";
   multiplayer.waiting = false;
+  multiplayer.joining = false;
   multiplayer.matchActive = false;
   multiplayer.resultApplied = false;
   multiplayer.pendingResult = null;
   multiplayer.syncAccumulatorMs = 0;
   multiplayer.processedDamageEventIds = new Set();
-  multiplayer.opponent = {
-    nickname: "Przeciwnik",
-    characterId: "magik-millo",
-    x: 0,
-    y: 0,
-    hp: GAME_RULES.playerMaxHp,
-    connected: false,
-  };
+  multiplayer.processedProjectileEventIds = new Set();
+  multiplayer.roomData = null;
+  multiplayer.roomStatus = "idle";
+  multiplayer.countdownEndsAt = 0;
+  multiplayer.playerOrder = [];
+  multiplayer.playerCount = 0;
+  multiplayer.players = {};
+  multiplayer.queueActionBusy = false;
   ui.pendingMultiplayerLaunch = null;
   ui.nextGameMode = "solo";
 }
 
 function openMultiplayerLobby() {
-  if (!multiplayerBackdrop || !multiplayerOwnNick || !multiplayerNote) {
-    return;
-  }
-
-  multiplayerBackdrop.hidden = false;
-  if (multiplayerFriendInput) {
-    multiplayerFriendInput.value = "";
-  }
-  renderMultiplayerLobbyState();
-}
-
-function closeMultiplayerLobby() {
   if (!multiplayerBackdrop) {
     return;
   }
 
+  setMultiplayerPanelMode("chooser");
+  multiplayerBackdrop.hidden = false;
+  renderMultiplayerLobbyState();
+}
+
+async function removeSelfFromMultiplayerRoom() {
+  if (!multiplayer.playerRef) {
+    return;
+  }
+
+  await multiplayer.playerRef.remove().catch(() => {});
+
+  if (multiplayer.roomRef) {
+    const snapshot = await multiplayer.roomRef.once("value").catch(() => null);
+    const roomData = snapshot && typeof snapshot.val === "function" ? snapshot.val() : null;
+
+    if (!roomData || getSortedRoomPlayersFromData(roomData).length === 0) {
+      await multiplayer.roomRef.remove().catch(() => {});
+    }
+  }
+}
+
+async function cancelMultiplayerWaitingRoom() {
+  if (!multiplayer.waiting && !multiplayer.matchActive) {
+    resetMultiplayerState();
+    multiplayerBackdrop.hidden = true;
+    setMultiplayerPanelMode("chooser");
+    return;
+  }
+
   if (multiplayer.waiting && !multiplayer.matchActive) {
-    cancelMultiplayerWaitingRoom();
+    await removeSelfFromMultiplayerRoom();
+  }
+
+  resetMultiplayerState();
+
+  if (!multiplayerBackdrop?.hidden) {
+    setMultiplayerPanelMode("chooser");
+    renderMultiplayerLobbyState();
+  }
+}
+
+function closeMultiplayerLobby(options = {}) {
+  if (!multiplayerBackdrop) {
+    return;
+  }
+
+  const cancelWaiting = options.cancelWaiting !== false;
+
+  if (multiplayer.waiting && !multiplayer.matchActive && cancelWaiting) {
+    void cancelMultiplayerWaitingRoom();
   }
 
   multiplayerBackdrop.hidden = true;
+  setMultiplayerPanelMode("chooser");
 }
 
-function watchMultiplayerRoom(roomId, role) {
+function buildActiveRoomPlayersFromRaw(room, now = Date.now()) {
+  return Object.entries(room?.players || {})
+    .map(([id, player]) => ({
+      id,
+      ...(player || {}),
+    }))
+    .filter((player) => player.connected !== false && Number(player.lastSeenAt || player.joinedAt || 0) >= now - MULTIPLAYER_PLAYER_STALE_MS)
+    .sort(
+      (first, second) =>
+        Number(first.joinedAt || 0) - Number(second.joinedAt || 0) ||
+        first.id.localeCompare(second.id)
+    );
+}
+
+function bindMultiplayerRoom(roomId) {
   const db = getFirebaseMultiplayerDatabase();
 
   if (!db) {
     return;
   }
 
-  resetMultiplayerState();
-
   multiplayer.roomId = roomId;
-  multiplayer.role = role;
-  multiplayer.waiting = role === "host";
   multiplayer.roomRef = db.ref(`multiplayerRooms/${roomId}`);
+  multiplayer.playerRef = db.ref(`multiplayerRooms/${roomId}/players/${multiplayer.selfId}`);
   multiplayer.damageRef = db.ref(`multiplayerRooms/${roomId}/damageEvents`);
-  multiplayer.processedDamageEventIds = new Set();
+  multiplayer.projectileRef = db.ref(`multiplayerRooms/${roomId}/projectileEvents`);
 
   multiplayer.roomRef.on("value", (snapshot) => {
     handleMultiplayerRoomSnapshot(snapshot.val());
   });
 
-  multiplayer.damageRef.limitToLast(40).on("child_added", (snapshot) => {
+  multiplayer.damageRef.limitToLast(120).on("child_added", (snapshot) => {
     handleMultiplayerDamageEvent(snapshot.key, snapshot.val());
   });
 
-  if (role === "host") {
-    multiplayer.roomRef.onDisconnect().remove().catch(() => {});
-  } else {
-    multiplayer.roomRef.child("guest").onDisconnect().remove().catch(() => {});
-  }
+  multiplayer.projectileRef.limitToLast(180).on("child_added", (snapshot) => {
+    handleMultiplayerProjectileEvent(snapshot.key, snapshot.val());
+  });
+
+  multiplayer.playerRef.onDisconnect().update({
+    connected: false,
+    alive: false,
+    hp: 0,
+    lastSeenAt: window.firebase.database.ServerValue.TIMESTAMP,
+  }).catch(() => {});
+
+  startMultiplayerIntervals();
 }
 
 function handleMultiplayerRoomSnapshot(roomData) {
   if (!roomData) {
-    if (multiplayerNote && multiplayerBackdrop && !multiplayerBackdrop.hidden) {
-      multiplayerNote.textContent = "Pokój został zamknięty.";
-    }
-    if (multiplayer.matchActive && !multiplayer.pendingResult) {
-      multiplayer.pendingResult = {
-        winnerRole: multiplayer.role,
-        reason: "disconnect",
-        finishedAt: Date.now(),
-      };
-    } else if (!multiplayer.matchActive) {
+    if (!multiplayer.matchActive) {
       resetMultiplayerState();
+      if (!multiplayerBackdrop?.hidden) {
+        setMultiplayerPanelMode("chooser");
+        renderMultiplayerLobbyState();
+      }
+    }
+
+    return;
+  }
+
+  updateMultiplayerLocalCache(roomData);
+  const ownPlayer = multiplayer.players[multiplayer.selfId] || null;
+
+  if (!ownPlayer && roomData.status !== "finished") {
+    if (!multiplayer.matchActive) {
+      resetMultiplayerState();
+      if (!multiplayerBackdrop?.hidden) {
+        setMultiplayerStatus("Status: Kolejka zamknięta", "error");
+        setMultiplayerNote("Twoje miejsce w kolejce już nie jest aktywne.", "error");
+        setMultiplayerPanelMode("chooser");
+      }
     }
     return;
   }
 
-  const opponentSlot = multiplayer.role === "host" ? roomData.guest : roomData.host;
-
-  if (opponentSlot) {
-    multiplayer.opponent.nickname = opponentSlot.nickname || "Przeciwnik";
-    multiplayer.opponent.characterId = opponentSlot.characterId || "magik-millo";
-    multiplayer.opponent.x = typeof opponentSlot.x === "number" ? opponentSlot.x : multiplayer.opponent.x;
-    multiplayer.opponent.y = typeof opponentSlot.y === "number" ? opponentSlot.y : multiplayer.opponent.y;
-    multiplayer.opponent.hp = typeof opponentSlot.hp === "number" ? opponentSlot.hp : multiplayer.opponent.hp;
-    multiplayer.opponent.connected = true;
-  } else {
-    multiplayer.opponent.connected = false;
-  }
-
-  if (roomData.status === "waiting" && multiplayer.role === "host" && multiplayerNote) {
+  if (roomData.status === "queueing") {
+    multiplayer.waiting = true;
     renderMultiplayerLobbyState();
+    void maybeEvaluateMultiplayerQueueRoom();
+    return;
   }
 
-  if (roomData.status === "playing" && opponentSlot) {
+  if (roomData.status === "playing") {
     multiplayer.waiting = false;
 
-    if (multiplayerBackdrop && !multiplayerBackdrop.hidden) {
+    if (!multiplayerBackdrop?.hidden) {
       renderMultiplayerLobbyState();
     }
 
-    if (ui.currentView !== "game") {
+    if (ui.currentView !== "game" && !ui.pendingMultiplayerLaunch) {
       ui.nextGameMode = "multiplayer";
       ui.pendingMultiplayerLaunch = {
         roomId: multiplayer.roomId,
-        role: multiplayer.role,
+        playerId: multiplayer.selfId,
       };
-      closeMultiplayerLobby();
+      closeMultiplayerLobby({ cancelWaiting: false });
       showView("game");
     }
-  }
 
-  if (roomData.status === "playing" && multiplayer.matchActive && !opponentSlot && !multiplayer.pendingResult) {
-    multiplayer.pendingResult = {
-      winnerRole: multiplayer.role,
-      reason: "disconnect",
-      finishedAt: Date.now(),
-    };
+    if (roomData.result) {
+      multiplayer.pendingResult = roomData.result;
+    }
+
+    return;
   }
 
   if (roomData.status === "finished" && roomData.result) {
     multiplayer.pendingResult = roomData.result;
+    multiplayer.waiting = false;
+    return;
+  }
+
+  if (roomData.status === "cancelled") {
+    multiplayer.waiting = false;
+    renderMultiplayerLobbyState();
   }
 }
 
@@ -5652,7 +5854,7 @@ function handleMultiplayerDamageEvent(eventId, payload) {
     !eventId ||
     !payload ||
     multiplayer.processedDamageEventIds.has(eventId) ||
-    payload.targetRole !== multiplayer.role ||
+    payload.targetPlayerId !== multiplayer.selfId ||
     !multiplayer.matchActive ||
     game.mode !== "multiplayer"
   ) {
@@ -5663,13 +5865,35 @@ function handleMultiplayerDamageEvent(eventId, payload) {
   damagePlayer(Number(payload.damage || 0));
 
   if (game.player.hp <= 0 && !multiplayer.pendingResult) {
-    multiplayer.pendingResult = {
-      winnerRole: payload.ownerRole || getMultiplayerOpponentRole(),
-      reason: "duel",
-      finishedAt: Date.now(),
-    };
-    setMultiplayerResult(multiplayer.pendingResult.winnerRole, "duel");
+    void eliminateLocalMultiplayerPlayer(payload.ownerId || "", "defeat");
   }
+}
+
+function handleMultiplayerProjectileEvent(eventId, payload) {
+  if (
+    !eventId ||
+    !payload ||
+    multiplayer.processedProjectileEventIds.has(eventId) ||
+    payload.ownerId === multiplayer.selfId ||
+    !multiplayer.matchActive ||
+    game.mode !== "multiplayer"
+  ) {
+    return;
+  }
+
+  multiplayer.processedProjectileEventIds.add(eventId);
+  spawnProjectile({
+    x: Number(payload.x || 0),
+    y: Number(payload.y || 0),
+    targetType: "player",
+    targetPlayerId: payload.targetPlayerId || "",
+    targetX: Number(payload.targetX || 0),
+    targetY: Number(payload.targetY || 0),
+    kind: payload.kind || "player",
+    characterId: payload.characterId || "magik-millo",
+    ownerId: payload.ownerId || "",
+    remote: true,
+  });
 }
 
 async function createFirebaseMultiplayerRoom() {
@@ -5679,68 +5903,75 @@ async function createFirebaseMultiplayerRoom() {
     return;
   }
 
+  const playerId = ensureMultiplayerSelfId();
   const roomRef = db.ref("multiplayerRooms").push();
-  const roomId = roomRef.key;
+  const roomId = roomRef.key || "";
+  const playerProfile = buildMultiplayerProfile();
 
   await roomRef.set({
-    status: "waiting",
+    status: "queueing",
     createdAt: Date.now(),
     updatedAt: Date.now(),
-    host: buildMultiplayerProfile(),
+    countdownEndsAt: Date.now() + MULTIPLAYER_QUEUE_DURATION_MS,
+    playerCount: 1,
+    playerOrder: [],
+    players: {
+      [playerId]: playerProfile,
+    },
   });
 
-  watchMultiplayerRoom(roomId, "host");
+  bindMultiplayerRoom(roomId);
+  multiplayer.waiting = true;
   renderMultiplayerLobbyState();
 }
 
-async function joinFirebaseMultiplayerRoom(friendNickname) {
+async function joinFirebaseMultiplayerRoom(roomId) {
   const db = getFirebaseMultiplayerDatabase();
 
   if (!db || !multiplayerNote) {
     return;
   }
 
-  const normalizedNickname = normalizeMultiplayerNickname(friendNickname);
-  const staleCutoff = Date.now() - 1000 * 60 * 30;
-  const snapshot = await db.ref("multiplayerRooms")
-    .orderByChild("host/nicknameNormalized")
-    .equalTo(normalizedNickname)
-    .once("value");
-  const rooms = snapshot.val() || {};
-  const matchingEntry = Object.entries(rooms)
-    .map(([roomId, room]) => ({ roomId, room }))
-    .filter(
-      ({ room }) =>
-        room &&
-        room.status === "waiting" &&
-        !room.guest &&
-        Number(room.updatedAt || room.createdAt || 0) >= staleCutoff
-    )
-    .sort((first, second) => Number(second.room?.createdAt || 0) - Number(first.room?.createdAt || 0))[0];
+  const playerId = ensureMultiplayerSelfId();
+  const playerProfile = buildMultiplayerProfile();
+  const roomRef = db.ref(`multiplayerRooms/${roomId}`);
+  const transaction = await roomRef.transaction((room) => {
+    const now = Date.now();
 
-  if (!matchingEntry) {
-    setMultiplayerStatus("Status: Brak pokoju", "error");
-    setMultiplayerNote(`Nie znaleziono aktywnego pokoju dla nicku ${friendNickname}.`, "error");
-    return;
-  }
+    if (!room || room.status !== "queueing" || Number(room.countdownEndsAt || 0) <= now) {
+      return room;
+    }
 
-  const roomRef = db.ref(`multiplayerRooms/${matchingEntry.roomId}`);
-  await roomRef.update({
-    status: "playing",
-    updatedAt: Date.now(),
-    guest: buildMultiplayerProfile(),
+    const activePlayers = buildActiveRoomPlayersFromRaw(room, now);
+    const nextPlayers = activePlayers.reduce((accumulator, player) => {
+      accumulator[player.id] = {
+        ...(room.players?.[player.id] || {}),
+      };
+      return accumulator;
+    }, {});
+
+    if (!nextPlayers[playerId] && Object.keys(nextPlayers).length >= MULTIPLAYER_MAX_PLAYERS) {
+      return room;
+    }
+
+    nextPlayers[playerId] = {
+      ...(nextPlayers[playerId] || {}),
+      ...playerProfile,
+    };
+    room.players = nextPlayers;
+    room.updatedAt = now;
+    room.playerCount = Object.keys(nextPlayers).length;
+    return room;
   });
 
-  watchMultiplayerRoom(matchingEntry.roomId, "guest");
-  multiplayer.waiting = false;
-  multiplayer.opponent.nickname = matchingEntry.room?.host?.nickname || friendNickname;
-  ui.nextGameMode = "multiplayer";
-  ui.pendingMultiplayerLaunch = {
-    roomId: matchingEntry.roomId,
-    role: "guest",
-  };
-  closeMultiplayerLobby();
-  showView("game");
+  const joined = transaction.committed && transaction.snapshot.child(`players/${playerId}`).exists();
+
+  if (!joined) {
+    throw new Error("queue-full");
+  }
+
+  bindMultiplayerRoom(roomId);
+  multiplayer.waiting = true;
 }
 
 async function startMultiplayerAction(mode) {
@@ -5748,50 +5979,176 @@ async function startMultiplayerAction(mode) {
     return;
   }
 
-  const friendNickname = sanitizePlayerNickname(multiplayerFriendInput?.value || "");
-
-  if (mode === "join" && !friendNickname) {
-    setMultiplayerStatus("Status: Czekam na nick", "error");
-    setMultiplayerNote("Wpisz nick znajomego, aby dołączyć do pokoju.", "error");
-    multiplayerFriendInput?.focus();
+  if (mode !== "queue") {
     return;
   }
+
+  setMultiplayerPanelMode("queue");
+  multiplayerBackdrop.hidden = false;
 
   if (!hasFirebaseMultiplayerConfig()) {
     setMultiplayerStatus("Status: Firebase off", "error");
-    setMultiplayerNote("Uzupełnij plik firebase-config.js danymi projektu Firebase, aby włączyć pokoje 1v1.", "error");
+    setMultiplayerNote("Uzupełnij plik firebase-config.js danymi projektu Firebase, aby włączyć kolejkę graczy.", "error");
     return;
   }
 
-  if (multiplayerCreateButton) {
-    multiplayerCreateButton.disabled = true;
+  if (multiplayer.waiting && multiplayer.roomRef) {
+    void syncMultiplayerQueuePresence();
+    renderMultiplayerLobbyState();
+    return;
   }
 
-  if (multiplayerJoinButton) {
-    multiplayerJoinButton.disabled = true;
-  }
-
-  setMultiplayerStatus(
-    mode === "create" ? "Status: Tworzę pokój" : "Status: Szukam pokoju",
-    "waiting"
-  );
-  setMultiplayerNote(
-    mode === "create"
-      ? "Tworzę pokój multiplayer i przygotowuję go dla znajomego."
-      : `Szukam aktywnego pokoju gracza ${friendNickname}.`,
-    "warning"
-  );
+  resetMultiplayerState();
+  ensureMultiplayerSelfId();
+  multiplayer.joining = true;
+  setMultiplayerStatus("Status: Szukam graczy", "waiting");
+  setMultiplayerNote("Szukam aktywnej kolejki. Jeśli żadnej nie ma, otwieram nową na 30 sekund.", "warning");
+  renderMultiplayerLobbyState();
 
   try {
-    if (mode === "create") {
-      await createFirebaseMultiplayerRoom();
+    const db = getFirebaseMultiplayerDatabase();
+    const queueSnapshot = await db.ref("multiplayerRooms")
+      .orderByChild("status")
+      .equalTo("queueing")
+      .limitToLast(20)
+      .once("value");
+    const now = Date.now();
+    const rooms = Object.entries(queueSnapshot.val() || {})
+      .map(([roomId, room]) => ({ roomId, room }))
+      .filter(({ room }) => {
+        if (!room) {
+          return false;
+        }
+
+        const activePlayers = buildActiveRoomPlayersFromRaw(room, now);
+        return (
+          Number(room.updatedAt || room.createdAt || 0) >= now - MULTIPLAYER_ROOM_STALE_MS &&
+          Number(room.countdownEndsAt || 0) > now &&
+          activePlayers.length < MULTIPLAYER_MAX_PLAYERS
+        );
+      })
+      .sort((first, second) => Number(first.room.createdAt || 0) - Number(second.room.createdAt || 0));
+
+    if (rooms[0]) {
+      await joinFirebaseMultiplayerRoom(rooms[0].roomId);
     } else {
-      await joinFirebaseMultiplayerRoom(friendNickname);
+      await createFirebaseMultiplayerRoom();
     }
   } catch (error) {
     setMultiplayerStatus("Status: Błąd", "error");
-    setMultiplayerNote("Nie udało się połączyć z Firebase. Sprawdź config i reguły bazy.", "error");
+    setMultiplayerNote("Nie udało się dołączyć do kolejki graczy. Sprawdź połączenie z Firebase.", "error");
     renderMultiplayerLobbyState();
+  } finally {
+    multiplayer.joining = false;
+  }
+}
+
+async function syncMultiplayerQueuePresence() {
+  if (!multiplayer.playerRef || multiplayer.roomStatus !== "queueing") {
+    return;
+  }
+
+  await multiplayer.playerRef.update({
+    nickname: getPlayerNickname(),
+    nicknameNormalized: normalizeMultiplayerNickname(getPlayerNickname()),
+    characterId: state.equippedCharacter || "magik-millo",
+    petId: state.equippedPet || "",
+    connected: true,
+    alive: true,
+    lastSeenAt: Date.now(),
+    placement: 0,
+  }).catch(() => {});
+}
+
+async function maybeEvaluateMultiplayerQueueRoom() {
+  if (multiplayer.queueActionBusy || !multiplayer.roomRef || multiplayer.roomStatus !== "queueing") {
+    return;
+  }
+
+  const roomData = multiplayer.roomData;
+
+  if (!roomData) {
+    return;
+  }
+
+  const now = Date.now();
+  const activePlayers = getActiveMultiplayerPlayers(roomData, now);
+  const countdownExpired = now >= Number(roomData.countdownEndsAt || 0);
+
+  if (!countdownExpired && activePlayers.length < MULTIPLAYER_MAX_PLAYERS) {
+    return;
+  }
+
+  multiplayer.queueActionBusy = true;
+
+  try {
+    if (countdownExpired && activePlayers.length < 2) {
+      await multiplayer.roomRef.transaction((room) => {
+        const currentNow = Date.now();
+
+        if (!room || room.status !== "queueing") {
+          return room;
+        }
+
+        const currentActivePlayers = buildActiveRoomPlayersFromRaw(room, currentNow);
+        if (currentActivePlayers.length >= 2 || currentNow < Number(room.countdownEndsAt || 0)) {
+          return room;
+        }
+
+        room.status = "cancelled";
+        room.updatedAt = currentNow;
+        room.result = {
+          reason: "not-enough-players",
+          finishedAt: currentNow,
+        };
+        return room;
+      });
+      return;
+    }
+
+    if (activePlayers.length >= 2) {
+      await multiplayer.roomRef.transaction((room) => {
+        const currentNow = Date.now();
+
+        if (!room || room.status !== "queueing") {
+          return room;
+        }
+
+        const currentActivePlayers = buildActiveRoomPlayersFromRaw(room, currentNow);
+        const shouldStart =
+          currentActivePlayers.length >= MULTIPLAYER_MAX_PLAYERS ||
+          currentNow >= Number(room.countdownEndsAt || 0);
+
+        if (!shouldStart || currentActivePlayers.length < 2) {
+          return room;
+        }
+
+        room.status = "playing";
+        room.updatedAt = currentNow;
+        room.startedAt = currentNow;
+        room.playerOrder = currentActivePlayers.map((player) => player.id);
+        room.playerCount = currentActivePlayers.length;
+        room.players = currentActivePlayers.reduce((accumulator, player) => {
+          accumulator[player.id] = {
+            ...(room.players?.[player.id] || {}),
+            nickname: player.nickname || "Gracz",
+            nicknameNormalized: player.nicknameNormalized || normalizeMultiplayerNickname(player.nickname || "Gracz"),
+            characterId: player.characterId || "magik-millo",
+            petId: player.petId || "",
+            connected: true,
+            alive: true,
+            hp: getPlayerMaxHp(),
+            placement: 0,
+            lastSeenAt: currentNow,
+          };
+          return accumulator;
+        }, {});
+        room.result = null;
+        return room;
+      });
+    }
+  } finally {
+    multiplayer.queueActionBusy = false;
   }
 }
 
@@ -6394,27 +6751,96 @@ function isMultiplayerMatchActive() {
   return game.mode === "multiplayer" && multiplayer.matchActive;
 }
 
-function getMultiplayerSpawnPoint(role) {
-  const x = role === "host" ? game.width * 0.25 : game.width * 0.75;
+function getMultiplayerSpawnPoint(index, totalPlayers) {
+  const fallbackPositions = [
+    { xRatio: 0.18, yRatio: 0.24 },
+    { xRatio: 0.82, yRatio: 0.24 },
+    { xRatio: 0.18, yRatio: 0.76 },
+    { xRatio: 0.82, yRatio: 0.76 },
+    { xRatio: 0.5, yRatio: 0.5 },
+  ];
+  const safeIndex = clamp(index, 0, fallbackPositions.length - 1);
+  const point = fallbackPositions[safeIndex] || fallbackPositions[0];
+
   return {
-    x: clamp(x, 72, Math.max(72, game.width - 72)),
-    y: clamp(game.height * 0.58, 110, Math.max(110, game.height - 72)),
+    x: clamp(game.width * point.xRatio, 72, Math.max(72, game.width - 72)),
+    y: clamp(game.height * point.yRatio, 110, Math.max(110, game.height - 72)),
   };
 }
 
-function getMultiplayerOpponentRole() {
-  return multiplayer.role === "host" ? "guest" : "host";
+function getMultiplayerMatchPlayers() {
+  const ids = multiplayer.playerOrder.length
+    ? multiplayer.playerOrder
+    : getSortedRoomPlayersFromData(multiplayer.roomData).map((player) => player.id);
+  const totalPlayers = ids.length || 2;
+
+  return ids
+    .map((playerId, index) => {
+      const player = multiplayer.players[playerId];
+
+      if (!player) {
+        return null;
+      }
+
+      const spawn = getMultiplayerSpawnPoint(index, totalPlayers);
+      return {
+        ...player,
+        x: typeof player.x === "number" && player.x > 0 ? player.x : spawn.x,
+        y: typeof player.y === "number" && player.y > 0 ? player.y : spawn.y,
+      };
+    })
+    .filter(Boolean);
+}
+
+function getNearestMultiplayerTarget() {
+  return getMultiplayerMatchPlayers()
+    .filter((player) => player.id !== multiplayer.selfId && player.alive !== false && player.connected !== false)
+    .sort(
+      (first, second) =>
+        Math.hypot(first.x - game.player.x, first.y - game.player.y) -
+        Math.hypot(second.x - game.player.x, second.y - game.player.y)
+    )[0] || null;
+}
+
+function getMultiplayerPlacementTrophyDelta(place, totalPlayers) {
+  if (place === 1) {
+    return 30;
+  }
+
+  if (place === 2) {
+    return 15;
+  }
+
+  if (totalPlayers >= 3 && place === totalPlayers) {
+    return -20;
+  }
+
+  return 0;
+}
+
+function getMultiplayerResultDetails(result) {
+  const placements = result?.placements || {};
+  const placement = Number(placements[multiplayer.selfId] || 0) || Math.max(1, result?.playerCount || 1);
+  const playerCount = Number(result?.playerCount || multiplayer.playerCount || getMultiplayerMatchPlayers().length || 1);
+  const delta = getMultiplayerPlacementTrophyDelta(placement, playerCount);
+  return { placement, playerCount, delta };
 }
 
 function startMultiplayerMatchSession(session) {
-  const role = session?.role || multiplayer.role || "host";
-  const ownSpawn = getMultiplayerSpawnPoint(role);
-  const opponentSpawn = getMultiplayerSpawnPoint(role === "host" ? "guest" : "host");
+  const playerId = session?.playerId || multiplayer.selfId;
+  const playerOrder = multiplayer.playerOrder.length
+    ? multiplayer.playerOrder
+    : getSortedRoomPlayersFromData(multiplayer.roomData).map((player) => player.id);
+  gameMap.classList.add("multiplayer-ffa");
+  updateGameBounds();
+  const ownIndex = Math.max(0, playerOrder.indexOf(playerId));
+  const ownSpawn = getMultiplayerSpawnPoint(ownIndex, playerOrder.length || 2);
 
   game.mode = "multiplayer";
-  multiplayer.role = role;
+  multiplayer.selfId = playerId;
   multiplayer.roomId = session?.roomId || multiplayer.roomId;
   multiplayer.matchActive = true;
+  multiplayer.waiting = false;
   multiplayer.resultApplied = false;
   multiplayer.pendingResult = null;
   multiplayer.syncAccumulatorMs = 0;
@@ -6426,17 +6852,17 @@ function startMultiplayerMatchSession(session) {
   game.player.hp = getPlayerMaxHp();
   game.player.x = ownSpawn.x;
   game.player.y = ownSpawn.y;
-  game.pet.x = game.player.x + 70;
-  game.pet.y = game.player.y + 36;
-  multiplayer.opponent.x = opponentSpawn.x;
-  multiplayer.opponent.y = opponentSpawn.y;
-  multiplayer.opponent.hp = getPlayerMaxHp();
+  game.pet.x = game.player.x + 50;
+  game.pet.y = game.player.y + 28;
+  game.pet.shieldActive = false;
+  game.pet.shieldTimerMs = 0;
+  game.pet.shieldCooldownMs = 0;
 
   syncMultiplayerPlayerState(true);
 }
 
 function syncMultiplayerPlayerState(force = false) {
-  if (!isMultiplayerMatchActive() || !multiplayer.roomRef || !multiplayer.role) {
+  if (!isMultiplayerMatchActive() || !multiplayer.playerRef || !multiplayer.selfId) {
     return;
   }
 
@@ -6445,56 +6871,153 @@ function syncMultiplayerPlayerState(force = false) {
     x: Math.round(game.player.x),
     y: Math.round(game.player.y),
     characterId: state.equippedCharacter || "magik-millo",
+    petId: state.equippedPet || "",
     nickname: getPlayerNickname(),
     nicknameNormalized: normalizeMultiplayerNickname(getPlayerNickname()),
+    connected: true,
+    alive: game.player.hp > 0,
     lastSeenAt: Date.now(),
   };
 
+  const update = {
+    ...payload,
+  };
+
   if (force) {
-    multiplayer.roomRef.update({
-      status: "playing",
-      updatedAt: Date.now(),
-      [`${multiplayer.role}`]: payload,
-    }).catch(() => {});
-    return;
+    update.placement = 0;
   }
 
-  multiplayer.roomRef.update({
-    updatedAt: Date.now(),
-    [`${multiplayer.role}`]: payload,
-  }).catch(() => {});
+  multiplayer.playerRef.update(update).catch(() => {});
 }
 
-function sendMultiplayerDamage(amount, projectileKind = "player") {
-  if (!isMultiplayerMatchActive() || !multiplayer.damageRef || !multiplayer.role) {
+function sendMultiplayerDamage(amount, projectileKind = "player", targetPlayerId = "") {
+  if (!isMultiplayerMatchActive() || !multiplayer.damageRef || !multiplayer.selfId || !targetPlayerId) {
     return;
   }
 
   const damageRef = multiplayer.damageRef.push();
-  const targetRole = multiplayer.role === "host" ? "guest" : "host";
 
   damageRef.set({
-    ownerRole: multiplayer.role,
-    targetRole,
+    ownerId: multiplayer.selfId,
+    targetPlayerId,
     projectileKind,
     damage: Math.max(1, Math.round(amount)),
     createdAt: Date.now(),
   }).catch(() => {});
 }
 
-function setMultiplayerResult(winnerRole, reason = "duel") {
-  if (!multiplayer.roomRef || multiplayer.resultApplied) {
+function sendMultiplayerProjectile(projectile) {
+  if (!isMultiplayerMatchActive() || !multiplayer.projectileRef || !multiplayer.selfId) {
     return;
   }
 
-  multiplayer.roomRef.update({
-    status: "finished",
-    updatedAt: Date.now(),
-    result: {
-      winnerRole,
-      reason,
-      finishedAt: Date.now(),
-    },
+  multiplayer.projectileRef.push().set({
+    ownerId: multiplayer.selfId,
+    x: Math.round(projectile.x),
+    y: Math.round(projectile.y),
+    targetPlayerId: projectile.targetPlayerId || "",
+    targetX: Math.round(projectile.targetX || 0),
+    targetY: Math.round(projectile.targetY || 0),
+    kind: projectile.kind || "player",
+    characterId: projectile.characterId || state.equippedCharacter || "magik-millo",
+    createdAt: Date.now(),
+  }).catch(() => {});
+}
+
+async function eliminateLocalMultiplayerPlayer(eliminatedById = "", reason = "defeat") {
+  if (
+    !isMultiplayerMatchActive() ||
+    !multiplayer.roomRef ||
+    !multiplayer.selfId ||
+    game.player.hp > 0 ||
+    multiplayer.pendingResult
+  ) {
+    return;
+  }
+
+  await multiplayer.roomRef.transaction((room) => {
+    const now = Date.now();
+
+    if (!room || room.status !== "playing") {
+      return room;
+    }
+
+    const players = room.players || {};
+    const ownPlayer = players[multiplayer.selfId];
+
+    if (!ownPlayer || ownPlayer.alive === false) {
+      return room;
+    }
+
+    const alivePlayers = Object.entries(players).filter(([, player]) => player?.alive !== false);
+    ownPlayer.alive = false;
+    ownPlayer.connected = reason === "forfeit" ? false : ownPlayer.connected;
+    ownPlayer.hp = 0;
+    ownPlayer.placement = alivePlayers.length;
+    ownPlayer.eliminatedAt = now;
+    ownPlayer.eliminatedBy = eliminatedById || "";
+    room.updatedAt = now;
+
+    const survivors = Object.entries(players).filter(([playerId, player]) => playerId !== multiplayer.selfId && player?.alive !== false);
+
+    if (survivors.length <= 1) {
+      if (survivors[0]) {
+        const [winnerId, winner] = survivors[0];
+        winner.placement = 1;
+        winner.connected = winner.connected !== false;
+        players[winnerId] = winner;
+      }
+
+      room.status = "finished";
+      room.result = {
+        reason,
+        finishedAt: now,
+        playerCount: Number(room.playerCount || Object.keys(players).length),
+        placements: Object.fromEntries(
+          Object.entries(players).map(([playerId, player]) => [playerId, Number(player?.placement || 0)])
+        ),
+      };
+    }
+
+    room.players = players;
+    return room;
+  }).catch(() => {});
+}
+
+async function maybeFinalizeMultiplayerWinner() {
+  if (!multiplayer.roomRef || !isMultiplayerMatchActive()) {
+    return;
+  }
+
+  await multiplayer.roomRef.transaction((room) => {
+    const now = Date.now();
+
+    if (!room || room.status !== "playing") {
+      return room;
+    }
+
+    const players = room.players || {};
+    const aliveEntries = Object.entries(players).filter(([, player]) => player?.alive !== false);
+
+    if (aliveEntries.length !== 1) {
+      return room;
+    }
+
+    const [winnerId, winner] = aliveEntries[0];
+    winner.placement = 1;
+    players[winnerId] = winner;
+    room.players = players;
+    room.status = "finished";
+    room.updatedAt = now;
+    room.result = {
+      reason: "survival",
+      finishedAt: now,
+      playerCount: Number(room.playerCount || Object.keys(players).length),
+      placements: Object.fromEntries(
+        Object.entries(players).map(([playerId, player]) => [playerId, Number(player?.placement || 0)])
+      ),
+    };
+    return room;
   }).catch(() => {});
 }
 
@@ -6503,22 +7026,29 @@ function applyMultiplayerPendingResult() {
     return;
   }
 
-  const localWon = multiplayer.pendingResult.winnerRole === multiplayer.role;
-  const reason = multiplayer.pendingResult.reason || "duel";
-  const opponentName = multiplayer.opponent.nickname || "Przeciwnik";
-  let note = localWon ? "Wygrales pojedynek 1v1." : "Przegrales pojedynek 1v1.";
+  const { placement, playerCount, delta } = getMultiplayerResultDetails(multiplayer.pendingResult);
+  const deltaText = delta > 0 ? `+${delta}` : `${delta}`;
+  let title = `Miejsce ${placement}`;
+  let note = `Bitwa ${playerCount} graczy zakończona. Zmiana pucharów: ${deltaText}.`;
 
-  if (reason === "forfeit") {
-    note = localWon ? `${opponentName} poddal pojedynek 1v1.` : "Poddales pojedynek 1v1.";
-  } else if (reason === "disconnect") {
-    note = localWon ? `${opponentName} rozlaczyl sie podczas pojedynku.` : "Polaczenie z przeciwnikiem zostalo przerwane.";
-  } else {
-    note = localWon ? `Wygrales pojedynek 1v1 z graczem ${opponentName}.` : `Przegrales pojedynek 1v1 z graczem ${opponentName}.`;
+  if (placement === 1) {
+    title = "Zwyciestwo";
+    note = `Wygrałeś bitwę ${playerCount} graczy. Zdobywasz ${deltaText} pucharów.`;
+  } else if (placement === 2) {
+    title = "Drugie miejsce";
+    note = `Kończysz walkę na 2. miejscu. Zdobywasz ${deltaText} pucharów.`;
+  } else if (delta < 0) {
+    title = "Ostatnie miejsce";
+    note = `Kończysz walkę na ostatnim miejscu. Tracisz ${Math.abs(delta)} pucharów.`;
   }
 
+  state.trophies = Math.max(0, state.trophies + delta);
+  trophyBalance.textContent = String(state.trophies);
+  game.trophiesEarnedRun = delta;
+  saveState();
   multiplayer.resultApplied = true;
   multiplayer.matchActive = false;
-  concludeGameSession(localWon ? "Zwyciestwo" : "Przegrana", note);
+  concludeGameSession(title, note);
 }
 
 function startGameSession() {
@@ -6554,12 +7084,16 @@ function stopGameSession() {
   barriersLayer.innerHTML = "";
   pickupsLayer.innerHTML = "";
   waterFieldsLayer.innerHTML = "";
+  if (multiplayerPlayersLayer) {
+    multiplayerPlayersLayer.innerHTML = "";
+  }
   robotsLayer.innerHTML = "";
   projectilesLayer.innerHTML = "";
   effectsLayer.innerHTML = "";
   if (gameTutorialOverlay) {
     gameTutorialOverlay.hidden = true;
   }
+  gameMap.classList.remove("multiplayer-ffa");
   gameMap.classList.remove("first-robot-tutorial");
   playerEntity.classList.remove("tutorial-focus");
   if (opponentEntity) {
@@ -6568,7 +7102,7 @@ function stopGameSession() {
   hideGameResult();
   resetTouchControls();
   finishFirstRobotTutorial(false);
-  if (!multiplayer.waiting) {
+  if (!multiplayer.waiting && multiplayer.roomStatus !== "finished") {
     multiplayer.matchActive = false;
   }
 }
@@ -6745,6 +7279,11 @@ function clampGameEntities() {
   });
 }
 
+function updateMultiplayerPetFollow() {
+  game.pet.x = clamp(game.player.x + 54, 36, Math.max(36, game.width - 36));
+  game.pet.y = clamp(game.player.y + 28, 72, Math.max(72, game.height - 36));
+}
+
 function runGameFrame(timestamp) {
   if (!game.active) {
     return;
@@ -6755,27 +7294,27 @@ function runGameFrame(timestamp) {
   game.lastFrameTime = timestamp;
 
   if (isMultiplayerMatchActive()) {
-    updatePlayerMovement(deltaSeconds);
-    updateAmmo(deltaSeconds);
-    tryAutoFire(timestamp);
+    if (game.player.hp > 0) {
+      updatePlayerMovement(deltaSeconds);
+      updateAmmo(deltaSeconds);
+      tryAutoFire(timestamp);
+    }
     updateProjectiles(deltaSeconds);
+    updateMultiplayerPetFollow();
     clampGameEntities();
 
-    multiplayer.syncAccumulatorMs += deltaMs;
-    if (multiplayer.syncAccumulatorMs >= 80) {
-      multiplayer.syncAccumulatorMs = 0;
-      syncMultiplayerPlayerState();
+    if (game.player.hp > 0) {
+      multiplayer.syncAccumulatorMs += deltaMs;
+      if (multiplayer.syncAccumulatorMs >= 80) {
+        multiplayer.syncAccumulatorMs = 0;
+        syncMultiplayerPlayerState();
+      }
     }
 
     renderGameScene();
 
     if (game.player.hp <= 0 && !multiplayer.pendingResult) {
-      multiplayer.pendingResult = {
-        winnerRole: getMultiplayerOpponentRole(),
-        reason: "duel",
-        finishedAt: Date.now(),
-      };
-      setMultiplayerResult(multiplayer.pendingResult.winnerRole, "duel");
+      void eliminateLocalMultiplayerPlayer("", "defeat");
     }
 
     if (multiplayer.pendingResult) {
@@ -6784,6 +7323,8 @@ function runGameFrame(timestamp) {
         return;
       }
     }
+
+    void maybeFinalizeMultiplayerWinner();
 
     game.animationId = window.requestAnimationFrame(runGameFrame);
     return;
@@ -6935,15 +7476,8 @@ function tryAutoFire(timestamp) {
     return;
   }
 
-  const multiplayerTarget = multiplayer.opponent.connected
-    ? {
-        id: "opponent",
-        x: multiplayer.opponent.x,
-        y: multiplayer.opponent.y,
-      }
-    : null;
   const target = isMultiplayerMatchActive()
-    ? multiplayerTarget
+    ? getNearestMultiplayerTarget()
     : findNearestRobot(game.player.x, game.player.y);
   const ammoIndex = game.ammo.findIndex((slot) => slot >= 1);
 
@@ -6958,11 +7492,13 @@ function tryAutoFire(timestamp) {
     x: game.player.x,
     y: game.player.y - 10,
     targetId: typeof target.id === "number" ? target.id : null,
-    targetType: isMultiplayerMatchActive() ? "opponent" : "robot",
-    targetRole: isMultiplayerMatchActive() ? getMultiplayerOpponentRole() : null,
+    targetType: isMultiplayerMatchActive() ? "player" : "robot",
+    targetPlayerId: isMultiplayerMatchActive() ? target.id : "",
     targetX: target.x,
     targetY: target.y,
     kind: getPlayerProjectileKind(ammoIndex),
+    characterId: state.equippedCharacter || "magik-millo",
+    ownerId: isMultiplayerMatchActive() ? multiplayer.selfId : "",
   });
 }
 
@@ -7206,13 +7742,23 @@ function updateProjectiles(deltaSeconds) {
   const survivors = [];
 
   game.projectiles.forEach((projectile) => {
-    const target = projectile.targetType === "opponent"
-      ? (isMultiplayerMatchActive() ? multiplayer.opponent : null)
+    const target = projectile.targetType === "player"
+      ? (
+        projectile.targetPlayerId === multiplayer.selfId
+          ? {
+              id: multiplayer.selfId,
+              x: game.player.x,
+              y: game.player.y,
+              hp: game.player.hp,
+              alive: game.player.hp > 0,
+            }
+          : getMultiplayerMatchPlayers().find((player) => player.id === projectile.targetPlayerId) || null
+      )
       : typeof projectile.targetId === "number"
         ? game.robots.find((robot) => robot.id === projectile.targetId && !robot.dead)
         : null;
 
-    if (!target && projectile.kind !== "papuga-miss") {
+    if (!target && projectile.kind !== "papuga-miss" && projectile.targetType !== "player") {
       return;
     }
 
@@ -7224,26 +7770,20 @@ function updateProjectiles(deltaSeconds) {
     const step = GAME_RULES.projectileSpeed * deltaSeconds;
 
     if (distance <= step + 20) {
-      if (projectile.targetType === "opponent") {
+      if (projectile.targetType === "player") {
         const damage = projectile.kind === "polar-bear-shot"
           ? GAME_RULES.polarBearProjectileDamage
           : getProjectileDamage();
 
-        if (projectile.kind === "papuga-miss") {
-          spawnFloatingText(projectile.targetX, projectile.targetY - 24, "NIE TRAFIONO", "hit");
-        } else {
-          sendMultiplayerDamage(damage, projectile.kind);
-          multiplayer.opponent.hp = Math.max(0, multiplayer.opponent.hp - damage);
-          spawnFloatingText(targetX, targetY - 92, `-${damage}`, "hit");
-
-          if (multiplayer.opponent.hp <= 0 && !multiplayer.pendingResult) {
-            multiplayer.pendingResult = {
-              winnerRole: multiplayer.role,
-              reason: "duel",
-              finishedAt: Date.now(),
-            };
-            setMultiplayerResult(multiplayer.role, "duel");
+        if (projectile.ownerId === multiplayer.selfId && projectile.targetPlayerId && projectile.targetPlayerId !== multiplayer.selfId) {
+          sendMultiplayerDamage(damage, projectile.kind, projectile.targetPlayerId);
+          if (multiplayer.players[projectile.targetPlayerId]) {
+            multiplayer.players[projectile.targetPlayerId].hp = Math.max(
+              0,
+              Number(multiplayer.players[projectile.targetPlayerId].hp || getPlayerMaxHp()) - damage
+            );
           }
+          spawnFloatingText(targetX, targetY - 92, `-${damage}`, "hit");
         }
 
         return;
@@ -7930,15 +8470,7 @@ function cleanupDeadRobots() {
 
 function finishGameLoss() {
   if (game.mode === "multiplayer") {
-    multiplayer.pendingResult = {
-      winnerRole: getMultiplayerOpponentRole(),
-      reason: "duel",
-      finishedAt: Date.now(),
-    };
-    setMultiplayerResult(multiplayer.pendingResult.winnerRole, "duel");
-    multiplayer.resultApplied = true;
-    multiplayer.matchActive = false;
-    concludeGameSession("Przegrana", "Przegrales pojedynek 1v1.");
+    void eliminateLocalMultiplayerPlayer("", "defeat");
     return;
   }
 
@@ -7947,15 +8479,7 @@ function finishGameLoss() {
 
 function finishGameVictory() {
   if (game.mode === "multiplayer") {
-    multiplayer.pendingResult = {
-      winnerRole: multiplayer.role,
-      reason: "duel",
-      finishedAt: Date.now(),
-    };
-    setMultiplayerResult(multiplayer.role, "duel");
-    multiplayer.resultApplied = true;
-    multiplayer.matchActive = false;
-    concludeGameSession("Zwyciestwo", "Wygrales pojedynek 1v1.");
+    void maybeFinalizeMultiplayerWinner();
     return;
   }
 
@@ -7966,22 +8490,15 @@ function requestExitGame() {
   openModal({
     title: "Zakonczyc runde?",
     message: game.mode === "multiplayer"
-      ? "Wyjście z 1v1 potraktujemy jako poddanie pojedynku."
+      ? "Wyjście z bitwy graczy potraktujemy jako poddanie i może dać ostatnie miejsce."
       : "Najpierw zobaczysz wynik rundy.",
     buttonText: "WYJDZ",
     dismissible: true,
     onConfirm: () => {
       closeModal();
       if (game.mode === "multiplayer") {
-        multiplayer.pendingResult = {
-          winnerRole: getMultiplayerOpponentRole(),
-          reason: "forfeit",
-          finishedAt: Date.now(),
-        };
-        setMultiplayerResult(multiplayer.pendingResult.winnerRole, "forfeit");
-        multiplayer.resultApplied = true;
-        multiplayer.matchActive = false;
-        concludeGameSession("Zakonczyles pojedynek", "Poddales pojedynek 1v1.");
+        game.player.hp = 0;
+        void eliminateLocalMultiplayerPlayer("", "forfeit");
         return;
       }
 
@@ -8141,6 +8658,15 @@ function spawnProjectile(projectileConfig) {
 
   game.projectiles.push(projectile);
   playProjectileSound(projectile);
+
+  if (
+    isMultiplayerMatchActive() &&
+    projectile.targetType === "player" &&
+    projectile.ownerId === multiplayer.selfId &&
+    !projectile.remote
+  ) {
+    sendMultiplayerProjectile(projectile);
+  }
 }
 
 function playProjectileSound(projectile) {
@@ -8372,11 +8898,49 @@ function updateWaterFields(deltaSeconds) {
   game.waterFields = [];
 }
 
+function buildMultiplayerRemotePlayerMarkup(player) {
+  const character = CATALOG.characters.find((item) => item.id === player.characterId) || CATALOG.characters[0];
+  const pet = CATALOG.pets.find((item) => item.id === player.petId) || null;
+  const petX = Math.round(player.x + 42);
+  const petY = Math.round(player.y + 22);
+
+  return `
+    <div class="entity remote-player-entity" style="left:${player.x}px; top:${player.y}px;">
+      <p class="entity-health opponent-health">${Math.max(0, Math.ceil(player.hp || 0))} pz</p>
+      <p class="opponent-nickname">${player.nickname || "Gracz"}</p>
+      <div class="player-visual opponent-visual">
+        <div class="player-sprite-frame opponent-sprite-frame remote-player-frame">
+          ${buildPreviewAssetMarkup(character, {
+            imageClass: "entity-image asset-image",
+            fallbackText: character.name || "GRACZ",
+            alt: character.name || "Gracz",
+            usePreviewVideo: false,
+          })}
+        </div>
+      </div>
+    </div>
+    ${pet ? `
+      <div class="entity remote-pet-entity" style="left:${petX}px; top:${petY}px;">
+        <div class="pet-sprite-frame remote-pet-frame">
+          <img
+            class="entity-image asset-image"
+            src="${pet.image}"
+            alt="${pet.name}"
+            data-fallback-text="PLATOYA"
+          />
+          <div class="asset-fallback">PLATOYA</div>
+        </div>
+      </div>
+    ` : ""}
+  `;
+}
+
 function renderGameScene() {
   refreshAmmoConfig();
   delete gameMap.dataset.worldTheme;
   const multiplayerMode = game.mode === "multiplayer";
   const showFirstRobotTutorial = isFirstRobotTutorialPaused();
+  gameMap.classList.toggle("multiplayer-ffa", multiplayerMode);
   gameMap.classList.toggle("first-robot-tutorial", showFirstRobotTutorial);
   playerEntity.classList.toggle("tutorial-focus", showFirstRobotTutorial);
   waveBanner.hidden = multiplayerMode || game.waveIntroMs <= 0;
@@ -8401,13 +8965,13 @@ function renderGameScene() {
   const pet = getEquippedPet();
   const petCooldownState = getPetCooldownState();
 
-  if (pet && !multiplayerMode) {
+  if (pet) {
     gamePetEntity.hidden = false;
     gamePetEntity.style.left = `${game.pet.x}px`;
     gamePetEntity.style.top = `${game.pet.y}px`;
-    petCooldownBar.hidden = petCooldownState === null;
-    petCooldownBar.dataset.kind = petCooldownState?.kind || "";
-    petCooldownFill.style.transform = `scaleY(${petCooldownState === null ? 0 : petCooldownState.progress})`;
+    petCooldownBar.hidden = multiplayerMode || petCooldownState === null;
+    petCooldownBar.dataset.kind = !multiplayerMode && petCooldownState?.kind ? petCooldownState.kind : "";
+    petCooldownFill.style.transform = `scaleY(${multiplayerMode || petCooldownState === null ? 0 : petCooldownState.progress})`;
     petPackLayer.innerHTML = "";
   } else {
     gamePetEntity.hidden = true;
@@ -8417,21 +8981,18 @@ function renderGameScene() {
     delete playerShield.dataset.kind;
   }
 
-  if (opponentEntity && opponentHealthLabel && opponentNickname && opponentImage) {
+  if (opponentEntity) {
+    opponentEntity.hidden = true;
+  }
+
+  if (multiplayerPlayersLayer) {
     if (multiplayerMode) {
-      const opponentCharacter = CATALOG.characters.find(
-        (character) => character.id === multiplayer.opponent.characterId
-      ) || CATALOG.characters[0];
-      opponentEntity.hidden = false;
-      opponentEntity.style.left = `${multiplayer.opponent.x}px`;
-      opponentEntity.style.top = `${multiplayer.opponent.y}px`;
-      opponentHealthLabel.textContent = `${Math.max(0, Math.ceil(multiplayer.opponent.hp))} pz`;
-      opponentNickname.textContent = multiplayer.opponent.nickname || "Przeciwnik";
-      opponentImage.src = opponentCharacter.image;
-      opponentImage.alt = opponentCharacter.name || "Przeciwnik";
-      opponentImage.dataset.fallbackText = "RYWAL";
+      multiplayerPlayersLayer.innerHTML = getMultiplayerMatchPlayers()
+        .filter((player) => player.id !== multiplayer.selfId && player.alive !== false && player.connected !== false)
+        .map((player) => buildMultiplayerRemotePlayerMarkup(player))
+        .join("");
     } else {
-      opponentEntity.hidden = true;
+      multiplayerPlayersLayer.innerHTML = "";
     }
   }
 
@@ -8556,7 +9117,7 @@ function showGameResult() {
 
 function animateResultCounter(node, targetValue, delayMs, onDone) {
   const startTimeout = window.setTimeout(() => {
-    if (targetValue <= 0) {
+    if (targetValue === 0) {
       node.textContent = "0";
       if (typeof onDone === "function") {
         onDone();
@@ -8565,11 +9126,12 @@ function animateResultCounter(node, targetValue, delayMs, onDone) {
     }
 
     let current = 0;
+    const step = targetValue > 0 ? 1 : -1;
     const interval = window.setInterval(() => {
-      current += 1;
+      current += step;
       node.textContent = String(current);
 
-      if (current >= targetValue) {
+      if ((step > 0 && current >= targetValue) || (step < 0 && current <= targetValue)) {
         window.clearInterval(interval);
         if (typeof onDone === "function") {
           onDone();
@@ -8600,13 +9162,16 @@ async function returnToLobbyFromResult() {
 
   try {
     const wasMultiplayer = game.mode === "multiplayer";
-    const earnedTrophies = Math.max(0, game.trophiesEarnedRun);
+    const earnedTrophies = game.trophiesEarnedRun;
     hideGameResult();
     showView("lobby");
 
     if (wasMultiplayer) {
-      if (multiplayer.roomRef) {
-        multiplayer.roomRef.remove().catch(() => {});
+      if (multiplayer.playerRef) {
+        multiplayer.playerRef.update({
+          connected: false,
+          lastSeenAt: Date.now(),
+        }).catch(() => {});
       }
       resetMultiplayerState();
       return;
@@ -8846,9 +9411,11 @@ function renderGameModeInfo() {
   }
 
   if (game.mode === "multiplayer") {
-    gameModeInfo.textContent = multiplayer.opponent.connected
-      ? `1v1 z ${multiplayer.opponent.nickname}: ty ${Math.max(0, Math.ceil(game.player.hp))} pz, rywal ${Math.max(0, Math.ceil(multiplayer.opponent.hp))} pz.`
-      : "Multiplayer 1v1: czekam na synchronizację przeciwnika...";
+    const alivePlayers = getMultiplayerMatchPlayers().filter(
+      (player) => player.alive !== false && player.connected !== false
+    ).length;
+    const totalPlayers = multiplayer.playerCount || getMultiplayerMatchPlayers().length || 1;
+    gameModeInfo.textContent = `Bitwa graczy: ${alivePlayers}/${totalPlayers} wciąż walczy. Ty masz ${Math.max(0, Math.ceil(game.player.hp))} pz, a twoja PlatoYA jest razem z tobą na mapie.`;
     return;
   }
 
@@ -9013,9 +9580,9 @@ function getProjectileVisual(projectile) {
   }
 
   if (projectile.kind === "elfie-shot") {
-    const equippedCharacter = getEquippedCharacter();
-    const isWarriorVariant = equippedCharacter?.id === "elfie-wojowniczka";
-    const isNatureVariant = equippedCharacter?.id === "elfie-w-swojej-naturze";
+    const projectileCharacterId = projectile.characterId || getEquippedCharacter()?.id;
+    const isWarriorVariant = projectileCharacterId === "elfie-wojowniczka";
+    const isNatureVariant = projectileCharacterId === "elfie-w-swojej-naturze";
 
     return {
       src: isWarriorVariant ? "./atak_wojowniczka.jpeg" : "./atak_elfie.jpeg",
@@ -9037,9 +9604,9 @@ function getProjectileVisual(projectile) {
   }
 
   if (projectile.kind === "linda-shot") {
-    const equippedCharacter = getEquippedCharacter();
+    const projectileCharacterId = projectile.characterId || getEquippedCharacter()?.id;
 
-    if (equippedCharacter?.id === "elfie-jako-linda") {
+    if (projectileCharacterId === "elfie-jako-linda") {
       return {
         src: "./atak_elinda.jpeg",
         alt: "Atak Elfie jako Lindy",
@@ -9051,13 +9618,13 @@ function getProjectileVisual(projectile) {
   }
 
   if (projectile.kind === "lily-shot") {
-    const equippedCharacter = getEquippedCharacter();
+    const projectileCharacterId = projectile.characterId || getEquippedCharacter()?.id;
     const isLeoVariant =
-      equippedCharacter?.id === "leo" ||
-      equippedCharacter?.id === "leo-skoczek-narciarski" ||
-      equippedCharacter?.id === "lyzwiarz-leo";
-    const isLilySkaterVariant = equippedCharacter?.id === "lyzwiarka-lily";
-    const isLilyMasterVariant = equippedCharacter?.id === "mistrzyni-lyzwiarstwa-lily";
+      projectileCharacterId === "leo" ||
+      projectileCharacterId === "leo-skoczek-narciarski" ||
+      projectileCharacterId === "lyzwiarz-leo";
+    const isLilySkaterVariant = projectileCharacterId === "lyzwiarka-lily";
+    const isLilyMasterVariant = projectileCharacterId === "mistrzyni-lyzwiarstwa-lily";
     const isSkiJumperVariant = equippedCharacter?.id === "leo-skoczek-narciarski";
     const isSkaterLeoVariant = equippedCharacter?.id === "lyzwiarz-leo";
     const isIceSkaterVariant = isLilySkaterVariant || isSkaterLeoVariant;
@@ -9123,8 +9690,8 @@ function getProjectileVisual(projectile) {
   }
 
   if (projectile.kind === "tricky-shot") {
-    const equippedCharacter = getEquippedCharacter();
-    const isReindeerVariant = equippedCharacter?.id === "tricky-renifer";
+    const projectileCharacterId = projectile.characterId || getEquippedCharacter()?.id;
+    const isReindeerVariant = projectileCharacterId === "tricky-renifer";
     return {
       src: "./atak_5.png",
       alt: isReindeerVariant ? "Atak Tricky Renifer" : "Atak Tricky",
