@@ -73,6 +73,7 @@
           <div class="panel lobby-panel">
             <div class="lobby-topbar">
               <h2 class="section-title">Lobby</h2>
+              <p class="lobby-nickname" id="lobby-nickname">Nick: Gracz</p>
               <button
                 class="circle-icon-button lobby-settings-button"
                 id="lobby-settings-button"
@@ -84,8 +85,12 @@
             </div>
 
             <div class="lobby-layout">
-              <button class="pixel-button lobby-nav-button top-button" data-view="game">
+              <button class="pixel-button lobby-nav-button top-button" id="lobby-play-button" data-view="game">
                 GRAJ
+              </button>
+
+              <button class="pixel-button lobby-nav-button top-secondary-button" id="lobby-friends-button" type="button">
+                ZAGRAJ ZE ZNAJOMYM
               </button>
 
               <button class="pixel-button lobby-nav-button left-button" data-view="store">
@@ -216,6 +221,23 @@
                   <div class="ammo-bars" id="ammo-bars"></div>
                 </div>
 
+                <div class="entity opponent-entity" id="opponent-entity" hidden>
+                  <p class="entity-health opponent-health" id="opponent-health-label">3000 pz</p>
+                  <p class="opponent-nickname" id="opponent-nickname">Przeciwnik</p>
+                  <div class="player-visual opponent-visual">
+                    <div class="player-sprite-frame opponent-sprite-frame">
+                      <img
+                        id="opponent-image"
+                        class="entity-image asset-image"
+                        src="./postac_1.png"
+                        alt="Przeciwnik"
+                        data-fallback-text="RYWAL"
+                      />
+                      <div class="asset-fallback">RYWAL</div>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="entity pet-entity" id="game-pet-entity" hidden>
                   <div class="pet-cooldown-bar" id="pet-cooldown-bar" hidden>
                     <div class="pet-cooldown-fill" id="pet-cooldown-fill"></div>
@@ -238,6 +260,12 @@
                 <div class="projectiles-layer" id="projectiles-layer"></div>
                 <div class="robots-layer" id="robots-layer"></div>
                 <div class="effects-layer" id="effects-layer"></div>
+                <div class="game-tutorial-overlay" id="game-tutorial-overlay" hidden>
+                  <div class="game-tutorial-spotlight" id="game-tutorial-spotlight" aria-hidden="true"></div>
+                  <p class="game-tutorial-message" id="game-tutorial-message">
+                    UWAŻAJ! IDZIE PIERWSZY ROBOT. NACIŚNIJ SPACJĘ, ABY WYSTRZELIĆ POCISK
+                  </p>
+                </div>
               </div>
 
               <div class="touch-controls" id="touch-controls" hidden>
@@ -304,7 +332,7 @@
             <div class="section-header">
               <div>
                 <h2 class="section-title">Aleja Pucharów</h2>
-                <p class="section-subtitle">Zbieraj puchary w walce i odbieraj kolejne nagrody w jednej, ciągłej alei.</p>
+                <p class="section-subtitle">Każdy świat ma teraz własną aleję nagród i przejście do kolejnego świata na samym końcu.</p>
               </div>
               <button class="pixel-button small-button" data-view="lobby">WROC</button>
             </div>
@@ -315,12 +343,6 @@
                   <p class="item-title" id="world-title">Aleja Pucharów</p>
                   <p class="item-note">Twój postęp: <span id="world-progress-value">0</span> pucharów</p>
                 </div>
-                <div class="world-header-actions">
-                  <p class="super-alley-status" id="super-alley-status">Aktywuj Aleję Super, aby odbierać różowe nagrody premium.</p>
-                  <button class="pixel-button small-button super-alley-button" id="super-alley-button">
-                    AKTYWUJ ALEJĘ SUPER
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -329,6 +351,75 @@
         </section>
       </section>
     </main>
+
+    <div class="first-game-guide" id="first-game-guide" hidden>
+      <p class="first-game-guide-message">ROZEGRAJ SWOJĄ PIERWSZĄ GRĘ!</p>
+    </div>
+
+    <div class="settings-backdrop multiplayer-backdrop" id="nickname-backdrop" hidden>
+      <div class="panel settings-panel multiplayer-panel" role="dialog" aria-modal="true" aria-label="Wybierz nick">
+        <div class="settings-panel-header multiplayer-panel-header">
+          <div class="settings-heading">
+            <p class="settings-kicker">Profil gracza</p>
+            <p class="section-title multiplayer-title">Jaki chcesz mieć nick?</p>
+          </div>
+        </div>
+
+        <label class="multiplayer-field">
+          <span class="multiplayer-label">Twój nick</span>
+          <input class="multiplayer-input" id="nickname-input" type="text" maxlength="18" placeholder="Np. Kacper123" />
+        </label>
+
+        <p class="multiplayer-note" id="nickname-note">Ten nick będzie widoczny w lobby i przy przyszłym multiplayerze.</p>
+
+        <div class="multiplayer-actions">
+          <button class="pixel-button" id="nickname-save-button" type="button">ZAPISZ NICK</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-backdrop multiplayer-backdrop" id="multiplayer-backdrop" hidden>
+      <div class="panel settings-panel multiplayer-panel" role="dialog" aria-modal="true" aria-label="Zagraj ze znajomym">
+        <div class="settings-panel-header multiplayer-panel-header">
+          <div class="settings-heading">
+            <p class="settings-kicker">Multiplayer</p>
+            <p class="section-title multiplayer-title">Zagraj ze znajomym</p>
+          </div>
+          <button class="circle-icon-button" id="multiplayer-close-button" type="button" aria-label="Zamknij">
+            ×
+          </button>
+        </div>
+
+        <div class="multiplayer-summary">
+          <p class="multiplayer-chip" id="multiplayer-own-nick">Twój nick: Gracz</p>
+          <p class="multiplayer-chip">Tryb: 1v1</p>
+          <p class="multiplayer-chip multiplayer-chip-status" id="multiplayer-status-chip">Status: Gotowy</p>
+        </div>
+
+        <div class="multiplayer-actions multiplayer-quick-actions">
+          <button class="pixel-button subtle-button" id="multiplayer-copy-nick-button" type="button">SKOPIUJ MÓJ NICK</button>
+          <button class="pixel-button subtle-button" id="multiplayer-edit-nick-button" type="button">ZMIEŃ NICK</button>
+        </div>
+
+        <label class="multiplayer-field">
+          <span class="multiplayer-label">Nick znajomego</span>
+          <input class="multiplayer-input" id="multiplayer-friend-input" type="text" maxlength="18" placeholder="Wpisz nick znajomego" />
+        </label>
+
+        <p class="multiplayer-note" id="multiplayer-note">
+          Wpisz nick znajomego. Prawdziwe połączenie 1v1 dokończę po podpięciu backendu multiplayer.
+        </p>
+
+        <div class="multiplayer-actions multiplayer-actions-double">
+          <button class="pixel-button" id="multiplayer-create-button" type="button">STWÓRZ POKÓJ</button>
+          <button class="pixel-button" id="multiplayer-join-button" type="button">DOŁĄCZ PO NICKU</button>
+        </div>
+
+        <div class="multiplayer-actions" id="multiplayer-cancel-wrap" hidden>
+          <button class="pixel-button subtle-button" id="multiplayer-cancel-button" type="button">ANULUJ OCZEKIWANIE</button>
+        </div>
+      </div>
+    </div>
 
     <div class="alley-intro-backdrop" id="alley-intro-backdrop" hidden>
       <div class="alley-intro-scene" id="alley-intro-scene" role="dialog" aria-modal="true" aria-label="Witaj w Swiecie Magikow">
@@ -354,6 +445,7 @@
             <div class="asset-fallback">MAGICY</div>
           </div>
           <p class="alley-intro-title" id="alley-intro-title">Witaj w Świecie Magików</p>
+          <p class="super-alley-copy alley-intro-copy" id="alley-intro-copy" hidden></p>
         </div>
       </div>
     </div>
@@ -653,6 +745,9 @@
       </div>
     </div>
 
+    <script src="./firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-database-compat.js"></script>
     <script src="./script.js"></script>
   </body>
 </html>

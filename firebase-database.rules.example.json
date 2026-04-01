@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "multiplayerRooms": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["host/nicknameNormalized", "status", "updatedAt"]
+    },
+    ".read": false,
+    ".write": false
+  }
+}

@@ -1,0 +1,12 @@
+{
+  /* Visit https://firebase.google.com/docs/database/security to learn more about security rules. */
+  "rules": {
+    "multiplayerRooms": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["host/nicknameNormalized", "status", "updatedAt"]
+    },
+    ".read": false,
+    ".write": false
+  }
+}
