@@ -3881,6 +3881,11 @@ function attachPartyRefListener(nextPartyId) {
 }
 
 function detachPartyListeners() {
+  if (party.memberSyncTimer) {
+    window.clearTimeout(party.memberSyncTimer);
+    party.memberSyncTimer = 0;
+  }
+
   if (party.membershipRef) {
     party.membershipRef.off();
     party.membershipRef = null;
@@ -3902,6 +3907,7 @@ function detachPartyListeners() {
   party.data = null;
   party.partyId = "";
   party.partyLaunchHandledId = "";
+  party.pendingMemberSyncPayload = {};
 }
 
 function filterFreshPartyInvites(entries = []) {
@@ -4266,18 +4272,41 @@ async function syncLocalPartyMemberState(overrides = {}) {
 }
 
 function schedulePartyMemberSync(immediate = false, overrides = {}) {
-  if (party.memberSyncTimer) {
-    window.clearTimeout(party.memberSyncTimer);
-    party.memberSyncTimer = 0;
+  if (!isPartyActive()) {
+    return;
   }
 
-  if (!isPartyActive()) {
+  party.pendingMemberSyncPayload = {
+    ...(party.pendingMemberSyncPayload || {}),
+    ...overrides,
+  };
+
+  if (immediate) {
+    if (party.memberSyncTimer) {
+      window.clearTimeout(party.memberSyncTimer);
+      party.memberSyncTimer = 0;
+    }
+  } else if (party.memberSyncTimer) {
     return;
   }
 
   party.memberSyncTimer = window.setTimeout(() => {
     party.memberSyncTimer = 0;
-    void syncLocalPartyMemberState(overrides);
+    const payload = {
+      ...(party.pendingMemberSyncPayload || {}),
+    };
+    party.pendingMemberSyncPayload = {};
+
+    if (party.syncingMember) {
+      party.pendingMemberSyncPayload = {
+        ...payload,
+        ...(party.pendingMemberSyncPayload || {}),
+      };
+      schedulePartyMemberSync(false);
+      return;
+    }
+
+    void syncLocalPartyMemberState(payload);
   }, immediate ? 10 : PARTY_MEMBER_SYNC_MS);
 }
 
@@ -8241,6 +8270,7 @@ function createPartyState() {
     data: null,
     partyLaunchHandledId: "",
     memberSyncTimer: 0,
+    pendingMemberSyncPayload: {},
     hostSyncTimer: 0,
     syncingMember: false,
     syncingHost: false,
@@ -10374,8 +10404,15 @@ function applyRemoteCoopSnapshot(snapshot) {
     }
 
     const player = game.coopPlayers[normalizedProfileId];
-    player.x = Number(playerSnapshot.x || player.x || 0);
-    player.y = Number(playerSnapshot.y || player.y || 0);
+    const isLocalGuestPlayer =
+      normalizedProfileId === state.profileId
+      && !game.coopIsHost
+      && snapshot.state !== "result";
+
+    if (!isLocalGuestPlayer) {
+      player.x = Number(playerSnapshot.x || player.x || 0);
+      player.y = Number(playerSnapshot.y || player.y || 0);
+    }
     player.hp = clamp(Number(playerSnapshot.hp || 0), 0, player.maxHp || GAME_RULES.playerMaxHp);
     player.alive = playerSnapshot.alive !== false && player.hp > 0;
     player.updatedAt = Date.now();
