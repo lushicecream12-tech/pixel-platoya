@@ -2,12 +2,20 @@ const TOTAL_LOADING_TIME = 10000;
 const STEP_INTERVAL_MIN = 200;
 const STEP_INTERVAL_MAX = 950;
 const STORAGE_KEY = "pixel-platoya-save-v1";
-const FIREBASE_MULTIPLAYER_CONFIG = window.PIXEL_PLATOYA_FIREBASE_CONFIG || null;
+const FIREBASE_MULTIPLAYER_CONFIG = null;
+const FIREBASE_SOCIAL_CONFIG = window.PIXEL_PLATOYA_FIREBASE_CONFIG || null;
+const PROFILE_SYNC_DEBOUNCE_MS = 900;
+const PROFILE_PRESENCE_HEARTBEAT_MS = 10000;
+const PROFILE_ACTIVE_WINDOW_MS = 20000;
+const PARTY_MEMBER_SYNC_MS = 120;
+const PARTY_SESSION_SYNC_MS = 120;
+const PARTY_INVITE_EXPIRY_MS = 5 * 60 * 1000;
+const PARTY_PLAYER_STALE_MS = 6000;
 const SUPER_ALLEY_DIAMOND_PRICE = 119;
 const SUPER_ALLEY_CASH_PRICE_LABEL = "19,99zł";
 const MAGICIANS_WORLD_END_TROPHIES = 2000;
 const WINTER_WORLD_START_TROPHIES = 2050;
-const TOWER_WORLD_START_TROPHIES = 4050;
+const TOTAL_GAME_WAVES = 5;
 const MULTIPLAYER_QUEUE_DURATION_MS = 10000;
 const MULTIPLAYER_START_COUNTDOWN_MS = 5000;
 const MULTIPLAYER_MAX_PLAYERS = 6;
@@ -23,7 +31,6 @@ const TROPHY_STORE_CODE = "2010";
 const SUPER_ALLEY_REWARD_THRESHOLDS = {
   alley: new Set([100, 250, 350, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1750, 1850, 1950]),
   winter: new Set([2100, 2250, 2350, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500, 3600, 3750, 3850, 3950]),
-  tower: new Set([4100, 4250, 4350, 4500]),
 };
 const SOUND_EFFECT_SOURCES = {
   shot2: ["./strzał_2.mp3", "./strzal_2.mp3"],
@@ -33,7 +40,6 @@ const SOUND_EFFECT_SOURCES = {
   shotNora: ["./strzał_nora.mp3", "./strzal_nora.mp3"],
   shotCloud: ["./strzał_cloud.mp3", "./strzal_cloud.mp3"],
   shotAnn: ["./strzał_ann.mp3", "./strzal_ann.mp3"],
-  shotZlotowlosa: ["./strzał_zlotowlosa.mp3", "./strzal_zlotowlosa.mp3", "./strzal_zlotowlosa.jpeg"],
   shotIceSkater: ["./strzał_leołyżwiaż.mp3", "./strzal_leolyzwiarz.mp3"],
   walkingLoop: ["./chodzenie_1.mp3"],
   coins: ["./dźwięk_1.mp3", "./dzwiek_1.mp3"],
@@ -52,6 +58,10 @@ const SOUND_EFFECT_SOURCES = {
   bearVoice: ["./niedzwiedz_1.mp3"],
   owlVoice: ["./sowa_1.mp3"],
   monkeyVoice: ["./małpka_1.mp3", "./malpka_1.mp3"],
+};
+const BACKGROUND_MUSIC_SOURCES = {
+  alley: ["./muzyka_1.mp3"],
+  winter: ["./zima_mp4.mp4", "./zima_mp4", "./zima.mp4"],
 };
 
 const GAME_RULES = {
@@ -226,15 +236,6 @@ const CATALOG = {
       image: "./postac_17.png",
       unlockWorld: "winter",
       storeNote: "Nagroda za final Swiata Zimowego.",
-    },
-    {
-      id: "zlotowlosa",
-      name: "Złotowłosa",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./postac_zlotowlosa.jpeg",
-      unlockWorld: "tower",
-      storeNote: "Nagroda za final Świata Wysokiej Wieży.",
     },
     {
       id: "leo-skoczek-narciarski",
@@ -482,10 +483,6 @@ const INVENTORY_WORLD_GROUPS = [
     id: "winter",
     label: "Swiat Zimowy",
   },
-  {
-    id: "tower",
-    label: "Swiat Wysokiej Wiezy",
-  },
 ];
 
 const TROPHY_WORLDS = [
@@ -583,36 +580,26 @@ const TROPHY_WORLDS = [
       { id: "winter-4000-leo", trophies: 4000, type: "character", itemId: "leo", label: "Leo" },
     ],
   },
-  {
-    id: "tower",
-    name: "Świat Wysokiej Wieży",
-    threshold: 4000,
-    rewards: [
-      { id: "tower-4050-coins", trophies: 4050, type: "coins", amount: 300, label: "300 monet" },
-      { id: "tower-4100-crate", trophies: 4100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-4150-diamonds", trophies: 4150, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "tower-4200-coins", trophies: 4200, type: "coins", amount: 300, label: "300 monet" },
-      { id: "tower-4250-crate", trophies: 4250, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-4300-coins", trophies: 4300, type: "coins", amount: 3000, label: "3000 monet" },
-      { id: "tower-4350-crate", trophies: 4350, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-4400-diamonds", trophies: 4400, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "tower-4450-crate", trophies: 4450, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "tower-4500-zlotowlosa", trophies: 4500, type: "character", itemId: "zlotowlosa", label: "Złotowłosa" },
-    ],
-  },
 ];
 
 const state = loadState();
 const ui = {
   currentView: "lobby",
+  storeTab: "characters",
   inventoryTab: "characters",
+  friendsTab: "friends",
   trophyWorldId: state.activeTrophyWorld || "alley",
   nextGameMode: "solo",
   pendingMultiplayerLaunch: null,
+  pendingPartyLaunch: null,
+  profileTab: "me",
+  profileEditMode: false,
 };
 
 const game = createGameState();
 const multiplayer = createMultiplayerState();
+const socialProfile = createSocialProfileState();
+const party = createPartyState();
 
 const loadingScreen = document.getElementById("loading-screen");
 const appScreen = document.getElementById("app-screen");
@@ -657,6 +644,7 @@ const balanceTarget = document.getElementById("balance-target");
 const trophyBalanceTarget = trophyBalance?.closest(".balance-box") || null;
 const lobbyPlayButton = document.getElementById("lobby-play-button");
 const lobbyFriendsButton = document.getElementById("lobby-friends-button");
+const lobbyProfileButton = document.getElementById("lobby-profile-button");
 const lobbyNickname = document.getElementById("lobby-nickname");
 const firstGameGuide = document.getElementById("first-game-guide");
 const lobbySettingsButton = document.getElementById("lobby-settings-button");
@@ -665,10 +653,75 @@ const settingsBackdrop = document.getElementById("settings-backdrop");
 const settingsCloseButton = document.getElementById("settings-close-button");
 const settingsPhoneStatus = document.getElementById("settings-phone-status");
 const phoneModeToggle = document.getElementById("phone-mode-toggle");
+const settingsAccountStatus = document.getElementById("settings-account-status");
+const settingsNewPassword = document.getElementById("settings-new-password");
+const settingsSetPasswordButton = document.getElementById("settings-set-password-button");
+const settingsLoginNickname = document.getElementById("settings-login-nickname");
+const settingsLoginPassword = document.getElementById("settings-login-password");
+const settingsLoginButton = document.getElementById("settings-login-button");
 const lobbyAvatar = document.getElementById("lobby-avatar");
 const lobbyAvatarFrame = lobbyAvatar?.parentElement || null;
 const lobbyPet = document.getElementById("lobby-pet");
 const petWrapper = document.getElementById("pet-wrapper");
+const lobbySelfReadyBadge = document.getElementById("lobby-self-ready-badge");
+const partyTeammateShowcase = document.getElementById("party-teammate-showcase");
+const partyTeammateReadyBadge = document.getElementById("lobby-party-ready-badge");
+const partyTeammateAvatarFrame = document.getElementById("party-teammate-avatar-frame");
+const partyTeammatePetFrame = document.getElementById("party-teammate-pet-frame");
+const partyTeammateName = document.getElementById("party-teammate-name");
+const partyLeaveButton = document.getElementById("party-leave-button");
+const profileBackdrop = document.getElementById("profile-backdrop");
+const profileCloseButton = document.getElementById("profile-close-button");
+const profileMainCard = document.getElementById("profile-main-card");
+const profileTabMeButton = document.getElementById("profile-tab-me");
+const profileTabUsersButton = document.getElementById("profile-tab-users");
+const profileTabPanelMe = document.getElementById("profile-tab-panel-me");
+const profileTabPanelUsers = document.getElementById("profile-tab-panel-users");
+const profileCloudStatus = document.getElementById("profile-cloud-status");
+const profileNameHeading = document.getElementById("profile-name-heading");
+const profileWorldBar = document.getElementById("profile-world-bar");
+const profileHeroNote = document.getElementById("profile-hero-note");
+const profileSummaryName = document.getElementById("profile-summary-name");
+const profileSummaryCharacter = document.getElementById("profile-summary-character");
+const profileSummaryPet = document.getElementById("profile-summary-pet");
+const profileEditButton = document.getElementById("profile-edit-button");
+const profileEditPanel = document.getElementById("profile-edit-panel");
+const profileCancelEditButton = document.getElementById("profile-cancel-edit-button");
+const profileNameInput = document.getElementById("profile-name-input");
+const profileSaveNameButton = document.getElementById("profile-save-name-button");
+const profileFavoriteCharacterSelect = document.getElementById("profile-favorite-character-select");
+const profileFavoritePetSelect = document.getElementById("profile-favorite-pet-select");
+const profileSaveFavoritesButton = document.getElementById("profile-save-favorites-button");
+const profileFavoriteCharacterFrame = document.getElementById("profile-favorite-character-frame");
+const profileFavoriteCharacterLabel = document.getElementById("profile-favorite-character-label");
+const profileFavoritePetFrame = document.getElementById("profile-favorite-pet-frame");
+const profileFavoritePetLabel = document.getElementById("profile-favorite-pet-label");
+const profileStatTrophies = document.getElementById("profile-stat-trophies");
+const profileStatWorld = document.getElementById("profile-stat-world");
+const profileStatGames = document.getElementById("profile-stat-games");
+const profileStatRobots = document.getElementById("profile-stat-robots");
+const profileStatCharacters = document.getElementById("profile-stat-characters");
+const profileStatPets = document.getElementById("profile-stat-pets");
+const profileUsersList = document.getElementById("profile-users-list");
+const profileUserPreviewCard = document.getElementById("profile-user-preview-card");
+const profileOtherMainCard = document.getElementById("profile-other-main-card");
+const profileOtherName = document.getElementById("profile-other-name");
+const profileOtherWorldBar = document.getElementById("profile-other-world-bar");
+const profileOtherCharacterFrame = document.getElementById("profile-other-character-frame");
+const profileOtherCharacterLabel = document.getElementById("profile-other-character-label");
+const profileOtherPetFrame = document.getElementById("profile-other-pet-frame");
+const profileOtherPetLabel = document.getElementById("profile-other-pet-label");
+const profileOtherTrophies = document.getElementById("profile-other-trophies");
+const profileOtherWorld = document.getElementById("profile-other-world");
+const profileOtherGames = document.getElementById("profile-other-games");
+const profileOtherRobots = document.getElementById("profile-other-robots");
+const profileOtherCharacters = document.getElementById("profile-other-characters");
+const profileOtherPets = document.getElementById("profile-other-pets");
+const friendsContent = document.getElementById("friends-content");
+const friendsSelfId = document.getElementById("friends-self-id");
+const friendsCopyIdButton = document.getElementById("friends-copy-id-button");
+const friendsInviteIdInput = document.getElementById("friends-invite-id-input");
+const friendsInviteIdButton = document.getElementById("friends-invite-id-button");
 const storeGrid = document.getElementById("store-grid");
 const inventoryGrid = document.getElementById("inventory-grid");
 const wardrobeOverview = document.getElementById("wardrobe-overview");
@@ -736,6 +789,7 @@ const gameStage = document.getElementById("game-stage");
 const gameMap = document.getElementById("game-map");
 const waveBanner = document.getElementById("wave-banner");
 const waveBannerTitle = document.getElementById("wave-banner-title");
+const waveBannerLabel = document.getElementById("wave-banner-label");
 const waveBannerCountdown = document.getElementById("wave-banner-countdown");
 const waveBannerPlayers = document.getElementById("wave-banner-players");
 const gameBackButton = document.getElementById("game-back-button");
@@ -783,14 +837,23 @@ const viewNodes = {
   lobby: document.getElementById("lobby-view"),
   store: document.getElementById("store-view"),
   inventory: document.getElementById("inventory-view"),
+  friends: document.getElementById("friends-view"),
   game: document.getElementById("game-view"),
   trophies: document.getElementById("trophies-view"),
 };
 
-const backgroundMusic = new Audio("./muzyka_1.mp3");
+const backgroundMusic = new Audio(BACKGROUND_MUSIC_SOURCES.alley[0]);
 backgroundMusic.loop = true;
 backgroundMusic.preload = "auto";
 backgroundMusic.volume = 0.42;
+backgroundMusic.dataset.currentSource = BACKGROUND_MUSIC_SOURCES.alley[0];
+backgroundMusic.addEventListener("error", () => {
+  const failedSource = backgroundMusic.dataset.currentSource || "";
+  if (failedSource) {
+    unavailableSoundSources.add(failedSource);
+  }
+  syncBackgroundMusic();
+});
 
 const loadingPoints = buildLoadingPoints(TOTAL_LOADING_TIME);
 const unavailableSoundSources = new Set();
@@ -820,6 +883,7 @@ let soundEffectsAudioContext = null;
 let bundleUnlockTimer = null;
 let bundleUnlockResolve = null;
 let nicknamePromptAfterSave = null;
+let remoteProfileSyncSuspendLevel = 0;
 const audioBoostMap = new WeakMap();
 
 bindEvents();
@@ -838,17 +902,30 @@ function bindEvents() {
 
   if (lobbyPlayButton) {
     lobbyPlayButton.addEventListener("click", () => {
-      openMultiplayerLobby();
+      ui.pendingMultiplayerLaunch = null;
+      ui.nextGameMode = "solo";
+      togglePartyReady();
+    });
+  }
+
+  if (partyLeaveButton) {
+    partyLeaveButton.addEventListener("click", () => {
+      leaveParty();
+    });
+  }
+
+  if (gameBackButton) {
+    gameBackButton.addEventListener("click", () => {
+      if (!game.active) {
+        return;
+      }
+
+      requestPauseGame();
     });
   }
 
   document.querySelectorAll("[data-view='lobby']").forEach((button) => {
     button.addEventListener("click", () => {
-      if (button === gameBackButton && ui.currentView === "game" && game.active) {
-        requestExitGame();
-        return;
-      }
-
       showView("lobby");
     });
   });
@@ -871,6 +948,11 @@ function bindEvents() {
         renderInventory();
       }
 
+      if (group === "friends") {
+        ui.friendsTab = tab;
+        renderFriendsView();
+      }
+
       syncTabs();
     });
   });
@@ -888,6 +970,12 @@ function bindEvents() {
     });
   }
 
+  if (lobbyProfileButton) {
+    lobbyProfileButton.addEventListener("click", () => {
+      openProfilePanel("me");
+    });
+  }
+
   if (accountResetButton) {
     accountResetButton.addEventListener("click", () => {
       closeSettingsPanel();
@@ -900,6 +988,175 @@ function bindEvents() {
       closeSettingsPanel();
     });
   }
+
+  if (profileCloseButton) {
+    profileCloseButton.addEventListener("click", () => {
+      closeProfilePanel();
+    });
+  }
+
+  if (profileBackdrop) {
+    profileBackdrop.addEventListener("click", (event) => {
+      if (event.target === profileBackdrop) {
+        closeProfilePanel();
+      }
+    });
+  }
+
+  if (profileTabMeButton) {
+    profileTabMeButton.addEventListener("click", () => {
+      ui.profileEditMode = false;
+      openProfilePanel("me");
+    });
+  }
+
+  if (profileTabUsersButton) {
+    profileTabUsersButton.addEventListener("click", () => {
+      openProfilePanel("users");
+    });
+  }
+
+  if (profileSaveNameButton) {
+    profileSaveNameButton.addEventListener("click", () => {
+      saveProfileDetails();
+    });
+  }
+
+  if (profileEditButton) {
+    profileEditButton.addEventListener("click", () => {
+      ui.profileEditMode = true;
+      renderProfilePanel();
+      if (profileNameInput) {
+        window.setTimeout(() => {
+          profileNameInput.focus();
+          profileNameInput.select();
+        }, 20);
+      }
+    });
+  }
+
+  if (profileCancelEditButton) {
+    profileCancelEditButton.addEventListener("click", () => {
+      ui.profileEditMode = false;
+      renderProfilePanel();
+    });
+  }
+
+  if (profileNameInput) {
+    profileNameInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        saveProfileDetails();
+      }
+    });
+  }
+
+  if (settingsSetPasswordButton) {
+    settingsSetPasswordButton.addEventListener("click", () => {
+      setCurrentAccountPassword();
+    });
+  }
+
+  if (settingsLoginButton) {
+    settingsLoginButton.addEventListener("click", () => {
+      loginToExistingAccount();
+    });
+  }
+
+  if (friendsCopyIdButton) {
+    friendsCopyIdButton.addEventListener("click", () => {
+      copyOwnProfileId();
+    });
+  }
+
+  if (friendsInviteIdButton) {
+    friendsInviteIdButton.addEventListener("click", () => {
+      sendFriendInviteFromInput();
+    });
+  }
+
+  if (friendsInviteIdInput) {
+    friendsInviteIdInput.addEventListener("input", () => {
+      friendsInviteIdInput.value = sanitizePublicPlayerId(friendsInviteIdInput.value);
+    });
+
+    friendsInviteIdInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        sendFriendInviteFromInput();
+      }
+    });
+  }
+
+  if (friendsContent) {
+    friendsContent.addEventListener("click", (event) => {
+      const inviteProfileButton = event.target.closest("[data-friend-invite-profile]");
+      if (inviteProfileButton) {
+        sendFriendInviteToResolvedProfileId(inviteProfileButton.dataset.friendInviteProfile || "");
+        return;
+      }
+
+      const inviteButton = event.target.closest("[data-friend-invite]");
+      if (inviteButton) {
+        sendFriendInviteByProfileId(inviteButton.dataset.friendInvite || "");
+        return;
+      }
+
+      const acceptButton = event.target.closest("[data-friend-accept]");
+      if (acceptButton) {
+        acceptFriendInvite(acceptButton.dataset.friendAccept || "");
+        return;
+      }
+
+      const rejectButton = event.target.closest("[data-friend-reject]");
+      if (rejectButton) {
+        rejectFriendInvite(rejectButton.dataset.friendReject || "");
+        return;
+      }
+
+      const partyInviteButton = event.target.closest("[data-party-invite]");
+      if (partyInviteButton) {
+        sendPartyInvite(partyInviteButton.dataset.partyInvite || "");
+        return;
+      }
+
+      const partyCancelButton = event.target.closest("[data-party-cancel]");
+      if (partyCancelButton) {
+        cancelPartyInvite(partyCancelButton.dataset.partyCancel || "");
+        return;
+      }
+
+      const partyAcceptButton = event.target.closest("[data-party-accept]");
+      if (partyAcceptButton) {
+        acceptPartyInvite(partyAcceptButton.dataset.partyAccept || "");
+        return;
+      }
+
+      const partyRejectButton = event.target.closest("[data-party-reject]");
+      if (partyRejectButton) {
+        rejectPartyInvite(partyRejectButton.dataset.partyReject || "");
+      }
+    });
+  }
+
+  [settingsNewPassword, settingsLoginNickname, settingsLoginPassword].forEach((field) => {
+    if (!field) {
+      return;
+    }
+
+    field.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") {
+        return;
+      }
+
+      event.preventDefault();
+      if (field === settingsNewPassword) {
+        setCurrentAccountPassword();
+      } else {
+        loginToExistingAccount();
+      }
+    });
+  });
 
   if (nicknameSaveButton) {
     nicknameSaveButton.addEventListener("click", () => {
@@ -1232,7 +1489,18 @@ function bindEvents() {
   window.addEventListener("blur", () => {
     resetGameKeys();
     resetTouchControls();
+    scheduleRemoteProfileSync(true);
   });
+
+  window.addEventListener("focus", () => {
+    scheduleRemoteProfileSync(true);
+  });
+
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", () => {
+      scheduleRemoteProfileSync(true);
+    });
+  }
 
   window.setInterval(() => {
     if (ui.currentView === "store") {
@@ -1323,6 +1591,23 @@ function shouldPlayBackgroundMusic() {
 }
 
 function syncBackgroundMusic() {
+  const preferredSource = getAvailableBackgroundMusicSource();
+
+  if (preferredSource && backgroundMusic.dataset.currentSource !== preferredSource) {
+    const wasPlaying = !backgroundMusic.paused;
+    backgroundMusic.src = preferredSource;
+    backgroundMusic.dataset.currentSource = preferredSource;
+    backgroundMusic.load();
+
+    if (wasPlaying && shouldPlayBackgroundMusic()) {
+      const replayAttempt = backgroundMusic.play();
+      if (replayAttempt && typeof replayAttempt.catch === "function") {
+        replayAttempt.catch(() => {});
+      }
+      return;
+    }
+  }
+
   if (shouldPlayBackgroundMusic()) {
     const playAttempt = backgroundMusic.play();
     if (playAttempt && typeof playAttempt.catch === "function") {
@@ -1332,6 +1617,16 @@ function syncBackgroundMusic() {
   }
 
   backgroundMusic.pause();
+}
+
+function getAvailableBackgroundMusicSource() {
+  const worldId = state.activeTrophyWorld === "tower"
+    ? "tower"
+    : state.activeTrophyWorld === "winter"
+      ? "winter"
+      : "alley";
+  const sources = BACKGROUND_MUSIC_SOURCES[worldId] || BACKGROUND_MUSIC_SOURCES.alley;
+  return sources.find((entry) => entry && !unavailableSoundSources.has(entry)) || BACKGROUND_MUSIC_SOURCES.alley[0];
 }
 
 function getAvailableSoundSource(effectName) {
@@ -1678,6 +1973,18 @@ function getPetVoiceEffect(petId) {
     return "owlVoice";
   }
 
+  if (petId === "norka") {
+    return "norkaVoice";
+  }
+
+  if (petId === "pascal") {
+    return "pascalVoice";
+  }
+
+  if (petId === "wrobelek") {
+    return "wrobelekVoice";
+  }
+
   if (petId === "l-psotka") {
     return "catVoice";
   }
@@ -1755,6 +2062,7 @@ function showApp() {
   appScreen.setAttribute("aria-hidden", "false");
   backgroundMusicReady = true;
   showView("lobby");
+  initSocialProfileSync();
   maybeRunIntro();
 }
 
@@ -1771,6 +2079,7 @@ function showView(viewName) {
 
   if (viewName !== "lobby") {
     closeSettingsPanel();
+    closeProfilePanel();
   }
 
   ui.currentView = viewName;
@@ -1787,11 +2096,13 @@ function showView(viewName) {
   });
 
   syncFirstGameGuide();
+  schedulePartyMemberSync(true);
 
   if (viewName === "game") {
     startGameSession();
     syncTouchControlsVisibility();
     syncBackgroundMusic();
+    scheduleRemoteProfileSync(true);
     return;
   }
 
@@ -1799,6 +2110,16 @@ function showView(viewName) {
     renderStore();
     syncTouchControlsVisibility();
     syncBackgroundMusic();
+    scheduleRemoteProfileSync(true);
+    return;
+  }
+
+  if (viewName === "friends") {
+    initSocialProfileSync().catch(() => {});
+    renderFriendsView();
+    syncTouchControlsVisibility();
+    syncBackgroundMusic();
+    scheduleRemoteProfileSync(true);
     return;
   }
 
@@ -1807,11 +2128,13 @@ function showView(viewName) {
     syncTouchControlsVisibility();
     syncBackgroundMusic();
     openTrophyRoadIntro();
+    scheduleRemoteProfileSync(true);
     return;
   }
 
   syncTouchControlsVisibility();
   syncBackgroundMusic();
+  scheduleRemoteProfileSync(true);
 }
 
 function renderAll() {
@@ -1822,14 +2145,17 @@ function renderAll() {
   renderLobby();
   renderStore();
   renderInventory();
+  renderFriendsView();
   renderTrophyRoad();
   renderGameLoadout();
   renderSettingsPanel();
+  renderProfilePanel();
   syncTouchControlsVisibility();
   syncTabs();
   syncBrokenAssets(document);
   syncAnimatedAssets(document);
   syncFirstGameGuide();
+  syncBackgroundMusic();
 }
 
 function shouldShowFirstGameGuide() {
@@ -2263,6 +2589,31 @@ function closeSettingsPanel() {
   settingsBackdrop.hidden = true;
 }
 
+function openProfilePanel(tab = "me") {
+  if (!profileBackdrop) {
+    return;
+  }
+
+  ui.profileTab = tab === "users" ? "users" : "me";
+  if (ui.profileTab === "me") {
+    ui.profileEditMode = false;
+  }
+  if (!socialProfile.ready) {
+    initSocialProfileSync().catch(() => {});
+  }
+  renderProfilePanel();
+  profileBackdrop.hidden = false;
+}
+
+function closeProfilePanel() {
+  if (!profileBackdrop) {
+    return;
+  }
+
+  ui.profileEditMode = false;
+  profileBackdrop.hidden = true;
+}
+
 function setPhoneModeEnabled(isEnabled) {
   state.phoneModeEnabled = Boolean(isEnabled);
   saveState();
@@ -2286,11 +2637,175 @@ function renderSettingsPanel() {
   settingsPhoneStatus.textContent = isEnabled
     ? "Wlaczony. W grze po lewej pojawi sie joystick, a po prawej przycisk strzalu."
     : "Wylaczony. Sterowanie zostaje na strzalkach i spacji.";
+
+  if (settingsAccountStatus) {
+    if (!socialProfile.ready) {
+      settingsAccountStatus.textContent = navigator.onLine === false
+        ? "Konto online nie działa bez internetu."
+        : socialProfile.lastError || "Profil online jest chwilowo niedostępny.";
+    } else if (socialProfile.lastError) {
+      settingsAccountStatus.textContent = socialProfile.lastError;
+    } else {
+      settingsAccountStatus.textContent = state.accountPasswordSet
+        ? "Konto jest połączone z chmurą. Możesz logować się nickiem i hasłem."
+        : "Profil jest już widoczny dla innych graczy. Ustaw hasło, aby logować się na innych urządzeniach.";
+    }
+  }
+
+  if (settingsSetPasswordButton) {
+    settingsSetPasswordButton.textContent = state.accountPasswordSet ? "HASŁO USTAWIONE" : "USTAW HASŁO";
+    settingsSetPasswordButton.disabled = state.accountPasswordSet;
+  }
+
+  if (settingsNewPassword) {
+    settingsNewPassword.disabled = state.accountPasswordSet;
+    settingsNewPassword.placeholder = state.accountPasswordSet ? "Hasło już ustawione" : "Wpisz hasło";
+  }
+
+  if (settingsLoginButton) {
+    settingsLoginButton.disabled = false;
+  }
+}
+
+function renderProfilePanel() {
+  if (!profileTabMeButton || !profileTabUsersButton || !profileTabPanelMe || !profileTabPanelUsers) {
+    return;
+  }
+
+  const favoriteCharacter = getProfileFavoriteCharacter();
+  const favoritePet = getProfileFavoritePet();
+  const highestWorldId = getHighestUnlockedTrophyWorldId();
+
+  profileTabMeButton.classList.toggle("active", ui.profileTab === "me");
+  profileTabUsersButton.classList.toggle("active", ui.profileTab === "users");
+  profileTabPanelMe.hidden = ui.profileTab !== "me";
+  profileTabPanelUsers.hidden = ui.profileTab !== "users";
+
+  if (profileCloudStatus) {
+    profileCloudStatus.textContent = socialProfile.ready
+      ? state.accountPasswordSet
+        ? "CHMURA + LOGOWANIE"
+        : "PROFIL W CHMURZE"
+      : "PROFIL LOKALNY";
+    profileCloudStatus.dataset.kind = socialProfile.ready ? "cloud" : "local";
+  }
+
+  if (profileNameHeading) {
+    profileNameHeading.textContent = getPlayerNickname();
+  }
+
+  if (profileWorldBar) {
+    profileWorldBar.dataset.worldTheme = highestWorldId;
+  }
+
+  if (profileMainCard) {
+    profileMainCard.dataset.worldTheme = highestWorldId;
+  }
+
+  if (profileHeroNote) {
+    profileHeroNote.textContent = socialProfile.lastError
+      ? socialProfile.lastError
+      : state.accountPasswordSet
+        ? "To konto jest gotowe do logowania."
+        : "Tutaj zobaczysz swoje ustawienia profilu.";
+  }
+
+  if (profileNameInput && document.activeElement !== profileNameInput) {
+    profileNameInput.value = getPlayerNickname();
+  }
+
+  if (profileSummaryName) {
+    profileSummaryName.textContent = getPlayerNickname();
+  }
+
+  if (profileFavoriteCharacterSelect) {
+    profileFavoriteCharacterSelect.innerHTML = getOwnedItems("characters")
+      .map((item) => `<option value="${item.id}" ${item.id === favoriteCharacter?.id ? "selected" : ""}>${escapeHtml(item.name)}</option>`)
+      .join("");
+  }
+
+  if (profileFavoritePetSelect) {
+    const petOptions = [`<option value="">BRAK PLATOYI</option>`].concat(
+      getOwnedItems("pets").map(
+        (item) => `<option value="${item.id}" ${item.id === favoritePet?.id ? "selected" : ""}>${escapeHtml(item.name)}</option>`
+      )
+    );
+    profileFavoritePetSelect.innerHTML = petOptions.join("");
+  }
+
+  renderPreviewAssetIntoFrame(profileFavoriteCharacterFrame, favoriteCharacter, {
+    elementId: "profile-favorite-character-image",
+    imageClass: "avatar-image asset-image",
+    videoClass: "avatar-image asset-video",
+    fallbackText: "POSTAĆ",
+    alt: favoriteCharacter?.name || "Ulubiona postać",
+  });
+  renderPreviewAssetIntoFrame(profileFavoritePetFrame, favoritePet, {
+    elementId: "profile-favorite-pet-image",
+    imageClass: "pet-image asset-image",
+    videoClass: "pet-image asset-video",
+    fallbackText: "PLATOYA",
+    alt: favoritePet?.name || "Ulubiona PlatoYa",
+  });
+
+  if (profileFavoriteCharacterLabel) {
+    profileFavoriteCharacterLabel.textContent = favoriteCharacter?.name || "Ulubiona postać";
+  }
+
+  if (profileSummaryCharacter) {
+    profileSummaryCharacter.textContent = favoriteCharacter?.name || "Brak";
+  }
+
+  if (profileFavoritePetLabel) {
+    profileFavoritePetLabel.textContent = favoritePet?.name || "Brak ulubionej PlatoYI";
+  }
+
+  if (profileSummaryPet) {
+    profileSummaryPet.textContent = favoritePet?.name || "Brak";
+  }
+
+  if (profileEditPanel) {
+    profileEditPanel.hidden = !ui.profileEditMode;
+  }
+
+  if (profileEditButton) {
+    profileEditButton.hidden = ui.profileEditMode;
+  }
+
+  if (profileStatTrophies) {
+    profileStatTrophies.textContent = String(state.trophies);
+  }
+
+  if (profileStatGames) {
+    profileStatGames.textContent = String(state.completedGamesTotal);
+  }
+
+  if (profileStatRobots) {
+    profileStatRobots.textContent = String(state.robotsDefeatedTotal);
+  }
+
+  if (profileStatCharacters) {
+    profileStatCharacters.textContent = `${state.ownedCharacters.length} / ${CATALOG.characters.length}`;
+  }
+
+  if (profileStatPets) {
+    profileStatPets.textContent = `${state.ownedPets.length} / ${CATALOG.pets.length}`;
+  }
+
+  renderOtherUsersPanel();
 }
 
 function renderLobby() {
   const equippedCharacter = getOwnedItem("characters", state.equippedCharacter);
   const equippedPet = getOwnedItem("pets", state.equippedPet);
+  const otherMember = getOtherPartyMemberData();
+  const otherMemberProfile = otherMember ? getMergedPartyMemberProfile(otherMember.profileId, otherMember) : null;
+  const otherMemberCharacter = otherMemberProfile
+    ? CATALOG.characters.find((item) => item.id === (otherMemberProfile.equippedCharacterId || otherMemberProfile.favoriteCharacterId)) || null
+    : null;
+  const otherMemberPet = otherMemberProfile
+    ? CATALOG.pets.find((item) => item.id === (otherMemberProfile.equippedPetId || otherMemberProfile.favoritePetId)) || null
+    : null;
 
   if (lobbyNickname) {
     lobbyNickname.textContent = `Nick: ${getPlayerNickname()}`;
@@ -2315,6 +2830,2383 @@ function renderLobby() {
     lobbyPet.alt = "PlatoYa";
     lobbyPet.classList.add("broken");
   }
+
+  if (lobbySelfReadyBadge) {
+    lobbySelfReadyBadge.hidden = !isPartyActive() || !isLocalPartyReady();
+  }
+
+  if (lobbyPlayButton) {
+    lobbyPlayButton.textContent = isPartyActive() && !isPartyGameActive() && isLocalPartyReady()
+      ? "ANULUJ GOTOWOŚĆ"
+      : "GRAJ";
+  }
+
+  if (partyTeammateShowcase) {
+    partyTeammateShowcase.hidden = !otherMemberProfile;
+  }
+
+  if (partyTeammateReadyBadge) {
+    partyTeammateReadyBadge.hidden = !otherMember?.ready;
+  }
+
+  if (partyTeammateName) {
+    partyTeammateName.textContent = otherMemberProfile?.nickname || "Znajomy";
+  }
+
+  renderPreviewAssetIntoFrame(partyTeammateAvatarFrame, otherMemberCharacter, {
+    elementId: "party-teammate-avatar",
+    imageClass: "avatar-image asset-image",
+    videoClass: "avatar-image asset-video",
+    fallbackText: "GRACZ",
+    alt: otherMemberCharacter?.name || "Znajomy",
+    usePreviewVideo: false,
+  });
+
+  renderPreviewAssetIntoFrame(partyTeammatePetFrame, otherMemberPet, {
+    elementId: "party-teammate-pet",
+    imageClass: "pet-image asset-image",
+    videoClass: "pet-image asset-video",
+    fallbackText: "PLATOYA",
+    alt: otherMemberPet?.name || "PlatoYa znajomego",
+    usePreviewVideo: false,
+  });
+
+  if (partyTeammatePetFrame) {
+    partyTeammatePetFrame.hidden = !otherMemberPet;
+  }
+
+  if (partyLeaveButton) {
+    partyLeaveButton.hidden = !otherMemberProfile;
+  }
+}
+
+function renderOtherUsersPanel() {
+  if (!profileUsersList) {
+    return;
+  }
+
+  if (!socialProfile.ready) {
+    profileUsersList.innerHTML = `
+      <div class="profile-users-empty">
+        ${navigator.onLine === false ? "Inni użytkownicy nie działają bez internetu." : "Inni użytkownicy są teraz niedostępni."}
+      </div>
+    `;
+    renderOtherUserPreview(null);
+    return;
+  }
+
+  const users = socialProfile.leaderboard;
+
+  if (!users.length) {
+    profileUsersList.innerHTML = `<div class="profile-users-empty">Jeszcze nie ma innych profili w rankingu.</div>`;
+    renderOtherUserPreview(null);
+    return;
+  }
+
+  if (!socialProfile.selectedProfileId || !users.some((entry) => entry.profileId === socialProfile.selectedProfileId)) {
+    socialProfile.selectedProfileId = users[0].profileId;
+  }
+
+  profileUsersList.innerHTML = users
+    .map((entry, index) => {
+      const active = entry.profileId === socialProfile.selectedProfileId;
+      const ownTag = entry.profileId === state.profileId ? " • TY" : "";
+      const worldTheme = getProfileThemeWorldId(entry);
+      return `
+        <button class="profile-user-row${active ? " active" : ""}" type="button" data-profile-user="${entry.profileId}" data-world-theme="${worldTheme}">
+          <p class="profile-user-row-rank">#${index + 1}</p>
+          <p class="profile-user-row-name">${escapeHtml(entry.nickname || "Gracz")}${ownTag}</p>
+          <p class="profile-user-row-trophies">
+            <img class="profile-user-row-icon" src="./monety_2.png" alt="Pucharki" />
+            <span>${Number(entry.trophies || 0)}</span>
+          </p>
+        </button>
+      `;
+    })
+    .join("");
+
+  profileUsersList.querySelectorAll("[data-profile-user]").forEach((button) => {
+    button.addEventListener("click", () => {
+      socialProfile.selectedProfileId = button.dataset.profileUser || "";
+      renderOtherUsersPanel();
+    });
+  });
+
+  renderOtherUserPreview(users.find((entry) => entry.profileId === socialProfile.selectedProfileId) || users[0]);
+}
+
+function renderOtherUserPreview(profile) {
+  const favoriteCharacter = profile?.favoriteCharacterId
+    ? CATALOG.characters.find((item) => item.id === profile.favoriteCharacterId) || null
+    : null;
+  const worldTheme = getProfileThemeWorldId(profile);
+
+  renderPreviewAssetIntoFrame(profileOtherCharacterFrame, favoriteCharacter, {
+    elementId: "profile-other-character-image",
+    imageClass: "avatar-image asset-image",
+    videoClass: "avatar-image asset-video",
+    fallbackText: "POSTAĆ",
+    alt: favoriteCharacter?.name || "Postać",
+  });
+
+  if (profileOtherName) {
+    profileOtherName.textContent = profile?.nickname || "Brak graczy";
+  }
+
+  if (profileUserPreviewCard) {
+    profileUserPreviewCard.dataset.worldTheme = worldTheme;
+  }
+
+  if (profileOtherMainCard) {
+    profileOtherMainCard.dataset.worldTheme = worldTheme;
+  }
+
+  if (profileOtherTrophies) {
+    profileOtherTrophies.textContent = String(Number(profile?.trophies || 0));
+  }
+
+  if (profileOtherWorldBar) {
+    profileOtherWorldBar.dataset.worldTheme = worldTheme;
+  }
+
+  if (profileOtherGames) {
+    profileOtherGames.textContent = String(Number(profile?.completedGamesTotal || 0));
+  }
+
+  if (profileOtherRobots) {
+    profileOtherRobots.textContent = String(Number(profile?.robotsDefeatedTotal || 0));
+  }
+
+  if (profileOtherCharacters) {
+    profileOtherCharacters.textContent = `${Number(profile?.ownedCharactersCount || 0)} / ${CATALOG.characters.length}`;
+  }
+
+  if (profileOtherPets) {
+    profileOtherPets.textContent = `${Number(profile?.ownedPetsCount || 0)} / ${CATALOG.pets.length}`;
+  }
+}
+
+function getProfileThemeWorldId(profile) {
+  if (profile && TROPHY_WORLDS.some((entry) => entry.id === profile.worldId)) {
+    return profile.worldId;
+  }
+
+  return "alley";
+}
+
+function mergeSocialProfilesIntoCache(entries = []) {
+  entries.forEach((entry) => {
+    if (!entry?.profileId) {
+      return;
+    }
+
+    socialProfile.profileCache[entry.profileId] = {
+      ...(socialProfile.profileCache[entry.profileId] || {}),
+      ...entry,
+    };
+  });
+}
+
+function getCachedSocialProfile(profileId) {
+  const normalizedId = sanitizeProfileId(profileId);
+
+  if (!normalizedId) {
+    return null;
+  }
+
+  if (normalizedId === state.profileId) {
+    return buildPublicProfilePayload();
+  }
+
+  return socialProfile.profileCache[normalizedId] || socialProfile.leaderboard.find((entry) => entry.profileId === normalizedId) || null;
+}
+
+function detachTrackedProfileListeners() {
+  Object.values(socialProfile.watchedProfileRefs || {}).forEach((ref) => {
+    ref?.off?.();
+  });
+  socialProfile.watchedProfileRefs = {};
+}
+
+function syncTrackedProfileListeners() {
+  const db = getFirebaseSocialDatabase();
+
+  if (!db) {
+    detachTrackedProfileListeners();
+    return;
+  }
+
+  const trackedIds = [...new Set([
+    ...socialProfile.friendIds,
+    ...socialProfile.sentInviteIds,
+    ...socialProfile.receivedInvites.map((entry) => entry.fromProfileId),
+    ...party.sentInviteIds,
+    ...party.invites.map((entry) => entry.fromProfileId),
+    ...getActivePartyMemberIds(),
+  ].map((id) => sanitizeProfileId(id)).filter(Boolean))];
+
+  const nextIds = new Set(trackedIds);
+
+  Object.entries(socialProfile.watchedProfileRefs || {}).forEach(([profileId, ref]) => {
+    if (!nextIds.has(profileId)) {
+      ref?.off?.();
+      delete socialProfile.watchedProfileRefs[profileId];
+    }
+  });
+
+  trackedIds.forEach((profileId) => {
+    if (socialProfile.watchedProfileRefs[profileId]) {
+      return;
+    }
+
+    const ref = db.ref(`profiles/${profileId}`);
+    ref.on("value", (snapshot) => {
+      const payload = snapshot.val();
+
+      if (payload) {
+        mergeSocialProfilesIntoCache([{ profileId, ...payload }]);
+      } else {
+        delete socialProfile.profileCache[profileId];
+      }
+
+      renderFriendsView();
+      renderProfilePanel();
+    });
+
+    socialProfile.watchedProfileRefs[profileId] = ref;
+  });
+}
+
+async function fetchPublicProfilesById(profileIds = []) {
+  const db = getFirebaseSocialDatabase();
+  if (!db) {
+    return [];
+  }
+
+  const uniqueIds = [...new Set(profileIds.map((id) => sanitizeProfileId(id)).filter(Boolean))];
+  if (!uniqueIds.length) {
+    return [];
+  }
+
+  const snapshots = await Promise.all(
+    uniqueIds.map((profileId) => db.ref(`profiles/${profileId}`).once("value").catch(() => null))
+  );
+
+  const fetchedProfiles = snapshots
+    .map((snapshot, index) => {
+      const payload = snapshot?.val();
+      return payload ? { profileId: uniqueIds[index], ...payload } : null;
+    })
+    .filter(Boolean);
+
+  mergeSocialProfilesIntoCache(fetchedProfiles);
+  return fetchedProfiles;
+}
+
+function detachSocialRelationshipListeners() {
+  if (socialProfile.friendsRef) {
+    socialProfile.friendsRef.off();
+    socialProfile.friendsRef = null;
+  }
+
+  if (socialProfile.receivedInvitesRef) {
+    socialProfile.receivedInvitesRef.off();
+    socialProfile.receivedInvitesRef = null;
+  }
+
+  if (socialProfile.sentInvitesRef) {
+    socialProfile.sentInvitesRef.off();
+    socialProfile.sentInvitesRef = null;
+  }
+
+  detachTrackedProfileListeners();
+}
+
+function syncSocialRelationshipListeners() {
+  const db = getFirebaseSocialDatabase();
+
+  if (!db || !state.profileId) {
+    return;
+  }
+
+  if (socialProfile.relationshipsOwnerId === state.profileId && socialProfile.friendsRef) {
+    return;
+  }
+
+  detachSocialRelationshipListeners();
+  socialProfile.relationshipsOwnerId = state.profileId;
+
+  socialProfile.friendsRef = db.ref(`friendLinks/${state.profileId}`);
+  socialProfile.friendsRef.on("value", (snapshot) => {
+    const raw = snapshot.val() || {};
+    socialProfile.friendIds = Object.keys(raw).map((id) => sanitizeProfileId(id)).filter(Boolean);
+    syncTrackedProfileListeners();
+    void fetchPublicProfilesById(socialProfile.friendIds).finally(() => {
+      renderFriendsView();
+      renderProfilePanel();
+    });
+  });
+
+  socialProfile.receivedInvitesRef = db.ref(`friendInvites/${state.profileId}`);
+  socialProfile.receivedInvitesRef.on("value", (snapshot) => {
+    const raw = snapshot.val() || {};
+    socialProfile.receivedInvites = Object.entries(raw).map(([fromProfileId, payload]) => ({
+      fromProfileId: sanitizeProfileId(fromProfileId),
+      ...(payload || {}),
+    })).filter((entry) => entry.fromProfileId);
+    syncTrackedProfileListeners();
+    void fetchPublicProfilesById(socialProfile.receivedInvites.map((entry) => entry.fromProfileId)).finally(() => {
+      renderFriendsView();
+    });
+  });
+
+  socialProfile.sentInvitesRef = db.ref(`friendInviteSent/${state.profileId}`);
+  socialProfile.sentInvitesRef.on("value", (snapshot) => {
+    const raw = snapshot.val() || {};
+    socialProfile.sentInviteIds = Object.keys(raw).map((id) => sanitizeProfileId(id)).filter(Boolean);
+    syncTrackedProfileListeners();
+    void fetchPublicProfilesById(socialProfile.sentInviteIds).finally(() => {
+      renderFriendsView();
+    });
+  });
+}
+
+function getSuggestedFriendProfiles() {
+  const currentWorldId = getHighestUnlockedTrophyWorldId();
+  const excluded = new Set([
+    state.profileId,
+    ...socialProfile.friendIds,
+    ...socialProfile.sentInviteIds,
+    ...socialProfile.receivedInvites.map((entry) => entry.fromProfileId),
+  ]);
+
+  const candidates = socialProfile.leaderboard.filter((entry) => (
+    !excluded.has(entry.profileId)
+    && getProfileThemeWorldId(entry) === currentWorldId
+  ));
+  const nearby = candidates
+    .filter((entry) => Math.abs(Number(entry.trophies || 0) - Number(state.trophies || 0)) <= 250)
+    .sort((left, right) => {
+      const diff = Math.abs(Number(left.trophies || 0) - Number(state.trophies || 0))
+        - Math.abs(Number(right.trophies || 0) - Number(state.trophies || 0));
+      if (diff !== 0) {
+        return diff;
+      }
+
+      return Number(right.trophies || 0) - Number(left.trophies || 0);
+    });
+
+  const fallback = candidates
+    .slice()
+    .sort((left, right) => {
+      const diff = Math.abs(Number(left.trophies || 0) - Number(state.trophies || 0))
+        - Math.abs(Number(right.trophies || 0) - Number(state.trophies || 0));
+      if (diff !== 0) {
+        return diff;
+      }
+
+      return Number(right.trophies || 0) - Number(left.trophies || 0);
+    });
+
+  return (nearby.length >= 8 ? nearby : fallback).slice(0, 8);
+}
+
+function buildFriendsProfileCard(profile, options = {}) {
+  const themeId = getProfileThemeWorldId(profile);
+  const favoriteCharacterId = profile?.equippedCharacterId || profile?.favoriteCharacterId;
+  const favoriteCharacter = favoriteCharacterId
+    ? CATALOG.characters.find((item) => item.id === favoriteCharacterId) || null
+    : null;
+  const title = escapeHtml(profile?.nickname || "Gracz");
+  const actions = Array.isArray(options.actions) ? options.actions.join("") : "";
+  const presence = getProfilePresenceMeta(profile);
+
+  return `
+    <article class="friends-profile-card" data-world-theme="${themeId}">
+      <div class="friends-profile-visual">
+        <div class="avatar-frame profile-preview-frame friends-profile-frame">
+          ${buildPreviewAssetMarkup(favoriteCharacter, {
+            imageClass: "avatar-image asset-image",
+            videoClass: "avatar-image asset-video",
+            fallbackText: "POSTAĆ",
+            alt: favoriteCharacter?.name || "Postać",
+            usePreviewVideo: false,
+          })}
+        </div>
+      </div>
+      <div class="friends-profile-main">
+        <div class="friends-profile-bar-shell">
+          <div class="profile-world-bar friends-profile-world-bar" data-world-theme="${themeId}" aria-hidden="true"></div>
+        </div>
+        <h4 class="friends-profile-name">${title}</h4>
+        <p class="friends-profile-presence" data-presence-state="${presence.state}">${presence.label}</p>
+        <div class="profile-trophy-line profile-trophy-line-plain friends-profile-trophy-line">
+          <img class="profile-trophy-icon profile-trophy-icon-plain" src="./monety_2.png" alt="Pucharki" />
+          <p class="profile-trophy-value profile-trophy-value-small friends-profile-trophy-value">${Number(profile?.trophies || 0)}</p>
+        </div>
+        ${actions ? `<div class="friends-profile-actions">${actions}</div>` : ""}
+      </div>
+    </article>
+  `;
+}
+
+function buildFriendInviteAction(profile) {
+  const profileId = sanitizeProfileId(profile?.profileId);
+  const publicId = sanitizePublicPlayerId(profile?.publicId);
+
+  if (profileId) {
+    return `<button class="pixel-button small-button settings-action-button" data-friend-invite-profile="${profileId}" type="button">ZAPROŚ</button>`;
+  }
+
+  if (!publicId) {
+    return `<button class="pixel-button small-button subtle-button" type="button" disabled>BRAK ID</button>`;
+  }
+
+  return `<button class="pixel-button small-button settings-action-button" data-friend-invite="${publicId}" type="button">ZAPROŚ</button>`;
+}
+
+function getCurrentProfileActivityState() {
+  if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+    return "offline";
+  }
+
+  if (ui.currentView === "game" && game.active) {
+    return "game";
+  }
+
+  return "lobby";
+}
+
+function formatLastSeenAgo(timestamp) {
+  const diffMs = Math.max(0, Date.now() - Number(timestamp || 0));
+  const diffSeconds = Math.floor(diffMs / 1000);
+
+  if (diffSeconds < 10) {
+    return "przed chwilą";
+  }
+
+  if (diffSeconds < 60) {
+    return `${diffSeconds} s temu`;
+  }
+
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  if (diffMinutes < 60) {
+    return `${diffMinutes} min temu`;
+  }
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) {
+    return `${diffHours} godz. temu`;
+  }
+
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} d temu`;
+}
+
+function getProfilePresenceMeta(profile) {
+  const lastActiveAt = Number(profile?.lastActiveAt || profile?.updatedAt || 0);
+  const activityState = String(profile?.activityState || "");
+  const isActive = lastActiveAt > 0 && (Date.now() - lastActiveAt) <= PROFILE_ACTIVE_WINDOW_MS;
+
+  if (isActive && activityState === "game") {
+    return {
+      label: "W grze",
+      state: "game",
+    };
+  }
+
+  if (isActive) {
+    return {
+      label: "W lobby",
+      state: "lobby",
+    };
+  }
+
+  return {
+    label: lastActiveAt ? `Ostatnio ${formatLastSeenAgo(lastActiveAt)}` : "Nieaktywny",
+    state: "offline",
+  };
+}
+
+function renderFriendsView() {
+  if (!friendsContent) {
+    return;
+  }
+
+  if (friendsSelfId) {
+    friendsSelfId.textContent = state.publicId || "-";
+  }
+
+  if (!socialProfile.ready) {
+    friendsContent.innerHTML = `
+      <div class="profile-users-empty">
+        ${navigator.onLine === false ? "Znajomi działają tylko z internetem." : "Znajomi są teraz niedostępni."}
+      </div>
+    `;
+    return;
+  }
+
+  if (ui.friendsTab === "friends") {
+    const friendProfiles = socialProfile.friendIds
+      .map((profileId) => getCachedSocialProfile(profileId))
+      .filter(Boolean)
+      .sort((left, right) => Number(right?.trophies || 0) - Number(left?.trophies || 0));
+
+    friendsContent.innerHTML = friendProfiles.length
+      ? `<div class="friends-card-grid">${friendProfiles.map((profile) => buildFriendsProfileCard(profile, {
+        actions: buildPartyInviteActions(profile),
+      })).join("")}</div>`
+      : `<div class="profile-users-empty">Nie masz jeszcze znajomych.</div>`;
+  } else if (ui.friendsTab === "suggested") {
+    const suggestedProfiles = getSuggestedFriendProfiles();
+
+    friendsContent.innerHTML = suggestedProfiles.length
+      ? `
+        <div class="friends-card-grid">
+          ${suggestedProfiles.map((profile) => buildFriendsProfileCard(profile, {
+            actions: [buildFriendInviteAction(profile)],
+          })).join("")}
+        </div>
+      `
+      : `<div class="profile-users-empty">Brak nowych sugerowanych graczy z Twojego świata.</div>`;
+  } else {
+    const inviteProfiles = socialProfile.receivedInvites.map((invite) => {
+      const cached = getCachedSocialProfile(invite.fromProfileId);
+      return cached || {
+        profileId: invite.fromProfileId,
+        nickname: invite.nickname || "Gracz",
+        trophies: Number(invite.trophies || 0),
+        worldId: invite.worldId || "alley",
+        completedGamesTotal: Number(invite.completedGamesTotal || 0),
+        robotsDefeatedTotal: Number(invite.robotsDefeatedTotal || 0),
+        ownedCharactersCount: Number(invite.ownedCharactersCount || 0),
+        ownedPetsCount: Number(invite.ownedPetsCount || 0),
+        favoriteCharacterId: invite.favoriteCharacterId || "",
+      };
+    });
+    const partyInviteProfiles = party.invites.map((invite) => {
+      const cached = getCachedSocialProfile(invite.fromProfileId);
+      return cached || {
+        profileId: invite.fromProfileId,
+        nickname: invite.nickname || "Gracz",
+        trophies: Number(invite.trophies || 0),
+        worldId: invite.worldId || "alley",
+        favoriteCharacterId: invite.favoriteCharacterId || invite.characterId || "",
+        equippedCharacterId: invite.characterId || "",
+        equippedPetId: invite.petId || "",
+      };
+    });
+
+    const sections = [];
+
+    if (inviteProfiles.length) {
+      sections.push(`
+        <div class="friends-section-block">
+          <p class="profile-users-heading">Zaproszenia do znajomych</p>
+          <div class="friends-card-grid">
+            ${inviteProfiles.map((profile) => buildFriendsProfileCard(profile, {
+              actions: [
+                `<button class="pixel-button small-button settings-action-button" data-friend-accept="${profile.profileId}" type="button">POTWIERDŹ</button>`,
+                `<button class="pixel-button small-button subtle-button" data-friend-reject="${profile.profileId}" type="button">ODRZUĆ</button>`,
+              ],
+            })).join("")}
+          </div>
+        </div>
+      `);
+    }
+
+    if (partyInviteProfiles.length) {
+      sections.push(`
+        <div class="friends-section-block">
+          <p class="profile-users-heading">Zaproszenia do lobby</p>
+          <div class="friends-card-grid">
+            ${partyInviteProfiles.map((profile) => buildFriendsProfileCard(profile, {
+              actions: [
+                `<button class="pixel-button small-button settings-action-button" data-party-accept="${profile.profileId}" type="button">AKCEPTUJ</button>`,
+                `<button class="pixel-button small-button subtle-button" data-party-reject="${profile.profileId}" type="button">ODRZUĆ</button>`,
+              ],
+            })).join("")}
+          </div>
+        </div>
+      `);
+    }
+
+    friendsContent.innerHTML = sections.length
+      ? sections.join("")
+      : `<div class="profile-users-empty">Nie masz nowych zaproszeń.</div>`;
+  }
+
+  syncBrokenAssets(friendsContent);
+  syncAnimatedAssets(friendsContent);
+}
+
+async function copyOwnProfileId() {
+  const publicId = state.publicId || "";
+  if (!publicId) {
+    return;
+  }
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(publicId);
+      openModal({
+        title: "Skopiowano ID",
+        message: "Twoje ID zostało skopiowane.",
+        buttonText: "OK",
+        onConfirm: closeModal,
+      });
+      return;
+    }
+  } catch (error) {
+    // fallback below
+  }
+
+  openModal({
+    title: "Twoje ID",
+    message: publicId,
+    buttonText: "OK",
+    onConfirm: closeModal,
+  });
+}
+
+function sendFriendInviteFromInput() {
+  sendFriendInviteByProfileId(friendsInviteIdInput?.value || "");
+}
+
+async function sendFriendInviteToResolvedProfileId(targetProfileId, fallbackProfile = null) {
+  const normalizedProfileId = sanitizeProfileId(targetProfileId);
+
+  if (!(await ensureSocialProfileReady())) {
+    openModal({
+      title: "Brak internetu",
+      message: "Znajomi działają tylko z internetem.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  if (!normalizedProfileId) {
+    openModal({
+      title: "Brak gracza",
+      message: "Nie udało się znaleźć tego gracza.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  if (normalizedProfileId === state.profileId) {
+    openModal({
+      title: "To Twój profil",
+      message: "Nie możesz zaprosić samego siebie.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  const db = getFirebaseSocialDatabase();
+  if (!db) {
+    return;
+  }
+
+  friendsInviteIdButton && (friendsInviteIdButton.disabled = true);
+
+  try {
+    if (socialProfile.friendIds.includes(normalizedProfileId)) {
+      throw new Error("already-friend");
+    }
+
+    if (socialProfile.sentInviteIds.includes(normalizedProfileId)) {
+      throw new Error("already-sent");
+    }
+
+    if (socialProfile.receivedInvites.some((entry) => entry.fromProfileId === normalizedProfileId)) {
+      throw new Error("already-received");
+    }
+
+    const targetProfile = fallbackProfile
+      || getCachedSocialProfile(normalizedProfileId)
+      || (await fetchPublicProfilesById([normalizedProfileId]))[0]
+      || null;
+
+    if (!targetProfile) {
+      throw new Error("missing-profile");
+    }
+
+    const invitePayload = {
+      ...buildPublicProfilePayload(),
+      fromProfileId: state.profileId,
+      createdAt: Date.now(),
+    };
+
+    const sentPayload = {
+      toProfileId: normalizedProfileId,
+      nickname: targetProfile.nickname || "Gracz",
+      trophies: Number(targetProfile.trophies || 0),
+      worldId: getProfileThemeWorldId(targetProfile),
+      createdAt: Date.now(),
+    };
+
+    const updates = {};
+    updates[`friendInvites/${normalizedProfileId}/${state.profileId}`] = invitePayload;
+    updates[`friendInviteSent/${state.profileId}/${normalizedProfileId}`] = sentPayload;
+    await db.ref().update(updates);
+
+    if (friendsInviteIdInput) {
+      friendsInviteIdInput.value = "";
+    }
+
+    openModal({
+      title: "Zaproszenie wysłane",
+      message: `Zaprosiłeś gracza ${targetProfile.nickname || "Gracz"}.`,
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+  } catch (error) {
+    openModal({
+      title: "Nie udało się",
+      message:
+        error?.message === "missing-profile"
+          ? "Nie ma gracza o takim ID."
+          : error?.message === "already-friend"
+            ? "Ten gracz jest już w znajomych."
+            : error?.message === "already-sent"
+              ? "Do tego gracza zostało już wysłane zaproszenie."
+              : error?.message === "already-received"
+                ? "Ten gracz już Cię zaprosił. Wejdź w Zaproszenia."
+                : "Nie udało się wysłać zaproszenia.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+  } finally {
+    friendsInviteIdButton && (friendsInviteIdButton.disabled = false);
+  }
+}
+
+async function sendFriendInviteByProfileId(rawProfileId) {
+  const targetPublicId = sanitizePublicPlayerId(rawProfileId);
+
+  if (!(await ensureSocialProfileReady())) {
+    openModal({
+      title: "Brak internetu",
+      message: "Znajomi działają tylko z internetem.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  if (!targetPublicId) {
+    openModal({
+      title: "Brak ID",
+      message: "Wpisz ID gracza.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  if (targetPublicId === state.publicId) {
+    openModal({
+      title: "To Twoje ID",
+      message: "Nie możesz zaprosić samego siebie.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  const db = getFirebaseSocialDatabase();
+  if (!db) {
+    return;
+  }
+
+  friendsInviteIdButton && (friendsInviteIdButton.disabled = true);
+
+  try {
+    const publicIdSnapshot = await db.ref(`publicIds/${targetPublicId}`).once("value");
+    const reservedProfileId = sanitizeProfileId(publicIdSnapshot.val()?.profileId);
+    const cachedProfileId = sanitizeProfileId(
+      socialProfile.leaderboard.find((entry) => sanitizePublicPlayerId(entry.publicId) === targetPublicId)?.profileId
+      || socialProfile.receivedInvites.find((entry) => sanitizePublicPlayerId(entry.publicId) === targetPublicId)?.fromProfileId
+      || socialProfile.friendIds.find((profileId) => sanitizePublicPlayerId(getCachedSocialProfile(profileId)?.publicId) === targetPublicId)
+      || ""
+    );
+    const targetProfileId = reservedProfileId || cachedProfileId;
+
+    if (!targetProfileId) {
+      throw new Error("missing-profile");
+    }
+
+    const targetProfile = getCachedSocialProfile(targetProfileId)
+      || (await fetchPublicProfilesById([targetProfileId]))[0]
+      || null;
+    await sendFriendInviteToResolvedProfileId(targetProfileId, targetProfile);
+  } catch (error) {
+    friendsInviteIdButton && (friendsInviteIdButton.disabled = false);
+
+    if (error?.message === "missing-profile") {
+      openModal({
+        title: "Nie udało się",
+        message: "Nie ma gracza o takim ID.",
+        buttonText: "OK",
+        onConfirm: closeModal,
+      });
+      return;
+    }
+
+    openModal({
+      title: "Nie udało się",
+      message: "Nie udało się wysłać zaproszenia.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+  }
+}
+
+async function acceptFriendInvite(rawProfileId) {
+  const fromProfileId = sanitizeProfileId(rawProfileId);
+  if (!fromProfileId || !(await ensureSocialProfileReady())) {
+    return;
+  }
+
+  const db = getFirebaseSocialDatabase();
+  if (!db) {
+    return;
+  }
+
+  const now = Date.now();
+  const updates = {};
+  updates[`friendLinks/${state.profileId}/${fromProfileId}`] = { createdAt: now };
+  updates[`friendLinks/${fromProfileId}/${state.profileId}`] = { createdAt: now };
+  updates[`friendInvites/${state.profileId}/${fromProfileId}`] = null;
+  updates[`friendInviteSent/${fromProfileId}/${state.profileId}`] = null;
+  updates[`friendInvites/${fromProfileId}/${state.profileId}`] = null;
+  updates[`friendInviteSent/${state.profileId}/${fromProfileId}`] = null;
+
+  await db.ref().update(updates).catch(() => {});
+}
+
+async function rejectFriendInvite(rawProfileId) {
+  const fromProfileId = sanitizeProfileId(rawProfileId);
+  if (!fromProfileId || !(await ensureSocialProfileReady())) {
+    return;
+  }
+
+  const db = getFirebaseSocialDatabase();
+  if (!db) {
+    return;
+  }
+
+  const updates = {};
+  updates[`friendInvites/${state.profileId}/${fromProfileId}`] = null;
+  updates[`friendInviteSent/${fromProfileId}/${state.profileId}`] = null;
+  await db.ref().update(updates).catch(() => {});
+}
+
+function getFirebasePartyDatabase() {
+  return getFirebaseSocialDatabase();
+}
+
+function buildPartyId(profileIds = []) {
+  const ids = [...new Set(profileIds.map((id) => sanitizeProfileId(id)).filter(Boolean))].sort();
+  return ids.length >= 2 ? `party-${ids.join("-")}` : "";
+}
+
+function buildPartyMemberRecordFromProfile(profile, overrides = {}) {
+  const themeWorldId = profile?.worldId ? normalizeTrophyWorldId(profile.worldId) : getProfileThemeWorldId(profile);
+  return {
+    profileId: sanitizeProfileId(profile?.profileId),
+    publicId: sanitizePublicPlayerId(profile?.publicId),
+    nickname: sanitizePlayerNickname(profile?.nickname) || "Gracz",
+    characterId: sanitizeStoredId(profile?.equippedCharacterId || profile?.favoriteCharacterId),
+    petId: sanitizeStoredId(profile?.equippedPetId || profile?.favoritePetId),
+    worldId: themeWorldId,
+    ready: false,
+    view: "lobby",
+    connected: true,
+    x: 0,
+    y: 0,
+    fire: false,
+    updatedAt: Date.now(),
+    ...overrides,
+  };
+}
+
+function buildLocalPartyMemberPayload(overrides = {}) {
+  const character = getOwnedItem("characters", state.equippedCharacter) || CATALOG.characters[0];
+  const pet = getOwnedItem("pets", state.equippedPet) || null;
+  return buildPartyMemberRecordFromProfile({
+    profileId: state.profileId,
+    publicId: state.publicId,
+    nickname: getPlayerNickname(),
+    equippedCharacterId: character?.id || "",
+    equippedPetId: pet?.id || "",
+    worldId: getHighestUnlockedTrophyWorldId(),
+  }, overrides);
+}
+
+function getActivePartyMemberIds(partyData = party.data) {
+  return Object.keys(partyData?.members || {}).map((id) => sanitizeProfileId(id)).filter(Boolean);
+}
+
+function getOtherPartyMemberId(partyData = party.data) {
+  return getActivePartyMemberIds(partyData).find((profileId) => profileId !== state.profileId) || "";
+}
+
+function getOtherPartyMemberData(partyData = party.data) {
+  const otherProfileId = getOtherPartyMemberId(partyData);
+  return otherProfileId ? partyData?.members?.[otherProfileId] || null : null;
+}
+
+function getMergedPartyMemberProfile(profileId, memberData = null) {
+  const normalizedProfileId = sanitizeProfileId(profileId);
+  if (!normalizedProfileId) {
+    return null;
+  }
+
+  const cached = getCachedSocialProfile(normalizedProfileId) || {};
+  const member = memberData || party.data?.members?.[normalizedProfileId] || {};
+  return {
+    ...cached,
+    ...member,
+    profileId: normalizedProfileId,
+    nickname: member.nickname || cached.nickname || "Gracz",
+    equippedCharacterId: member.characterId || cached.equippedCharacterId || cached.favoriteCharacterId || "",
+    equippedPetId: member.petId || cached.equippedPetId || cached.favoritePetId || "",
+    worldId: member.worldId || cached.worldId || "alley",
+  };
+}
+
+function isPartyActive() {
+  return Boolean(party.partyId && party.data);
+}
+
+function isPartyGameActive(partyData = party.data) {
+  return Boolean(partyData?.game?.active && sanitizeStoredId(partyData?.game?.sessionId));
+}
+
+function isPartyLeader(partyData = party.data) {
+  return sanitizeProfileId(partyData?.hostProfileId) === state.profileId;
+}
+
+function isLocalPartyReady() {
+  return Boolean(party.data?.members?.[state.profileId]?.ready);
+}
+
+function detachPartyRefListener() {
+  if (party.partyRef) {
+    party.partyRef.off();
+    party.partyRef = null;
+  }
+}
+
+function handlePartyDisbanded() {
+  const wasCoopActive = game.mode === "coop" && game.coopPartyId;
+  party.data = null;
+  party.partyId = "";
+  party.partyLaunchHandledId = "";
+  ui.pendingPartyLaunch = null;
+  renderLobby();
+  renderFriendsView();
+  syncTrackedProfileListeners();
+
+  if (wasCoopActive) {
+    stopGameSession();
+    showView("lobby");
+    openModal({
+      title: "Drużyna zamknięta",
+      message: "Znajomy opuścił lobby albo zakończył wspólną grę.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+  }
+}
+
+function handleActivePartySnapshot(payload) {
+  if (!payload) {
+    handlePartyDisbanded();
+    return;
+  }
+
+  party.data = {
+    partyId: party.partyId,
+    ...payload,
+  };
+  syncTrackedProfileListeners();
+  renderLobby();
+  renderFriendsView();
+
+  if (isPartyLeader(party.data) && !isPartyGameActive(party.data)) {
+    void maybeStartPartyGameSession();
+  }
+
+  const sessionId = sanitizeStoredId(party.data?.game?.sessionId);
+  if (sessionId && isPartyGameActive(party.data)) {
+    if (game.mode === "coop" && game.coopSessionId === sessionId) {
+      applyRemoteCoopSnapshot(party.data.game);
+      return;
+    }
+
+    if (party.partyLaunchHandledId !== sessionId) {
+      party.partyLaunchHandledId = sessionId;
+      ui.pendingPartyLaunch = {
+        partyId: party.partyId,
+        snapshot: party.data.game,
+      };
+      showView("game");
+    }
+  }
+}
+
+function attachPartyRefListener(nextPartyId) {
+  detachPartyRefListener();
+  party.partyId = sanitizeStoredId(nextPartyId);
+
+  if (!party.partyId) {
+    party.data = null;
+    renderLobby();
+    renderFriendsView();
+    syncTrackedProfileListeners();
+    return;
+  }
+
+  const db = getFirebasePartyDatabase();
+  if (!db) {
+    return;
+  }
+
+  party.partyRef = db.ref(`parties/${party.partyId}`);
+  party.partyRef.on("value", (snapshot) => {
+    handleActivePartySnapshot(snapshot.val() || null);
+  });
+}
+
+function detachPartyListeners() {
+  if (party.membershipRef) {
+    party.membershipRef.off();
+    party.membershipRef = null;
+  }
+
+  if (party.invitesRef) {
+    party.invitesRef.off();
+    party.invitesRef = null;
+  }
+
+  if (party.invitesSentRef) {
+    party.invitesSentRef.off();
+    party.invitesSentRef = null;
+  }
+
+  detachPartyRefListener();
+  party.invites = [];
+  party.sentInviteIds = [];
+  party.data = null;
+  party.partyId = "";
+  party.partyLaunchHandledId = "";
+}
+
+function filterFreshPartyInvites(entries = []) {
+  const threshold = Date.now() - PARTY_INVITE_EXPIRY_MS;
+  return entries.filter((entry) => Number(entry?.createdAt || 0) >= threshold);
+}
+
+function syncPartyListeners() {
+  const db = getFirebasePartyDatabase();
+
+  if (!db || !state.profileId) {
+    detachPartyListeners();
+    return;
+  }
+
+  if (party.membershipOwnerId === state.profileId && party.membershipRef) {
+    return;
+  }
+
+  detachPartyListeners();
+  party.membershipOwnerId = state.profileId;
+
+  party.membershipRef = db.ref(`partyMemberships/${state.profileId}`);
+  party.membershipRef.on("value", (snapshot) => {
+    const nextPartyId = sanitizeStoredId(snapshot.val()?.partyId || "");
+    if (nextPartyId !== party.partyId) {
+      attachPartyRefListener(nextPartyId);
+      return;
+    }
+
+    if (!nextPartyId && party.partyId) {
+      handlePartyDisbanded();
+    }
+  });
+
+  party.invitesRef = db.ref(`partyInvites/${state.profileId}`);
+  party.invitesRef.on("value", (snapshot) => {
+    const raw = snapshot.val() || {};
+    party.invites = filterFreshPartyInvites(
+      Object.entries(raw).map(([fromProfileId, payload]) => ({
+        fromProfileId: sanitizeProfileId(fromProfileId),
+        ...(payload || {}),
+      })).filter((entry) => entry.fromProfileId)
+    );
+    syncTrackedProfileListeners();
+    void fetchPublicProfilesById(party.invites.map((entry) => entry.fromProfileId)).finally(() => {
+      renderFriendsView();
+    });
+  });
+
+  party.invitesSentRef = db.ref(`partyInviteSent/${state.profileId}`);
+  party.invitesSentRef.on("value", (snapshot) => {
+    const raw = snapshot.val() || {};
+    const freshEntries = filterFreshPartyInvites(
+      Object.entries(raw).map(([toProfileId, payload]) => ({
+        toProfileId: sanitizeProfileId(toProfileId),
+        ...(payload || {}),
+      })).filter((entry) => entry.toProfileId)
+    );
+    party.sentInviteIds = freshEntries.map((entry) => entry.toProfileId);
+    syncTrackedProfileListeners();
+    void fetchPublicProfilesById(party.sentInviteIds).finally(() => {
+      renderFriendsView();
+    });
+  });
+}
+
+async function sendPartyInvite(rawProfileId) {
+  const targetProfileId = sanitizeProfileId(rawProfileId);
+
+  if (!targetProfileId || !(await ensureSocialProfileReady())) {
+    openModal({
+      title: "Brak internetu",
+      message: "Drużyny działają tylko z internetem.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  if (!socialProfile.friendIds.includes(targetProfileId)) {
+    openModal({
+      title: "Tylko znajomi",
+      message: "Do lobby możesz zaprosić tylko znajomego.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  if (isPartyActive()) {
+    openModal({
+      title: "Masz już drużynę",
+      message: "Najpierw opuść obecną drużynę.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  if (party.sentInviteIds.length > 0) {
+    openModal({
+      title: "Zaproszenie czeka",
+      message: "Masz już wysłane zaproszenie do lobby.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  const db = getFirebasePartyDatabase();
+  if (!db) {
+    return;
+  }
+
+  try {
+    const targetMembershipSnapshot = await db.ref(`partyMemberships/${targetProfileId}`).once("value");
+    if (sanitizeStoredId(targetMembershipSnapshot.val()?.partyId)) {
+      throw new Error("target-in-party");
+    }
+
+    const targetProfile = getCachedSocialProfile(targetProfileId)
+      || (await fetchPublicProfilesById([targetProfileId]))[0]
+      || null;
+
+    if (!targetProfile) {
+      throw new Error("missing-profile");
+    }
+
+    const now = Date.now();
+    const invitePayload = {
+      ...buildLocalPartyMemberPayload({
+        fromProfileId: state.profileId,
+        createdAt: now,
+      }),
+    };
+    const sentPayload = {
+      toProfileId: targetProfileId,
+      nickname: targetProfile.nickname || "Gracz",
+      createdAt: now,
+    };
+    const updates = {};
+    updates[`partyInvites/${targetProfileId}/${state.profileId}`] = invitePayload;
+    updates[`partyInviteSent/${state.profileId}/${targetProfileId}`] = sentPayload;
+    await db.ref().update(updates);
+
+    openModal({
+      title: "Zaproszenie wysłane",
+      message: `Zaprosiłeś ${targetProfile.nickname || "znajomego"} do lobby.`,
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+  } catch (error) {
+    openModal({
+      title: "Nie udało się",
+      message:
+        error?.message === "target-in-party"
+          ? "Ten znajomy jest już w innej drużynie."
+          : "Nie udało się wysłać zaproszenia do lobby.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+  }
+}
+
+async function cancelPartyInvite(rawProfileId) {
+  const targetProfileId = sanitizeProfileId(rawProfileId);
+  if (!targetProfileId || !(await ensureSocialProfileReady())) {
+    return;
+  }
+
+  const db = getFirebasePartyDatabase();
+  if (!db) {
+    return;
+  }
+
+  const updates = {};
+  updates[`partyInvites/${targetProfileId}/${state.profileId}`] = null;
+  updates[`partyInviteSent/${state.profileId}/${targetProfileId}`] = null;
+  await db.ref().update(updates).catch(() => {});
+}
+
+async function acceptPartyInvite(rawProfileId) {
+  const fromProfileId = sanitizeProfileId(rawProfileId);
+  if (!fromProfileId || !(await ensureSocialProfileReady())) {
+    return;
+  }
+
+  if (isPartyActive()) {
+    openModal({
+      title: "Masz już drużynę",
+      message: "Najpierw opuść obecną drużynę.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  const db = getFirebasePartyDatabase();
+  if (!db) {
+    return;
+  }
+
+  try {
+    const [selfMembershipSnapshot, senderMembershipSnapshot] = await Promise.all([
+      db.ref(`partyMemberships/${state.profileId}`).once("value"),
+      db.ref(`partyMemberships/${fromProfileId}`).once("value"),
+    ]);
+
+    if (
+      sanitizeStoredId(selfMembershipSnapshot.val()?.partyId)
+      || sanitizeStoredId(senderMembershipSnapshot.val()?.partyId)
+    ) {
+      throw new Error("already-in-party");
+    }
+
+    const senderProfile = getCachedSocialProfile(fromProfileId)
+      || (await fetchPublicProfilesById([fromProfileId]))[0]
+      || party.invites.find((entry) => entry.fromProfileId === fromProfileId)
+      || null;
+
+    const partyId = buildPartyId([state.profileId, fromProfileId]);
+    const now = Date.now();
+    const updates = {};
+    updates[`parties/${partyId}`] = {
+      partyId,
+      hostProfileId: fromProfileId,
+      status: "lobby",
+      createdAt: now,
+      updatedAt: now,
+      members: {
+        [fromProfileId]: buildPartyMemberRecordFromProfile(senderProfile, {
+          profileId: fromProfileId,
+          ready: false,
+          view: "lobby",
+          connected: true,
+          updatedAt: now,
+        }),
+        [state.profileId]: buildLocalPartyMemberPayload({
+          ready: false,
+          view: "lobby",
+          connected: true,
+          updatedAt: now,
+        }),
+      },
+      game: null,
+    };
+    updates[`partyMemberships/${state.profileId}`] = { partyId, updatedAt: now };
+    updates[`partyMemberships/${fromProfileId}`] = { partyId, updatedAt: now };
+    updates[`partyInvites/${state.profileId}/${fromProfileId}`] = null;
+    updates[`partyInviteSent/${fromProfileId}/${state.profileId}`] = null;
+    updates[`partyInvites/${fromProfileId}/${state.profileId}`] = null;
+    updates[`partyInviteSent/${state.profileId}/${fromProfileId}`] = null;
+    await db.ref().update(updates);
+  } catch (error) {
+    openModal({
+      title: "Nie udało się",
+      message:
+        error?.message === "already-in-party"
+          ? "Ty albo ten znajomy jesteście już w drużynie."
+          : "Nie udało się dołączyć do lobby.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+  }
+}
+
+async function rejectPartyInvite(rawProfileId) {
+  const fromProfileId = sanitizeProfileId(rawProfileId);
+  if (!fromProfileId || !(await ensureSocialProfileReady())) {
+    return;
+  }
+
+  const db = getFirebasePartyDatabase();
+  if (!db) {
+    return;
+  }
+
+  const updates = {};
+  updates[`partyInvites/${state.profileId}/${fromProfileId}`] = null;
+  updates[`partyInviteSent/${fromProfileId}/${state.profileId}`] = null;
+  await db.ref().update(updates).catch(() => {});
+}
+
+async function leaveParty() {
+  if (!isPartyActive() || !(await ensureSocialProfileReady())) {
+    return;
+  }
+
+  const db = getFirebasePartyDatabase();
+  if (!db) {
+    return;
+  }
+
+  const memberIds = getActivePartyMemberIds();
+  const updates = {};
+  updates[`parties/${party.partyId}`] = null;
+  memberIds.forEach((profileId) => {
+    updates[`partyMemberships/${profileId}`] = null;
+  });
+  await db.ref().update(updates).catch(() => {});
+}
+
+function buildPartyInviteActions(profile) {
+  const profileId = sanitizeProfileId(profile?.profileId);
+
+  if (!profileId || !socialProfile.friendIds.includes(profileId)) {
+    return [];
+  }
+
+  if (party.invites.some((entry) => entry.fromProfileId === profileId)) {
+    return [
+      `<button class="pixel-button small-button settings-action-button" data-party-accept="${profileId}" type="button">AKCEPTUJ</button>`,
+      `<button class="pixel-button small-button subtle-button" data-party-reject="${profileId}" type="button">ODRZUĆ</button>`,
+    ];
+  }
+
+  if (party.sentInviteIds.includes(profileId)) {
+    return [
+      `<button class="pixel-button small-button subtle-button" data-party-cancel="${profileId}" type="button">ANULUJ</button>`,
+    ];
+  }
+
+  if (isPartyActive()) {
+    if (getOtherPartyMemberId() === profileId) {
+      return [
+        `<button class="pixel-button small-button subtle-button" type="button" disabled>W LOBBY</button>`,
+      ];
+    }
+
+    return [
+      `<button class="pixel-button small-button subtle-button" type="button" disabled>MASZ DRUŻYNĘ</button>`,
+    ];
+  }
+
+  return [
+    `<button class="pixel-button small-button settings-action-button" data-party-invite="${profileId}" type="button">DO LOBBY</button>`,
+  ];
+}
+
+async function syncLocalPartyMemberState(overrides = {}) {
+  if (!isPartyActive() || party.syncingMember) {
+    return;
+  }
+
+  const db = getFirebasePartyDatabase();
+  if (!db) {
+    return;
+  }
+
+  party.syncingMember = true;
+
+  try {
+    const payload = buildLocalPartyMemberPayload(overrides);
+    await db.ref(`parties/${party.partyId}/members/${state.profileId}`).update(payload);
+    await db.ref(`parties/${party.partyId}/updatedAt`).set(Date.now());
+  } catch (error) {
+    // ignore temporary sync issues
+  } finally {
+    party.syncingMember = false;
+  }
+}
+
+function schedulePartyMemberSync(immediate = false, overrides = {}) {
+  if (party.memberSyncTimer) {
+    window.clearTimeout(party.memberSyncTimer);
+    party.memberSyncTimer = 0;
+  }
+
+  if (!isPartyActive()) {
+    return;
+  }
+
+  party.memberSyncTimer = window.setTimeout(() => {
+    party.memberSyncTimer = 0;
+    void syncLocalPartyMemberState(overrides);
+  }, immediate ? 10 : PARTY_MEMBER_SYNC_MS);
+}
+
+async function togglePartyReady() {
+  if (!isPartyActive()) {
+    ui.pendingPartyLaunch = null;
+    showView("game");
+    return;
+  }
+
+  if (isPartyGameActive()) {
+    return;
+  }
+
+  const nextReady = !isLocalPartyReady();
+  await syncLocalPartyMemberState({
+    ready: nextReady,
+    view: "lobby",
+    fire: false,
+    x: 0,
+    y: 0,
+  });
+}
+
+async function maybeStartPartyGameSession() {
+  if (!isPartyActive() || !isPartyLeader() || isPartyGameActive() || party.syncingHost) {
+    return;
+  }
+
+  const memberIds = getActivePartyMemberIds();
+  if (memberIds.length !== 2 || memberIds.some((profileId) => !party.data?.members?.[profileId]?.ready)) {
+    return;
+  }
+
+  const db = getFirebasePartyDatabase();
+  if (!db) {
+    return;
+  }
+
+  party.syncingHost = true;
+
+  try {
+    await db.ref(`parties/${party.partyId}`).transaction((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const members = current.members || {};
+      const currentMemberIds = Object.keys(members).map((profileId) => sanitizeProfileId(profileId)).filter(Boolean);
+      if (
+        current.game?.active
+        || currentMemberIds.length !== 2
+        || currentMemberIds.some((profileId) => !members[profileId]?.ready)
+      ) {
+        return current;
+      }
+
+      const now = Date.now();
+      const sessionId = `coop-${now.toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+      current.status = "game";
+      current.updatedAt = now;
+      current.game = {
+        active: true,
+        state: "playing",
+        sessionId,
+        hostProfileId: state.profileId,
+        currentWave: 0,
+        pendingWave: 1,
+        waveIntroMs: 3000,
+        pauseResumeCountdownMs: 0,
+        pauseResumeRobotsLeft: 0,
+        robotsKilledTotal: 0,
+        trophiesEarnedRun: 0,
+        resultStatus: "",
+        resultNote: "",
+        players: currentMemberIds.reduce((accumulator, profileId, index) => {
+          const member = members[profileId] || {};
+          const characterId = member.characterId || "magik-millo";
+          const petId = member.petId || "";
+          accumulator[profileId] = {
+            profileId,
+            nickname: member.nickname || "Gracz",
+            characterId,
+            petId,
+            x: index === 0 ? 0 : 0,
+            y: 0,
+            hp: getPlayerMaxHpForLoadout(characterId, petId),
+            alive: true,
+          };
+          return accumulator;
+        }, {}),
+        robots: [],
+        projectiles: [],
+        updatedAt: now,
+      };
+
+      currentMemberIds.forEach((profileId) => {
+        members[profileId] = {
+          ...(members[profileId] || {}),
+          ready: false,
+          view: "game",
+          connected: true,
+          updatedAt: now,
+        };
+      });
+
+      current.members = members;
+      return current;
+    });
+  } catch (error) {
+    // ignore
+  } finally {
+    party.syncingHost = false;
+  }
+}
+
+function getProfileFavoriteCharacter() {
+  return getOwnedItem("characters", state.favoriteCharacterId) || getOwnedItem("characters", state.equippedCharacter) || CATALOG.characters[0];
+}
+
+function getProfileFavoritePet() {
+  return getOwnedItem("pets", state.favoritePetId) || getOwnedItem("pets", state.equippedPet) || null;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function normalizePublicNickname(nickname) {
+  return sanitizePlayerNickname(nickname).toLowerCase();
+}
+
+function withRemoteProfileSyncSuspended(callback) {
+  remoteProfileSyncSuspendLevel += 1;
+
+  try {
+    return callback();
+  } finally {
+    remoteProfileSyncSuspendLevel = Math.max(0, remoteProfileSyncSuspendLevel - 1);
+  }
+}
+
+function applyHydratedState(nextState) {
+  withRemoteProfileSyncSuspended(() => {
+    Object.keys(state).forEach((key) => {
+      delete state[key];
+    });
+    Object.assign(state, hydrateSavedState(nextState));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  });
+
+  ui.trophyWorldId = state.activeTrophyWorld || "alley";
+  socialProfile.nicknameReserved = normalizePublicNickname(getPlayerNickname());
+  socialProfile.publicIdReserved = sanitizePublicPlayerId(state.publicId);
+  socialProfile.friendIds = [];
+  socialProfile.sentInviteIds = [];
+  socialProfile.receivedInvites = [];
+  socialProfile.relationshipsOwnerId = "";
+  detachSocialRelationshipListeners();
+  party.invites = [];
+  party.sentInviteIds = [];
+  party.partyLaunchHandledId = "";
+  party.membershipOwnerId = "";
+  detachPartyListeners();
+  closeSettingsPanel();
+  closeProfilePanel();
+  stopGameSession();
+  renderAll();
+  if (socialProfile.ready) {
+    syncSocialRelationshipListeners();
+  }
+  scheduleRemoteProfileSync(true);
+}
+
+function hasFirebaseSocialAccess() {
+  return Boolean(
+    FIREBASE_SOCIAL_CONFIG &&
+    typeof window !== "undefined" &&
+    window.firebase &&
+    typeof window.firebase.initializeApp === "function" &&
+    typeof window.firebase.database === "function"
+  );
+}
+
+function getFirebaseSocialDatabase() {
+  if (!hasFirebaseSocialAccess()) {
+    return null;
+  }
+
+  if (socialProfile.db) {
+    return socialProfile.db;
+  }
+
+  try {
+    const appName = "pixel-platoya-social";
+    socialProfile.app = window.firebase.apps.find((entry) => entry.name === appName)
+      || window.firebase.initializeApp(FIREBASE_SOCIAL_CONFIG, appName);
+    socialProfile.db = window.firebase.database(socialProfile.app);
+    socialProfile.ready = true;
+    return socialProfile.db;
+  } catch (error) {
+    socialProfile.lastError = "Nie udało się połączyć z Firebase.";
+    socialProfile.ready = false;
+    return null;
+  }
+}
+
+async function initSocialProfileSync() {
+  if (socialProfile.initPromise) {
+    return socialProfile.initPromise;
+  }
+
+  socialProfile.initStarted = true;
+  socialProfile.initPromise = (async () => {
+    const db = getFirebaseSocialDatabase();
+
+    if (!db) {
+      socialProfile.lastError = navigator.onLine === false
+        ? "Profil online nie działa bez internetu."
+        : socialProfile.lastError || "Nie udało się połączyć z profilem online.";
+      socialProfile.initStarted = false;
+      renderSettingsPanel();
+      renderProfilePanel();
+      renderFriendsView();
+      return;
+    }
+
+    try {
+      if (!socialProfile.listenerBound) {
+        const profilesRef = db.ref("profiles").orderByChild("trophies").limitToLast(100);
+        profilesRef.on("value", (snapshot) => {
+          const raw = snapshot.val() || {};
+        socialProfile.leaderboard = Object.entries(raw)
+          .map(([profileId, payload]) => ({
+            profileId,
+            ...(payload || {}),
+          }))
+            .sort((left, right) => {
+              const trophyDelta = Number(right.trophies || 0) - Number(left.trophies || 0);
+              if (trophyDelta !== 0) {
+                return trophyDelta;
+              }
+
+              return Number(right.updatedAt || 0) - Number(left.updatedAt || 0);
+            });
+          mergeSocialProfilesIntoCache(socialProfile.leaderboard);
+          renderProfilePanel();
+          renderFriendsView();
+        });
+        socialProfile.listenerBound = true;
+      }
+
+      await ensureRemoteNicknameReservation();
+      await ensureRemotePublicIdReservation();
+      syncSocialRelationshipListeners();
+      syncPartyListeners();
+      if (!socialProfile.heartbeatTimer) {
+        socialProfile.heartbeatTimer = window.setInterval(() => {
+          scheduleRemoteProfileSync(true);
+        }, PROFILE_PRESENCE_HEARTBEAT_MS);
+      }
+      socialProfile.lastError = "";
+      scheduleRemoteProfileSync(true);
+    } catch (error) {
+      socialProfile.lastError = "Profil online jest chwilowo niedostępny.";
+      socialProfile.initStarted = false;
+    }
+
+    renderSettingsPanel();
+    renderProfilePanel();
+    renderFriendsView();
+  })();
+
+  try {
+    await socialProfile.initPromise;
+  } finally {
+    socialProfile.initPromise = null;
+  }
+}
+
+async function ensureSocialProfileReady() {
+  if (socialProfile.ready) {
+    return true;
+  }
+
+  await initSocialProfileSync();
+  return socialProfile.ready;
+}
+
+function scheduleRemoteProfileSync(immediate = false) {
+  if (remoteProfileSyncSuspendLevel > 0) {
+    return;
+  }
+
+  if (socialProfile.syncTimer) {
+    window.clearTimeout(socialProfile.syncTimer);
+    socialProfile.syncTimer = 0;
+  }
+
+  if (!socialProfile.ready || !state.profileId) {
+    return;
+  }
+
+  const delay = immediate ? 10 : PROFILE_SYNC_DEBOUNCE_MS;
+  socialProfile.syncTimer = window.setTimeout(() => {
+    socialProfile.syncTimer = 0;
+    syncRemoteProfileNow();
+  }, delay);
+}
+
+async function syncRemoteProfileNow() {
+  if (remoteProfileSyncSuspendLevel > 0 || socialProfile.syncBusy) {
+    socialProfile.syncPending = true;
+    return;
+  }
+
+  const db = getFirebaseSocialDatabase();
+  if (!db) {
+    return;
+  }
+
+  socialProfile.syncBusy = true;
+
+  try {
+    await ensureRemoteNicknameReservation();
+    await ensureRemotePublicIdReservation();
+    await db.ref(`profiles/${state.profileId}`).set(buildPublicProfilePayload());
+
+    if (state.accountPasswordSet && state.accountSaveSecret) {
+      await syncRemoteSaveBlob();
+    }
+
+    socialProfile.lastError = "";
+    socialProfile.lastSyncedAt = Date.now();
+  } catch (error) {
+    socialProfile.lastError = "Nie udało się zsynchronizować profilu.";
+  } finally {
+    socialProfile.syncBusy = false;
+    renderSettingsPanel();
+    renderProfilePanel();
+
+    if (socialProfile.syncPending) {
+      socialProfile.syncPending = false;
+      scheduleRemoteProfileSync(true);
+    }
+  }
+}
+
+function buildPublicProfilePayload() {
+  const favoriteCharacter = getProfileFavoriteCharacter();
+  const favoritePet = getProfileFavoritePet();
+  const worldId = getHighestUnlockedTrophyWorldId();
+  const activityState = getCurrentProfileActivityState();
+  const now = Date.now();
+
+  return {
+    profileId: state.profileId,
+    publicId: state.publicId,
+    nickname: getPlayerNickname(),
+    nicknameNormalized: normalizePublicNickname(getPlayerNickname()),
+    trophies: Number(state.trophies || 0),
+    worldId,
+    completedGamesTotal: Number(state.completedGamesTotal || 0),
+    robotsDefeatedTotal: Number(state.robotsDefeatedTotal || 0),
+    ownedCharactersCount: state.ownedCharacters.length,
+    ownedPetsCount: state.ownedPets.length,
+    favoriteCharacterId: favoriteCharacter?.id || "",
+    favoritePetId: favoritePet?.id || "",
+    equippedCharacterId: sanitizeStoredId(state.equippedCharacter),
+    equippedPetId: sanitizeStoredId(state.equippedPet),
+    activityState,
+    lastActiveAt: now,
+    updatedAt: now,
+    createdAt: Number(state.profileCreatedAt || Date.now()),
+  };
+}
+
+async function ensureRemoteNicknameReservation() {
+  const db = getFirebaseSocialDatabase();
+
+  if (!db) {
+    return false;
+  }
+
+  let candidate = getPlayerNickname();
+
+  for (let attempt = 0; attempt < 24; attempt += 1) {
+    const reserved = await tryClaimRemoteNickname(candidate);
+    if (reserved) {
+      if (candidate !== state.playerNickname) {
+        withRemoteProfileSyncSuspended(() => {
+          state.playerNickname = candidate;
+          state.nicknamePromptSeen = true;
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        });
+        renderAll();
+      }
+      return true;
+    }
+
+    candidate = generateDefaultNickname();
+  }
+
+  throw new Error("Nie udało się zarezerwować nicku.");
+}
+
+async function ensureRemotePublicIdReservation() {
+  const db = getFirebaseSocialDatabase();
+
+  if (!db) {
+    return false;
+  }
+
+  let candidate = sanitizePublicPlayerId(state.publicId) || generatePublicPlayerId();
+
+  for (let attempt = 0; attempt < 24; attempt += 1) {
+    const reserved = await tryClaimRemotePublicId(candidate);
+    if (reserved) {
+      if (candidate !== state.publicId) {
+        withRemoteProfileSyncSuspended(() => {
+          state.publicId = candidate;
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        });
+      }
+      return true;
+    }
+
+    candidate = generatePublicPlayerId();
+  }
+
+  throw new Error("Nie udało się zarezerwować ID.");
+}
+
+async function tryClaimRemotePublicId(publicId) {
+  const db = getFirebaseSocialDatabase();
+  const normalized = sanitizePublicPlayerId(publicId);
+
+  if (!db || !normalized) {
+    return false;
+  }
+
+  const ref = db.ref(`publicIds/${normalized}`);
+  const result = await ref.transaction((currentValue) => {
+    if (!currentValue || currentValue.profileId === state.profileId) {
+      return {
+        profileId: state.profileId,
+        updatedAt: Date.now(),
+      };
+    }
+
+    return;
+  });
+
+  if (!result.committed) {
+    return false;
+  }
+
+  const previousReservation = socialProfile.publicIdReserved;
+  socialProfile.publicIdReserved = normalized;
+
+  if (previousReservation && previousReservation !== normalized) {
+    const previousRef = db.ref(`publicIds/${previousReservation}`);
+    const previousSnapshot = await previousRef.once("value").catch(() => null);
+    if (previousSnapshot?.val()?.profileId === state.profileId) {
+      await previousRef.remove().catch(() => {});
+    }
+  }
+
+  return true;
+}
+
+async function tryClaimRemoteNickname(nickname) {
+  const db = getFirebaseSocialDatabase();
+
+  if (!db) {
+    return false;
+  }
+
+  const normalized = normalizePublicNickname(nickname);
+  if (!normalized) {
+    return false;
+  }
+
+  const ref = db.ref(`nicknames/${normalized}`);
+  const result = await ref.transaction((currentValue) => {
+    if (!currentValue || currentValue.profileId === state.profileId) {
+      return {
+        profileId: state.profileId,
+        nickname,
+        updatedAt: Date.now(),
+      };
+    }
+
+    return;
+  });
+
+  if (!result.committed) {
+    return false;
+  }
+
+  const previousReservation = socialProfile.nicknameReserved;
+  socialProfile.nicknameReserved = normalized;
+
+  if (previousReservation && previousReservation !== normalized) {
+    const previousRef = db.ref(`nicknames/${previousReservation}`);
+    const previousSnapshot = await previousRef.once("value").catch(() => null);
+    if (previousSnapshot?.val()?.profileId === state.profileId) {
+      await previousRef.remove().catch(() => {});
+    }
+  }
+
+  return true;
+}
+
+async function syncRemoteSaveBlob() {
+  const db = getFirebaseSocialDatabase();
+
+  if (!db || !state.accountSaveSecret) {
+    return;
+  }
+
+  const payload = JSON.stringify(state);
+  const encrypted = await encryptTextWithSecret(payload, state.accountSaveSecret);
+  await db.ref(`saveBlobs/${state.profileId}`).set({
+    ciphertext: encrypted.ciphertext,
+    iv: encrypted.iv,
+    updatedAt: Date.now(),
+    version: 1,
+  });
+}
+
+async function saveProfileDetails() {
+  if (!profileNameInput) {
+    return;
+  }
+
+  const nextNickname = sanitizePlayerNickname(profileNameInput.value);
+  const nextCharacterId = sanitizeStoredId(profileFavoriteCharacterSelect?.value);
+  const nextPetId = sanitizeStoredId(profileFavoritePetSelect?.value);
+
+  if (!nextNickname) {
+    openModal({
+      title: "Brak nazwy",
+      message: "Wpisz nazwę gracza.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  profileSaveNameButton.disabled = true;
+
+  try {
+    if (nextNickname !== getPlayerNickname() && socialProfile.ready) {
+      const reserved = await tryClaimRemoteNickname(nextNickname);
+      if (!reserved) {
+        openModal({
+          title: "Nick jest zajęty",
+          message: "Wybierz inny nick.",
+          buttonText: "OK",
+          onConfirm: closeModal,
+        });
+        return;
+      }
+    }
+
+    state.playerNickname = nextNickname;
+    state.nicknamePromptSeen = true;
+
+    if (nextCharacterId && state.ownedCharacters.includes(nextCharacterId)) {
+      state.favoriteCharacterId = nextCharacterId;
+    }
+
+    state.favoritePetId = nextPetId && state.ownedPets.includes(nextPetId) ? nextPetId : "";
+    saveState();
+    ui.profileEditMode = false;
+    renderAll();
+  } finally {
+    profileSaveNameButton.disabled = false;
+  }
+}
+
+async function setCurrentAccountPassword() {
+  if (!(await ensureSocialProfileReady())) {
+    openModal({
+      title: "Brak chmury",
+      message: "Połącz grę z Firebase, żeby ustawić hasło do konta.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  if (state.accountPasswordSet) {
+    return;
+  }
+
+  const password = String(settingsNewPassword?.value || "").trim();
+  if (password.length < 4) {
+    openModal({
+      title: "Hasło jest za krótkie",
+      message: "Hasło musi mieć co najmniej 4 znaki.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  settingsSetPasswordButton.disabled = true;
+
+  try {
+    await ensureRemoteNicknameReservation();
+    const db = getFirebaseSocialDatabase();
+    if (!db) {
+      throw new Error("no-db");
+    }
+
+    const salt = generateRandomBase64(16);
+    const passwordHash = await createPasswordHash(password, salt);
+    const saveSecret = generateRandomBase64(32);
+    const wrappedSecret = await encryptTextWithPassword(saveSecret, password, salt);
+
+    await db.ref(`accounts/${state.profileId}`).set({
+      profileId: state.profileId,
+      nicknameNormalized: normalizePublicNickname(getPlayerNickname()),
+      passwordHash,
+      salt,
+      saveSecretCiphertext: wrappedSecret.ciphertext,
+      saveSecretIv: wrappedSecret.iv,
+      updatedAt: Date.now(),
+      createdAt: Number(state.profileCreatedAt || Date.now()),
+    });
+
+    state.accountPasswordSet = true;
+    state.accountPasswordHash = passwordHash;
+    state.accountPasswordSalt = salt;
+    state.accountSaveSecret = saveSecret;
+    saveState();
+    await syncRemoteProfileNow();
+    if (settingsNewPassword) {
+      settingsNewPassword.value = "";
+    }
+    renderAll();
+    openModal({
+      title: "Hasło ustawione",
+      message: "To konto można już logować nickiem i hasłem na innym urządzeniu.",
+      buttonText: "SUPER",
+      onConfirm: closeModal,
+    });
+  } catch (error) {
+    openModal({
+      title: "Nie udało się",
+      message: "Nie udało się ustawić hasła do konta.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+  } finally {
+    settingsSetPasswordButton.disabled = false;
+    renderSettingsPanel();
+  }
+}
+
+async function loginToExistingAccount() {
+  if (!(await ensureSocialProfileReady())) {
+    openModal({
+      title: "Brak chmury",
+      message: "Połącz grę z Firebase, żeby zalogować się na istniejące konto.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  const nickname = sanitizePlayerNickname(settingsLoginNickname?.value);
+  const password = String(settingsLoginPassword?.value || "").trim();
+
+  if (!nickname || !password) {
+    openModal({
+      title: "Brakuje danych",
+      message: "Wpisz nick i hasło istniejącego konta.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  settingsLoginButton.disabled = true;
+
+  try {
+    const db = getFirebaseSocialDatabase();
+    if (!db) {
+      throw new Error("no-db");
+    }
+
+    const nicknameSnapshot = await db.ref(`nicknames/${normalizePublicNickname(nickname)}`).once("value");
+    const nicknameData = nicknameSnapshot.val();
+
+    if (!nicknameData?.profileId) {
+      throw new Error("missing-account");
+    }
+
+    const profileId = sanitizeProfileId(nicknameData.profileId);
+    const accountSnapshot = await db.ref(`accounts/${profileId}`).once("value");
+    const accountData = accountSnapshot.val();
+
+    if (!accountData?.passwordHash || !accountData?.salt || !accountData?.saveSecretCiphertext || !accountData?.saveSecretIv) {
+      throw new Error("missing-password");
+    }
+
+    const passwordHash = await createPasswordHash(password, accountData.salt);
+    if (passwordHash !== accountData.passwordHash) {
+      throw new Error("wrong-password");
+    }
+
+    const saveSecret = await decryptTextWithPassword(
+      accountData.saveSecretCiphertext,
+      accountData.saveSecretIv,
+      password,
+      accountData.salt
+    );
+    const saveSnapshot = await db.ref(`saveBlobs/${profileId}`).once("value");
+    const saveData = saveSnapshot.val();
+
+    if (!saveData?.ciphertext || !saveData?.iv) {
+      throw new Error("missing-save");
+    }
+
+    const decryptedSave = await decryptTextWithSecret(saveData.ciphertext, saveData.iv, saveSecret);
+    const parsedSave = JSON.parse(decryptedSave);
+    const hydrated = hydrateSavedState(parsedSave);
+    hydrated.profileId = profileId;
+    hydrated.accountPasswordSet = true;
+    hydrated.accountPasswordHash = accountData.passwordHash;
+    hydrated.accountPasswordSalt = accountData.salt;
+    hydrated.accountSaveSecret = saveSecret;
+    hydrated.nicknamePromptSeen = true;
+
+    if (settingsLoginNickname) {
+      settingsLoginNickname.value = "";
+    }
+    if (settingsLoginPassword) {
+      settingsLoginPassword.value = "";
+    }
+
+    applyHydratedState(hydrated);
+    openModal({
+      title: "Zalogowano",
+      message: `Wczytano konto ${hydrateSavedState(parsedSave).playerNickname}.`,
+      buttonText: "SUPER",
+      onConfirm: closeModal,
+    });
+  } catch (error) {
+    let message = "Nie udało się zalogować na to konto.";
+
+    if (error?.message === "missing-account") {
+      message = "Nie ma jeszcze konta o takim nicku.";
+    } else if (error?.message === "missing-password") {
+      message = "To konto nie ma jeszcze ustawionego hasła. Uzupełnij je najpierw w ustawieniach na tamtym urządzeniu.";
+    } else if (error?.message === "wrong-password") {
+      message = "Hasło jest nieprawidłowe.";
+    } else if (error?.message === "missing-save") {
+      message = "To konto nie ma jeszcze zapisu w chmurze.";
+    }
+
+    openModal({
+      title: "Logowanie nieudane",
+      message,
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+  } finally {
+    settingsLoginButton.disabled = false;
+  }
+}
+
+async function createPasswordHash(password, salt) {
+  return sha256Hex(`${password}::${salt}`);
+}
+
+async function sha256Hex(value) {
+  const data = new TextEncoder().encode(String(value || ""));
+  const digest = await window.crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function generateRandomBase64(length = 16) {
+  const bytes = new Uint8Array(length);
+
+  if (window.crypto?.getRandomValues) {
+    window.crypto.getRandomValues(bytes);
+  } else {
+    for (let index = 0; index < bytes.length; index += 1) {
+      bytes[index] = Math.floor(Math.random() * 256);
+    }
+  }
+
+  return uint8ArrayToBase64(bytes);
+}
+
+function uint8ArrayToBase64(bytes) {
+  let binary = "";
+  bytes.forEach((value) => {
+    binary += String.fromCharCode(value);
+  });
+  return window.btoa(binary);
+}
+
+function base64ToUint8Array(base64Value) {
+  const binary = window.atob(base64Value);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return bytes;
+}
+
+async function derivePasswordAesKey(password, saltBase64) {
+  const keyMaterial = await window.crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
+  );
+
+  return window.crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: base64ToUint8Array(saltBase64),
+      iterations: 120000,
+      hash: "SHA-256",
+    },
+    keyMaterial,
+    {
+      name: "AES-GCM",
+      length: 256,
+    },
+    false,
+    ["encrypt", "decrypt"]
+  );
+}
+
+async function encryptTextWithPassword(plainText, password, saltBase64) {
+  const iv = base64ToUint8Array(generateRandomBase64(12));
+  const key = await derivePasswordAesKey(password, saltBase64);
+  const cipherBuffer = await window.crypto.subtle.encrypt(
+    {
+      name: "AES-GCM",
+      iv,
+    },
+    key,
+    new TextEncoder().encode(String(plainText || ""))
+  );
+
+  return {
+    ciphertext: uint8ArrayToBase64(new Uint8Array(cipherBuffer)),
+    iv: uint8ArrayToBase64(iv),
+  };
+}
+
+async function decryptTextWithPassword(ciphertext, ivBase64, password, saltBase64) {
+  const key = await derivePasswordAesKey(password, saltBase64);
+  const plainBuffer = await window.crypto.subtle.decrypt(
+    {
+      name: "AES-GCM",
+      iv: base64ToUint8Array(ivBase64),
+    },
+    key,
+    base64ToUint8Array(ciphertext)
+  );
+
+  return new TextDecoder().decode(plainBuffer);
+}
+
+async function importSecretAesKey(secretBase64) {
+  return window.crypto.subtle.importKey(
+    "raw",
+    base64ToUint8Array(secretBase64),
+    {
+      name: "AES-GCM",
+    },
+    false,
+    ["encrypt", "decrypt"]
+  );
+}
+
+async function encryptTextWithSecret(plainText, secretBase64) {
+  const iv = base64ToUint8Array(generateRandomBase64(12));
+  const key = await importSecretAesKey(secretBase64);
+  const cipherBuffer = await window.crypto.subtle.encrypt(
+    {
+      name: "AES-GCM",
+      iv,
+    },
+    key,
+    new TextEncoder().encode(String(plainText || ""))
+  );
+
+  return {
+    ciphertext: uint8ArrayToBase64(new Uint8Array(cipherBuffer)),
+    iv: uint8ArrayToBase64(iv),
+  };
+}
+
+async function decryptTextWithSecret(ciphertext, ivBase64, secretBase64) {
+  const key = await importSecretAesKey(secretBase64);
+  const plainBuffer = await window.crypto.subtle.decrypt(
+    {
+      name: "AES-GCM",
+      iv: base64ToUint8Array(ivBase64),
+    },
+    key,
+    base64ToUint8Array(ciphertext)
+  );
+
+  return new TextDecoder().decode(plainBuffer);
 }
 
 function renderStore() {
@@ -5250,15 +8142,11 @@ function hasPlayerNickname() {
 }
 
 function getPlayerNickname() {
-  return sanitizePlayerNickname(state.playerNickname) || "Gracz";
+  return sanitizePlayerNickname(state.playerNickname) || generateDefaultNickname();
 }
 
 function maybePromptNicknameAfterIntro() {
-  if (!state.seenIntro || hasPlayerNickname() || !nicknameBackdrop) {
-    return;
-  }
-
-  openNicknamePrompt();
+  return;
 }
 
 function openNicknamePrompt(onSave = null) {
@@ -5314,6 +8202,55 @@ function submitNicknamePrompt() {
   }
 }
 
+function createSocialProfileState() {
+  return {
+    app: null,
+    db: null,
+    ready: false,
+    initStarted: false,
+    initPromise: null,
+    listenerBound: false,
+    syncTimer: 0,
+    syncBusy: false,
+    syncPending: false,
+    lastError: "",
+    leaderboard: [],
+    profileCache: {},
+    selectedProfileId: "",
+    nicknameReserved: "",
+    publicIdReserved: "",
+    friendIds: [],
+    sentInviteIds: [],
+    receivedInvites: [],
+    relationshipsOwnerId: "",
+    friendsRef: null,
+    receivedInvitesRef: null,
+    sentInvitesRef: null,
+    watchedProfileRefs: {},
+    heartbeatTimer: 0,
+    lastSyncedAt: 0,
+  };
+}
+
+function createPartyState() {
+  return {
+    membershipRef: null,
+    membershipOwnerId: "",
+    invitesRef: null,
+    invitesSentRef: null,
+    partyRef: null,
+    partyId: "",
+    invites: [],
+    sentInviteIds: [],
+    data: null,
+    partyLaunchHandledId: "",
+    memberSyncTimer: 0,
+    hostSyncTimer: 0,
+    syncingMember: false,
+    syncingHost: false,
+  };
+}
+
 function createMultiplayerState() {
   return {
     firebaseApp: null,
@@ -5347,33 +8284,11 @@ function createMultiplayerState() {
 }
 
 function hasFirebaseMultiplayerConfig() {
-  return Boolean(
-    FIREBASE_MULTIPLAYER_CONFIG &&
-      typeof FIREBASE_MULTIPLAYER_CONFIG === "object" &&
-      FIREBASE_MULTIPLAYER_CONFIG.apiKey &&
-      FIREBASE_MULTIPLAYER_CONFIG.projectId &&
-      FIREBASE_MULTIPLAYER_CONFIG.appId &&
-      FIREBASE_MULTIPLAYER_CONFIG.databaseURL &&
-      window.firebase
-  );
+  return false;
 }
 
 function getFirebaseMultiplayerDatabase() {
-  if (!hasFirebaseMultiplayerConfig()) {
-    return null;
-  }
-
-  if (!multiplayer.firebaseApp) {
-    multiplayer.firebaseApp = window.firebase.apps.length
-      ? window.firebase.app()
-      : window.firebase.initializeApp(FIREBASE_MULTIPLAYER_CONFIG);
-  }
-
-  if (!multiplayer.firebaseDb) {
-    multiplayer.firebaseDb = window.firebase.database(multiplayer.firebaseApp);
-  }
-
-  return multiplayer.firebaseDb;
+  return null;
 }
 
 function normalizeMultiplayerNickname(nickname) {
@@ -6807,6 +9722,8 @@ function createGameState() {
       shieldTimerMs: 0,
       shieldCooldownMs: 0,
       targetId: null,
+      pascalTriggered: false,
+      pascalInvisibleMs: 0,
     },
     petPack: [],
     hadActiveRobots: false,
@@ -6817,12 +9734,18 @@ function createGameState() {
     currentWave: 0,
     pendingWave: 1,
     waveIntroMs: 3000,
+    paused: false,
+    pauseResumeCountdownMs: 0,
+    pauseResumeRobotsLeft: 0,
     multiplayerStartCountdownMs: 0,
     waveSpawnTimerMs: 0,
     waveRobotsRemaining: 0,
+    waveStages: [],
+    currentWaveStageIndex: -1,
     currentWaveConfig: null,
     robotsKilledTotal: 0,
     trophiesEarnedRun: 0,
+    statsCounted: false,
     firstRobotPreludeActive: false,
     firstRobotTutorialActive: false,
     firstRobotTutorialPromptUsed: false,
@@ -6832,6 +9755,15 @@ function createGameState() {
     resultStatus: "Koniec rundy",
     resultNote: "Twoje statystyki z tej rundy.",
     resultTimeouts: [],
+    coopPartyId: "",
+    coopSessionId: "",
+    coopHostProfileId: "",
+    coopIsHost: false,
+    coopPlayers: {},
+    coopRemoteAppliedAt: 0,
+    coopHostSyncAccumulatorMs: 0,
+    coopInputSyncAccumulatorMs: 0,
+    coopResultApplied: false,
     robots: [],
     projectiles: [],
     pickups: [],
@@ -7159,22 +10091,451 @@ function applyMultiplayerPendingResult() {
   concludeGameSession(title, note);
 }
 
+function isCoopMatchActive() {
+  return game.mode === "coop" && Boolean(game.coopPartyId && game.coopSessionId);
+}
+
+function getPlayerMaxHpForLoadout(characterId, petId) {
+  let baseHp = characterId === "talia" ? 4000 : GAME_RULES.playerMaxHp;
+
+  if (petId === "norka") {
+    baseHp = Math.max(baseHp, 3200);
+  }
+
+  return baseHp;
+}
+
+function getProjectileKindForCharacterId(characterId) {
+  if (!characterId) {
+    return "player";
+  }
+
+  if (
+    characterId === "elfie" ||
+    characterId === "elfie-wojowniczka" ||
+    characterId === "elfie-w-swojej-naturze"
+  ) {
+    return "elfie-shot";
+  }
+
+  if (characterId === "millo-jako-elfie") {
+    return "millo-elfie-shot";
+  }
+
+  if (characterId === "nora") {
+    return "nora-shot";
+  }
+
+  if (characterId === "cloud") {
+    return "cloud-shot";
+  }
+
+  if (characterId === "ann") {
+    return "ann-shot";
+  }
+
+  if (characterId === "zlotowlosa") {
+    return "zlotowlosa-shot";
+  }
+
+  if (characterId === "gertruda" || characterId === "gertruda-zla-macocha") {
+    return "gertruda-shot";
+  }
+
+  if (characterId === "zlotowlosa-malarka") {
+    return "malarka-shot";
+  }
+
+  if (
+    characterId === "cassandra-ptasia-odslona" ||
+    characterId === "cassandra-przygotowana-do-walki"
+  ) {
+    return "ptasia-shot";
+  }
+
+  if (
+    characterId === "linda" ||
+    characterId === "roslinna-krolowa-linda" ||
+    characterId === "elfie-jako-linda" ||
+    characterId === "linda-wojownicza-ksiezniczka"
+  ) {
+    return "linda-shot";
+  }
+
+  if (
+    characterId === "lily" ||
+    characterId === "leo" ||
+    characterId === "leo-skoczek-narciarski" ||
+    characterId === "lyzwiarka-lily" ||
+    characterId === "lyzwiarz-leo" ||
+    characterId === "mistrzyni-lyzwiarstwa-lily"
+  ) {
+    return "lily-shot";
+  }
+
+  if (characterId === "tricky" || characterId === "tricky-renifer") {
+    return "tricky-shot";
+  }
+
+  return "player";
+}
+
+function getProjectileDamageForPetId(petId) {
+  return petId === "chomik-strazak"
+    ? Math.round(GAME_RULES.projectileDamage * GAME_RULES.hamsterDamageMultiplier)
+    : GAME_RULES.projectileDamage;
+}
+
+function getCoopPlayerIds() {
+  return Object.keys(game.coopPlayers || {}).map((profileId) => sanitizeProfileId(profileId)).filter(Boolean);
+}
+
+function getLocalCoopPlayerState() {
+  return game.coopPlayers[state.profileId] || null;
+}
+
+function getRemoteCoopPlayers() {
+  return getCoopPlayerIds()
+    .filter((profileId) => profileId !== state.profileId)
+    .map((profileId) => game.coopPlayers[profileId])
+    .filter(Boolean);
+}
+
+function cloneCoopRobots(robots = []) {
+  return robots.map((robot) => ({
+    ...robot,
+    history: Array.isArray(robot.history) ? robot.history.map((entry) => ({ ...entry })) : [],
+  }));
+}
+
+function cloneCoopProjectiles(projectiles = []) {
+  return projectiles.map((projectile) => ({ ...projectile }));
+}
+
+function syncGamePlayerFromLocalCoopPlayer() {
+  const localPlayer = getLocalCoopPlayerState();
+  if (!localPlayer) {
+    return;
+  }
+
+  game.player.x = Number(localPlayer.x || game.player.x || (game.width / 2));
+  game.player.y = Number(localPlayer.y || game.player.y || (game.height / 2));
+  game.player.hp = Number(localPlayer.hp || game.player.hp || GAME_RULES.playerMaxHp);
+}
+
+function syncLocalCoopPlayerFromGame() {
+  const localPlayer = getLocalCoopPlayerState();
+  if (!localPlayer) {
+    return;
+  }
+
+  localPlayer.x = Number(game.player.x || 0);
+  localPlayer.y = Number(game.player.y || 0);
+  localPlayer.hp = Number(game.player.hp || 0);
+  localPlayer.alive = game.player.hp > 0;
+  localPlayer.updatedAt = Date.now();
+}
+
+function initializeCoopGameSession(sessionSnapshot) {
+  const memberIds = [
+    ...new Set([
+      ...Object.keys(sessionSnapshot?.players || {}),
+      ...getActivePartyMemberIds(),
+    ].map((profileId) => sanitizeProfileId(profileId)).filter(Boolean)),
+  ];
+  const spawnPositions = [
+    { x: game.width * 0.38, y: game.height * 0.72 },
+    { x: game.width * 0.62, y: game.height * 0.72 },
+  ];
+
+  game.coopPartyId = party.partyId;
+  game.coopSessionId = sanitizeStoredId(sessionSnapshot?.sessionId);
+  game.coopHostProfileId = sanitizeProfileId(sessionSnapshot?.hostProfileId);
+  game.coopIsHost = game.coopHostProfileId === state.profileId;
+  game.coopPlayers = {};
+  game.coopRemoteAppliedAt = 0;
+  game.coopHostSyncAccumulatorMs = 0;
+  game.coopInputSyncAccumulatorMs = 0;
+  game.coopResultApplied = false;
+  game.firstRobotPreludeActive = false;
+  game.firstRobotTutorialActive = false;
+  game.firstRobotTutorialPromptUsed = true;
+  game.firstRobotTutorialDelayMs = 0;
+  game.firstRobotTutorialRobotId = null;
+  game.waveIntroMs = Math.max(0, Number(sessionSnapshot?.waveIntroMs || 3000));
+  game.pauseResumeCountdownMs = Math.max(0, Number(sessionSnapshot?.pauseResumeCountdownMs || 0));
+  game.pauseResumeRobotsLeft = Math.max(0, Number(sessionSnapshot?.pauseResumeRobotsLeft || 0));
+  game.currentWave = Math.max(0, Number(sessionSnapshot?.currentWave || 0));
+  game.pendingWave = Math.max(1, Number(sessionSnapshot?.pendingWave || 1));
+  game.robotsKilledTotal = Math.max(0, Number(sessionSnapshot?.robotsKilledTotal || 0));
+  game.trophiesEarnedRun = Math.max(0, Number(sessionSnapshot?.trophiesEarnedRun || 0));
+  game.resultStatus = sessionSnapshot?.resultStatus || "Koniec rundy";
+  game.resultNote = sessionSnapshot?.resultNote || "Twoje statystyki z tej rundy.";
+
+  memberIds.forEach((profileId, index) => {
+    const memberData = party.data?.members?.[profileId] || {};
+    const snapshotPlayer = sessionSnapshot?.players?.[profileId] || {};
+    const characterId = sanitizeStoredId(
+      snapshotPlayer.characterId || memberData.characterId || state.equippedCharacter || "magik-millo"
+    ) || "magik-millo";
+    const petId = sanitizeStoredId(snapshotPlayer.petId || memberData.petId);
+    const maxHp = getPlayerMaxHpForLoadout(characterId, petId);
+    const spawn = spawnPositions[index] || { x: game.width / 2, y: game.height * 0.72 };
+
+    game.coopPlayers[profileId] = {
+      profileId,
+      nickname: sanitizePlayerNickname(snapshotPlayer.nickname || memberData.nickname || getCachedSocialProfile(profileId)?.nickname) || "Gracz",
+      characterId,
+      petId,
+      maxHp,
+      hp: clamp(Number(snapshotPlayer.hp || maxHp), 0, maxHp),
+      x: Number(snapshotPlayer.x || spawn.x),
+      y: Number(snapshotPlayer.y || spawn.y),
+      alive: snapshotPlayer.alive !== false && Number(snapshotPlayer.hp || maxHp) > 0,
+      ammo: new Array(GAME_RULES.baseAmmoCount).fill(1),
+      ammoRechargeDurations: new Array(GAME_RULES.baseAmmoCount).fill(GAME_RULES.ammoRechargeSeconds),
+      lastShotAt: -Infinity,
+      fire: false,
+      updatedAt: Date.now(),
+    };
+  });
+
+  syncGamePlayerFromLocalCoopPlayer();
+  game.pet.x = game.player.x + 70;
+  game.pet.y = game.player.y + 34;
+  game.robots = cloneCoopRobots(sessionSnapshot?.robots || []);
+  game.projectiles = cloneCoopProjectiles(sessionSnapshot?.projectiles || []);
+}
+
+function buildCoopPartySnapshot(stateName = "playing") {
+  return {
+    active: stateName !== "result",
+    state: stateName,
+    sessionId: game.coopSessionId,
+    hostProfileId: game.coopHostProfileId,
+    currentWave: game.currentWave,
+    pendingWave: game.pendingWave,
+    waveIntroMs: Math.max(0, Number(game.waveIntroMs || 0)),
+    pauseResumeCountdownMs: Math.max(0, Number(game.pauseResumeCountdownMs || 0)),
+    pauseResumeRobotsLeft: Math.max(0, Number(game.pauseResumeRobotsLeft || 0)),
+    robotsKilledTotal: Math.max(0, Number(game.robotsKilledTotal || 0)),
+    trophiesEarnedRun: Math.max(0, Number(game.trophiesEarnedRun || 0)),
+    resultStatus: stateName === "result" ? (game.resultStatus || "Koniec rundy") : "",
+    resultNote: stateName === "result" ? (game.resultNote || "Twoje statystyki z tej rundy.") : "",
+    players: getCoopPlayerIds().reduce((accumulator, profileId) => {
+      const player = game.coopPlayers[profileId];
+      if (!player) {
+        return accumulator;
+      }
+
+      accumulator[profileId] = {
+        profileId,
+        nickname: player.nickname || "Gracz",
+        characterId: player.characterId || "magik-millo",
+        petId: player.petId || "",
+        x: Number(player.x || 0),
+        y: Number(player.y || 0),
+        hp: Math.max(0, Number(player.hp || 0)),
+        alive: player.alive !== false && Number(player.hp || 0) > 0,
+      };
+      return accumulator;
+    }, {}),
+    robots: cloneCoopRobots(game.robots || []),
+    projectiles: cloneCoopProjectiles(game.projectiles || []),
+    updatedAt: Date.now(),
+  };
+}
+
+function applyRemoteCoopSnapshot(snapshot) {
+  if (!snapshot || !isCoopMatchActive()) {
+    return;
+  }
+
+  if (game.coopIsHost && snapshot.state !== "result") {
+    return;
+  }
+
+  const updatedAt = Number(snapshot.updatedAt || 0);
+  if (updatedAt > 0 && updatedAt <= game.coopRemoteAppliedAt && snapshot.state !== "result") {
+    return;
+  }
+
+  game.coopRemoteAppliedAt = Math.max(game.coopRemoteAppliedAt, updatedAt);
+  game.currentWave = Math.max(0, Number(snapshot.currentWave || 0));
+  game.pendingWave = Math.max(1, Number(snapshot.pendingWave || 1));
+  game.waveIntroMs = Math.max(0, Number(snapshot.waveIntroMs || 0));
+  game.pauseResumeCountdownMs = Math.max(0, Number(snapshot.pauseResumeCountdownMs || 0));
+  game.pauseResumeRobotsLeft = Math.max(0, Number(snapshot.pauseResumeRobotsLeft || 0));
+  game.robotsKilledTotal = Math.max(0, Number(snapshot.robotsKilledTotal || 0));
+  game.trophiesEarnedRun = Math.max(0, Number(snapshot.trophiesEarnedRun || 0));
+  game.resultStatus = snapshot.resultStatus || game.resultStatus;
+  game.resultNote = snapshot.resultNote || game.resultNote;
+
+  Object.entries(snapshot.players || {}).forEach(([profileId, playerSnapshot]) => {
+    const normalizedProfileId = sanitizeProfileId(profileId);
+    if (!normalizedProfileId || !game.coopPlayers[normalizedProfileId]) {
+      return;
+    }
+
+    const player = game.coopPlayers[normalizedProfileId];
+    player.x = Number(playerSnapshot.x || player.x || 0);
+    player.y = Number(playerSnapshot.y || player.y || 0);
+    player.hp = clamp(Number(playerSnapshot.hp || 0), 0, player.maxHp || GAME_RULES.playerMaxHp);
+    player.alive = playerSnapshot.alive !== false && player.hp > 0;
+    player.updatedAt = Date.now();
+  });
+
+  syncGamePlayerFromLocalCoopPlayer();
+  game.robots = cloneCoopRobots(snapshot.robots || []);
+  game.projectiles = cloneCoopProjectiles(snapshot.projectiles || []);
+
+  if (snapshot.state === "result") {
+    applyCoopResultSnapshot(snapshot);
+  }
+}
+
+async function syncCoopPartySnapshot() {
+  if (!isCoopMatchActive() || !game.coopIsHost || party.syncingHost) {
+    return;
+  }
+
+  const db = getFirebasePartyDatabase();
+  if (!db) {
+    return;
+  }
+
+  party.syncingHost = true;
+
+  try {
+    const snapshot = buildCoopPartySnapshot("playing");
+    await db.ref(`parties/${game.coopPartyId}/game`).set(snapshot);
+    await db.ref(`parties/${game.coopPartyId}`).update({
+      status: "game",
+      updatedAt: Date.now(),
+    });
+  } catch (error) {
+    // ignore temporary Firebase hiccups
+  } finally {
+    party.syncingHost = false;
+  }
+}
+
+async function publishCoopResult(status, note) {
+  if (!isCoopMatchActive() || !game.coopIsHost || game.coopResultApplied) {
+    return;
+  }
+
+  const db = getFirebasePartyDatabase();
+  if (!db) {
+    return;
+  }
+
+  game.resultStatus = status;
+  game.resultNote = note;
+  game.active = false;
+  window.cancelAnimationFrame(game.animationId);
+  game.animationId = 0;
+
+  try {
+    const snapshot = buildCoopPartySnapshot("result");
+    snapshot.active = false;
+    await db.ref(`parties/${game.coopPartyId}/game`).set(snapshot);
+    await db.ref(`parties/${game.coopPartyId}`).update({
+      status: "game",
+      updatedAt: Date.now(),
+    });
+  } catch (error) {
+    // ignore
+  }
+}
+
+function applyCoopResultSnapshot(snapshot) {
+  if (game.coopResultApplied) {
+    return;
+  }
+
+  game.coopResultApplied = true;
+
+  if (!game.statsCounted) {
+    game.statsCounted = true;
+    state.completedGamesTotal += 1;
+    state.robotsDefeatedTotal += Math.max(0, Number(snapshot?.robotsKilledTotal || game.robotsKilledTotal || 0));
+    state.trophies = Math.max(0, state.trophies + Math.max(0, Number(snapshot?.trophiesEarnedRun || game.trophiesEarnedRun || 0)));
+    trophyBalance.textContent = String(state.trophies);
+    saveState();
+  }
+
+  game.active = false;
+  window.cancelAnimationFrame(game.animationId);
+  game.animationId = 0;
+  resetGameKeys();
+  syncTouchControlsVisibility();
+  game.resultStatus = snapshot?.resultStatus || game.resultStatus || "Koniec rundy";
+  game.resultNote = snapshot?.resultNote || game.resultNote || "Twoje statystyki z tej rundy.";
+  game.robotsKilledTotal = Math.max(0, Number(snapshot?.robotsKilledTotal || game.robotsKilledTotal || 0));
+  game.trophiesEarnedRun = Math.max(0, Number(snapshot?.trophiesEarnedRun || game.trophiesEarnedRun || 0));
+  showGameResult();
+}
+
+async function resetPartyAfterCoopResult() {
+  if (!party.partyId || !(await ensureSocialProfileReady())) {
+    return;
+  }
+
+  const db = getFirebasePartyDatabase();
+  if (!db) {
+    return;
+  }
+
+  const now = Date.now();
+
+  if (game.coopIsHost) {
+    const updates = {};
+    updates[`parties/${party.partyId}/game`] = null;
+    updates[`parties/${party.partyId}/status`] = "lobby";
+    updates[`parties/${party.partyId}/updatedAt`] = now;
+    getActivePartyMemberIds().forEach((profileId) => {
+      updates[`parties/${party.partyId}/members/${profileId}/ready`] = false;
+      updates[`parties/${party.partyId}/members/${profileId}/view`] = "lobby";
+      updates[`parties/${party.partyId}/members/${profileId}/fire`] = false;
+      updates[`parties/${party.partyId}/members/${profileId}/updatedAt`] = now;
+    });
+    await db.ref().update(updates).catch(() => {});
+    return;
+  }
+
+  await db.ref(`parties/${party.partyId}/members/${state.profileId}`).update({
+    ready: false,
+    view: "lobby",
+    fire: false,
+    updatedAt: now,
+  }).catch(() => {});
+}
+
 function startGameSession() {
   stopGameSession();
   updateGameBounds();
   resetGameSession();
-  if (ui.pendingMultiplayerLaunch) {
-    startMultiplayerMatchSession(ui.pendingMultiplayerLaunch);
-    ui.pendingMultiplayerLaunch = null;
+  if (ui.pendingPartyLaunch?.snapshot) {
+    initializeCoopGameSession(ui.pendingPartyLaunch.snapshot);
+    ui.pendingPartyLaunch = null;
   }
   game.active = true;
   renderGameLoadout();
   hideGameResult();
   renderGameScene();
   syncTouchControlsVisibility();
-  if (!isFirstRobotPreludeActive() && game.mode !== "multiplayer") {
+  if (!isFirstRobotPreludeActive()) {
     playWaveIntroSound();
   }
+  scheduleRemoteProfileSync(true);
+  schedulePartyMemberSync(true, {
+    view: "game",
+    ready: false,
+    x: game.player.x,
+    y: game.player.y,
+    fire: false,
+  });
   game.lastFrameTime = performance.now();
   game.animationId = window.requestAnimationFrame(runGameFrame);
 }
@@ -7204,19 +10565,28 @@ function stopGameSession() {
   gameMap.classList.remove("multiplayer-ffa");
   gameMap.classList.remove("first-robot-tutorial");
   playerEntity.classList.remove("tutorial-focus");
+  playerEntity.classList.remove("pascal-invisible");
+  game.paused = false;
+  game.pauseResumeCountdownMs = 0;
+  game.pauseResumeRobotsLeft = 0;
+  scheduleRemoteProfileSync(true);
   if (opponentEntity) {
     opponentEntity.hidden = true;
   }
   hideGameResult();
   resetTouchControls();
   finishFirstRobotTutorial(false);
-  if (!multiplayer.waiting && multiplayer.roomStatus !== "finished") {
-    multiplayer.matchActive = false;
-  }
+  multiplayer.matchActive = false;
+  schedulePartyMemberSync(true, {
+    view: "lobby",
+    ready: false,
+    fire: false,
+  });
 }
 
 function resetGameSession() {
-  game.mode = ui.pendingMultiplayerLaunch ? "multiplayer" : "solo";
+  ui.pendingMultiplayerLaunch = null;
+  game.mode = ui.pendingPartyLaunch ? "coop" : "solo";
   game.lastShotAt = -Infinity;
   game.nextRobotId = 1;
   game.nextProjectileId = 1;
@@ -7224,12 +10594,18 @@ function resetGameSession() {
   game.currentWave = 0;
   game.pendingWave = 1;
   game.waveIntroMs = 3000;
+  game.paused = false;
+  game.pauseResumeCountdownMs = 0;
+  game.pauseResumeRobotsLeft = 0;
   game.multiplayerStartCountdownMs = 0;
   game.waveSpawnTimerMs = 0;
   game.waveRobotsRemaining = 0;
+  game.waveStages = [];
+  game.currentWaveStageIndex = -1;
   game.currentWaveConfig = null;
   game.robotsKilledTotal = 0;
   game.trophiesEarnedRun = 0;
+  game.statsCounted = false;
   game.firstRobotPreludeActive = false;
   game.firstRobotTutorialActive = false;
   game.firstRobotTutorialPromptUsed = false;
@@ -7239,6 +10615,15 @@ function resetGameSession() {
   game.resultStatus = "Koniec rundy";
   game.resultNote = "Twoje statystyki z tej rundy.";
   clearGameResultTimers();
+  game.coopPartyId = "";
+  game.coopSessionId = "";
+  game.coopHostProfileId = "";
+  game.coopIsHost = false;
+  game.coopPlayers = {};
+  game.coopRemoteAppliedAt = 0;
+  game.coopHostSyncAccumulatorMs = 0;
+  game.coopInputSyncAccumulatorMs = 0;
+  game.coopResultApplied = false;
   game.robots = [];
   game.projectiles = [];
   game.pickups = [];
@@ -7261,6 +10646,8 @@ function resetGameSession() {
   game.pet.shieldTimerMs = 0;
   game.pet.shieldCooldownMs = 0;
   game.pet.targetId = null;
+  game.pet.pascalTriggered = false;
+  game.pet.pascalInvisibleMs = 0;
   game.touch.moveX = 0;
   game.touch.moveY = 0;
   game.touch.movePointerId = null;
@@ -7270,11 +10657,11 @@ function resetGameSession() {
   game.pet.y = game.player.y + 36;
   game.petPack = [];
 
-  if (game.mode !== "multiplayer" && getEquippedPet()?.id === "sniezynka") {
+  if (game.mode === "solo" && getEquippedPet()?.id === "sniezynka") {
     game.pet.shieldCooldownMs = GAME_RULES.snowflakeShieldCooldownMs;
   }
 
-  if (game.mode !== "multiplayer" && !state.seenFirstRobotTutorial) {
+  if (game.mode === "solo" && !state.seenFirstRobotTutorial) {
     startFirstRobotPrelude();
   }
 
@@ -7393,6 +10780,196 @@ function updateMultiplayerPetFollow() {
   game.pet.y = clamp(game.player.y + 28, 72, Math.max(72, game.height - 36));
 }
 
+function updateCoopRemotePlayersFromParty() {
+  getRemoteCoopPlayers().forEach((player) => {
+    const memberData = party.data?.members?.[player.profileId] || {};
+    player.x = clamp(Number(memberData.x || player.x || game.width / 2), 48, Math.max(48, game.width - 48));
+    player.y = clamp(Number(memberData.y || player.y || game.height / 2), 90, Math.max(90, game.height - 40));
+    player.fire = Boolean(memberData.fire);
+    player.nickname = sanitizePlayerNickname(memberData.nickname || player.nickname) || "Gracz";
+    player.characterId = sanitizeStoredId(memberData.characterId || player.characterId) || "magik-millo";
+    player.petId = sanitizeStoredId(memberData.petId || player.petId);
+    player.maxHp = getPlayerMaxHpForLoadout(player.characterId, player.petId);
+    player.hp = clamp(Number(player.hp || player.maxHp), 0, player.maxHp);
+    player.alive = Boolean(player.alive !== false && player.hp > 0);
+  });
+}
+
+function updateCoopRemoteAmmo(player, deltaSeconds) {
+  player.ammo = (player.ammo || []).map((slot, index) => {
+    const rechargeDuration = player.ammoRechargeDurations?.[index] || GAME_RULES.ammoRechargeSeconds;
+    const refillPerSecond = 1 / rechargeDuration;
+    return Math.min(1, Number(slot || 0) + refillPerSecond * deltaSeconds);
+  });
+}
+
+function tryAutoFireForCoopRemotePlayer(player, timestamp) {
+  if (!player || !player.alive || !player.fire) {
+    return;
+  }
+
+  if (timestamp - Number(player.lastShotAt || -Infinity) < GAME_RULES.fireIntervalMs) {
+    return;
+  }
+
+  const ammoIndex = (player.ammo || []).findIndex((slot) => slot >= 1);
+  const target = findNearestRobot(player.x, player.y);
+  if (ammoIndex === -1 || !target) {
+    return;
+  }
+
+  player.ammo[ammoIndex] = 0;
+  player.lastShotAt = timestamp;
+  spawnProjectile({
+    x: player.x,
+    y: player.y - 10,
+    targetId: target.id,
+    targetType: "robot",
+    targetX: target.x,
+    targetY: target.y,
+    kind: getProjectileKindForCharacterId(player.characterId),
+    characterId: player.characterId,
+    ownerProfileId: player.profileId,
+    damage: getProjectileDamageForPetId(player.petId),
+  });
+}
+
+function updateGuestCoopAmmoPreview(deltaSeconds, timestamp) {
+  updateAmmo(deltaSeconds);
+
+  if (!isFireInputActive()) {
+    return;
+  }
+
+  if (timestamp - game.lastShotAt < GAME_RULES.fireIntervalMs) {
+    return;
+  }
+
+  const ammoIndex = game.ammo.findIndex((slot) => slot >= 1);
+  if (ammoIndex === -1) {
+    return;
+  }
+
+  game.ammo[ammoIndex] = 0;
+  game.lastShotAt = timestamp;
+}
+
+function getRobotTargetPlayer(robot) {
+  if (!isCoopMatchActive() || !game.coopIsHost) {
+    return {
+      profileId: state.profileId,
+      x: game.player.x,
+      y: game.player.y,
+      hp: game.player.hp,
+      alive: game.player.hp > 0,
+    };
+  }
+
+  let nearest = null;
+  let nearestDistance = Infinity;
+
+  getCoopPlayerIds().forEach((profileId) => {
+    const player = game.coopPlayers[profileId];
+    if (!player || player.alive === false || Number(player.hp || 0) <= 0) {
+      return;
+    }
+
+    const distance = Math.hypot(Number(player.x || 0) - robot.x, Number(player.y || 0) - robot.y);
+    if (distance < nearestDistance) {
+      nearest = player;
+      nearestDistance = distance;
+    }
+  });
+
+  return nearest;
+}
+
+function damageCoopPlayer(profileId, amount) {
+  const player = game.coopPlayers[sanitizeProfileId(profileId)];
+  if (!player || player.alive === false) {
+    return;
+  }
+
+  const appliedDamage = Math.min(amount, Number(player.hp || 0));
+  player.hp = Math.max(0, Number(player.hp || 0) - amount);
+  player.alive = player.hp > 0;
+  spawnFloatingText(player.x, player.y - 120, `-${appliedDamage}`, "hit");
+
+  if (player.profileId === state.profileId) {
+    game.player.hp = player.hp;
+  }
+}
+
+function updateCoopHostFrame(deltaMs, deltaSeconds, timestamp) {
+  updateCoopRemotePlayersFromParty();
+  syncLocalCoopPlayerFromGame();
+
+  if (game.waveIntroMs > 0) {
+    updateWaveProgress(deltaMs);
+  } else {
+    updateWaveProgress(deltaMs);
+    if (game.player.hp > 0) {
+      updatePlayerMovement(deltaSeconds);
+      syncLocalCoopPlayerFromGame();
+      clampGameEntities();
+      updateAmmo(deltaSeconds);
+      tryAutoFire(timestamp);
+    }
+    getRemoteCoopPlayers().forEach((player) => {
+      updateCoopRemoteAmmo(player, deltaSeconds);
+      tryAutoFireForCoopRemotePlayer(player, timestamp);
+    });
+    if (game.player.hp > 0) {
+      updatePet(deltaSeconds, deltaMs);
+      updatePetVoiceAmbient(deltaMs);
+    }
+    updateBarriers(deltaMs);
+    updatePickups(deltaMs);
+    updateWaterFields(deltaSeconds);
+    updateRobots(deltaSeconds);
+    updateProjectiles(deltaSeconds);
+    cleanupDeadRobots();
+  }
+
+  syncLocalCoopPlayerFromGame();
+
+  const alivePlayers = getCoopPlayerIds().filter((profileId) => {
+    const player = game.coopPlayers[profileId];
+    return player && player.alive !== false && Number(player.hp || 0) > 0;
+  });
+
+  if (alivePlayers.length === 0) {
+    void publishCoopResult("Przegrana", "Twoje statystyki z tej rundy.");
+    return;
+  }
+
+  game.coopHostSyncAccumulatorMs += deltaMs;
+  if (game.coopHostSyncAccumulatorMs >= PARTY_SESSION_SYNC_MS) {
+    game.coopHostSyncAccumulatorMs = 0;
+    void syncCoopPartySnapshot();
+  }
+}
+
+function updateCoopGuestFrame(deltaMs, deltaSeconds, timestamp) {
+  if (game.player.hp > 0 && game.waveIntroMs <= 0 && game.pauseResumeCountdownMs <= 0) {
+    updatePlayerMovement(deltaSeconds);
+    clampGameEntities();
+  }
+
+  updateGuestCoopAmmoPreview(deltaSeconds, timestamp);
+  schedulePartyMemberSync(false, {
+    view: "game",
+    ready: false,
+    x: game.player.x,
+    y: game.player.y,
+    fire: isFireInputActive(),
+  });
+
+  if (party.data?.game) {
+    applyRemoteCoopSnapshot(party.data.game);
+  }
+}
+
 function runGameFrame(timestamp) {
   if (!game.active) {
     return;
@@ -7401,6 +10978,29 @@ function runGameFrame(timestamp) {
   const deltaMs = Math.min(40, timestamp - game.lastFrameTime || 16);
   const deltaSeconds = deltaMs / 1000;
   game.lastFrameTime = timestamp;
+
+  if (game.paused) {
+    renderGameScene();
+    game.animationId = window.requestAnimationFrame(runGameFrame);
+    return;
+  }
+
+  if (isCoopMatchActive()) {
+    if (game.coopIsHost) {
+      updateCoopHostFrame(deltaMs, deltaSeconds, timestamp);
+    } else {
+      updateCoopGuestFrame(deltaMs, deltaSeconds, timestamp);
+    }
+
+    renderGameScene();
+
+    if (!game.active) {
+      return;
+    }
+
+    game.animationId = window.requestAnimationFrame(runGameFrame);
+    return;
+  }
 
   if (isMultiplayerMatchActive()) {
     const preStartCountdownActive = game.multiplayerStartCountdownMs > 0;
@@ -7452,6 +11052,13 @@ function runGameFrame(timestamp) {
   }
 
   if (!game.active) {
+    return;
+  }
+
+  if (game.pauseResumeCountdownMs > 0) {
+    game.pauseResumeCountdownMs = Math.max(0, game.pauseResumeCountdownMs - deltaMs);
+    renderGameScene();
+    game.animationId = window.requestAnimationFrame(runGameFrame);
     return;
   }
 
@@ -7518,11 +11125,11 @@ function handleGameKey(event, isPressed) {
     game.keys.right = isPressed;
   } else if (key === " ") {
     game.keys.fire = isPressed;
-  } else if (isPressed && game.mode !== "multiplayer" && (key === "w" || key === "W")) {
+  } else if (isPressed && game.mode === "solo" && (key === "w" || key === "W")) {
     tryActivateOwlAbility();
-  } else if (isPressed && game.mode !== "multiplayer" && (key === "a" || key === "A")) {
+  } else if (isPressed && game.mode === "solo" && (key === "a" || key === "A")) {
     setCatMode("a");
-  } else if (isPressed && game.mode !== "multiplayer" && (key === "s" || key === "S")) {
+  } else if (isPressed && game.mode === "solo" && (key === "s" || key === "S")) {
     setCatMode("s");
   }
 
@@ -7614,6 +11221,8 @@ function tryAutoFire(timestamp) {
     kind: getPlayerProjectileKind(ammoIndex),
     characterId: state.equippedCharacter || "magik-millo",
     ownerId: isMultiplayerMatchActive() ? multiplayer.selfId : "",
+    ownerProfileId: isCoopMatchActive() ? state.profileId : "",
+    damage: isCoopMatchActive() ? getProjectileDamage() : undefined,
   });
 }
 
@@ -7629,23 +11238,36 @@ function updateWaveProgress(deltaMs) {
   }
 
   const waveConfig = game.currentWaveConfig || getWaveConfig(game.currentWave || 1);
+  const currentStage = game.waveStages[game.currentWaveStageIndex] || null;
 
-  if (game.waveRobotsRemaining > 0) {
+  if (game.waveRobotsRemaining > 0 && currentStage) {
+    if (currentStage.waitForClear && game.robots.length > 0) {
+      return;
+    }
+
     game.waveSpawnTimerMs += deltaMs;
-    const spawnIntervalMs = waveConfig.spawnIntervalMs || 2000;
-    const spawnBatch = Math.max(1, waveConfig.spawnBatch || 1);
+    const spawnIntervalMs = Math.max(0, Number(currentStage.intervalMs ?? waveConfig.spawnIntervalMs ?? 2000));
+    const spawnBatch = Math.max(1, Number(currentStage.batch || waveConfig.spawnBatch || 1));
 
-    while (game.waveRobotsRemaining > 0 && game.waveSpawnTimerMs >= spawnIntervalMs) {
+    while (
+      game.waveRobotsRemaining > 0 &&
+      (spawnIntervalMs === 0 || game.waveSpawnTimerMs >= spawnIntervalMs)
+    ) {
       const spawnCount = Math.min(spawnBatch, game.waveRobotsRemaining);
-      spawnRobotBatch(spawnCount, waveConfig);
+      spawnRobotBatch(spawnCount, currentStage);
       game.waveRobotsRemaining -= spawnCount;
-      game.waveSpawnTimerMs -= spawnIntervalMs;
+      game.waveSpawnTimerMs = spawnIntervalMs === 0 ? 0 : (game.waveSpawnTimerMs - spawnIntervalMs);
     }
 
     return;
   }
 
   if (game.currentWave > 0 && game.waveRobotsRemaining === 0 && game.robots.length === 0) {
+    if (game.currentWaveStageIndex >= 0 && game.currentWaveStageIndex < game.waveStages.length - 1) {
+      activateWaveStage(game.currentWaveStageIndex + 1);
+      return;
+    }
+
     finishWave(game.currentWaveConfig || getWaveConfig(game.currentWave));
   }
 }
@@ -7657,14 +11279,71 @@ function queueNextWave(waveNumber) {
   playWaveIntroSound();
 }
 
+function buildWaveStages(waveConfig) {
+  if (Array.isArray(waveConfig.spawnStages) && waveConfig.spawnStages.length > 0) {
+    return waveConfig.spawnStages.map((stage) => ({
+      batch: 1,
+      intervalMs: waveConfig.spawnIntervalMs || 2000,
+      initialBatch: 0,
+      waitForClear: false,
+      killReward: waveConfig.killReward || 0,
+      robotHp: waveConfig.robotHp,
+      robotDamage: waveConfig.robotDamage,
+      robotAttackIntervalMs: waveConfig.robotAttackIntervalMs || 100,
+      ...stage,
+    }));
+  }
+
+  return [
+    {
+      count: waveConfig.robotCount,
+      batch: waveConfig.spawnBatch || 1,
+      intervalMs: waveConfig.spawnIntervalMs || 2000,
+      initialBatch: waveConfig.initialBatch,
+      waitForClear: false,
+      killReward: waveConfig.killReward || 0,
+      robotHp: waveConfig.robotHp,
+      robotDamage: waveConfig.robotDamage,
+      robotAttackIntervalMs: waveConfig.robotAttackIntervalMs || 100,
+    },
+  ];
+}
+
+function activateWaveStage(stageIndex) {
+  const stage = game.waveStages[stageIndex];
+
+  if (!stage) {
+    game.currentWaveStageIndex = -1;
+    game.waveRobotsRemaining = 0;
+    game.waveSpawnTimerMs = 0;
+    return;
+  }
+
+  game.currentWaveStageIndex = stageIndex;
+  game.waveSpawnTimerMs = 0;
+  const spawnBatch = Math.max(1, Number(stage.batch || 1));
+  const initialBatchValue = stage.initialBatch;
+  const initialBatch = Math.min(
+    Number(stage.count || 0),
+    Math.max(
+      0,
+      Number.isFinite(Number(initialBatchValue)) ? Number(initialBatchValue) : spawnBatch
+    )
+  );
+  game.waveRobotsRemaining = Math.max(0, Number(stage.count || 0) - initialBatch);
+
+  if (initialBatch > 0) {
+    spawnRobotBatch(initialBatch, stage);
+  }
+}
+
 function beginWave(waveNumber) {
   const waveConfig = getWaveConfig(waveNumber);
   game.currentWave = waveNumber;
   game.currentWaveConfig = waveConfig;
-  const initialBatch = Math.min(waveConfig.robotCount, Math.max(1, waveConfig.spawnBatch || 1));
-  game.waveRobotsRemaining = Math.max(0, waveConfig.robotCount - initialBatch);
-  game.waveSpawnTimerMs = 0;
-  spawnRobotBatch(initialBatch, waveConfig);
+  game.waveStages = buildWaveStages(waveConfig);
+  game.currentWaveStageIndex = -1;
+  activateWaveStage(0);
 }
 
 function spawnRobotBatch(count, waveConfig) {
@@ -7681,7 +11360,7 @@ function finishWave(waveConfig) {
     spawnFloatingText(game.player.x, game.player.y - 150, `+${completionReward} PUCHARÓW`, "heal");
   }
 
-  if (waveConfig.wave >= 6) {
+  if (waveConfig.wave >= TOTAL_GAME_WAVES) {
     finishGameVictory();
     return;
   }
@@ -7691,6 +11370,7 @@ function finishWave(waveConfig) {
 
 function spawnRobot(waveConfig = getWaveConfig(game.currentWave || 1)) {
   const robotStats = getRobotStats(waveConfig);
+  const robotWave = Number(waveConfig.wave || game.currentWave || 1);
   const margin = 30;
   const side = randomBetween(0, 3);
   let x = margin;
@@ -7716,6 +11396,7 @@ function spawnRobot(waveConfig = getWaveConfig(game.currentWave || 1)) {
     y,
     hp: robotStats.hp,
     damage: robotStats.damage,
+    attackIntervalMs: robotStats.attackIntervalMs,
     speed: robotStats.speed,
     rewardTrophies: waveConfig.killReward,
     attackTimer: 0,
@@ -7733,6 +11414,7 @@ function spawnRobot(waveConfig = getWaveConfig(game.currentWave || 1)) {
     rewindFromY: y,
     rewindTargetX: x,
     rewindTargetY: y,
+    sizeClass: robotWave >= TOTAL_GAME_WAVES ? "final-wave" : "default",
     dead: false,
   };
 
@@ -7811,6 +11493,7 @@ function updateRobots(deltaSeconds) {
     }
 
     const contactDamage = Math.round(robot.damage * fieldEffect.damageMultiplier);
+    const attackIntervalSeconds = Math.max(0.05, Number(robot.attackIntervalMs || 100) / 1000);
 
     if (robot.stunTimerMs > 0) {
       robot.attackTimer = 0;
@@ -7822,16 +11505,54 @@ function updateRobots(deltaSeconds) {
     if (cage) {
       robot.attackTimer += deltaSeconds;
 
-      while (robot.attackTimer >= 0.1) {
-        robot.attackTimer -= 0.1;
+      while (robot.attackTimer >= attackIntervalSeconds) {
+        robot.attackTimer -= attackIntervalSeconds;
         damageBarrier(cage, contactDamage);
       }
 
       return;
     }
 
-    const dx = game.player.x - robot.x;
-    const dy = game.player.y - robot.y;
+    if (isPascalInvisibilityActive()) {
+      const robotTarget = findNearestRobotExcluding(robot.x, robot.y, robot.id);
+
+      if (!robotTarget) {
+        robot.attackTimer = 0;
+        return;
+      }
+
+      const robotDx = robotTarget.x - robot.x;
+      const robotDy = robotTarget.y - robot.y;
+      const robotDistance = Math.hypot(robotDx, robotDy) || 1;
+      const robotMoveSpeed =
+        robot.speed * fieldEffect.speedMultiplier * getRobotSlowMultiplier(robot);
+
+      if (robotDistance > 70) {
+        const step = robotMoveSpeed * deltaSeconds;
+        robot.x += (robotDx / robotDistance) * step;
+        robot.y += (robotDy / robotDistance) * step;
+        robot.attackTimer = 0;
+        return;
+      }
+
+      robot.attackTimer += deltaSeconds;
+
+      while (robot.attackTimer >= attackIntervalSeconds) {
+        robot.attackTimer -= attackIntervalSeconds;
+        damageRobot(robotTarget, contactDamage, "pascal");
+      }
+
+      return;
+    }
+
+    const playerTarget = getRobotTargetPlayer(robot);
+    if (!playerTarget) {
+      robot.attackTimer = 0;
+      return;
+    }
+
+    const dx = playerTarget.x - robot.x;
+    const dy = playerTarget.y - robot.y;
     const distance = Math.hypot(dx, dy) || 1;
     const moveSpeed =
       robot.speed * fieldEffect.speedMultiplier * getRobotSlowMultiplier(robot);
@@ -7846,9 +11567,13 @@ function updateRobots(deltaSeconds) {
 
     robot.attackTimer += deltaSeconds;
 
-    while (robot.attackTimer >= 0.1) {
-      robot.attackTimer -= 0.1;
-      damagePlayer(contactDamage);
+    while (robot.attackTimer >= attackIntervalSeconds) {
+      robot.attackTimer -= attackIntervalSeconds;
+      if (isCoopMatchActive() && game.coopIsHost) {
+        damageCoopPlayer(playerTarget.profileId || state.profileId, contactDamage);
+      } else {
+        damagePlayer(contactDamage);
+      }
     }
   });
 }
@@ -7888,7 +11613,7 @@ function updateProjectiles(deltaSeconds) {
       if (projectile.targetType === "player") {
         const damage = projectile.kind === "polar-bear-shot"
           ? GAME_RULES.polarBearProjectileDamage
-          : getProjectileDamage();
+          : Number(projectile.damage || getProjectileDamage());
 
         if (projectile.ownerId === multiplayer.selfId && projectile.targetPlayerId && projectile.targetPlayerId !== multiplayer.selfId) {
           sendMultiplayerDamage(damage, projectile.kind, projectile.targetPlayerId);
@@ -7917,10 +11642,10 @@ function updateProjectiles(deltaSeconds) {
       } else if (projectile.kind === "papuga-miss") {
         spawnFloatingText(projectile.targetX, projectile.targetY - 24, "NIE TRAFIONO", "hit");
       } else if (projectile.kind === "snake-shot") {
-        damageRobot(target, getProjectileDamage(), "player");
+        damageRobot(target, Number(projectile.damage || getProjectileDamage()), "player");
         slowRobot(target, 3000, 0.5);
       } else {
-        damageRobot(target, getProjectileDamage(), "player");
+        damageRobot(target, Number(projectile.damage || getProjectileDamage()), "player");
       }
       return;
     }
@@ -7969,6 +11694,12 @@ function updatePet(deltaSeconds, deltaMs) {
 
   if (pet.id === "sowa") {
     updateOwlPet(deltaSeconds, deltaMs);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === "pascal") {
+    updatePascalPet(deltaSeconds, deltaMs);
     game.hadActiveRobots = hasRobots;
     return;
   }
@@ -8131,6 +11862,15 @@ function updateCatPet(deltaSeconds, deltaMs) {
 function updateSnowflakePet(deltaSeconds, deltaMs) {
   movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
   updateSnowflakeShield(deltaMs);
+}
+
+function updatePascalPet(deltaSeconds, deltaMs) {
+  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+  maybeTriggerPascalEmergency();
+
+  if (game.pet.pascalInvisibleMs > 0) {
+    game.pet.pascalInvisibleMs = Math.max(0, game.pet.pascalInvisibleMs - deltaMs);
+  }
 }
 
 function updateCrabPet(deltaSeconds, deltaMs) {
@@ -8352,6 +12092,7 @@ function damagePlayer(amount) {
 
   game.player.hp = Math.max(0, game.player.hp - reducedAmount);
   spawnFloatingText(game.player.x, game.player.y - 120, `-${reducedAmount}`, "hit");
+  maybeTriggerPascalEmergency();
 }
 
 function awardCoins(amount) {
@@ -8361,8 +12102,13 @@ function awardCoins(amount) {
 }
 
 function awardTrophies(amount) {
-  state.trophies += amount;
   game.trophiesEarnedRun += amount;
+
+  if (isCoopMatchActive()) {
+    return;
+  }
+
+  state.trophies += amount;
   trophyBalance.textContent = String(state.trophies);
   saveState();
 }
@@ -8584,8 +12330,14 @@ function cleanupDeadRobots() {
 }
 
 function finishGameLoss() {
-  if (game.mode === "multiplayer") {
-    void eliminateLocalMultiplayerPlayer("", "defeat");
+  const defeatReward = getDefeatTrophyReward();
+
+  if (defeatReward > 0) {
+    awardTrophies(defeatReward);
+  }
+
+  if (isCoopMatchActive() && game.coopIsHost) {
+    void publishCoopResult("Przegrana", "Twoje statystyki z tej rundy.");
     return;
   }
 
@@ -8593,36 +12345,111 @@ function finishGameLoss() {
 }
 
 function finishGameVictory() {
-  if (game.mode === "multiplayer") {
-    void maybeFinalizeMultiplayerWinner();
+  if (isCoopMatchActive() && game.coopIsHost) {
+    void publishCoopResult("Zwyciestwo", "Przeszedles wszystkie 5 fal.");
     return;
   }
 
-  concludeGameSession("Zwyciestwo", "Przeszedles wszystkie 6 fal.");
+  concludeGameSession("Zwyciestwo", "Przeszedles wszystkie 5 fal.");
+}
+
+function getDefeatTrophyReward() {
+  const activeWave = game.currentWave > 0 ? game.currentWave : 1;
+  return Number(getWaveConfig(activeWave).defeatReward || 0);
 }
 
 function requestExitGame() {
+  if (isCoopMatchActive()) {
+    leaveParty();
+    return;
+  }
+
   openModal({
     title: "Zakonczyc runde?",
-    message: game.mode === "multiplayer"
-      ? "Wyjście z bitwy graczy potraktujemy jako poddanie i może dać ostatnie miejsce."
-      : "Najpierw zobaczysz wynik rundy.",
+    message: "Najpierw zobaczysz wynik rundy.",
     buttonText: "WYJDZ",
     dismissible: true,
     onConfirm: () => {
       closeModal();
-      if (game.mode === "multiplayer") {
-        game.player.hp = 0;
-        void eliminateLocalMultiplayerPlayer("", "forfeit");
-        return;
-      }
-
       concludeGameSession("Zakonczyles runde", "Twoje statystyki z tej rundy.");
     },
   });
 }
 
+function getCurrentWaveDisplayNumber() {
+  return Math.max(1, Number(game.currentWave || game.pendingWave || 1));
+}
+
+function getRemainingRobotsInCurrentWave() {
+  const aliveRobots = game.robots.filter((robot) => !robot.dead).length;
+
+  if (isFirstRobotPreludeActive() || isFirstRobotTutorialPaused()) {
+    return Math.max(1, aliveRobots);
+  }
+
+  let remaining = aliveRobots + Math.max(0, Number(game.waveRobotsRemaining || 0));
+
+  if (Array.isArray(game.waveStages) && game.currentWaveStageIndex >= 0) {
+    for (let stageIndex = game.currentWaveStageIndex + 1; stageIndex < game.waveStages.length; stageIndex += 1) {
+      remaining += Math.max(0, Number(game.waveStages[stageIndex]?.count || 0));
+    }
+  } else if (remaining === 0 && game.pendingWave > 0) {
+    remaining = Math.max(0, Number(getWaveConfig(game.pendingWave).robotCount || 0));
+  }
+
+  return remaining;
+}
+
+function resumeGameFromPause() {
+  game.paused = false;
+  game.pauseResumeRobotsLeft = getRemainingRobotsInCurrentWave();
+  game.pauseResumeCountdownMs = 3000;
+}
+
+function requestPauseGame() {
+  if (!game.active || game.paused || !modalBackdrop.hidden) {
+    return;
+  }
+
+  if (isCoopMatchActive()) {
+    openModal({
+      title: "Wspólna gra",
+      message: "Wspólnej rundy nie da się zatrzymać. Możesz opuścić drużynę.",
+      buttonText: "OPUŚĆ DRUŻYNĘ",
+      dismissible: true,
+      onConfirm: () => {
+        closeModal();
+        leaveParty();
+      },
+    });
+    return;
+  }
+
+  game.paused = true;
+  resetGameKeys();
+  resetTouchControls();
+  syncWalkingLoop();
+
+  openModal({
+    title: "Pauza",
+    message: "Runda jest zatrzymana. Kliknij, aby wrócić do walki.",
+    buttonText: "KONTYNUUJ",
+    dismissible: false,
+    onConfirm: () => {
+      closeModal();
+      resumeGameFromPause();
+    },
+  });
+}
+
 function concludeGameSession(status, note) {
+  if (!game.statsCounted) {
+    game.statsCounted = true;
+    state.completedGamesTotal += 1;
+    state.robotsDefeatedTotal += Math.max(0, Number(game.robotsKilledTotal || 0));
+    saveState();
+  }
+
   game.active = false;
   window.cancelAnimationFrame(game.animationId);
   game.animationId = 0;
@@ -8653,6 +12480,26 @@ function findNearestRobot(x, y) {
   return nearest;
 }
 
+function findNearestRobotExcluding(x, y, excludedRobotId) {
+  let nearest = null;
+  let nearestDistance = Infinity;
+
+  game.robots.forEach((robot) => {
+    if (robot.dead || robot.id === excludedRobotId) {
+      return;
+    }
+
+    const distance = Math.hypot(robot.x - x, robot.y - y);
+
+    if (distance < nearestDistance) {
+      nearest = robot;
+      nearestDistance = distance;
+    }
+  });
+
+  return nearest;
+}
+
 function getEquippedPet() {
   return getOwnedItem("pets", state.equippedPet);
 }
@@ -8662,72 +12509,95 @@ function getEquippedCharacter() {
 }
 
 function getPlayerMaxHp() {
-  const baseHp = getEquippedCharacter()?.id === "talia" ? 4000 : GAME_RULES.playerMaxHp;
+  const baseHp = getPlayerMaxHpForLoadout(getEquippedCharacter()?.id, getEquippedPet()?.id);
   return isOlympianBuffActive() ? baseHp * 2 : baseHp;
 }
 
 function getWaveConfig(waveNumber) {
-  const normalizedWave = clamp(Math.round(waveNumber || 1), 1, 6);
+  const normalizedWave = clamp(Math.round(waveNumber || 1), 1, TOTAL_GAME_WAVES);
   const waveConfigs = {
     1: {
       wave: 1,
-      robotCount: 5,
+      robotCount: 10,
       robotHp: 200,
-      robotDamage: 20,
-      killReward: 1,
-      completionReward: 3,
-      spawnIntervalMs: 2000,
-      spawnBatch: 1,
+      robotDamage: 10,
+      robotAttackIntervalMs: 100,
+      killReward: 0,
+      completionReward: 0,
+      defeatReward: 10,
+      spawnIntervalMs: 1500,
+      spawnBatch: 3,
+      initialBatch: 3,
     },
     2: {
       wave: 2,
-      robotCount: 5,
+      robotCount: 8,
       robotHp: 500,
-      robotDamage: 25,
-      killReward: 2,
-      completionReward: 5,
+      robotDamage: 15,
+      robotAttackIntervalMs: 100,
+      killReward: 0,
+      completionReward: 0,
+      defeatReward: 10,
       spawnIntervalMs: 2000,
       spawnBatch: 1,
+      initialBatch: 1,
     },
     3: {
       wave: 3,
-      robotCount: 5,
-      robotHp: 800,
+      robotCount: 7,
+      robotHp: 700,
       robotDamage: 30,
-      killReward: 3,
-      completionReward: 7,
-      spawnIntervalMs: 2000,
+      robotAttackIntervalMs: 100,
+      killReward: 0,
+      completionReward: 0,
+      defeatReward: 20,
+      spawnIntervalMs: 2500,
       spawnBatch: 1,
+      initialBatch: 1,
     },
     4: {
       wave: 4,
-      robotCount: 8,
+      robotCount: 5,
       robotHp: 1000,
-      robotDamage: 30,
-      killReward: 3,
-      completionReward: 7,
-      spawnIntervalMs: 1800,
+      robotDamage: 40,
+      robotAttackIntervalMs: 100,
+      killReward: 0,
+      completionReward: 0,
+      defeatReward: 35,
+      spawnIntervalMs: 2000,
       spawnBatch: 1,
+      initialBatch: 1,
     },
     5: {
       wave: 5,
-      robotCount: 10,
-      robotHp: 800,
-      robotDamage: 31,
-      killReward: 4,
-      completionReward: 8,
-      spawnIntervalMs: 1600,
-      spawnBatch: 1,
-    },
-    6: {
-      wave: 6,
-      robotCount: 12,
-      robotHp: 700,
-      robotDamage: 40,
-      killReward: 5,
-      completionReward: 15,
-      spawnIntervalMs: 1500,
-      spawnBatch: 2,
+      robotCount: 3,
+      robotHp: 1500,
+      robotDamage: 100,
+      robotAttackIntervalMs: 300,
+      killReward: 0,
+      completionReward: 50,
+      defeatReward: 35,
+      spawnStages: [
+        {
+          count: 2,
+          batch: 2,
+          intervalMs: 1000,
+          initialBatch: 0,
+          robotHp: 1500,
+          robotDamage: 100,
+          robotAttackIntervalMs: 300,
+        },
+        {
+          count: 1,
+          batch: 1,
+          intervalMs: 0,
+          initialBatch: 0,
+          waitForClear: true,
+          robotHp: 2500,
+          robotDamage: 20,
+          robotAttackIntervalMs: 100,
+        },
+      ],
     },
   };
 
@@ -8735,18 +12605,22 @@ function getWaveConfig(waveNumber) {
 }
 
 function getRobotStats(waveConfig = getWaveConfig(game.currentWave || 1)) {
+  const coopMultiplier = isCoopMatchActive() ? 2 : 1;
+
   if (getEquippedCharacter()?.id === "talia") {
     return {
-      hp: waveConfig.robotHp + 500,
-      damage: waveConfig.robotDamage + 20,
+      hp: (waveConfig.robotHp + 500) * coopMultiplier,
+      damage: (waveConfig.robotDamage + 20) * coopMultiplier,
       speed: GAME_RULES.robotSpeed,
+      attackIntervalMs: Number(waveConfig.robotAttackIntervalMs || 100),
     };
   }
 
   return {
-    hp: waveConfig.robotHp,
-    damage: waveConfig.robotDamage,
+    hp: waveConfig.robotHp * coopMultiplier,
+    damage: waveConfig.robotDamage * coopMultiplier,
     speed: GAME_RULES.robotSpeed,
+    attackIntervalMs: Number(waveConfig.robotAttackIntervalMs || 100),
   };
 }
 
@@ -8831,6 +12705,21 @@ function playProjectileSound(projectile) {
     return;
   }
 
+  if (visual.src === "./atak_gertruda.jpeg") {
+    playOneShotSound("shotGertruda", 0.76);
+    return;
+  }
+
+  if (visual.src === "./atak_malarka.jpeg") {
+    playOneShotSound("shotMalarka", 0.76);
+    return;
+  }
+
+  if (visual.src === "./atak_ptasia.jpeg") {
+    playOneShotSound("shotPtasia", 0.76);
+    return;
+  }
+
   if (visual.src === "./atak_leołyżwiaż.jpeg" || visual.src === "./atak_lilyrozowa.jpeg") {
     playOneShotSound("shotIceSkater", 0.55);
     return;
@@ -8876,6 +12765,21 @@ function getPlayerProjectileKind(ammoIndex) {
 
   if (character?.id === "zlotowlosa") {
     return "zlotowlosa-shot";
+  }
+
+  if (character?.id === "gertruda" || character?.id === "gertruda-zla-macocha") {
+    return "gertruda-shot";
+  }
+
+  if (character?.id === "zlotowlosa-malarka") {
+    return "malarka-shot";
+  }
+
+  if (
+    character?.id === "cassandra-ptasia-odslona" ||
+    character?.id === "cassandra-przygotowana-do-walki"
+  ) {
+    return "ptasia-shot";
   }
 
   if (
@@ -8927,11 +12831,36 @@ function getParrotRange() {
 }
 
 function getRobotSlowMultiplier(robot) {
-  if (!robot || robot.dead || robot.slowTimerMs <= 0) {
+  if (!robot || robot.dead) {
     return 1;
   }
 
-  return robot.slowMultiplier || 1;
+  let multiplier = robot.slowTimerMs > 0 ? (robot.slowMultiplier || 1) : 1;
+
+  if (getEquippedPet()?.id === "wrobelek") {
+    multiplier = Math.min(multiplier, 0.75);
+  }
+
+  return multiplier;
+}
+
+function isPascalInvisibilityActive() {
+  return Boolean(getEquippedPet()?.id === "pascal" && game.pet.pascalInvisibleMs > 0);
+}
+
+function maybeTriggerPascalEmergency() {
+  if (
+    getEquippedPet()?.id !== "pascal" ||
+    game.pet.pascalTriggered ||
+    game.player.hp <= 0 ||
+    game.player.hp >= 2000
+  ) {
+    return;
+  }
+
+  game.pet.pascalTriggered = true;
+  game.pet.pascalInvisibleMs = GAME_RULES.pascalInvisibilityMs;
+  spawnFloatingText(game.player.x, game.player.y - 136, "PASCAL", "heal");
 }
 
 function getPetCooldownState() {
@@ -9081,17 +13010,42 @@ function buildMultiplayerShowcaseCardMarkup(player) {
 
 function renderGameScene() {
   refreshAmmoConfig();
-  delete gameMap.dataset.worldTheme;
+  gameMap.dataset.worldTheme = getGlobalVisualWorldTheme();
   const multiplayerMode = game.mode === "multiplayer";
+  const coopMode = game.mode === "coop";
   const multiplayerCountdownActive = multiplayerMode && game.multiplayerStartCountdownMs > 0;
+  const pauseResumeCountdownActive = !multiplayerMode && game.pauseResumeCountdownMs > 0;
   const showFirstRobotTutorial = isFirstRobotTutorialPaused();
   gameMap.classList.toggle("multiplayer-ffa", multiplayerMode);
   gameMap.classList.toggle("first-robot-tutorial", showFirstRobotTutorial);
   playerEntity.classList.toggle("tutorial-focus", showFirstRobotTutorial);
-  waveBanner.hidden = (!multiplayerCountdownActive && game.waveIntroMs <= 0) || (multiplayerMode && !multiplayerCountdownActive);
-  waveBannerTitle.textContent = multiplayerCountdownActive ? "GRACZE GOTOWI" : `FALA ${game.pendingWave}`;
+  waveBanner.hidden =
+    (!multiplayerCountdownActive && !pauseResumeCountdownActive && game.waveIntroMs <= 0) ||
+    (multiplayerMode && !multiplayerCountdownActive);
+  waveBannerTitle.textContent = multiplayerCountdownActive
+    ? "GRACZE GOTOWI"
+    : pauseResumeCountdownActive
+      ? `KONTYNUACJA FALI ${getCurrentWaveDisplayNumber()}`
+      : `FALA ${game.pendingWave}`;
+  const robotsLeftText = `${Math.max(0, Number(game.pauseResumeRobotsLeft || 0))} ROBOTÓW ZOSTAŁO`;
+  const bannerLabelText = pauseResumeCountdownActive ? robotsLeftText : "Start za";
+  const bannerCountdownValue = Math.max(
+    1,
+    Math.ceil(
+      (
+        multiplayerCountdownActive
+          ? game.multiplayerStartCountdownMs
+          : pauseResumeCountdownActive
+            ? game.pauseResumeCountdownMs
+            : game.waveIntroMs
+      ) / 1000
+    )
+  );
+  if (waveBannerLabel) {
+    waveBannerLabel.textContent = bannerLabelText;
+  }
   waveBannerCountdown.textContent = String(
-    Math.max(1, Math.ceil((multiplayerCountdownActive ? game.multiplayerStartCountdownMs : game.waveIntroMs) / 1000))
+    bannerCountdownValue
   );
   if (waveBannerPlayers) {
     waveBannerPlayers.hidden = !multiplayerCountdownActive;
@@ -9103,6 +13057,7 @@ function renderGameScene() {
   }
   playerEntity.style.left = `${game.player.x}px`;
   playerEntity.style.top = `${game.player.y}px`;
+  playerEntity.classList.toggle("pascal-invisible", isPascalInvisibilityActive());
   playerHealthLabel.textContent = `${Math.ceil(game.player.hp)} pz`;
   const winterShieldActive = isSnowflakeShieldActive() || isOwlShieldActive();
   playerShield.hidden = !isCatShieldActive() && !winterShieldActive;
@@ -9146,6 +13101,21 @@ function renderGameScene() {
         .filter((player) => player.id !== multiplayer.selfId && player.alive !== false && player.connected !== false)
         .map((player) => buildMultiplayerRemotePlayerMarkup(player))
         .join("");
+    } else if (coopMode) {
+      multiplayerPlayersLayer.innerHTML = getRemoteCoopPlayers()
+        .filter((player) => player.alive !== false)
+        .map((player) => buildMultiplayerRemotePlayerMarkup({
+          id: player.profileId,
+          nickname: player.nickname,
+          x: player.x,
+          y: player.y,
+          hp: player.hp,
+          characterId: player.characterId,
+          petId: player.petId,
+          alive: player.alive,
+          connected: true,
+        }))
+        .join("");
     } else {
       multiplayerPlayersLayer.innerHTML = "";
     }
@@ -9183,13 +13153,21 @@ function renderGameScene() {
     )
     .join("");
 
+  const robotVisual = getRobotVisual();
+
   robotsLayer.innerHTML = game.robots
     .map(
       (robot) => `
-        <div class="robot-entity${robot.poisonTimerMs > 0 ? " poisoned" : ""}${isFirstRobotTutorialPaused() && robot.id === getFirstRobotTutorialTarget()?.id ? " tutorial-focus" : ""}" style="left:${robot.x}px; top:${robot.y}px;">
+        <div class="robot-entity${robot.sizeClass === "final-wave" ? " final-wave-robot" : ""}${robot.poisonTimerMs > 0 ? " poisoned" : ""}${isFirstRobotTutorialPaused() && robot.id === getFirstRobotTutorialTarget()?.id ? " tutorial-focus" : ""}" style="left:${robot.x}px; top:${robot.y}px;">
           <p class="robot-health">${Math.ceil(robot.hp)} pz</p>
           <div class="robot-sprite-frame">
-            <div class="robot-core"></div>
+            <img
+              class="entity-image asset-image robot-core-image"
+              src="${robotVisual.src}"
+              alt="${robotVisual.alt}"
+              data-fallback-text="${robotVisual.fallbackText}"
+            />
+            <div class="asset-fallback">${robotVisual.fallbackText}</div>
             ${robot.stunTimerMs > 0 ? `<div class="robot-stun-dots"><span></span><span></span><span></span></div>` : ""}
           </div>
           ${robot.bubbleTimerMs > 0 ? `<div class="robot-bubble"></div>` : ""}
@@ -9317,6 +13295,7 @@ async function returnToLobbyFromResult() {
 
   try {
     const wasMultiplayer = game.mode === "multiplayer";
+    const wasCoop = game.mode === "coop";
     const earnedTrophies = game.trophiesEarnedRun;
     hideGameResult();
     showView("lobby");
@@ -9330,6 +13309,10 @@ async function returnToLobbyFromResult() {
       }
       resetMultiplayerState();
       return;
+    }
+
+    if (wasCoop) {
+      await resetPartyAfterCoopResult();
     }
 
     if (earnedTrophies > 0) {
@@ -9355,7 +13338,7 @@ function hideGameResult() {
 function setCatMode(mode) {
   const pet = getEquippedPet();
 
-  if (!pet || pet.id !== "kot-roslina" || game.mode === "multiplayer") {
+  if (!pet || pet.id !== "kot-roslina" || game.mode !== "solo") {
     return;
   }
 
@@ -9565,6 +13548,14 @@ function renderGameModeInfo() {
     return;
   }
 
+  if (game.mode === "coop") {
+    const allyCount = getRemoteCoopPlayers().filter((player) => player.alive !== false).length;
+    gameModeInfo.textContent = allyCount > 0
+      ? `Wspólna gra: walczysz razem ze znajomym. Roboty mają podwójne życie i podwójne obrażenia.`
+      : "Wspólna gra: czekam na stan znajomego.";
+    return;
+  }
+
   if (game.mode === "multiplayer") {
     const alivePlayers = getMultiplayerMatchPlayers().filter(
       (player) => player.alive !== false && player.connected !== false
@@ -9617,6 +13608,25 @@ function renderGameModeInfo() {
         : game.pet.shieldCooldownMs > 0
           ? `Sowa: moc laduje sie ${(game.pet.shieldCooldownMs / 1000).toFixed(1)} s.`
           : "Sowa: wcisnij W, aby na 3 s zatrzymac ruch, wlaczyc tarcze i odzyskac 20% zycia.";
+      return;
+    }
+
+    if (pet && pet.id === "norka") {
+      gameModeInfo.textContent = `Norka: twoje maksymalne zycie wynosi teraz ${getPlayerMaxHp()} pz.`;
+      return;
+    }
+
+    if (pet && pet.id === "pascal") {
+      gameModeInfo.textContent = isPascalInvisibilityActive()
+        ? `Pascal: niewidzialnosc aktywna jeszcze ${(game.pet.pascalInvisibleMs / 1000).toFixed(1)} s. Roboty walcza miedzy soba.`
+        : game.pet.pascalTriggered
+          ? "Pascal: moc została już wykorzystana w tej rundzie."
+          : "Pascal: poniżej 2000 pz jednorazowo znikniesz na 5 s i zmusisz roboty do walki między sobą.";
+      return;
+    }
+
+    if (pet && pet.id === "wrobelek") {
+      gameModeInfo.textContent = "Wróbelek: wszystkie roboty są stale spowolnione o 25%.";
       return;
     }
 
@@ -9677,6 +13687,10 @@ function syncTabs() {
 
   document.querySelectorAll("[data-tab-group='inventory']").forEach((button) => {
     button.classList.toggle("active", button.dataset.tab === ui.inventoryTab);
+  });
+
+  document.querySelectorAll("[data-tab-group='friends']").forEach((button) => {
+    button.classList.toggle("active", button.dataset.tab === ui.friendsTab);
   });
 }
 
@@ -9836,6 +13850,35 @@ function getProjectileVisual(projectile) {
     };
   }
 
+  if (projectile.kind === "gertruda-shot") {
+    return {
+      src: "./atak_gertruda.jpeg",
+      alt: (projectile.characterId || getEquippedCharacter()?.id) === "gertruda-zla-macocha"
+        ? "Atak Gertrudy Złej Macochy"
+        : "Atak Gertrudy",
+      fallbackText: "GERTRUDA",
+    };
+  }
+
+  if (projectile.kind === "malarka-shot") {
+    return {
+      src: "./atak_malarka.jpeg",
+      alt: "Atak Złotowłosej Malarki",
+      fallbackText: "MALARKA",
+    };
+  }
+
+  if (projectile.kind === "ptasia-shot") {
+    const projectileCharacterId = projectile.characterId || getEquippedCharacter()?.id;
+    return {
+      src: "./atak_ptasia.jpeg",
+      alt: projectileCharacterId === "cassandra-przygotowana-do-walki"
+        ? "Atak Cassandry Przygotowanej do Walki"
+        : "Atak Cassandry w Ptasiej odsłonie",
+      fallbackText: "PTASIA",
+    };
+  }
+
   if (projectile.kind === "polar-bear-shot") {
     return {
       src: "./atak_4.png",
@@ -9868,97 +13911,45 @@ function getProjectileVisual(projectile) {
   return { src: weapon.image, alt: weapon.name, fallbackText: weapon.name };
 }
 
+function getRobotVisual() {
+  const worldTheme = getGlobalVisualWorldTheme();
+
+  if (worldTheme === "tower") {
+    return {
+      src: "./robot_wieza.jpeg",
+      alt: "Robot Wysokiej Wieży",
+      fallbackText: "ROBOT",
+    };
+  }
+
+  if (worldTheme === "winter") {
+    return {
+      src: "./robot_zimowy.jpeg",
+      alt: "Robot Zimowy",
+      fallbackText: "ROBOT",
+    };
+  }
+
+  return {
+    src: "./robot_magik.jpeg",
+    alt: "Robot Magików",
+    fallbackText: "ROBOT",
+  };
+}
+
 function loadState() {
   try {
     const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY));
-
-    if (!saved) {
-      return defaultState();
-    }
-
-    const merged = {
-      ...defaultState(),
-      ...saved,
-      ownedCharacters: Array.isArray(saved.ownedCharacters) ? saved.ownedCharacters : [],
-      ownedPets: Array.isArray(saved.ownedPets) ? saved.ownedPets : [],
-      ownedWeapons: Array.isArray(saved.ownedWeapons) ? saved.ownedWeapons : ["atak-1"],
-      crateInventory:
-        saved.crateInventory && typeof saved.crateInventory === "object"
-          ? { ...defaultState().crateInventory, ...saved.crateInventory }
-          : { ...defaultState().crateInventory },
-      openedCrates:
-        saved.openedCrates && typeof saved.openedCrates === "object"
-          ? { ...defaultState().openedCrates, ...saved.openedCrates }
-          : { ...defaultState().openedCrates },
-      freeCrates:
-        saved.freeCrates && typeof saved.freeCrates === "object"
-          ? { ...defaultState().freeCrates, ...saved.freeCrates }
-          : { ...defaultState().freeCrates },
-      claimedTrophyRewards:
-        saved.claimedTrophyRewards && typeof saved.claimedTrophyRewards === "object"
-          ? { ...defaultState().claimedTrophyRewards, ...saved.claimedTrophyRewards }
-          : { ...defaultState().claimedTrophyRewards },
-      storeOffers:
-        saved.storeOffers && typeof saved.storeOffers === "object"
-          ? { ...defaultState().storeOffers, ...saved.storeOffers }
-          : { ...defaultState().storeOffers },
-    };
-
-    merged.claimedTrophyRewards = migrateClaimedTrophyRewards(saved.claimedTrophyRewards);
-    merged.activeTrophyWorld = normalizeTrophyWorldId(saved.activeTrophyWorld);
-    merged.superAlleyActive = Boolean(saved.superAlleyActive);
-    merged.superAlleyWinterActive = Boolean(saved.superAlleyWinterActive);
-    merged.superAlleyTowerActive = Boolean(saved.superAlleyTowerActive);
-    merged.phoneModeEnabled = Boolean(saved.phoneModeEnabled);
-    merged.seenWinterWorldIntro = Boolean(saved.seenWinterWorldIntro);
-    merged.seenTowerWorldIntro = Boolean(saved.seenTowerWorldIntro);
-    merged.playerNickname = sanitizePlayerNickname(saved.playerNickname);
-    merged.nicknamePromptSeen = Boolean(saved.nicknamePromptSeen);
-    merged.seenFirstRobotTutorial = Object.prototype.hasOwnProperty.call(saved, "seenFirstRobotTutorial")
-      ? Boolean(saved.seenFirstRobotTutorial)
-      : Boolean(saved.playedFirstGame);
-    merged.ownedCharacters = sanitizeOwnedIds(merged.ownedCharacters, CATALOG.characters);
-    merged.ownedPets = sanitizeOwnedIds(merged.ownedPets, CATALOG.pets);
-    merged.ownedWeapons = sanitizeOwnedIds(merged.ownedWeapons, CATALOG.weapons);
-
-    if (!merged.ownedWeapons.includes("atak-1")) {
-      merged.ownedWeapons.push("atak-1");
-    }
-
-    if (!merged.ownedCharacters.includes("magik-millo")) {
-      merged.ownedCharacters.unshift("magik-millo");
-    }
-
-    if (!merged.ownedCharacters.includes(merged.equippedCharacter)) {
-      merged.equippedCharacter = null;
-    }
-
-    if (!merged.ownedPets.includes(merged.equippedPet)) {
-      merged.equippedPet = null;
-    }
-
-    if (!merged.ownedWeapons.includes(merged.equippedWeapon)) {
-      merged.equippedWeapon = "atak-1";
-    }
-
-    if (!merged.equippedWeapon) {
-      merged.equippedWeapon = "atak-1";
-    }
-
-    if (!merged.equippedCharacter) {
-      merged.equippedCharacter = "magik-millo";
-    }
-
-    merged.freeCrates["drewniana-skrzynia"] = 0;
-
-    return merged;
+    return hydrateSavedState(saved);
   } catch (error) {
-    return defaultState();
+    return hydrateSavedState(null);
   }
 }
 
 function saveState() {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  scheduleRemoteProfileSync();
+  schedulePartyMemberSync();
 }
 
 function defaultState() {
@@ -9979,6 +13970,17 @@ function defaultState() {
     seenTowerWorldIntro: false,
     playerNickname: "",
     nicknamePromptSeen: false,
+    profileId: "",
+    publicId: "",
+    profileCreatedAt: 0,
+    favoriteCharacterId: "",
+    favoritePetId: "",
+    completedGamesTotal: 0,
+    robotsDefeatedTotal: 0,
+    accountPasswordSet: false,
+    accountPasswordHash: "",
+    accountPasswordSalt: "",
+    accountSaveSecret: "",
     ownedCharacters: [],
     ownedPets: [],
     ownedWeapons: ["atak-1"],
@@ -10006,6 +14008,226 @@ function defaultState() {
       nextRefreshAt: 0,
     },
   };
+}
+
+function hydrateSavedState(saved) {
+  const baseState = defaultState();
+
+  if (!saved || typeof saved !== "object") {
+    ensureStateProfileDefaults(baseState);
+    return baseState;
+  }
+
+  const merged = {
+    ...baseState,
+    ...saved,
+    ownedCharacters: Array.isArray(saved.ownedCharacters) ? saved.ownedCharacters : [],
+    ownedPets: Array.isArray(saved.ownedPets) ? saved.ownedPets : [],
+    ownedWeapons: Array.isArray(saved.ownedWeapons) ? saved.ownedWeapons : ["atak-1"],
+    crateInventory:
+      saved.crateInventory && typeof saved.crateInventory === "object"
+        ? { ...baseState.crateInventory, ...saved.crateInventory }
+        : { ...baseState.crateInventory },
+    openedCrates:
+      saved.openedCrates && typeof saved.openedCrates === "object"
+        ? { ...baseState.openedCrates, ...saved.openedCrates }
+        : { ...baseState.openedCrates },
+    freeCrates:
+      saved.freeCrates && typeof saved.freeCrates === "object"
+        ? { ...baseState.freeCrates, ...saved.freeCrates }
+        : { ...baseState.freeCrates },
+    claimedTrophyRewards:
+      saved.claimedTrophyRewards && typeof saved.claimedTrophyRewards === "object"
+        ? { ...baseState.claimedTrophyRewards, ...saved.claimedTrophyRewards }
+        : { ...baseState.claimedTrophyRewards },
+    storeOffers:
+      saved.storeOffers && typeof saved.storeOffers === "object"
+        ? { ...baseState.storeOffers, ...saved.storeOffers }
+        : { ...baseState.storeOffers },
+  };
+
+  merged.claimedTrophyRewards = migrateClaimedTrophyRewards(saved.claimedTrophyRewards);
+  merged.activeTrophyWorld = normalizeTrophyWorldId(saved.activeTrophyWorld);
+  merged.superAlleyActive = Boolean(saved.superAlleyActive);
+  merged.superAlleyWinterActive = Boolean(saved.superAlleyWinterActive);
+  merged.superAlleyTowerActive = Boolean(saved.superAlleyTowerActive);
+  merged.phoneModeEnabled = Boolean(saved.phoneModeEnabled);
+  merged.seenWinterWorldIntro = Boolean(saved.seenWinterWorldIntro);
+  merged.seenTowerWorldIntro = Boolean(saved.seenTowerWorldIntro);
+  merged.playerNickname = sanitizePlayerNickname(saved.playerNickname);
+  merged.nicknamePromptSeen = Boolean(saved.nicknamePromptSeen);
+  merged.profileId = sanitizeProfileId(saved.profileId);
+  merged.publicId = sanitizePublicPlayerId(saved.publicId);
+  merged.profileCreatedAt = Math.max(0, Number(saved.profileCreatedAt || 0));
+  merged.completedGamesTotal = Math.max(0, Number(saved.completedGamesTotal || 0));
+  merged.robotsDefeatedTotal = Math.max(0, Number(saved.robotsDefeatedTotal || 0));
+  merged.favoriteCharacterId = sanitizeStoredId(saved.favoriteCharacterId);
+  merged.favoritePetId = sanitizeStoredId(saved.favoritePetId);
+  merged.accountPasswordHash = sanitizeStoredToken(saved.accountPasswordHash);
+  merged.accountPasswordSalt = sanitizeStoredToken(saved.accountPasswordSalt);
+  merged.accountSaveSecret = sanitizeStoredToken(saved.accountSaveSecret);
+  merged.accountPasswordSet = Boolean(
+    saved.accountPasswordSet &&
+    merged.accountPasswordHash &&
+    merged.accountPasswordSalt &&
+    merged.accountSaveSecret
+  );
+  merged.seenFirstRobotTutorial = Object.prototype.hasOwnProperty.call(saved, "seenFirstRobotTutorial")
+    ? Boolean(saved.seenFirstRobotTutorial)
+    : Boolean(saved.playedFirstGame);
+  merged.ownedCharacters = sanitizeOwnedIds(merged.ownedCharacters, CATALOG.characters);
+  merged.ownedPets = sanitizeOwnedIds(merged.ownedPets, CATALOG.pets);
+  merged.ownedWeapons = sanitizeOwnedIds(merged.ownedWeapons, CATALOG.weapons);
+
+  if (!merged.ownedWeapons.includes("atak-1")) {
+    merged.ownedWeapons.push("atak-1");
+  }
+
+  if (!merged.ownedCharacters.includes("magik-millo")) {
+    merged.ownedCharacters.unshift("magik-millo");
+  }
+
+  if (!merged.ownedCharacters.includes(merged.equippedCharacter)) {
+    merged.equippedCharacter = null;
+  }
+
+  if (!merged.ownedPets.includes(merged.equippedPet)) {
+    merged.equippedPet = null;
+  }
+
+  if (!merged.ownedWeapons.includes(merged.equippedWeapon)) {
+    merged.equippedWeapon = "atak-1";
+  }
+
+  if (!merged.equippedWeapon) {
+    merged.equippedWeapon = "atak-1";
+  }
+
+  if (!merged.equippedCharacter) {
+    merged.equippedCharacter = "magik-millo";
+  }
+
+  merged.freeCrates["drewniana-skrzynia"] = 0;
+  ensureStateProfileDefaults(merged);
+  return merged;
+}
+
+function ensureStateProfileDefaults(targetState) {
+  if (!sanitizePlayerNickname(targetState.playerNickname)) {
+    targetState.playerNickname = generateDefaultNickname();
+    targetState.nicknamePromptSeen = true;
+  }
+
+  if (!sanitizeProfileId(targetState.profileId)) {
+    targetState.profileId = generateProfileId();
+  }
+
+  if (!sanitizePublicPlayerId(targetState.publicId)) {
+    targetState.publicId = generatePublicPlayerId();
+  }
+
+  if (!Number(targetState.profileCreatedAt)) {
+    targetState.profileCreatedAt = Date.now();
+  }
+
+  if (!targetState.ownedCharacters.includes("magik-millo")) {
+    targetState.ownedCharacters.unshift("magik-millo");
+  }
+
+  if (!targetState.favoriteCharacterId || !targetState.ownedCharacters.includes(targetState.favoriteCharacterId)) {
+    targetState.favoriteCharacterId = targetState.equippedCharacter && targetState.ownedCharacters.includes(targetState.equippedCharacter)
+      ? targetState.equippedCharacter
+      : targetState.ownedCharacters[0] || "magik-millo";
+  }
+
+  if (!targetState.favoritePetId || !targetState.ownedPets.includes(targetState.favoritePetId)) {
+    targetState.favoritePetId = targetState.equippedPet && targetState.ownedPets.includes(targetState.equippedPet)
+      ? targetState.equippedPet
+      : targetState.ownedPets[0] || "";
+  }
+
+  if (!targetState.accountPasswordSet) {
+    targetState.accountPasswordHash = "";
+    targetState.accountPasswordSalt = "";
+    targetState.accountSaveSecret = "";
+  }
+}
+
+function generateDefaultNickname() {
+  return `Gracz${generateRandomDigits(4)}`;
+}
+
+function generateRandomDigits(length = 4) {
+  const digits = [];
+
+  if (window.crypto?.getRandomValues) {
+    const values = new Uint8Array(length);
+    window.crypto.getRandomValues(values);
+    values.forEach((value) => {
+      digits.push(String(value % 10));
+    });
+    return digits.join("");
+  }
+
+  for (let index = 0; index < length; index += 1) {
+    digits.push(String(Math.floor(Math.random() * 10)));
+  }
+
+  return digits.join("");
+}
+
+function generateProfileId() {
+  const randomPart = Math.random().toString(36).slice(2, 10);
+  return `profile-${randomPart}${Date.now().toString(36).slice(-6)}`;
+}
+
+function generatePublicPlayerId() {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+
+  if (window.crypto?.getRandomValues) {
+    const values = new Uint8Array(5);
+    window.crypto.getRandomValues(values);
+    values.forEach((value) => {
+      result += alphabet[value % alphabet.length];
+    });
+    return result;
+  }
+
+  for (let index = 0; index < 5; index += 1) {
+    result += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+
+  return result;
+}
+
+function sanitizeProfileId(value) {
+  return String(value || "")
+    .trim()
+    .replace(/[^0-9A-Za-z_-]/g, "")
+    .slice(0, 48);
+}
+
+function sanitizePublicPlayerId(value) {
+  return String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^0-9A-Z]/g, "")
+    .slice(0, 5);
+}
+
+function sanitizeStoredId(value) {
+  return String(value || "")
+    .trim()
+    .replace(/[^0-9A-Za-z_-]/g, "")
+    .slice(0, 64);
+}
+
+function sanitizeStoredToken(value) {
+  return String(value || "")
+    .trim()
+    .replace(/[^0-9A-Za-z+/=_-]/g, "")
+    .slice(0, 512);
 }
 
 function hasDiamondAccess() {

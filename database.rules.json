@@ -1,12 +1,79 @@
 {
-  /* Visit https://firebase.google.com/docs/database/security to learn more about security rules. */
   "rules": {
-    "multiplayerRooms": {
-      ".read": true,
-      ".write": true,
-      ".indexOn": ["host/nicknameNormalized", "status", "updatedAt"]
-    },
     ".read": false,
-    ".write": false
+    ".write": false,
+    "profiles": {
+      ".read": true,
+      ".indexOn": ["trophies", "nicknameNormalized"],
+      "$profileId": {
+        ".write": true
+      }
+    },
+    "nicknames": {
+      ".read": true,
+      "$nickname": {
+        ".write": true
+      }
+    },
+    "publicIds": {
+      ".read": true,
+      "$publicId": {
+        ".write": true
+      }
+    },
+    "accounts": {
+      ".read": true,
+      "$profileId": {
+        ".write": true
+      }
+    },
+    "saveBlobs": {
+      ".read": true,
+      "$profileId": {
+        ".write": true
+      }
+    },
+    "friendLinks": {
+      ".read": true,
+      "$profileId": {
+        ".write": true
+      }
+    },
+    "friendInvites": {
+      ".read": true,
+      "$profileId": {
+        ".write": true
+      }
+    },
+    "friendInviteSent": {
+      ".read": true,
+      "$profileId": {
+        ".write": true
+      }
+    },
+    "partyInvites": {
+      ".read": true,
+      "$profileId": {
+        ".write": true
+      }
+    },
+    "partyInviteSent": {
+      ".read": true,
+      "$profileId": {
+        ".write": true
+      }
+    },
+    "partyMemberships": {
+      ".read": true,
+      "$profileId": {
+        ".write": true
+      }
+    },
+    "parties": {
+      ".read": true,
+      "$partyId": {
+        ".write": true
+      }
+    }
   }
 }

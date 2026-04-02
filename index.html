@@ -72,8 +72,20 @@
         <section class="screen-view active" id="lobby-view">
           <div class="panel lobby-panel">
             <div class="lobby-topbar">
-              <h2 class="section-title">Lobby</h2>
-              <p class="lobby-nickname" id="lobby-nickname">Nick: Gracz</p>
+              <div class="lobby-topbar-left">
+                <button
+                  class="lobby-profile-button"
+                  id="lobby-profile-button"
+                  type="button"
+                  aria-label="Profil"
+                >
+                  <img class="lobby-profile-icon" src="./profil.jpeg" alt="Profil" />
+                </button>
+                <div class="lobby-topbar-copy">
+                  <h2 class="section-title">Lobby</h2>
+                  <p class="lobby-nickname" id="lobby-nickname">Nick: Gracz0000</p>
+                </div>
+              </div>
               <button
                 class="circle-icon-button lobby-settings-button"
                 id="lobby-settings-button"
@@ -89,12 +101,17 @@
                 GRAJ
               </button>
 
+              <button class="pixel-button lobby-nav-button top-secondary-button" id="lobby-friends-button" data-view="friends" type="button">
+                ZNAJOMI
+              </button>
+
               <button class="pixel-button lobby-nav-button left-button" data-view="store">
                 SKLEP
               </button>
 
               <div class="showcase-stage">
                 <div class="avatar-wrapper">
+                  <p class="party-ready-badge party-ready-badge-self" id="lobby-self-ready-badge" hidden>GOTOWY</p>
                   <div class="avatar-frame">
                     <img
                       id="lobby-avatar"
@@ -118,6 +135,36 @@
                     />
                     <div class="pet-fallback asset-fallback">PLATOYA</div>
                   </div>
+                </div>
+
+                <div class="party-teammate-showcase" id="party-teammate-showcase" hidden>
+                  <p class="party-ready-badge" id="lobby-party-ready-badge" hidden>GOTOWY</p>
+                  <div class="avatar-frame party-teammate-avatar" id="party-teammate-avatar-frame">
+                    <img
+                      id="party-teammate-avatar"
+                      class="avatar-image asset-image"
+                      src=""
+                      alt="Znajomy"
+                      data-fallback-text="GRACZ"
+                    />
+                    <div class="asset-fallback">GRACZ</div>
+                  </div>
+
+                  <div class="pet-frame party-teammate-pet" id="party-teammate-pet-frame">
+                    <img
+                      id="party-teammate-pet"
+                      class="pet-image asset-image"
+                      src=""
+                      alt="PlatoYa znajomego"
+                      data-fallback-text="PLATOYA"
+                    />
+                    <div class="asset-fallback">PLATOYA</div>
+                  </div>
+
+                  <p class="party-teammate-name" id="party-teammate-name">Znajomy</p>
+                  <button class="pixel-button small-button subtle-button party-leave-button" id="party-leave-button" type="button">
+                    OPUŚĆ DRUŻYNĘ
+                  </button>
                 </div>
               </div>
 
@@ -178,6 +225,44 @@
           </div>
         </section>
 
+        <section class="screen-view" id="friends-view" aria-hidden="true">
+          <div class="panel section-panel">
+            <div class="section-header">
+              <div>
+                <h2 class="section-title">Znajomi</h2>
+                <p class="section-subtitle">Tutaj zobaczysz znajomych, sugestie i zaproszenia.</p>
+              </div>
+              <button class="pixel-button small-button" data-view="lobby">WROC</button>
+            </div>
+
+            <div class="friends-toolbar">
+              <div class="friends-self-id-card">
+                <p class="friends-toolbar-label">Moje ID</p>
+                <p class="friends-self-id-value" id="friends-self-id">-</p>
+                <button class="pixel-button small-button" id="friends-copy-id-button" type="button">KOPIUJ</button>
+              </div>
+
+              <div class="friends-invite-form">
+                <label class="settings-field friends-invite-field" for="friends-invite-id-input">
+                  <span class="settings-field-label">Zaproś po ID</span>
+                  <input class="settings-input" id="friends-invite-id-input" type="text" maxlength="5" placeholder="ABCDE" />
+                </label>
+                <button class="pixel-button small-button settings-action-button" id="friends-invite-id-button" type="button">
+                  ZAPROŚ
+                </button>
+              </div>
+            </div>
+
+            <div class="tab-row">
+              <button class="pixel-button tab-button active" data-tab-group="friends" data-tab="friends">Znajomi</button>
+              <button class="pixel-button tab-button" data-tab-group="friends" data-tab="suggested">Sugerowani Gracze</button>
+              <button class="pixel-button tab-button" data-tab-group="friends" data-tab="invites">Zaproszenia</button>
+            </div>
+
+            <div class="friends-content" id="friends-content"></div>
+          </div>
+        </section>
+
         <section class="screen-view" id="game-view" aria-hidden="true">
           <div class="panel section-panel">
             <div class="section-header">
@@ -186,7 +271,7 @@
                 <p class="section-subtitle">Strzalki poruszaja postacia, a spacja strzela. W trybie telefonowym uzyj joysticka i przycisku strzalu.</p>
                 <p class="section-subtitle" id="game-mode-info"></p>
               </div>
-              <button class="pixel-button small-button" id="game-back-button" data-view="lobby">WROC</button>
+              <button class="pixel-button small-button" id="game-back-button" type="button">PAUZA</button>
             </div>
 
             <div class="game-stage" id="game-stage">
@@ -194,13 +279,12 @@
                 <div class="wave-banner" id="wave-banner" hidden>
                   <div class="wave-banner-box">
                     <p class="wave-banner-title" id="wave-banner-title">FALA 1</p>
-                    <p class="wave-banner-label">Start za</p>
+                    <p class="wave-banner-label" id="wave-banner-label">Start za</p>
                     <p class="wave-banner-countdown" id="wave-banner-countdown">3</p>
                     <div class="wave-banner-players" id="wave-banner-players" hidden></div>
                   </div>
                 </div>
                 <div class="water-fields-layer" id="water-fields-layer"></div>
-                <div class="multiplayer-players-layer" id="multiplayer-players-layer"></div>
                 <div class="entity player-entity" id="player-entity">
                   <p class="entity-health player-health" id="player-health-label">3000 pz</p>
                   <div class="player-visual">
@@ -219,23 +303,6 @@
                   <div class="ammo-bars" id="ammo-bars"></div>
                 </div>
 
-                <div class="entity opponent-entity" id="opponent-entity" hidden>
-                  <p class="entity-health opponent-health" id="opponent-health-label">3000 pz</p>
-                  <p class="opponent-nickname" id="opponent-nickname">Przeciwnik</p>
-                  <div class="player-visual opponent-visual">
-                    <div class="player-sprite-frame opponent-sprite-frame">
-                      <img
-                        id="opponent-image"
-                        class="entity-image asset-image"
-                        src="./postac_1.png"
-                        alt="Przeciwnik"
-                        data-fallback-text="RYWAL"
-                      />
-                      <div class="asset-fallback">RYWAL</div>
-                    </div>
-                  </div>
-                </div>
-
                 <div class="entity pet-entity" id="game-pet-entity" hidden>
                   <div class="pet-cooldown-bar" id="pet-cooldown-bar" hidden>
                     <div class="pet-cooldown-fill" id="pet-cooldown-fill"></div>
@@ -252,6 +319,7 @@
                   </div>
                 </div>
 
+                <div class="multiplayer-players-layer" id="multiplayer-players-layer"></div>
                 <div class="pet-pack-layer" id="pet-pack-layer"></div>
                 <div class="barriers-layer" id="barriers-layer"></div>
                 <div class="pickups-layer" id="pickups-layer"></div>
@@ -352,77 +420,6 @@
 
     <div class="first-game-guide" id="first-game-guide" hidden>
       <p class="first-game-guide-message">ROZEGRAJ SWOJĄ PIERWSZĄ GRĘ!</p>
-    </div>
-
-    <div class="settings-backdrop multiplayer-backdrop" id="nickname-backdrop" hidden>
-      <div class="panel settings-panel multiplayer-panel" role="dialog" aria-modal="true" aria-label="Wybierz nick">
-        <div class="settings-panel-header multiplayer-panel-header">
-          <div class="settings-heading">
-            <p class="settings-kicker">Profil gracza</p>
-            <p class="section-title multiplayer-title">Jaki chcesz mieć nick?</p>
-          </div>
-        </div>
-
-        <label class="multiplayer-field">
-          <span class="multiplayer-label">Twój nick</span>
-          <input class="multiplayer-input" id="nickname-input" type="text" maxlength="18" placeholder="Np. Kacper123" />
-        </label>
-
-        <p class="multiplayer-note" id="nickname-note">Ten nick będzie widoczny w lobby i przy przyszłym multiplayerze.</p>
-
-        <div class="multiplayer-actions">
-          <button class="pixel-button" id="nickname-save-button" type="button">ZAPISZ NICK</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="settings-backdrop multiplayer-backdrop" id="multiplayer-backdrop" hidden>
-      <div class="panel settings-panel multiplayer-panel" role="dialog" aria-modal="true" aria-label="Wybierz tryb gry">
-        <div class="settings-panel-header multiplayer-panel-header">
-          <div class="settings-heading">
-            <p class="settings-kicker">Multiplayer</p>
-            <p class="section-title multiplayer-title" id="multiplayer-title">Wybierz tryb gry</p>
-          </div>
-          <button class="circle-icon-button" id="multiplayer-close-button" type="button" aria-label="Zamknij">
-            ×
-          </button>
-        </div>
-
-        <div class="play-mode-choice" id="play-mode-choice">
-          <p class="multiplayer-note">
-            Wybierz tryb walki.
-          </p>
-
-          <div class="multiplayer-actions">
-            <button class="pixel-button" id="play-robots-button" type="button">GRAJ Z ROBOTAMI</button>
-            <button class="pixel-button" id="play-players-button" type="button">GRAJ Z GRACZAMI</button>
-          </div>
-        </div>
-
-        <div class="multiplayer-queue-panel" id="multiplayer-queue-panel" hidden>
-          <div class="multiplayer-queue-hero">
-            <p class="multiplayer-queue-status multiplayer-chip-status" id="multiplayer-status-chip">SZUKANIE</p>
-
-            <div class="multiplayer-queue-loader" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-
-            <p class="multiplayer-queue-count" id="multiplayer-own-nick">1/6</p>
-          </div>
-
-          <p class="multiplayer-timer" id="multiplayer-timer">START ZA 10 s</p>
-
-          <p class="multiplayer-queue-note" id="multiplayer-note">Dobieram graczy...</p>
-
-          <div class="multiplayer-player-list" id="multiplayer-player-list"></div>
-
-          <div class="multiplayer-actions">
-            <button class="pixel-button subtle-button" id="multiplayer-cancel-button" type="button">WYJDŹ Z KOLEJKI</button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div class="alley-intro-backdrop" id="alley-intro-backdrop" hidden>
@@ -583,7 +580,7 @@
           </button>
         </div>
 
-        <p class="settings-copy">Tutaj wlaczysz tryb telefonowy oraz znajdziesz reset konta.</p>
+        <p class="settings-copy">Tutaj wlaczysz tryb telefonowy, ustawisz haslo i zalogujesz sie na inne konto.</p>
 
         <div class="settings-option">
           <div class="settings-option-copy">
@@ -597,9 +594,197 @@
           </button>
         </div>
 
+        <div class="settings-option settings-option-stack">
+          <div class="settings-option-copy">
+            <p class="settings-option-title">Konto</p>
+            <p class="settings-option-text" id="settings-account-status">
+              Profil lokalny. Ustaw haslo, aby logowac sie na tym koncie na innych urzadzeniach.
+            </p>
+          </div>
+        </div>
+
+        <div class="settings-auth-grid">
+          <label class="settings-field" for="settings-new-password">
+            <span class="settings-field-label">Ustaw hasło do tego konta</span>
+            <input class="settings-input" id="settings-new-password" type="password" maxlength="32" placeholder="Wpisz hasło" />
+          </label>
+          <button class="pixel-button small-button settings-action-button" id="settings-set-password-button" type="button">
+            USTAW HASŁO
+          </button>
+        </div>
+
+        <div class="settings-auth-grid">
+          <label class="settings-field" for="settings-login-nickname">
+            <span class="settings-field-label">Nick istniejącego konta</span>
+            <input class="settings-input" id="settings-login-nickname" type="text" maxlength="18" placeholder="Gracz1234" />
+          </label>
+          <label class="settings-field" for="settings-login-password">
+            <span class="settings-field-label">Hasło</span>
+            <input class="settings-input" id="settings-login-password" type="password" maxlength="32" placeholder="Hasło" />
+          </label>
+          <button class="pixel-button small-button settings-action-button" id="settings-login-button" type="button">
+            ZALOGUJ
+          </button>
+        </div>
+
         <button class="pixel-button settings-reset-button" id="account-reset-button" data-account-reset type="button">
           RESET KONTA
         </button>
+      </div>
+    </div>
+
+    <div class="settings-backdrop" id="profile-backdrop" hidden>
+      <div class="panel profile-panel" id="profile-panel" role="dialog" aria-modal="true" aria-label="Profil gracza">
+        <div class="settings-panel-header">
+          <div class="settings-heading">
+            <p class="settings-kicker">Pixel PlatoYA</p>
+            <h3 class="modal-title">Profil</h3>
+          </div>
+          <button
+            class="circle-icon-button settings-close-button"
+            id="profile-close-button"
+            type="button"
+            aria-label="Zamknij profil"
+          >
+            X
+          </button>
+        </div>
+
+        <div class="profile-tab-row">
+          <button class="pixel-button tab-button active" id="profile-tab-me" type="button">MÓJ PROFIL</button>
+          <button class="pixel-button tab-button" id="profile-tab-users" type="button">INNI UŻYTKOWNICY</button>
+        </div>
+
+        <div class="profile-tab-panel" id="profile-tab-panel-me">
+          <div class="profile-main-card" id="profile-main-card" data-world-theme="alley">
+            <div class="profile-hero-column">
+              <div class="avatar-frame profile-preview-frame profile-hero-frame" id="profile-favorite-character-frame">
+                <img
+                  id="profile-favorite-character-image"
+                  class="avatar-image asset-image"
+                  src="./postac_1.png"
+                  alt="Ulubiona postać"
+                  data-fallback-text="POSTAĆ"
+                />
+                <div class="avatar-fallback asset-fallback">POSTAĆ</div>
+              </div>
+
+              <h4 class="profile-name-heading profile-name-heading-left" id="profile-name-heading">Gracz0000</h4>
+
+              <div class="profile-world-bar" id="profile-world-bar" data-world-theme="alley" aria-hidden="true"></div>
+
+              <div class="profile-trophy-line profile-trophy-line-plain">
+                <img class="profile-trophy-icon profile-trophy-icon-plain" src="./monety_2.png" alt="Pucharki" />
+                <p class="profile-trophy-value" id="profile-stat-trophies">0</p>
+              </div>
+            </div>
+
+            <div class="profile-compact-stats profile-compact-stats-side">
+              <div class="profile-compact-stat profile-compact-stat-small">
+                <p class="profile-compact-stat-label">Roboty</p>
+                <p class="profile-compact-stat-value" id="profile-stat-robots">0</p>
+              </div>
+              <div class="profile-compact-stat profile-compact-stat-small">
+                <p class="profile-compact-stat-label">Gry</p>
+                <p class="profile-compact-stat-value" id="profile-stat-games">0</p>
+              </div>
+              <div class="profile-compact-stat profile-compact-stat-small">
+                <p class="profile-compact-stat-label">Postacie</p>
+                <p class="profile-compact-stat-value" id="profile-stat-characters">0 / 0</p>
+              </div>
+              <div class="profile-compact-stat profile-compact-stat-small">
+                <p class="profile-compact-stat-label">PlatoYas</p>
+                <p class="profile-compact-stat-value" id="profile-stat-pets">0 / 0</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-edit-card">
+            <button class="pixel-button small-button settings-action-button profile-wide-button" id="profile-edit-button" type="button">
+              EDYTUJ PROFIL
+            </button>
+            <div class="profile-form-grid" id="profile-edit-panel" hidden>
+              <label class="settings-field" for="profile-name-input">
+                <span class="settings-field-label">Nazwa gracza</span>
+                <input class="settings-input" id="profile-name-input" type="text" maxlength="18" placeholder="Gracz1234" />
+              </label>
+
+              <label class="settings-field" for="profile-favorite-character-select">
+                <span class="settings-field-label">Ulubiona postać</span>
+                <select class="settings-input" id="profile-favorite-character-select"></select>
+              </label>
+
+              <label class="settings-field" for="profile-favorite-pet-select">
+                <span class="settings-field-label">Ulubiona PlatoYa</span>
+                <select class="settings-input" id="profile-favorite-pet-select"></select>
+              </label>
+
+              <div class="profile-edit-actions">
+                <button class="pixel-button small-button settings-action-button" id="profile-save-name-button" type="button">
+                  ZAPISZ
+                </button>
+                <button class="pixel-button small-button subtle-button" id="profile-cancel-edit-button" type="button">
+                  ANULUJ
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-tab-panel" id="profile-tab-panel-users" hidden>
+          <div class="profile-users-layout">
+            <div class="profile-users-list-wrap">
+              <p class="profile-users-heading">Ranking pucharków</p>
+              <div class="profile-users-list" id="profile-users-list"></div>
+            </div>
+
+            <div class="profile-user-preview-card" id="profile-user-preview-card" data-world-theme="alley">
+              <p class="profile-users-heading">Podgląd profilu</p>
+              <div class="profile-main-card profile-main-card-compact" id="profile-other-main-card" data-world-theme="alley">
+                <div class="profile-hero-column">
+                  <div class="avatar-frame profile-preview-frame profile-hero-frame profile-hero-frame-small" id="profile-other-character-frame">
+                    <img
+                      id="profile-other-character-image"
+                      class="avatar-image asset-image"
+                      src=""
+                      alt="Postać gracza"
+                      data-fallback-text="POSTAĆ"
+                    />
+                    <div class="avatar-fallback asset-fallback">POSTAĆ</div>
+                  </div>
+
+                  <h4 class="profile-name-heading profile-name-heading-small profile-name-heading-left" id="profile-other-name">Brak graczy</h4>
+
+                  <div class="profile-world-bar profile-world-bar-small" id="profile-other-world-bar" data-world-theme="alley" aria-hidden="true"></div>
+
+                  <div class="profile-trophy-line profile-trophy-line-plain">
+                    <img class="profile-trophy-icon profile-trophy-icon-plain" src="./monety_2.png" alt="Pucharki" />
+                    <p class="profile-trophy-value profile-trophy-value-small" id="profile-other-trophies">0</p>
+                  </div>
+                </div>
+
+                <div class="profile-compact-stats profile-compact-stats-side">
+                  <div class="profile-compact-stat profile-compact-stat-small">
+                    <p class="profile-compact-stat-label">Roboty</p>
+                    <p class="profile-compact-stat-value" id="profile-other-robots">0</p>
+                  </div>
+                  <div class="profile-compact-stat profile-compact-stat-small">
+                    <p class="profile-compact-stat-label">Gry</p>
+                    <p class="profile-compact-stat-value" id="profile-other-games">0</p>
+                  </div>
+                  <div class="profile-compact-stat profile-compact-stat-small">
+                    <p class="profile-compact-stat-label">Postacie</p>
+                    <p class="profile-compact-stat-value" id="profile-other-characters">0 / 0</p>
+                  </div>
+                  <div class="profile-compact-stat profile-compact-stat-small">
+                    <p class="profile-compact-stat-label">PlatoYas</p>
+                    <p class="profile-compact-stat-value" id="profile-other-pets">0 / 0</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -749,9 +934,9 @@
       </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
     <script src="./firebase-config.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-database-compat.js"></script>
     <script src="./script.js"></script>
   </body>
 </html>
