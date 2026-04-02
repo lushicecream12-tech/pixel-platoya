@@ -10238,15 +10238,36 @@ function cloneCoopProjectiles(projectiles = []) {
   return projectiles.map((projectile) => ({ ...projectile }));
 }
 
-function syncGamePlayerFromLocalCoopPlayer() {
+function syncGamePlayerFromLocalCoopPlayer(options = {}) {
   const localPlayer = getLocalCoopPlayerState();
   if (!localPlayer) {
     return;
   }
 
-  game.player.x = Number(localPlayer.x || game.player.x || (game.width / 2));
-  game.player.y = Number(localPlayer.y || game.player.y || (game.height / 2));
-  game.player.hp = Number(localPlayer.hp || game.player.hp || GAME_RULES.playerMaxHp);
+  const preservePosition = Boolean(options.preservePosition);
+  const nextX = Number(localPlayer.x);
+  const nextY = Number(localPlayer.y);
+  const nextHp = Number(localPlayer.hp);
+
+  if (!preservePosition) {
+    if (Number.isFinite(nextX)) {
+      game.player.x = nextX;
+    } else if (!Number.isFinite(game.player.x)) {
+      game.player.x = game.width / 2;
+    }
+
+    if (Number.isFinite(nextY)) {
+      game.player.y = nextY;
+    } else if (!Number.isFinite(game.player.y)) {
+      game.player.y = game.height / 2;
+    }
+  }
+
+  if (Number.isFinite(nextHp)) {
+    game.player.hp = nextHp;
+  } else if (!Number.isFinite(game.player.hp)) {
+    game.player.hp = GAME_RULES.playerMaxHp;
+  }
 }
 
 function syncLocalCoopPlayerFromGame() {
@@ -10418,7 +10439,11 @@ function applyRemoteCoopSnapshot(snapshot) {
     player.updatedAt = Date.now();
   });
 
-  syncGamePlayerFromLocalCoopPlayer();
+  if (!game.coopIsHost && snapshot.state !== "result") {
+    syncGamePlayerFromLocalCoopPlayer({ preservePosition: true });
+  } else {
+    syncGamePlayerFromLocalCoopPlayer();
+  }
   game.robots = cloneCoopRobots(snapshot.robots || []);
   game.projectiles = cloneCoopProjectiles(snapshot.projectiles || []);
 
@@ -10970,6 +10995,7 @@ function updateCoopGuestFrame(deltaMs, deltaSeconds, timestamp) {
   if (game.player.hp > 0 && game.waveIntroMs <= 0 && game.pauseResumeCountdownMs <= 0) {
     updatePlayerMovement(deltaSeconds);
     clampGameEntities();
+    syncLocalCoopPlayerFromGame();
   }
 
   updateGuestCoopAmmoPreview(deltaSeconds, timestamp);
