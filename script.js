@@ -7,8 +7,8 @@ const FIREBASE_SOCIAL_CONFIG = window.PIXEL_PLATOYA_FIREBASE_CONFIG || null;
 const PROFILE_SYNC_DEBOUNCE_MS = 900;
 const PROFILE_PRESENCE_HEARTBEAT_MS = 10000;
 const PROFILE_ACTIVE_WINDOW_MS = 20000;
-const PARTY_MEMBER_SYNC_MS = 120;
-const PARTY_SESSION_SYNC_MS = 120;
+const PARTY_MEMBER_SYNC_MS = 180;
+const PARTY_SESSION_SYNC_MS = 260;
 const PARTY_INVITE_EXPIRY_MS = 5 * 60 * 1000;
 const PARTY_PLAYER_STALE_MS = 6000;
 const SUPER_ALLEY_DIAMOND_PRICE = 119;
@@ -3814,14 +3814,10 @@ function handlePartyDisbanded() {
   syncTrackedProfileListeners();
 
   if (wasCoopActive) {
-    stopGameSession();
-    showView("lobby");
-    openModal({
-      title: "Drużyna zamknięta",
-      message: "Znajomy opuścił lobby albo zakończył wspólną grę.",
-      buttonText: "OK",
-      onConfirm: closeModal,
-    });
+    game.coopPartyId = "";
+    game.coopSessionId = "";
+    game.coopHostProfileId = "";
+    concludeCoopGameSession("Koniec rundy", "Znajomy opuścił wspólną grę.");
   }
 }
 
@@ -10450,31 +10446,14 @@ async function publishCoopResult(status, note) {
 }
 
 function applyCoopResultSnapshot(snapshot) {
-  if (game.coopResultApplied) {
-    return;
-  }
-
-  game.coopResultApplied = true;
-
-  if (!game.statsCounted) {
-    game.statsCounted = true;
-    state.completedGamesTotal += 1;
-    state.robotsDefeatedTotal += Math.max(0, Number(snapshot?.robotsKilledTotal || game.robotsKilledTotal || 0));
-    state.trophies = Math.max(0, state.trophies + Math.max(0, Number(snapshot?.trophiesEarnedRun || game.trophiesEarnedRun || 0)));
-    trophyBalance.textContent = String(state.trophies);
-    saveState();
-  }
-
-  game.active = false;
-  window.cancelAnimationFrame(game.animationId);
-  game.animationId = 0;
-  resetGameKeys();
-  syncTouchControlsVisibility();
-  game.resultStatus = snapshot?.resultStatus || game.resultStatus || "Koniec rundy";
-  game.resultNote = snapshot?.resultNote || game.resultNote || "Twoje statystyki z tej rundy.";
-  game.robotsKilledTotal = Math.max(0, Number(snapshot?.robotsKilledTotal || game.robotsKilledTotal || 0));
-  game.trophiesEarnedRun = Math.max(0, Number(snapshot?.trophiesEarnedRun || game.trophiesEarnedRun || 0));
-  showGameResult();
+  concludeCoopGameSession(
+    snapshot?.resultStatus || game.resultStatus || "Koniec rundy",
+    snapshot?.resultNote || game.resultNote || "Twoje statystyki z tej rundy.",
+    {
+      robotsKilledTotal: snapshot?.robotsKilledTotal,
+      trophiesEarnedRun: snapshot?.trophiesEarnedRun,
+    }
+  );
 }
 
 async function resetPartyAfterCoopResult() {
@@ -10938,8 +10917,8 @@ function updateCoopHostFrame(deltaMs, deltaSeconds, timestamp) {
     return player && player.alive !== false && Number(player.hp || 0) > 0;
   });
 
-  if (alivePlayers.length === 0) {
-    void publishCoopResult("Przegrana", "Twoje statystyki z tej rundy.");
+  if (alivePlayers.length < getCoopPlayerIds().length) {
+    finishGameLoss();
     return;
   }
 
@@ -10992,11 +10971,15 @@ function runGameFrame(timestamp) {
       updateCoopGuestFrame(deltaMs, deltaSeconds, timestamp);
     }
 
-    renderGameScene();
+    if (!game.coopResultApplied && game.player.hp <= 0) {
+      finishGameLoss();
+    }
 
     if (!game.active) {
       return;
     }
+
+    renderGameScene();
 
     game.animationId = window.requestAnimationFrame(runGameFrame);
     return;
@@ -12330,14 +12313,21 @@ function cleanupDeadRobots() {
 }
 
 function finishGameLoss() {
+  if (!game.active || game.coopResultApplied) {
+    return;
+  }
+
   const defeatReward = getDefeatTrophyReward();
 
   if (defeatReward > 0) {
     awardTrophies(defeatReward);
   }
 
-  if (isCoopMatchActive() && game.coopIsHost) {
-    void publishCoopResult("Przegrana", "Twoje statystyki z tej rundy.");
+  if (isCoopMatchActive()) {
+    if (game.coopIsHost) {
+      void publishCoopResult("Przegrana", "Twoje statystyki z tej rundy.");
+    }
+    concludeCoopGameSession("Przegrana", "Twoje statystyki z tej rundy.");
     return;
   }
 
@@ -12345,8 +12335,15 @@ function finishGameLoss() {
 }
 
 function finishGameVictory() {
-  if (isCoopMatchActive() && game.coopIsHost) {
-    void publishCoopResult("Zwyciestwo", "Przeszedles wszystkie 5 fal.");
+  if (!game.active || game.coopResultApplied) {
+    return;
+  }
+
+  if (isCoopMatchActive()) {
+    if (game.coopIsHost) {
+      void publishCoopResult("Zwyciestwo", "Przeszedles wszystkie 5 fal.");
+    }
+    concludeCoopGameSession("Zwyciestwo", "Przeszedles wszystkie 5 fal.");
     return;
   }
 
@@ -12457,6 +12454,50 @@ function concludeGameSession(status, note) {
   syncTouchControlsVisibility();
   game.resultStatus = status;
   game.resultNote = note;
+  showGameResult();
+}
+
+function concludeCoopGameSession(status, note, overrides = {}) {
+  if (game.coopResultApplied) {
+    return;
+  }
+
+  const robotsKilledTotal = Math.max(
+    0,
+    Number(
+      overrides.robotsKilledTotal ?? game.robotsKilledTotal ?? 0
+    )
+  );
+  const trophiesEarnedRun = Math.max(
+    0,
+    Number(
+      overrides.trophiesEarnedRun ?? game.trophiesEarnedRun ?? 0
+    )
+  );
+
+  game.coopResultApplied = true;
+
+  if (!game.statsCounted) {
+    game.statsCounted = true;
+    state.completedGamesTotal += 1;
+    state.robotsDefeatedTotal += robotsKilledTotal;
+  }
+
+  if (trophiesEarnedRun > 0) {
+    state.trophies = Math.max(0, state.trophies + trophiesEarnedRun);
+    trophyBalance.textContent = String(state.trophies);
+  }
+
+  saveState();
+  game.active = false;
+  window.cancelAnimationFrame(game.animationId);
+  game.animationId = 0;
+  resetGameKeys();
+  syncTouchControlsVisibility();
+  game.resultStatus = status || "Koniec rundy";
+  game.resultNote = note || "Twoje statystyki z tej rundy.";
+  game.robotsKilledTotal = robotsKilledTotal;
+  game.trophiesEarnedRun = trophiesEarnedRun;
   showGameResult();
 }
 
