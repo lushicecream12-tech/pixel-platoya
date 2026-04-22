@@ -25,51 +25,81 @@ const MULTIPLAYER_PLAYER_STALE_MS = 6000;
 const MULTIPLAYER_ROOM_STALE_MS = 45000;
 const TROPHY_NODE_WIDTH = 220;
 const TROPHY_NODE_GAP = 20;
-const TROPHY_ICON_IMAGE = "./monety_2.png";
-const TROPHY_DIAMOND_IMAGE = "./diamenty_.png";
+const TROPHY_ICON_IMAGE = "./assets/currencies/monety_2.png";
+const TROPHY_DIAMOND_IMAGE = "./assets/currencies/diamenty_.png";
+const COIN_REWARD_IMAGE = "./assets/currencies/wymiatanie.png";
+const DIAMOND_REWARD_IMAGE = "./assets/currencies/wypaddanie.png";
+const MAGICIANS_PLATOYA_KEY_IMAGE = "./klucz.magikow.png";
+const WINTER_PLATOYA_KEY_IMAGE = "./klucz.zimowy.png";
 const TROPHY_STORE_CODE = "2010";
+const DEFAULT_STORE_MODE = "default";
+const MAGICIANS_PET_STORE_MODE = "magicians-pets";
+const WINTER_PET_STORE_MODE = "winter-pets";
+const MAGIC_MACHINE_PRICE = 2;
+const MAGIC_MACHINE_FIRST_PRICE = 1;
+const MAGIC_MACHINE_FIRST_REWARD_PET_ID = "pies-magik";
+const MAGIC_MACHINE_IMAGE = "./automat.1.png";
+const MAGIC_MACHINE_BALL_IMAGE = "./kulka.1.png";
 const SUPER_ALLEY_REWARD_THRESHOLDS = {
   alley: new Set([100, 250, 350, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1750, 1850, 1950]),
   winter: new Set([2100, 2250, 2350, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500, 3600, 3750, 3850, 3950]),
+  tower: new Set([4150, 4250, 4350, 4500, 4650, 4800, 5000, 5100, 5200, 5300, 5400, 5500, 5600, 5750, 5850, 6150, 6250, 6400, 6500, 6600, 6750, 6850]),
 };
 const SOUND_EFFECT_SOURCES = {
-  shot2: ["./strzał_2.mp3", "./strzal_2.mp3"],
-  shot3: ["./strzał_3.mp3", "./strzal_3.mp3"],
-  shot4: ["./strzał_4.mp3", "./strzal_4.mp3"],
-  shotElfie: ["./strzał_elfie.mp3", "./strzal_elfie.mp3"],
-  shotNora: ["./strzał_nora.mp3", "./strzal_nora.mp3"],
-  shotCloud: ["./strzał_cloud.mp3", "./strzal_cloud.mp3"],
-  shotAnn: ["./strzał_ann.mp3", "./strzal_ann.mp3"],
-  shotIceSkater: ["./strzał_leołyżwiaż.mp3", "./strzal_leolyzwiarz.mp3"],
-  walkingLoop: ["./chodzenie_1.mp3"],
-  coins: ["./dźwięk_1.mp3", "./dzwiek_1.mp3"],
-  characterUnlock: ["./character_1.mp3"],
-  superIntro: ["./super_1.mp3"],
-  victoryResult: ["./kn_1.mp3"],
-  defeatResult: ["./kn_2.mp3"],
-  roundEndResult: ["./kn_3.mp3"],
-  crateAward: ["./skrzynia_1.mp3"],
-  crateOpen: ["./skrzynia_2.mp3"],
-  dogVoice: ["./pies_1.mp3"],
-  parrotVoice: ["./papuga_1.mp3"],
-  catVoice: ["./kot_1.mp3"],
-  snowflakeVoice: ["./kot_2.mp3"],
-  crowVoice: ["./kruk_1.mp3"],
-  bearVoice: ["./niedzwiedz_1.mp3"],
-  owlVoice: ["./sowa_1.mp3"],
-  monkeyVoice: ["./małpka_1.mp3", "./malpka_1.mp3"],
+  shot2: ["./assets/sounds/attacks/strzał_2.mp3", "./assets/sounds/attacks/strzał_2.mp3"],
+  shot3: ["./assets/sounds/attacks/strzał_3.mp3", "./assets/sounds/attacks/strzał_3.mp3"],
+  shot4: ["./assets/sounds/attacks/strzał_4.mp3", "./assets/sounds/attacks/strzał_4.mp3"],
+  shotElfie: ["./assets/sounds/attacks/strzał_elfie.mp3", "./assets/sounds/attacks/strzał_elfie.mp3"],
+  shotNora: ["./assets/sounds/attacks/strzał_nora.mp3", "./assets/sounds/attacks/strzał_nora.mp3"],
+  shotCloud: ["./assets/sounds/attacks/strzał_cloud.mp3", "./assets/sounds/attacks/strzał_cloud.mp3"],
+  shotAnn: ["./assets/sounds/attacks/strzał_ann.mp3", "./assets/sounds/attacks/strzał_ann.mp3"],
+  shotIceSkater: ["./assets/sounds/attacks/strzał_leołyżwiaż.mp3", "./assets/sounds/attacks/strzał_leołyżwiaż.mp3"],
+  shotIvy: ["./assets/sounds/attacks/strzal_ivy.mp3"],
+  shotCoco: ["./assets/sounds/characters/coco_dzwiek.mp3"],
+  shotAslan: ["./assets/sounds/characters/aslan.mp3"],
+  shotKora: ["./assets/sounds/characters/kora.mp3"],
+  shotWodzu: ["./assets/sounds/attacks/strzalwodza.mp3"],
+  walkingLoop: ["./assets/sounds/game/chodzenie_1.mp3"],
+  coins: ["./assets/sounds/game/dźwięk_1.mp3", "./assets/sounds/game/dźwięk_1.mp3"],
+  diamondShine: ["./benkirb-shine-2-268904.mp3"],
+  characterUnlock: ["./assets/sounds/game/character_1.mp3"],
+  superIntro: ["./assets/sounds/game/super_1.mp3"],
+  magicMachineRoll: ["./losowanie.mp3"],
+  magicMachineOpen: ["./losowanie2.mp3"],
+  victoryResult: ["./assets/sounds/game/kn_1.mp3"],
+  defeatResult: ["./assets/sounds/game/kn_2.mp3"],
+  roundEndResult: ["./assets/sounds/game/kn_3.mp3"],
+  crateAward: ["./assets/sounds/game/skrzynia_1.mp3"],
+  crateOpen: ["./assets/sounds/game/skrzynia_2.mp3"],
+  dogVoice: ["./assets/sounds/pets/pies_1.mp3"],
+  parrotVoice: ["./assets/sounds/pets/papuga_1.mp3"],
+  catVoice: ["./assets/sounds/pets/kot_1.mp3"],
+  snowflakeVoice: ["./assets/sounds/pets/kot_2.mp3"],
+  crowVoice: ["./assets/sounds/pets/kruk_1.mp3"],
+  bearVoice: ["./assets/sounds/pets/niedzwiedz_1.mp3"],
+  owlVoice: ["./assets/sounds/pets/sowa_1.mp3"],
+  monkeyVoice: ["./assets/sounds/pets/małpka_1.mp3", "./assets/sounds/pets/małpka_1.mp3"],
 };
 const BACKGROUND_MUSIC_SOURCES = {
-  alley: ["./muzyka_1.mp3"],
-  winter: ["./zima_mp4.mp4", "./zima_mp4", "./zima.mp4"],
+  alley: ["./assets/sounds/game/muzyka_1.mp3"],
+  winter: ["./assets/sounds/game/zima_mp4.mp4", "./zima_mp4", "./assets/sounds/game/zima_mp4.mp4"],
+  tower: ["./assets/sounds/game/dzungla.mp4", "./dzungla", "./assets/sounds/game/muzyka_1.mp3"],
 };
+const GAMEPLAY_BACKGROUND_MUSIC_SOURCES = [
+  "./gra_1.ogg",
+  "./assets/sounds/game/gra_1.ogg",
+  "./assets/sounds/game/muzyka_1.mp3",
+];
+const BACKGROUND_MUSIC_DEFAULT_VOLUME = 0.42;
+const BACKGROUND_MUSIC_DUCKED_VOLUME = 0.22;
+const ATTACK_SOUND_VOLUME_MULTIPLIER = 1.5;
 
 const GAME_RULES = {
   playerMaxHp: 3000,
   robotMaxHp: 1000,
   robotSpawnMs: 6000,
   robotMaxCount: 4,
-  robotSpeed: 78,
+  robotSpeed: 117,
   robotDamagePerSecond: 250,
   projectileDamage: 200,
   projectileSpeed: 580,
@@ -95,6 +125,32 @@ const GAME_RULES = {
   owlShieldDurationMs: 3000,
   owlShieldCooldownMs: 10000,
   owlHealAmount: Math.round(3000 * 0.2),
+  jaguarFieldRadius: 128,
+  jaguarFieldDurationMs: 5000,
+  frogPuddleRadius: 86,
+  frogPuddleDurationMs: 6000,
+  frogPuddleIntervalMs: 5000,
+  frogPuddleHealIntervalMs: 2000,
+  frogPuddleHealAmount: 50,
+  frogPuddleRobotDamagePerSecond: 100,
+  jungleParrotHealMultiplier: 0.1,
+  jungleMonkeyMarkedTargets: 2,
+  jungleMonkeyDamageMultiplier: 1.5,
+  jungleSnakeCastIntervalMs: 6000,
+  jungleSnakeTargetCount: 2,
+  jungleSnakeDurationMs: 5000,
+  jungleSnakeSlowMultiplier: 0.2,
+  jungleSnakeDamageMultiplier: 0.5,
+  elephantRideCooldownMs: 10000,
+  elephantRideDurationMs: 10000,
+  elephantRideSpeed: 300,
+  slothSlowCooldownMs: 10000,
+  slothSlowDurationMs: 8000,
+  slothSlowMultiplier: 0.45,
+  tigerDamagePerStep: 4,
+  tigerDamageStepHp: 50,
+  crocodileSurfaceDurationMs: 5000,
+  crocodileBurrowDurationMs: 3000,
   lpsotkaCastIntervalMs: 5000,
   snakeWallActiveMs: 5000,
   snakeWallCooldownMs: 5000,
@@ -115,13 +171,39 @@ const GAME_RULES = {
 };
 
 const CATALOG = {
+  profilePhotos: [
+    {
+      id: "drzemka-pod-golym-niebem",
+      name: "Drzemka pod gołym niebem",
+      image: "./assets/profile-images/drzemka.jpeg",
+      unlockWorld: "tower",
+    },
+    {
+      id: "raj-dla-papug",
+      name: "Raj dla papug",
+      image: "./assets/profile-images/papug.jpeg",
+      unlockWorld: "tower",
+    },
+    {
+      id: "bagienna-kapiel",
+      name: "Bagienna Kąpiel",
+      image: "./assets/profile-images/kapiel.jpeg",
+      unlockWorld: "tower",
+    },
+    {
+      id: "sledztwo-w-sprawie",
+      name: "Śledztwo w sprawie",
+      image: "./assets/profile-images/sledztwo.jpeg",
+      unlockWorld: "tower",
+    },
+  ],
   characters: [
     {
       id: "magik-millo",
       name: "Magik Millo",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_1.png",
+      image: "./assets/characters/postac_1.png",
       storeNote: "Postac startowa z magicznym atakiem.",
     },
     {
@@ -129,7 +211,7 @@ const CATALOG = {
       name: "Elfie",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_2.png",
+      image: "./assets/characters/postac_2.png",
       unlockWorld: "alley",
       storeNote: "Zdobadz w Alei Pucharow.",
     },
@@ -138,7 +220,7 @@ const CATALOG = {
       name: "Linda",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_3.png",
+      image: "./assets/characters/postac_3.png",
       unlockWorld: "alley",
       storeNote: "Zdobadz na koncu Alei Pucharow.",
     },
@@ -147,7 +229,7 @@ const CATALOG = {
       name: "Roslinna Krolowa Linda",
       price: 10000,
       cashPriceLabel: "",
-      image: "./postac_4.png",
+      image: "./assets/characters/postac_4.png",
       storeNote: "Skorka premium Lindy z królewskim atakiem natury.",
     },
     {
@@ -155,7 +237,7 @@ const CATALOG = {
       name: "Magiczna Lidsay",
       price: 10000,
       cashPriceLabel: "",
-      image: "./postac_10.png",
+      image: "./assets/characters/postac_10.png",
       storeNote: "Magiczna postac sklepowa z atakiem jak Magik Millo.",
     },
     {
@@ -163,7 +245,7 @@ const CATALOG = {
       name: "Elfie Wojowniczka",
       price: 10000,
       cashPriceLabel: "",
-      image: "./postac_5.png",
+      image: "./assets/characters/postac_5.png",
       storeNote: "Skorka Elfie gotowa do walki.",
     },
     {
@@ -171,7 +253,7 @@ const CATALOG = {
       name: "Elfie w swojej naturze",
       price: 10000,
       cashPriceLabel: "",
-      image: "./postac_6.png",
+      image: "./assets/characters/postac_6.png",
       storeNote: "Naturalna wersja Elfie ze swoim atakiem.",
     },
     {
@@ -179,7 +261,7 @@ const CATALOG = {
       name: "Elfie jako Linda",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_7.png",
+      image: "./assets/characters/postac_7.png",
       unlockWorld: "alley",
       storeNote: "Skorka z konca Alei Pucharow.",
     },
@@ -188,7 +270,7 @@ const CATALOG = {
       name: "Millo jako Elfie",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_8.png",
+      image: "./assets/characters/postac_8.png",
       unlockWorld: "alley",
       storeNote: "Nagroda za dalsza czesc Alei Pucharow.",
     },
@@ -197,7 +279,7 @@ const CATALOG = {
       name: "Linda Wojownicza Ksiezniczka",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_9.png",
+      image: "./assets/characters/postac_9.png",
       unlockWorld: "alley",
       storeNote: "Nagroda z dalszej czesci Alei Pucharow.",
     },
@@ -206,7 +288,7 @@ const CATALOG = {
       name: "Lily",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_11.png",
+      image: "./assets/characters/postac_11.png",
       unlockWorld: "winter",
       storeNote: "Nagroda z konca Swiata Zimowego.",
     },
@@ -215,7 +297,7 @@ const CATALOG = {
       name: "Tricky",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_12.png",
+      image: "./assets/characters/postac_12.png",
       unlockWorld: "winter",
       storeNote: "Nagroda z dalszego konca Swiata Zimowego.",
     },
@@ -224,7 +306,7 @@ const CATALOG = {
       name: "Tricky Renifer",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_13.png",
+      image: "./assets/characters/postac_13.png",
       unlockWorld: "winter",
       storeNote: "Nagroda za sam koniec Swiata Zimowego.",
     },
@@ -233,7 +315,7 @@ const CATALOG = {
       name: "Leo",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_17.png",
+      image: "./assets/characters/postac_17.png",
       unlockWorld: "winter",
       storeNote: "Nagroda za final Swiata Zimowego.",
     },
@@ -242,7 +324,7 @@ const CATALOG = {
       name: "Leo Skoczek Narciarski",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_14.png",
+      image: "./assets/characters/postac_14.png",
       unlockWorld: "winter",
       storeNote: "Nagroda Super ze Swiata Zimowego.",
     },
@@ -251,7 +333,7 @@ const CATALOG = {
       name: "Łyżwiarka Lily",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_15.png",
+      image: "./assets/characters/postac_15.png",
       unlockWorld: "winter",
       storeNote: "Postac z zimowego pakietu.",
     },
@@ -260,7 +342,7 @@ const CATALOG = {
       name: "Łyżwiaż Leo",
       price: 0,
       cashPriceLabel: "",
-      image: "./postac_16.png",
+      image: "./assets/characters/postac_16.png",
       unlockWorld: "winter",
       storeNote: "Postac z zimowego pakietu.",
     },
@@ -269,7 +351,7 @@ const CATALOG = {
       name: "Mistrzyni Łyżwiarstwa Lily",
       price: 10000,
       cashPriceLabel: "",
-      image: "./postac_18.png",
+      image: "./assets/characters/postac_18.png",
       unlockWorld: "winter",
       storeNote: "Zimowa sklepowa postac z atakiem jak Lily.",
     },
@@ -278,8 +360,8 @@ const CATALOG = {
       name: "NORA",
       price: 20000,
       cashPriceLabel: "",
-      image: "./postac_nora.png",
-      previewVideo: "./nora_1.mov",
+      image: "./assets/characters/postac_nora.png",
+      previewVideo: "./assets/characters/nora_1.mov",
       unlockWorld: "winter",
       storeWorld: "winter",
       storeNote: "Animowany zimowy skin z własnym atakiem i dźwiękiem.",
@@ -289,8 +371,8 @@ const CATALOG = {
       name: "Cloud",
       price: 20000,
       cashPriceLabel: "",
-      image: "./postac_cloud.mp4",
-      previewVideo: "./postac_cloud.mp4",
+      image: "./assets/characters/postac_cloud.mp4",
+      previewVideo: "./assets/characters/postac_cloud.mp4",
       unlockWorld: "winter",
       storeWorld: "winter",
       storeNote: "Animowany zimowy skin z własnym atakiem chmur.",
@@ -300,11 +382,140 @@ const CATALOG = {
       name: "Ann",
       price: 20000,
       cashPriceLabel: "",
-      image: "./postac_ann.mov",
-      previewVideo: "./postac_ann.mov",
+      image: "./assets/characters/postac_ann.mov",
+      previewVideo: "./assets/characters/postac_ann.mov",
       unlockWorld: "winter",
       storeWorld: "winter",
       storeNote: "Animowany zimowy skin z własnym atakiem.",
+    },
+    {
+      id: "ivy",
+      name: "Ivy",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./assets/characters/ivy.jpeg",
+      unlockWorld: "tower",
+      storeNote: "Nagroda Super ze Świata Dżungli.",
+    },
+    {
+      id: "coco-nkosi",
+      name: "Coco N'Kosi",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./assets/characters/ivy.jpeg",
+      previewVideo: "./assets/characters/coco.mp4",
+      previewPoster: false,
+      unlockWorld: "tower",
+      storeNote: "Darmowa animowana postać za zebranie wszystkich zwierząt z Księgi Dżungli.",
+    },
+    {
+      id: "aslan",
+      name: "Aslan",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./assets/characters/aslan.jpeg",
+      unlockWorld: "tower",
+      storeNote: "Nagroda Super ze Świata Dżungli.",
+    },
+    {
+      id: "ozdobiona-ivy",
+      name: "Ozdobiona Ivy",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./assets/characters/ozdobiona.jpeg",
+      unlockWorld: "tower",
+      storeNote: "Nagroda Super z dalszej części Świata Dżungli.",
+    },
+    {
+      id: "aslan-za-mlodu",
+      name: "Aslan za Młodu",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./assets/characters/mlodu.jpeg",
+      unlockWorld: "tower",
+      storeNote: "Nagroda za koniec dalszej części Świata Dżungli.",
+    },
+    {
+      id: "ivy-obronczyni-dzungli",
+      name: "Ivy Obrończyni Dżunglii",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./assets/characters/obronczyni.jpeg",
+      unlockWorld: "tower",
+      storeNote: "Nagroda Super z dalszej części Świata Dżungli.",
+    },
+    {
+      id: "kora",
+      name: "Kora",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./assets/characters/kora.jpeg",
+      unlockWorld: "tower",
+      storeNote: "Nagroda Super ze Świata Dżungli z własnym atakiem.",
+    },
+    {
+      id: "krolowa-kora",
+      name: "Królowa Kora",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./assets/characters/krolowa.jpeg",
+      unlockWorld: "tower",
+      storeNote: "Nagroda Super z końcówki Świata Dżungli.",
+    },
+    {
+      id: "wojownik-aslan",
+      name: "Wojownik Aslan",
+      price: 0,
+      cashPriceLabel: "",
+      image: "./assets/characters/wojownik.jpeg",
+      unlockWorld: "tower",
+      storeNote: "Nagroda za finał dalszej części Świata Dżungli.",
+    },
+    {
+      id: "roco-nkosi",
+      name: "Roco N'kosi",
+      price: 20000,
+      cashPriceLabel: "",
+      image: "./assets/characters/ivy.jpeg",
+      previewVideo: "./assets/characters/roco.mp4",
+      previewPoster: false,
+      unlockWorld: "tower",
+      storeWorld: "tower",
+      storeNote: "Animowana dżunglowa postać sklepowa z atakiem jak Coco.",
+    },
+    {
+      id: "wodzu",
+      name: "Wodzu",
+      price: 20000,
+      cashPriceLabel: "",
+      image: "./assets/attacks/wodza.jpeg",
+      previewVideo: "./assets/characters/wodzu.mp4",
+      previewPoster: false,
+      unlockWorld: "tower",
+      storeWorld: "tower",
+      storeNote: "Animowana dżunglowa postać sklepowa z własnym atakiem wodza.",
+    },
+    {
+      id: "naomi",
+      name: "Naomi",
+      price: 20000,
+      cashPriceLabel: "",
+      image: "./assets/characters/aslan.jpeg",
+      previewVideo: "./assets/characters/naomi.mp4",
+      previewPoster: false,
+      unlockWorld: "tower",
+      storeWorld: "tower",
+      storeNote: "Animowana dżunglowa postać sklepowa z atakiem jak Aslan.",
+    },
+    {
+      id: "kira",
+      name: "Kira",
+      price: 10000,
+      cashPriceLabel: "",
+      image: "./assets/characters/kira.jpeg",
+      unlockWorld: "tower",
+      storeWorld: "tower",
+      storeNote: "Dżunglowa sklepowa postać z własnym atakiem i dźwiękiem jak Aslan.",
     },
   ],
   pets: [
@@ -312,7 +523,7 @@ const CATALOG = {
       id: "pies-magik",
       name: "Pies Magik",
       price: 500,
-      image: "./platoya_1.png",
+      image: "./assets/pets/platoya_1.png",
       categoryId: "magicy",
       unlockWorld: "alley",
       rarityLabel: "Pospolity PlatoYa",
@@ -323,7 +534,7 @@ const CATALOG = {
       id: "papuga-manipulantka",
       name: "Papuga Manipulantka",
       price: 500,
-      image: "./platoya_2.png",
+      image: "./assets/pets/platoya_2.png",
       categoryId: "magicy",
       unlockWorld: "alley",
       rarityLabel: "Pospolity PlatoYa",
@@ -334,7 +545,7 @@ const CATALOG = {
       id: "l-psotka",
       name: "L'Psotka",
       price: 0,
-      image: "./platoya_3.png",
+      image: "./assets/pets/platoya_3.png",
       categoryId: "magicy",
       unlockWorld: "alley",
       rarityLabel: "Pospolity PlatoYa",
@@ -345,7 +556,7 @@ const CATALOG = {
       id: "el-kruk",
       name: "El Kruk",
       price: 0,
-      image: "./platoya_4.png",
+      image: "./assets/pets/platoya_4.png",
       categoryId: "magicy",
       unlockWorld: "alley",
       rarityLabel: "Pospolity PlatoYa",
@@ -357,7 +568,7 @@ const CATALOG = {
       name: "Małpka Jasnoksiężnik",
       price: 2500,
       originalPrice: 3000,
-      image: "./platoya_malpka.png",
+      image: "./assets/pets/platoya_malpka.png",
       categoryId: "magicy",
       rarityLabel: "Legendarny PlatoYa",
       rarityClass: "legendary",
@@ -367,7 +578,7 @@ const CATALOG = {
       id: "niedzwiedz-polarny",
       name: "Niedźwiedź Polarny",
       price: 0,
-      image: "./platoya_6.png",
+      image: "./assets/pets/platoya_6.png",
       categoryId: "balonowi",
       unlockWorld: "winter",
       rarityLabel: "Zimowy PlatoYa",
@@ -378,7 +589,7 @@ const CATALOG = {
       id: "sniezynka",
       name: "Śnieżynka",
       price: 0,
-      image: "./platoya_7.png",
+      image: "./assets/pets/platoya_7.png",
       categoryId: "balonowi",
       unlockWorld: "winter",
       rarityLabel: "Super PlatoYa",
@@ -389,21 +600,120 @@ const CATALOG = {
       id: "sowa",
       name: "Sowa",
       price: 0,
-      image: "./platoya_9.png",
+      image: "./assets/pets/platoya_9.png",
       categoryId: "balonowi",
       unlockWorld: "winter",
       rarityLabel: "Super PlatoYa",
       rarityClass: "ultra",
       description: "Wcisnij W, aby na 3 sekundy zatrzymac ruch, wlaczyc zimowa tarcze i po niej odnowic 20% zycia.",
     },
+    {
+      id: "jaguar",
+      name: "Jaguar",
+      price: 100,
+      image: "./assets/pets/jaguar.jpeg",
+      categoryId: "dzungla",
+      unlockWorld: "tower",
+      rarityLabel: "Dżunglowy PlatoYa",
+      rarityClass: "legendary",
+      description: "Po spadku poniżej kolejnych progów życia tworzy zielone pole, które odpycha roboty od ciebie przez 5 sekund.",
+    },
+    {
+      id: "papuga-dzungli",
+      name: "Papuga",
+      price: 100,
+      image: "./assets/pets/papuga.jpeg",
+      categoryId: "dzungla",
+      unlockWorld: "tower",
+      rarityLabel: "Dżunglowy PlatoYa",
+      rarityClass: "legendary",
+      description: "Za każdym razem leczy cię o 10% obrażeń zadanych ci przez roboty.",
+    },
+    {
+      id: "malpa-dzungli",
+      name: "Małpa",
+      price: 100,
+      image: "./assets/pets/małpka.jpeg",
+      categoryId: "dzungla",
+      unlockWorld: "tower",
+      rarityLabel: "Dżunglowy PlatoYa",
+      rarityClass: "legendary",
+      description: "Oznacza na zielono dwa roboty, którym zadajesz o 50% więcej obrażeń.",
+    },
+    {
+      id: "waz-dzungli",
+      name: "Wąż",
+      price: 100,
+      image: "./assets/pets/wąż.jpeg",
+      categoryId: "dzungla",
+      unlockWorld: "tower",
+      rarityLabel: "Dżunglowy PlatoYa",
+      rarityClass: "legendary",
+      description: "Co 6 sekund zatruwa dwa najbliższe roboty, mocno je spowalnia i osłabia ich obrażenia na 5 sekund.",
+    },
+    {
+      id: "slon-dzungli",
+      name: "Słoń",
+      price: 100,
+      image: "./assets/pets/słoń.jpeg",
+      categoryId: "dzungla",
+      unlockWorld: "tower",
+      rarityLabel: "Dżunglowy PlatoYa",
+      rarityClass: "legendary",
+      description: "Co 10 sekund porywa jednego robota na dziką przejażdżkę po mapie, a po 10 sekundach go eliminuje.",
+    },
+    {
+      id: "zaba-dzungli",
+      name: "Żaba",
+      price: 100,
+      image: "./assets/pets/żaba.jpeg",
+      categoryId: "dzungla",
+      unlockWorld: "tower",
+      rarityLabel: "Dżunglowy PlatoYa",
+      rarityClass: "legendary",
+      description: "Co 5 sekund tworzy małą toksyczną kałużę, która leczy graczy i rani roboty.",
+    },
+    {
+      id: "leniwiec-dzungli",
+      name: "Leniwiec",
+      price: 100,
+      image: "./assets/pets/leniwiec.jpeg",
+      categoryId: "dzungla",
+      unlockWorld: "tower",
+      rarityLabel: "Dżunglowy PlatoYa",
+      rarityClass: "legendary",
+      description: "Co 10 sekund spowalnia wszystko poza graczami na 8 sekund.",
+    },
+    {
+      id: "tygrys-dzungli",
+      name: "Tygrys",
+      price: 100,
+      image: "./assets/pets/tygrys.jpeg",
+      categoryId: "dzungla",
+      unlockWorld: "tower",
+      rarityLabel: "Dżunglowy PlatoYa",
+      rarityClass: "legendary",
+      description: "Im mniej życia ci brakuje, tym więcej dodatkowych obrażeń zadajesz robotom.",
+    },
+    {
+      id: "krokodyl-dzungli",
+      name: "Krokodyl",
+      price: 100,
+      image: "./assets/pets/krokodyl.jpeg",
+      categoryId: "dzungla",
+      unlockWorld: "tower",
+      rarityLabel: "Dżunglowy PlatoYa",
+      rarityClass: "legendary",
+      description: "Po krótkiej ochronie przy graczu chowa się pod ziemię, tropi robota i zabija go jednym wyskokiem.",
+    },
   ],
   coins: [
-    { id: "coins-10000", name: "10000 monet", priceLabel: "13,99zł", amount: 10000, image: "./monety_1.png" },
-    { id: "coins-20000", name: "20000 monet", priceLabel: "24,99zł", amount: 20000, image: "./monety_1.png" },
+    { id: "coins-10000", name: "10000 monet", priceLabel: "13,99zł", amount: 10000, image: COIN_REWARD_IMAGE },
+    { id: "coins-20000", name: "20000 monet", priceLabel: "24,99zł", amount: 20000, image: COIN_REWARD_IMAGE },
   ],
   diamonds: [
-    { id: "diamonds-35", name: "35 klejnotow", priceLabel: "5,99zł", amount: 35, image: TROPHY_DIAMOND_IMAGE },
-    { id: "diamonds-119", name: "119 klejnotow", priceLabel: "19,99zł", amount: 119, image: TROPHY_DIAMOND_IMAGE },
+    { id: "diamonds-35", name: "35 klejnotow", priceLabel: "5,99zł", amount: 35, image: DIAMOND_REWARD_IMAGE },
+    { id: "diamonds-119", name: "119 klejnotow", priceLabel: "19,99zł", amount: 119, image: DIAMOND_REWARD_IMAGE },
   ],
   trophies: [
     {
@@ -420,7 +730,7 @@ const CATALOG = {
       id: "winter-ice-pack",
       name: "Pakiet Zimowego Swiata",
       cashPriceLabel: "19,99zł",
-      image: "./pakiet_1.png",
+      image: "./assets/shop/pakiet_1.png",
       storeWorld: "winter",
       rewardCharacterIds: ["lyzwiarka-lily", "lyzwiarz-leo"],
       description: "Zawiera postacie Łyżwiarka Lily i Łyżwiaż Leo.",
@@ -430,14 +740,22 @@ const CATALOG = {
     {
       id: "drewniana-skrzynia",
       name: "Drewniana Skrzynia",
-      image: "./skrzynia_1.png",
+      image: "./assets/shop/skrzynia_1.png",
       fallbackText: "SKRZYNIA",
       betaFreeClaims: 3,
       description: "Nowość beta. Odbierz darmowe skrzynie z oferty i sprawdź, co jest w środku.",
     },
+    {
+      id: "dzunglowa-skrzynia",
+      name: "Skrzynia Dżungli",
+      image: "./assets/shop/skrzyniadzungla.jpeg",
+      fallbackText: "DZUNGLA",
+      betaFreeClaims: 0,
+      description: "Daje wyłącznie diamenty oraz ma szansę na dżunglowego PlatoYasa.",
+    },
   ],
   weapons: [
-    { id: "atak-1", name: "Atak 1", price: 0, image: "./atak_1.png" },
+    { id: "atak-1", name: "Atak 1", price: 0, image: "./assets/attacks/atak_2.png" },
   ],
 };
 
@@ -445,31 +763,31 @@ const PET_CATEGORIES = [
   {
     id: "magicy",
     name: "Magicy",
-    image: "./ikona_1.png",
+    image: "./assets/pets/platoya_1.png",
     fallbackText: "MAGICY",
   },
   {
     id: "roslinozercy",
     name: "Roslinozercy",
-    image: "./ikona_2.png",
+    image: "./assets/pets/platoya_2.png",
     fallbackText: "ROSLINOZERCY",
   },
   {
     id: "miasto-chomikow",
     name: "Miasto Chomikow",
-    image: "./ikona_3.png",
+    image: "./assets/pets/platoya_3.png",
     fallbackText: "MIASTO CHOMIKOW",
   },
   {
     id: "balonowi",
     name: "Balonowi",
-    image: "./ikona_4.png",
+    image: "./assets/pets/platoya_4.png",
     fallbackText: "BALONOWI",
   },
   {
     id: "podwodni-nurkowie",
     name: "Podwodni Nurkowie",
-    image: "./ikona_5.png",
+    image: "./assets/pets/platoya_6.png",
     fallbackText: "PODWODNI NURKOWIE",
   },
 ];
@@ -483,6 +801,10 @@ const INVENTORY_WORLD_GROUPS = [
     id: "winter",
     label: "Swiat Zimowy",
   },
+  {
+    id: "tower",
+    label: "Swiat Dzungli",
+  },
 ];
 
 const TROPHY_WORLDS = [
@@ -494,7 +816,7 @@ const TROPHY_WORLDS = [
       { id: "alley-50-coins", trophies: 50, type: "coins", amount: 300, label: "300 monet" },
       { id: "alley-100-crate", trophies: 100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
       { id: "alley-150-diamonds", trophies: 150, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "alley-200-pies-magik", trophies: 200, type: "pet", itemId: "pies-magik", label: "Pies Magik" },
+      { id: "alley-200-pies-magik", trophies: 200, type: "plato-keys", amount: 1, label: "1 klucz PlatoYI", keyTheme: "magicians" },
       { id: "alley-250-crate", trophies: 250, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
       { id: "alley-300-coins", trophies: 300, type: "coins", amount: 3000, label: "3000 monet" },
       { id: "alley-350-crate", trophies: 350, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
@@ -506,7 +828,7 @@ const TROPHY_WORLDS = [
       { id: "alley-650-diamonds", trophies: 650, type: "diamonds", amount: 3, label: "3 diamenty" },
       { id: "alley-700-crate", trophies: 700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
       { id: "alley-750-coins", trophies: 750, type: "coins", amount: 300, label: "300 monet" },
-      { id: "alley-800-l-psotka", trophies: 800, type: "pet", itemId: "l-psotka", label: "PlatoYa L'Psotka" },
+      { id: "alley-800-l-psotka", trophies: 800, type: "plato-keys", amount: 2, label: "2 klucze PlatoYI", keyTheme: "magicians" },
       { id: "alley-850-diamonds", trophies: 850, type: "diamonds", amount: 3, label: "3 diamenty" },
       { id: "alley-900-crate", trophies: 900, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
       { id: "alley-950-coins", trophies: 950, type: "coins", amount: 300, label: "300 monet" },
@@ -516,7 +838,7 @@ const TROPHY_WORLDS = [
       { id: "alley-1150-coins", trophies: 1150, type: "coins", amount: 300, label: "300 monet" },
       { id: "alley-1200-crate", trophies: 1200, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
       { id: "alley-1250-diamonds", trophies: 1250, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "alley-1300-el-kruk", trophies: 1300, type: "pet", itemId: "el-kruk", label: "El Kruk" },
+      { id: "alley-1300-el-kruk", trophies: 1300, type: "plato-keys", amount: 2, label: "2 klucze PlatoYI", keyTheme: "magicians" },
       { id: "alley-1350-coins", trophies: 1350, type: "coins", amount: 300, label: "300 monet" },
       { id: "alley-1400-crate", trophies: 1400, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
       { id: "alley-1450-diamonds", trophies: 1450, type: "diamonds", amount: 3, label: "3 diamenty" },
@@ -528,7 +850,7 @@ const TROPHY_WORLDS = [
       { id: "alley-1750-linda-wojownicza-ksiezniczka", trophies: 1750, type: "character", itemId: "linda-wojownicza-ksiezniczka", label: "Linda Wojownicza Księżniczka" },
       { id: "alley-1800-coins", trophies: 1800, type: "coins", amount: 300, label: "300 monet" },
       { id: "alley-1850-crate", trophies: 1850, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "alley-1900-diamonds", trophies: 1900, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "alley-1900-diamonds", trophies: 1900, type: "plato-keys", amount: 1, label: "1 klucz PlatoYI", keyTheme: "magicians" },
       { id: "alley-1950-coins", trophies: 1950, type: "coins", amount: 5000, label: "5000 monet" },
       { id: "alley-2000-millo-jako-elfie", trophies: 2000, type: "character", itemId: "millo-jako-elfie", label: "Millo jako Elfie" },
     ],
@@ -541,7 +863,7 @@ const TROPHY_WORLDS = [
       { id: "winter-2050-coins", trophies: 2050, type: "coins", amount: 300, label: "300 monet" },
       { id: "winter-2100-crate", trophies: 2100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
       { id: "winter-2150-diamonds", trophies: 2150, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "winter-2200-niedzwiedz-polarny", trophies: 2200, type: "pet", itemId: "niedzwiedz-polarny", label: "Niedźwiedź Polarny" },
+      { id: "winter-2200-niedzwiedz-polarny", trophies: 2200, type: "plato-keys", amount: 1, label: "1 klucz PlatoYI", keyTheme: "winter" },
       { id: "winter-2250-crate", trophies: 2250, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
       { id: "winter-2300-coins", trophies: 2300, type: "coins", amount: 3000, label: "3000 monet" },
       { id: "winter-2350-crate", trophies: 2350, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
@@ -553,7 +875,7 @@ const TROPHY_WORLDS = [
       { id: "winter-2650-diamonds", trophies: 2650, type: "diamonds", amount: 3, label: "3 diamenty" },
       { id: "winter-2700-crate", trophies: 2700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
       { id: "winter-2750-coins", trophies: 2750, type: "coins", amount: 300, label: "300 monet" },
-      { id: "winter-2800-sniezynka", trophies: 2800, type: "pet", itemId: "sniezynka", label: "PlatoYa Śnieżynka" },
+      { id: "winter-2800-sniezynka", trophies: 2800, type: "plato-keys", amount: 2, label: "2 klucze PlatoYI", keyTheme: "winter" },
       { id: "winter-2850-diamonds", trophies: 2850, type: "diamonds", amount: 3, label: "3 diamenty" },
       { id: "winter-2900-crate", trophies: 2900, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
       { id: "winter-2950-coins", trophies: 2950, type: "coins", amount: 300, label: "300 monet" },
@@ -563,7 +885,7 @@ const TROPHY_WORLDS = [
       { id: "winter-3150-coins", trophies: 3150, type: "coins", amount: 300, label: "300 monet" },
       { id: "winter-3200-crate", trophies: 3200, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
       { id: "winter-3250-diamonds", trophies: 3250, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "winter-3300-sowa", trophies: 3300, type: "pet", itemId: "sowa", label: "PlatoYa Sowa" },
+      { id: "winter-3300-sowa", trophies: 3300, type: "plato-keys", amount: 2, label: "2 klucze PlatoYI", keyTheme: "winter" },
       { id: "winter-3350-coins", trophies: 3350, type: "coins", amount: 300, label: "300 monet" },
       { id: "winter-3400-crate", trophies: 3400, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
       { id: "winter-3450-diamonds", trophies: 3450, type: "diamonds", amount: 3, label: "3 diamenty" },
@@ -575,9 +897,75 @@ const TROPHY_WORLDS = [
       { id: "winter-3750-leo-skoczek-narciarski", trophies: 3750, type: "character", itemId: "leo-skoczek-narciarski", label: "Leo Skoczek Narciarski" },
       { id: "winter-3800-coins", trophies: 3800, type: "coins", amount: 300, label: "300 monet" },
       { id: "winter-3850-crate", trophies: 3850, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "winter-3900-diamonds", trophies: 3900, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "winter-3900-diamonds", trophies: 3900, type: "plato-keys", amount: 1, label: "1 darmowy klucz PlatoYI", keyTheme: "winter" },
       { id: "winter-3950-coins", trophies: 3950, type: "coins", amount: 5000, label: "5000 monet" },
       { id: "winter-4000-leo", trophies: 4000, type: "character", itemId: "leo", label: "Leo" },
+    ],
+  },
+  {
+    id: "tower",
+    name: "Świat Dżungli",
+    threshold: 4000,
+    rewards: [
+      { id: "tower-4050-jungle-crate", trophies: 4050, type: "crate", crateId: "dzunglowa-skrzynia", amount: 1, label: "Skrzynia Dżungli" },
+      { id: "tower-4100-coins", trophies: 4100, type: "coins", amount: 500, label: "500 monet" },
+      { id: "tower-4150-diamonds", trophies: 4150, type: "diamonds", amount: 10, label: "10 diamentów" },
+      { id: "tower-4200-profile-photo-drzemka", trophies: 4200, type: "profile-photo", itemId: "drzemka-pod-golym-niebem", label: "Drzemka pod gołym niebem" },
+      { id: "tower-4250-diamonds", trophies: 4250, type: "diamonds", amount: 10, label: "10 diamentów" },
+      { id: "tower-4300-jungle-crate", trophies: 4300, type: "crate", crateId: "dzunglowa-skrzynia", amount: 1, label: "Skrzynia Dżungli" },
+      { id: "tower-4350-wood-crate", trophies: 4350, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "tower-4400-diamonds", trophies: 4400, type: "diamonds", amount: 5, label: "5 diamentów" },
+      { id: "tower-4450-coins", trophies: 4450, type: "coins", amount: 300, label: "300 monet" },
+      { id: "tower-4500-ivy", trophies: 4500, type: "character", itemId: "ivy", label: "Ivy" },
+      { id: "tower-4550-jungle-crate", trophies: 4550, type: "crate", crateId: "dzunglowa-skrzynia", amount: 1, label: "Skrzynia Dżungli" },
+      { id: "tower-4600-diamonds", trophies: 4600, type: "diamonds", amount: 10, label: "10 diamentów" },
+      { id: "tower-4650-profile-photo-papugi", trophies: 4650, type: "profile-photo", itemId: "raj-dla-papug", label: "Raj dla papug" },
+      { id: "tower-4700-coins", trophies: 4700, type: "coins", amount: 500, label: "500 monet" },
+      { id: "tower-4750-jungle-crate", trophies: 4750, type: "crate", crateId: "dzunglowa-skrzynia", amount: 1, label: "Skrzynia Dżungli" },
+      { id: "tower-4800-diamonds", trophies: 4800, type: "diamonds", amount: 10, label: "10 diamentów" },
+      { id: "tower-4850-coins", trophies: 4850, type: "coins", amount: 300, label: "300 monet" },
+      { id: "tower-4900-jungle-crate", trophies: 4900, type: "crate", crateId: "dzunglowa-skrzynia", amount: 1, label: "Skrzynia Dżungli" },
+      { id: "tower-4950-diamonds", trophies: 4950, type: "diamonds", amount: 10, label: "10 diamentów" },
+      { id: "tower-5000-aslan", trophies: 5000, type: "character", itemId: "aslan", label: "Aslan" },
+      { id: "tower-5050-diamonds", trophies: 5050, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "tower-5100-wood-crate", trophies: 5100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "tower-5150-coins", trophies: 5150, type: "coins", amount: 300, label: "300 monet" },
+      { id: "tower-5200-wood-crate", trophies: 5200, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "tower-5250-diamonds", trophies: 5250, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "tower-5300-profile-photo-kapiel", trophies: 5300, type: "profile-photo", itemId: "bagienna-kapiel", label: "Bagienna Kąpiel" },
+      { id: "tower-5350-coins", trophies: 5350, type: "coins", amount: 300, label: "300 monet" },
+      { id: "tower-5400-wood-crate", trophies: 5400, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "tower-5450-diamonds", trophies: 5450, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "tower-5500-ozdobiona-ivy", trophies: 5500, type: "character", itemId: "ozdobiona-ivy", label: "Ozdobiona Ivy" },
+      { id: "tower-5550-coins", trophies: 5550, type: "coins", amount: 300, label: "300 monet" },
+      { id: "tower-5600-wood-crate", trophies: 5600, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "tower-5650-diamonds", trophies: 5650, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "tower-5700-wood-crate-free", trophies: 5700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "tower-5750-profile-photo-sledztwo", trophies: 5750, type: "profile-photo", itemId: "sledztwo-w-sprawie", label: "Śledztwo w sprawie" },
+      { id: "tower-5800-coins", trophies: 5800, type: "coins", amount: 300, label: "300 monet" },
+      { id: "tower-5850-wood-crate", trophies: 5850, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "tower-5900-diamonds", trophies: 5900, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "tower-5950-coins", trophies: 5950, type: "coins", amount: 300, label: "300 monet" },
+      { id: "tower-6000-aslan-za-mlodu", trophies: 6000, type: "character", itemId: "aslan-za-mlodu", label: "Aslan za Młodu" },
+      { id: "tower-6050-diamonds", trophies: 6050, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "tower-6100-coins", trophies: 6100, type: "coins", amount: 800, label: "800 monet" },
+      { id: "tower-6150-wood-crate", trophies: 6150, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "tower-6200-diamonds", trophies: 6200, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "tower-6250-ivy-obronczyni-dzungli", trophies: 6250, type: "character", itemId: "ivy-obronczyni-dzungli", label: "Ivy Obrończyni Dżunglii" },
+      { id: "tower-6300-coins", trophies: 6300, type: "coins", amount: 800, label: "800 monet" },
+      { id: "tower-6350-jungle-crate", trophies: 6350, type: "crate", crateId: "dzunglowa-skrzynia", amount: 1, label: "Skrzynia Dżungli" },
+      { id: "tower-6400-diamonds", trophies: 6400, type: "diamonds", amount: 10, label: "10 diamentów" },
+      { id: "tower-6450-coins", trophies: 6450, type: "coins", amount: 800, label: "800 monet" },
+      { id: "tower-6500-kora", trophies: 6500, type: "character", itemId: "kora", label: "Kora" },
+      { id: "tower-6550-diamonds", trophies: 6550, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "tower-6600-wood-crate", trophies: 6600, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "tower-6700-coins", trophies: 6700, type: "coins", amount: 800, label: "800 monet" },
+      { id: "tower-6750-krolowa-kora", trophies: 6750, type: "character", itemId: "krolowa-kora", label: "Królowa Kora" },
+      { id: "tower-6800-wood-crate-free", trophies: 6800, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "tower-6850-coins", trophies: 6850, type: "coins", amount: 5000, label: "5000 monet" },
+      { id: "tower-6900-diamonds", trophies: 6900, type: "diamonds", amount: 3, label: "3 diamenty" },
+      { id: "tower-6950-wood-crate-free", trophies: 6950, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+      { id: "tower-7000-wojownik-aslan", trophies: 7000, type: "character", itemId: "wojownik-aslan", label: "Wojownik Aslan" },
     ],
   },
 ];
@@ -586,14 +974,18 @@ const state = loadState();
 const ui = {
   currentView: "lobby",
   storeTab: "characters",
+  storeMode: DEFAULT_STORE_MODE,
+  storeScrollLeft: null,
   inventoryTab: "characters",
   friendsTab: "friends",
+  bookTab: "book",
   trophyWorldId: state.activeTrophyWorld || "alley",
   nextGameMode: "solo",
   pendingMultiplayerLaunch: null,
   pendingPartyLaunch: null,
   profileTab: "me",
   profileEditMode: false,
+  profileEditSection: "",
 };
 
 const game = createGameState();
@@ -602,7 +994,14 @@ const socialProfile = createSocialProfileState();
 const party = createPartyState();
 
 const loadingScreen = document.getElementById("loading-screen");
+const orientationLockOverlay = document.getElementById("orientation-lock-overlay");
+const gameLaunchBackdrop = document.getElementById("game-launch-backdrop");
+const gameLaunchKicker = document.getElementById("game-launch-kicker");
+const gameLaunchTitle = document.getElementById("game-launch-title");
+const gameLaunchCopy = document.getElementById("game-launch-copy");
+const gameLaunchStage = document.getElementById("game-launch-stage");
 const appScreen = document.getElementById("app-screen");
+const appShell = document.querySelector(".app-shell");
 const loadingFillText = document.getElementById("loading-fill-text");
 const loadingProgressFill = document.getElementById("loading-progress-fill");
 const progressValue = document.getElementById("progress-value");
@@ -632,21 +1031,53 @@ const storeCharacterPurchaseBackdrop = document.getElementById("store-character-
 const storeCharacterPurchaseScene = document.getElementById("store-character-purchase-scene");
 const storeCharacterPurchaseImage = document.getElementById("store-character-purchase-image");
 const storeCharacterPurchaseArtFrame = storeCharacterPurchaseImage?.parentElement || null;
+const storeCharacterPurchaseKicker = document.getElementById("store-character-purchase-kicker");
 const storeCharacterPurchaseTitle = document.getElementById("store-character-purchase-title");
 const storeCharacterPurchaseCopy = document.getElementById("store-character-purchase-copy");
 const storeCharacterPurchaseActions = document.getElementById("store-character-purchase-actions");
 const storeCharacterPurchaseConfirmButton = document.getElementById("store-character-purchase-confirm-button");
 const storeCharacterPurchaseMissing = document.getElementById("store-character-purchase-missing");
+const magicMachineBackdrop = document.getElementById("magic-machine-backdrop");
+const magicMachineScene = document.getElementById("magic-machine-scene");
+const magicMachineCard = document.getElementById("magic-machine-card");
+const magicMachineArt = document.getElementById("magic-machine-art");
+const magicMachineImage = document.getElementById("magic-machine-image");
+const magicMachineLaunchBall = document.getElementById("magic-machine-launch-ball");
+const magicMachineBallSplit = document.getElementById("magic-machine-ball-split");
+const magicMachineRewardGlow = document.getElementById("magic-machine-reward-glow");
+const magicMachineRewardImage = document.getElementById("magic-machine-reward-image");
+const magicMachineLabel = document.getElementById("magic-machine-label");
+const magicMachineCloseButton = document.getElementById("magic-machine-close-button");
+const magicMachineWord = document.getElementById("magic-machine-word");
+const magicMachineNote = document.getElementById("magic-machine-note");
+const magicMachinePrice = document.getElementById("magic-machine-price");
 const coinBalance = document.getElementById("coin-balance");
 const trophyBalance = document.getElementById("trophy-balance");
 const diamondBalance = document.getElementById("diamond-balance");
 const balanceTarget = document.getElementById("balance-target");
+const lobbyBalanceTarget = document.getElementById("lobby-balance-target");
+const lobbyCoinBalance = document.getElementById("lobby-coin-balance");
+const lobbyDiamondBalance = document.getElementById("lobby-diamond-balance");
+const storeBalanceTarget = document.getElementById("store-balance-target");
+const storeCoinBalance = document.getElementById("store-coin-balance");
+const storeDiamondBalance = document.getElementById("store-diamond-balance");
 const trophyBalanceTarget = trophyBalance?.closest(".balance-box") || null;
 const lobbyPlayButton = document.getElementById("lobby-play-button");
 const lobbyFriendsButton = document.getElementById("lobby-friends-button");
+const lobbyBookButton = document.getElementById("lobby-book-button");
+const lobbyLayout = document.querySelector(".lobby-layout");
 const lobbyProfileButton = document.getElementById("lobby-profile-button");
 const lobbyNickname = document.getElementById("lobby-nickname");
 const firstGameGuide = document.getElementById("first-game-guide");
+const bookGuidePrompt = document.getElementById("book-guide-prompt");
+const bookGuideBackdrop = document.getElementById("book-guide-backdrop");
+const bookGuideScene = document.getElementById("book-guide-scene");
+const bookGuideCard = document.getElementById("book-guide-card");
+const bookGuideImage = document.getElementById("book-guide-image");
+const bookGuideArtFrame = bookGuideImage?.parentElement || null;
+const bookGuideTitle = document.getElementById("book-guide-title");
+const bookGuideCopy = document.getElementById("book-guide-copy");
+const bookGuideConfirmButton = document.getElementById("book-guide-confirm-button");
 const lobbySettingsButton = document.getElementById("lobby-settings-button");
 const accountResetButton = document.getElementById("account-reset-button");
 const settingsBackdrop = document.getElementById("settings-backdrop");
@@ -673,19 +1104,25 @@ const partyLeaveButton = document.getElementById("party-leave-button");
 const profileBackdrop = document.getElementById("profile-backdrop");
 const profileCloseButton = document.getElementById("profile-close-button");
 const profileMainCard = document.getElementById("profile-main-card");
+const profileEditCard = document.getElementById("profile-edit-card");
 const profileTabMeButton = document.getElementById("profile-tab-me");
 const profileTabUsersButton = document.getElementById("profile-tab-users");
 const profileTabPanelMe = document.getElementById("profile-tab-panel-me");
 const profileTabPanelUsers = document.getElementById("profile-tab-panel-users");
 const profileCloudStatus = document.getElementById("profile-cloud-status");
 const profileNameHeading = document.getElementById("profile-name-heading");
+const profileNameButton = document.getElementById("profile-name-button");
 const profileWorldBar = document.getElementById("profile-world-bar");
+const profileThemeButton = document.getElementById("profile-theme-button");
+const profileThemePicker = document.getElementById("profile-theme-picker");
 const profileHeroNote = document.getElementById("profile-hero-note");
 const profileSummaryName = document.getElementById("profile-summary-name");
 const profileSummaryCharacter = document.getElementById("profile-summary-character");
 const profileSummaryPet = document.getElementById("profile-summary-pet");
 const profileEditButton = document.getElementById("profile-edit-button");
 const profileEditPanel = document.getElementById("profile-edit-panel");
+const profileEditKicker = document.getElementById("profile-edit-kicker");
+const profileEditCloseButton = document.getElementById("profile-edit-close-button");
 const profileCancelEditButton = document.getElementById("profile-cancel-edit-button");
 const profileNameInput = document.getElementById("profile-name-input");
 const profileSaveNameButton = document.getElementById("profile-save-name-button");
@@ -693,6 +1130,7 @@ const profileFavoriteCharacterSelect = document.getElementById("profile-favorite
 const profileFavoritePetSelect = document.getElementById("profile-favorite-pet-select");
 const profileSaveFavoritesButton = document.getElementById("profile-save-favorites-button");
 const profileFavoriteCharacterFrame = document.getElementById("profile-favorite-character-frame");
+const profileCharacterButton = document.getElementById("profile-character-button");
 const profileFavoriteCharacterLabel = document.getElementById("profile-favorite-character-label");
 const profileFavoritePetFrame = document.getElementById("profile-favorite-pet-frame");
 const profileFavoritePetLabel = document.getElementById("profile-favorite-pet-label");
@@ -722,12 +1160,20 @@ const friendsSelfId = document.getElementById("friends-self-id");
 const friendsCopyIdButton = document.getElementById("friends-copy-id-button");
 const friendsInviteIdInput = document.getElementById("friends-invite-id-input");
 const friendsInviteIdButton = document.getElementById("friends-invite-id-button");
+const bookContent = document.getElementById("book-content");
+const storeGridWrap = document.getElementById("store-grid-wrap");
 const storeGrid = document.getElementById("store-grid");
 const inventoryGrid = document.getElementById("inventory-grid");
 const wardrobeOverview = document.getElementById("wardrobe-overview");
 const trophyGrid = document.getElementById("trophy-grid");
+const worldHeaderPanel = document.getElementById("world-header-panel");
+const trophyRoadTitleBadge = document.getElementById("trophy-road-title-badge");
 const worldTitle = document.getElementById("world-title");
 const worldProgressValue = document.getElementById("world-progress-value");
+const worldHeaderActions = document.getElementById("world-header-actions");
+const worldHeaderMiniProgress = document.getElementById("world-header-mini-progress");
+const worldHeaderMiniProgressFill = document.getElementById("world-header-mini-progress-fill");
+const worldHeaderMachineButton = document.getElementById("world-header-machine-button");
 const modalBackdrop = document.getElementById("modal-backdrop");
 const modalBox = document.getElementById("modal-box");
 const modalTitle = document.getElementById("modal-title");
@@ -742,6 +1188,14 @@ const chestTitle = document.getElementById("chest-title");
 const chestScene = document.getElementById("chest-scene");
 const chestOpenButton = document.getElementById("chest-open-button");
 const chestImage = document.getElementById("chest-image");
+const storeDragState = {
+  active: false,
+  pointerId: null,
+  startX: 0,
+  startScrollLeft: 0,
+  moved: false,
+  suppressClickUntil: 0,
+};
 const chestLeftImage = document.getElementById("chest-left-image");
 const chestRightImage = document.getElementById("chest-right-image");
 const chestRemaining = document.getElementById("chest-remaining");
@@ -817,6 +1271,7 @@ const petPackLayer = document.getElementById("pet-pack-layer");
 const barriersLayer = document.getElementById("barriers-layer");
 const pickupsLayer = document.getElementById("pickups-layer");
 const waterFieldsLayer = document.getElementById("water-fields-layer");
+const jungleFieldsLayer = document.getElementById("jungle-fields-layer");
 const projectilesLayer = document.getElementById("projectiles-layer");
 const robotsLayer = document.getElementById("robots-layer");
 const effectsLayer = document.getElementById("effects-layer");
@@ -838,6 +1293,7 @@ const viewNodes = {
   store: document.getElementById("store-view"),
   inventory: document.getElementById("inventory-view"),
   friends: document.getElementById("friends-view"),
+  book: document.getElementById("book-view"),
   game: document.getElementById("game-view"),
   trophies: document.getElementById("trophies-view"),
 };
@@ -845,7 +1301,7 @@ const viewNodes = {
 const backgroundMusic = new Audio(BACKGROUND_MUSIC_SOURCES.alley[0]);
 backgroundMusic.loop = true;
 backgroundMusic.preload = "auto";
-backgroundMusic.volume = 0.42;
+backgroundMusic.volume = BACKGROUND_MUSIC_DEFAULT_VOLUME;
 backgroundMusic.dataset.currentSource = BACKGROUND_MUSIC_SOURCES.alley[0];
 backgroundMusic.addEventListener("error", () => {
   const failedSource = backgroundMusic.dataset.currentSource || "";
@@ -876,6 +1332,12 @@ let winterBundleStage = "offer";
 let activeWinterBundle = null;
 let storeCharacterPurchaseBusy = false;
 let activeStoreCharacterPurchase = null;
+let magicMachineBusy = false;
+let magicMachineStage = "buy";
+let magicMachineRewardPetId = "";
+let magicMachineSequenceId = 0;
+let bookGuideSequenceRunning = false;
+let bookGuideStageResolve = null;
 let trophyWorldBatchClaimBusy = false;
 let trophyWorldTransitionBusy = false;
 let walkingLoopAudio = null;
@@ -884,16 +1346,27 @@ let bundleUnlockTimer = null;
 let bundleUnlockResolve = null;
 let nicknamePromptAfterSave = null;
 let remoteProfileSyncSuspendLevel = 0;
+let gameLaunchTransitionBusy = false;
+let gameLaunchTransitionToken = 0;
 const audioBoostMap = new WeakMap();
 
 bindEvents();
 renderAll();
+syncOrientationLock();
 bootApp();
 
 function bindEvents() {
   document.querySelectorAll(".lobby-nav-button").forEach((button) => {
     button.addEventListener("click", () => {
+      if (button === lobbyBookButton && shouldShowJungleBookGuidePrompt()) {
+        void startJungleBookGuideFlow();
+        return;
+      }
+
       if (button.dataset.view) {
+        if (button.dataset.view === "store") {
+          ui.storeMode = DEFAULT_STORE_MODE;
+        }
         ui.nextGameMode = button.dataset.view === "game" ? "solo" : ui.nextGameMode;
         showView(button.dataset.view);
       }
@@ -921,6 +1394,12 @@ function bindEvents() {
       }
 
       requestPauseGame();
+    });
+  }
+
+  if (bookGuideConfirmButton) {
+    bookGuideConfirmButton.addEventListener("click", () => {
+      advanceJungleBookGuideStage();
     });
   }
 
@@ -958,6 +1437,12 @@ function bindEvents() {
   });
 
   storeGrid.addEventListener("click", handleStoreClick);
+  storeGridWrap.addEventListener("pointerdown", handleStoreDragStart);
+  storeGridWrap.addEventListener("pointermove", handleStoreDragMove);
+  storeGridWrap.addEventListener("pointerup", handleStoreDragEnd);
+  storeGridWrap.addEventListener("pointercancel", handleStoreDragEnd);
+  storeGridWrap.addEventListener("scroll", handleStoreScroll, { passive: true });
+  storeGridWrap.addEventListener("wheel", handleStoreWheelScroll, { passive: false });
   inventoryGrid.addEventListener("click", handleInventoryClick);
   trophyGrid.addEventListener("click", handleTrophyClick);
   trophyGrid.addEventListener("scroll", () => {
@@ -1006,6 +1491,7 @@ function bindEvents() {
   if (profileTabMeButton) {
     profileTabMeButton.addEventListener("click", () => {
       ui.profileEditMode = false;
+      ui.profileEditSection = "";
       openProfilePanel("me");
     });
   }
@@ -1022,29 +1508,74 @@ function bindEvents() {
     });
   }
 
+  if (profileCharacterButton) {
+    profileCharacterButton.addEventListener("click", () => {
+      openProfileEditSection("character");
+    });
+  }
+
+  if (profileNameButton) {
+    profileNameButton.addEventListener("click", () => {
+      openProfileEditSection("name");
+    });
+  }
+
+  if (profileThemeButton) {
+    profileThemeButton.addEventListener("click", () => {
+      openProfileEditSection("theme");
+    });
+  }
+
+  if (profileEditCloseButton) {
+    profileEditCloseButton.addEventListener("click", () => {
+      closeProfileEditSection();
+    });
+  }
+
   if (profileEditButton) {
     profileEditButton.addEventListener("click", () => {
-      ui.profileEditMode = true;
-      renderProfilePanel();
-      if (profileNameInput) {
-        window.setTimeout(() => {
-          profileNameInput.focus();
-          profileNameInput.select();
-        }, 20);
-      }
+      openProfileEditSection("name");
     });
   }
 
   if (profileCancelEditButton) {
     profileCancelEditButton.addEventListener("click", () => {
-      ui.profileEditMode = false;
-      renderProfilePanel();
+      closeProfileEditSection();
     });
   }
 
-  if (profileNameInput) {
-    profileNameInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
+  if (profileEditPanel) {
+    profileEditPanel.addEventListener("click", (event) => {
+      const photoChoice = event.target.closest("[data-profile-photo-choice]");
+      if (photoChoice) {
+        applyProfilePhotoChange(photoChoice.dataset.profilePhotoChoice || "");
+        return;
+      }
+
+      const characterChoice = event.target.closest("[data-profile-character-choice]");
+      if (characterChoice) {
+        applyProfileFavoriteCharacterChange(characterChoice.dataset.profileCharacterChoice || "");
+        return;
+      }
+
+      const themeChoice = event.target.closest("[data-profile-theme-choice]");
+      if (themeChoice) {
+        applyProfileThemeChange(themeChoice.dataset.profileThemeChoice || "");
+        return;
+      }
+
+      if (event.target.closest("[data-profile-name-save]")) {
+        saveProfileDetails();
+        return;
+      }
+
+      if (event.target.closest("[data-profile-edit-cancel]")) {
+        closeProfileEditSection();
+      }
+    });
+
+    profileEditPanel.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && event.target instanceof HTMLInputElement && event.target.id === "profile-name-input-dynamic") {
         event.preventDefault();
         saveProfileDetails();
       }
@@ -1136,6 +1667,36 @@ function bindEvents() {
       if (partyRejectButton) {
         rejectPartyInvite(partyRejectButton.dataset.partyReject || "");
       }
+    });
+  }
+
+  if (bookContent) {
+    bookContent.addEventListener("click", (event) => {
+      const bookTabButton = event.target.closest("[data-book-tab]");
+      if (bookTabButton) {
+        ui.bookTab = bookTabButton.dataset.bookTab === "missions" ? "missions" : "book";
+        renderBookView();
+        return;
+      }
+
+      const missionClaimButton = event.target.closest("[data-book-mission-claim]");
+      if (missionClaimButton) {
+        void claimBookMission(missionClaimButton.dataset.bookMissionClaim || "");
+        return;
+      }
+
+      const grandRewardButton = event.target.closest("[data-book-grand-reward]");
+      if (grandRewardButton) {
+        openBookGrandRewardModal(grandRewardButton.dataset.bookGrandReward || "");
+        return;
+      }
+
+      const petButton = event.target.closest("[data-book-pet]");
+      if (!petButton) {
+        return;
+      }
+
+      openBookPetPurchaseModal(petButton.dataset.bookPet || "");
     });
   }
 
@@ -1274,6 +1835,27 @@ function bindEvents() {
     });
   }
 
+  if (worldHeaderMachineButton) {
+    worldHeaderMachineButton.addEventListener("click", () => {
+      openMagicMachine();
+    });
+  }
+
+  if (magicMachineArt) {
+    magicMachineArt.addEventListener("click", async () => {
+      await handleMagicMachineAction();
+    });
+
+    magicMachineArt.addEventListener("keydown", async (event) => {
+      if (event.key !== "Enter" && event.key !== " ") {
+        return;
+      }
+
+      event.preventDefault();
+      await handleMagicMachineAction();
+    });
+  }
+
   if (winterBundleConfirmButton) {
     winterBundleConfirmButton.addEventListener("click", async () => {
       await confirmWinterBundlePurchase();
@@ -1333,6 +1915,35 @@ function bindEvents() {
       if (event.target === storeCharacterPurchaseBackdrop && !storeCharacterPurchaseBusy) {
         closeStoreCharacterPurchase();
       }
+    });
+  }
+
+  if (magicMachineBackdrop) {
+    magicMachineBackdrop.addEventListener("click", (event) => {
+      if (event.target === magicMachineBackdrop && canCloseMagicMachineBackdrop()) {
+        closeMagicMachineBackdrop();
+      }
+    });
+  }
+
+  if (magicMachineScene) {
+    magicMachineScene.addEventListener("click", (event) => {
+      if (!canCloseMagicMachineBackdrop()) {
+        return;
+      }
+
+      const target = event.target instanceof Element ? event.target : null;
+      if (!target || target.closest("#magic-machine-art")) {
+        return;
+      }
+
+      closeMagicMachineBackdrop();
+    });
+  }
+
+  if (magicMachineCloseButton) {
+    magicMachineCloseButton.addEventListener("click", () => {
+      closeMagicMachineBackdrop();
     });
   }
 
@@ -1413,6 +2024,16 @@ function bindEvents() {
 
     if (
       event.key === "Escape" &&
+      magicMachineBackdrop &&
+      !magicMachineBackdrop.hidden &&
+      canCloseMagicMachineBackdrop()
+    ) {
+      closeMagicMachineBackdrop();
+      return;
+    }
+
+    if (
+      event.key === "Escape" &&
       winterBundleBackdrop &&
       !winterBundleBackdrop.hidden &&
       !winterBundleBusy &&
@@ -1462,6 +2083,17 @@ function bindEvents() {
       return;
     }
 
+    if (
+      (event.key === "Enter" || event.key === " ") &&
+      magicMachineBackdrop &&
+      !magicMachineBackdrop.hidden &&
+      !magicMachineBusy
+    ) {
+      event.preventDefault();
+      void handleMagicMachineAction();
+      return;
+    }
+
     if (event.key === "Escape" && settingsBackdrop && !settingsBackdrop.hidden) {
       closeSettingsPanel();
       return;
@@ -1477,12 +2109,17 @@ function bindEvents() {
   });
 
   window.addEventListener("resize", () => {
+    syncOrientationLock();
     if (game.active) {
       updateGameBounds();
       clampGameEntities();
       renderGameScene();
     }
   });
+  window.addEventListener("orientationchange", syncOrientationLock);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", syncOrientationLock);
+  }
 
   window.addEventListener("pointerdown", syncBackgroundMusic, { passive: true });
   window.addEventListener("keydown", syncBackgroundMusic);
@@ -1578,16 +2215,72 @@ function startLoadingSequence() {
   });
 }
 
+function shouldBlockPortraitMobileView() {
+  const hasCoarsePointer = window.matchMedia("(pointer: coarse)").matches || Number(navigator.maxTouchPoints || 0) > 0;
+  const handheldViewport = Math.max(window.innerWidth || 0, window.innerHeight || 0) <= 1100;
+  const isPortrait = (window.innerHeight || 0) > (window.innerWidth || 0);
+
+  return hasCoarsePointer && handheldViewport && isPortrait;
+}
+
+function syncOrientationLock() {
+  const shouldBlock = shouldBlockPortraitMobileView();
+
+  if (document.body) {
+    document.body.classList.toggle("mobile-portrait-blocked", shouldBlock);
+  }
+
+  if (orientationLockOverlay) {
+    orientationLockOverlay.hidden = !shouldBlock;
+    orientationLockOverlay.setAttribute("aria-hidden", shouldBlock ? "false" : "true");
+  }
+}
+
 function shouldPlayBackgroundMusic() {
   return (
     backgroundMusicReady &&
-    ui.currentView !== "game" &&
     appScreen.classList.contains("active") &&
     (!alleyIntroBackdrop || alleyIntroBackdrop.hidden) &&
     (!superAlleyBackdrop || superAlleyBackdrop.hidden) &&
+    (!magicMachineBackdrop || magicMachineBackdrop.hidden) &&
     (!winterBundleBackdrop || winterBundleBackdrop.hidden) &&
     (!bundleUnlockBackdrop || bundleUnlockBackdrop.hidden)
   );
+}
+
+function isWaveBannerAnnouncementActive() {
+  if (ui.currentView !== "game") {
+    return false;
+  }
+
+  const multiplayerCountdownActive = game.mode === "multiplayer" && game.multiplayerStartCountdownMs > 0;
+  const pauseResumeCountdownActive = game.mode !== "multiplayer" && game.pauseResumeCountdownMs > 0;
+
+  return multiplayerCountdownActive || pauseResumeCountdownActive || game.waveIntroMs > 0;
+}
+
+function getBackgroundMusicTargetVolume() {
+  return isWaveBannerAnnouncementActive()
+    ? BACKGROUND_MUSIC_DUCKED_VOLUME
+    : BACKGROUND_MUSIC_DEFAULT_VOLUME;
+}
+
+function syncBackgroundMusicVolume(smoothing = 1) {
+  const targetVolume = getBackgroundMusicTargetVolume();
+
+  if (smoothing >= 1) {
+    backgroundMusic.volume = targetVolume;
+    return;
+  }
+
+  const currentVolume = Number.isFinite(backgroundMusic.volume)
+    ? backgroundMusic.volume
+    : BACKGROUND_MUSIC_DEFAULT_VOLUME;
+  const nextVolume = currentVolume + ((targetVolume - currentVolume) * smoothing);
+
+  backgroundMusic.volume = Math.abs(targetVolume - nextVolume) <= 0.01
+    ? targetVolume
+    : nextVolume;
 }
 
 function syncBackgroundMusic() {
@@ -1600,6 +2293,7 @@ function syncBackgroundMusic() {
     backgroundMusic.load();
 
     if (wasPlaying && shouldPlayBackgroundMusic()) {
+      syncBackgroundMusicVolume(ui.currentView === "game" ? 0.18 : 1);
       const replayAttempt = backgroundMusic.play();
       if (replayAttempt && typeof replayAttempt.catch === "function") {
         replayAttempt.catch(() => {});
@@ -1609,6 +2303,7 @@ function syncBackgroundMusic() {
   }
 
   if (shouldPlayBackgroundMusic()) {
+    syncBackgroundMusicVolume(ui.currentView === "game" ? 0.18 : 1);
     const playAttempt = backgroundMusic.play();
     if (playAttempt && typeof playAttempt.catch === "function") {
       playAttempt.catch(() => {});
@@ -1620,6 +2315,11 @@ function syncBackgroundMusic() {
 }
 
 function getAvailableBackgroundMusicSource() {
+  if (ui.currentView === "game") {
+    return GAMEPLAY_BACKGROUND_MUSIC_SOURCES.find((entry) => entry && !unavailableSoundSources.has(entry))
+      || GAMEPLAY_BACKGROUND_MUSIC_SOURCES[GAMEPLAY_BACKGROUND_MUSIC_SOURCES.length - 1];
+  }
+
   const worldId = state.activeTrophyWorld === "tower"
     ? "tower"
     : state.activeTrophyWorld === "winter"
@@ -1701,43 +2401,11 @@ function playOneShotSound(effectName, volume = 0.74, gainBoost = 1) {
 }
 
 function startWalkingLoop() {
-  const source = getAvailableSoundSource("walkingLoop");
+  stopWalkingLoop();
+}
 
-  if (!source) {
-    return;
-  }
-
-  if (!walkingLoopAudio || walkingLoopAudio.codexSource !== source) {
-    const audio = new Audio(source);
-    audio.preload = "auto";
-    audio.loop = true;
-    audio.volume = 1;
-    audio.codexSource = source;
-    audio.addEventListener("error", () => {
-      unavailableSoundSources.add(source);
-      if (walkingLoopAudio?.codexSource === source) {
-        walkingLoopAudio = null;
-      }
-    }, { once: true });
-    walkingLoopAudio = audio;
-    ensureBoostedMediaElement(audio, 3);
-  }
-
-  if (!walkingLoopAudio.paused) {
-    return;
-  }
-
-  const context = ensureBoostedMediaElement(walkingLoopAudio, 3);
-
-  if (context && context.state === "suspended") {
-    void context.resume().catch(() => {});
-  }
-
-  const playAttempt = walkingLoopAudio.play();
-
-  if (playAttempt && typeof playAttempt.catch === "function") {
-    playAttempt.catch(() => {});
-  }
+function getBoostedAttackSoundVolume(baseVolume) {
+  return Math.min(1, Math.max(0, baseVolume * ATTACK_SOUND_VOLUME_MULTIPLIER));
 }
 
 function stopWalkingLoop() {
@@ -1965,6 +2633,10 @@ function getPetVoiceEffect(petId) {
     return "parrotVoice";
   }
 
+  if (petId === "papuga-dzungli") {
+    return "parrotVoice";
+  }
+
   if (petId === "sniezynka") {
     return "snowflakeVoice";
   }
@@ -1994,6 +2666,10 @@ function getPetVoiceEffect(petId) {
   }
 
   if (petId === "malpka-jasnoksieznik") {
+    return "monkeyVoice";
+  }
+
+  if (petId === "malpa-dzungli") {
     return "monkeyVoice";
   }
 
@@ -2066,8 +2742,58 @@ function showApp() {
   maybeRunIntro();
 }
 
+function updateBalanceDisplays() {
+  const coinsText = String(state.coins);
+  const trophiesText = String(state.trophies);
+  const diamondsText = String(state.diamonds);
+
+  if (coinBalance) {
+    coinBalance.textContent = coinsText;
+  }
+
+  if (lobbyCoinBalance) {
+    lobbyCoinBalance.textContent = coinsText;
+  }
+
+  if (storeCoinBalance) {
+    storeCoinBalance.textContent = coinsText;
+  }
+
+  if (trophyBalance) {
+    trophyBalance.textContent = trophiesText;
+  }
+
+  if (diamondBalance) {
+    diamondBalance.textContent = diamondsText;
+  }
+
+  if (lobbyDiamondBalance) {
+    lobbyDiamondBalance.textContent = diamondsText;
+  }
+
+  if (storeDiamondBalance) {
+    storeDiamondBalance.textContent = diamondsText;
+  }
+}
+
+function getCoinFlyTargetElement() {
+  if (ui.currentView === "lobby" && lobbyBalanceTarget && !lobbyBalanceTarget.hidden) {
+    return lobbyBalanceTarget;
+  }
+
+  if (ui.currentView === "store" && storeBalanceTarget && !storeBalanceTarget.hidden) {
+    return storeBalanceTarget;
+  }
+
+  return balanceTarget;
+}
+
 function showView(viewName) {
   const previousView = ui.currentView;
+
+  if (viewName !== "game" && gameLaunchTransitionBusy) {
+    cancelGameLaunchTransition();
+  }
 
   if (previousView === "game" && viewName !== "game") {
     stopGameSession();
@@ -2075,6 +2801,7 @@ function showView(viewName) {
 
   if (viewName !== "trophies") {
     closeAlleyIntro(false, false);
+    closeMagicMachineBackdrop(false);
   }
 
   if (viewName !== "lobby") {
@@ -2083,6 +2810,8 @@ function showView(viewName) {
   }
 
   ui.currentView = viewName;
+  syncCurrentViewChrome();
+  syncGlobalVisualTheme();
 
   if (viewName === "game" && !state.playedFirstGame) {
     state.playedFirstGame = true;
@@ -2096,6 +2825,7 @@ function showView(viewName) {
   });
 
   syncFirstGameGuide();
+  syncJungleBookGuidePrompt();
   schedulePartyMemberSync(true);
 
   if (viewName === "game") {
@@ -2107,7 +2837,19 @@ function showView(viewName) {
   }
 
   if (viewName === "store") {
+    ui.storeScrollLeft = 0;
     renderStore();
+    const storePanel = viewNodes.store?.querySelector(".section-panel");
+    if (storePanel) {
+      window.requestAnimationFrame(() => {
+        storePanel.scrollTop = 0;
+      });
+    }
+    if (storeGridWrap) {
+      window.requestAnimationFrame(() => {
+        storeGridWrap.scrollLeft = 0;
+      });
+    }
     syncTouchControlsVisibility();
     syncBackgroundMusic();
     scheduleRemoteProfileSync(true);
@@ -2117,6 +2859,14 @@ function showView(viewName) {
   if (viewName === "friends") {
     initSocialProfileSync().catch(() => {});
     renderFriendsView();
+    syncTouchControlsVisibility();
+    syncBackgroundMusic();
+    scheduleRemoteProfileSync(true);
+    return;
+  }
+
+  if (viewName === "book") {
+    renderBookView();
     syncTouchControlsVisibility();
     syncBackgroundMusic();
     scheduleRemoteProfileSync(true);
@@ -2138,14 +2888,14 @@ function showView(viewName) {
 }
 
 function renderAll() {
+  syncCurrentViewChrome();
   syncGlobalVisualTheme();
-  coinBalance.textContent = String(state.coins);
-  trophyBalance.textContent = String(state.trophies);
-  diamondBalance.textContent = String(state.diamonds);
+  updateBalanceDisplays();
   renderLobby();
   renderStore();
   renderInventory();
   renderFriendsView();
+  renderBookView();
   renderTrophyRoad();
   renderGameLoadout();
   renderSettingsPanel();
@@ -2155,7 +2905,27 @@ function renderAll() {
   syncBrokenAssets(document);
   syncAnimatedAssets(document);
   syncFirstGameGuide();
+  syncJungleBookGuidePrompt();
   syncBackgroundMusic();
+}
+
+function syncCurrentViewChrome() {
+  const isGameView = ui.currentView === "game";
+  const isStoreView = ui.currentView === "store";
+
+  if (appScreen) {
+    appScreen.dataset.currentView = ui.currentView;
+  }
+
+  if (document.body) {
+    document.body.classList.toggle("game-view-active", isGameView);
+    document.body.classList.toggle("store-view-active", isStoreView);
+  }
+
+  if (appShell) {
+    appShell.classList.toggle("game-view-active", isGameView);
+    appShell.classList.toggle("store-view-active", isStoreView);
+  }
 }
 
 function shouldShowFirstGameGuide() {
@@ -2178,6 +2948,149 @@ function syncFirstGameGuide() {
 
   if (lobbyPlayButton) {
     lobbyPlayButton.classList.toggle("first-game-guide-target", shouldShow);
+  }
+}
+
+function shouldShowJungleBookGuidePrompt() {
+  return Boolean(
+    bookGuidePrompt &&
+    lobbyBookButton &&
+    isTowerWorldUnlocked() &&
+    ui.currentView === "lobby" &&
+    !state.seenJungleBookGuide &&
+    !introSequenceRunning &&
+    !bookGuideSequenceRunning
+  );
+}
+
+function syncJungleBookGuidePrompt() {
+  const shouldShow = shouldShowJungleBookGuidePrompt();
+
+  if (bookGuidePrompt) {
+    bookGuidePrompt.hidden = !shouldShow;
+  }
+
+  if (lobbyBookButton) {
+    lobbyBookButton.classList.toggle("book-guide-target", shouldShow);
+  }
+}
+
+function closeJungleBookGuideBackdrop() {
+  if (!bookGuideBackdrop || !bookGuideCard) {
+    return;
+  }
+
+  bookGuideBackdrop.hidden = true;
+  bookGuideCard.classList.remove("show");
+}
+
+function showJungleBookGuideStage({ item, title, copy, buttonLabel }) {
+  if (
+    !bookGuideBackdrop ||
+    !bookGuideCard ||
+    !bookGuideArtFrame ||
+    !bookGuideTitle ||
+    !bookGuideCopy ||
+    !bookGuideConfirmButton
+  ) {
+    return Promise.resolve();
+  }
+
+  renderPreviewAssetIntoFrame(bookGuideArtFrame, item, {
+    elementId: "book-guide-image",
+    imageClass: "modal-image asset-image",
+    videoClass: "modal-image asset-video",
+    fallbackText: item?.name || title,
+    alt: item?.name || title,
+  });
+
+  bookGuideTitle.textContent = title;
+  bookGuideCopy.textContent = copy;
+  bookGuideConfirmButton.textContent = buttonLabel;
+
+  bookGuideBackdrop.hidden = false;
+  bookGuideCard.classList.remove("show");
+  void bookGuideCard.offsetWidth;
+  bookGuideCard.classList.add("show");
+  syncBrokenAssets(bookGuideBackdrop);
+  syncAnimatedAssets(bookGuideBackdrop);
+
+  return new Promise((resolve) => {
+    bookGuideStageResolve = resolve;
+  });
+}
+
+function advanceJungleBookGuideStage() {
+  if (typeof bookGuideStageResolve !== "function") {
+    return;
+  }
+
+  const resolve = bookGuideStageResolve;
+  bookGuideStageResolve = null;
+  closeJungleBookGuideBackdrop();
+  resolve();
+}
+
+async function startJungleBookGuideFlow() {
+  if (bookGuideSequenceRunning) {
+    return;
+  }
+
+  if (state.seenJungleBookGuide) {
+    showView("book");
+    return;
+  }
+
+  const rewardCharacter = getBookGrandRewardCharacter();
+  const animalsTotal = getBookAnimals().length;
+
+  if (
+    !bookGuideBackdrop ||
+    !bookGuideCard ||
+    !bookGuideArtFrame ||
+    !bookGuideTitle ||
+    !bookGuideCopy ||
+    !bookGuideConfirmButton ||
+    !rewardCharacter
+  ) {
+    state.seenJungleBookGuide = true;
+    saveState();
+    renderAll();
+    showView("book");
+    return;
+  }
+
+  bookGuideSequenceRunning = true;
+  syncJungleBookGuidePrompt();
+
+  try {
+    if (ui.currentView !== "book") {
+      showView("book");
+      await wait(80);
+    }
+
+    await showJungleBookGuideStage({
+      item: { name: "Księga Dżungli", image: "./assets/alley/księga.jpeg" },
+      title: "Księga Dżungli",
+      copy: `ZBIERZ WSZYSTKIE ${animalsTotal} ZWIERZĄT, KUPUJĄC JE LUB TRAFIAJĄC Z DŻUNGLOWEJ SKRZYNI, ABY...`,
+      buttonLabel: "KONTYNUUJ",
+    });
+
+    await showJungleBookGuideStage({
+      item: rewardCharacter,
+      title: "Coco N'Kosi",
+      copy: "...ODBLOKOWAĆ ZA DARMO COCO N'KOSI",
+      buttonLabel: "DO DZIEŁA",
+    });
+
+    state.seenJungleBookGuide = true;
+    saveState();
+    renderAll();
+    showView("book");
+  } finally {
+    bookGuideSequenceRunning = false;
+    closeJungleBookGuideBackdrop();
+    syncJungleBookGuidePrompt();
   }
 }
 
@@ -2380,7 +3293,7 @@ function getHighestUnlockedTrophyWorldId() {
 }
 
 function getGlobalVisualWorldTheme() {
-  return getHighestUnlockedTrophyWorldId();
+  return getActiveTrophyWorldId();
 }
 
 function syncGlobalVisualTheme() {
@@ -2500,7 +3413,7 @@ function setSuperAlleyActiveForWorld(worldId, isActive) {
 
 function getSuperAlleyOfferCopy(worldId) {
   if (worldId === "tower") {
-    return `Wybierz aktywację za ${SUPER_ALLEY_DIAMOND_PRICE} klejnotow lub ${SUPER_ALLEY_CASH_PRICE_LABEL} i odblokuj jasnozielone nagrody premium.`;
+    return `Wybierz aktywację za ${SUPER_ALLEY_DIAMOND_PRICE} klejnotow lub ${SUPER_ALLEY_CASH_PRICE_LABEL} i odblokuj zielone nagrody premium Świata Dżungli.`;
   }
 
   return worldId === "winter"
@@ -2510,7 +3423,7 @@ function getSuperAlleyOfferCopy(worldId) {
 
 function getSuperAlleyUnlockedCopy(worldId) {
   if (worldId === "tower") {
-    return "Nagrody Super w Świecie Wysokiej Wieży są już odblokowane.";
+    return "Nagrody Super w Świecie Dżungli są już odblokowane.";
   }
 
   return worldId === "winter"
@@ -2521,18 +3434,18 @@ function getSuperAlleyUnlockedCopy(worldId) {
 function getSuperAlleySceneVisual(worldId) {
   if (worldId === "tower") {
     return {
-      image: "./ładowanie_3.jpeg",
-      fallbackText: "WIEZA",
+      image: "./assets/alley/jungle.jpeg",
+      fallbackText: "DZUNGLA",
     };
   }
 
   return worldId === "winter"
     ? {
-        image: "./ładowanie_2.png",
+        image: "./assets/backgrounds/ładowanie_2.png",
         fallbackText: "ZIMA",
       }
     : {
-        image: "./ładowanie_1.png",
+        image: "./assets/backgrounds/ładowanie_1.png",
         fallbackText: "SUPER",
       };
 }
@@ -2541,7 +3454,7 @@ function getSuperAlleyBlockedContent(worldId) {
   if (worldId === "tower" && !isTowerWorldUnlocked()) {
     return {
       title: "Najpierw ukoncz Swiat Zimowy",
-      copy: "Po odebraniu Leo odblokujesz Aleje Super Świata Wysokiej Wieży i jego jasnozielone nagrody premium.",
+      copy: "Po odebraniu Leo odblokujesz Aleje Super Świata Dżungli i jego zielone nagrody premium.",
     };
   }
 
@@ -2555,7 +3468,7 @@ function getSuperAlleyBlockedContent(worldId) {
   if (worldId === "winter" && isTowerWorldUnlocked()) {
     return {
       title: "Ukończyles juz Swiat Zimowy, nie mozesz go aktywowac",
-      copy: "Po odebraniu Leo mozesz aktywowac juz tylko Aleje Super Świata Wysokiej Wieży.",
+      copy: "Po odebraniu Leo mozesz aktywowac juz tylko Aleje Super Świata Dżungli.",
     };
   }
 
@@ -2564,7 +3477,7 @@ function getSuperAlleyBlockedContent(worldId) {
     return {
       title: "Ukończyles juz Swiat Magikow, nie mozesz go aktywowac",
       copy: highestUnlockedWorldId === "tower"
-        ? "Po odebraniu Leo mozesz aktywowac juz tylko Aleje Super Świata Wysokiej Wieży."
+        ? "Po odebraniu Leo mozesz aktywowac juz tylko Aleje Super Świata Dżungli."
         : "Po odebraniu Millo jako Elfie mozesz aktywowac juz tylko zimowa Aleje Super.",
     };
   }
@@ -2594,10 +3507,9 @@ function openProfilePanel(tab = "me") {
     return;
   }
 
-  ui.profileTab = tab === "users" ? "users" : "me";
-  if (ui.profileTab === "me") {
-    ui.profileEditMode = false;
-  }
+  ui.profileTab = "me";
+  ui.profileEditMode = false;
+  ui.profileEditSection = "";
   if (!socialProfile.ready) {
     initSocialProfileSync().catch(() => {});
   }
@@ -2611,7 +3523,239 @@ function closeProfilePanel() {
   }
 
   ui.profileEditMode = false;
+  ui.profileEditSection = "";
   profileBackdrop.hidden = true;
+}
+
+function openProfileEditSection(section = "") {
+  if (!profileEditPanel) {
+    return;
+  }
+
+  ui.profileEditMode = Boolean(section);
+  ui.profileEditSection = section || "";
+  renderProfilePanel();
+
+  if (section === "name") {
+    window.setTimeout(() => {
+      const dynamicNameInput = document.getElementById("profile-name-input-dynamic");
+      if (dynamicNameInput) {
+        dynamicNameInput.focus();
+        dynamicNameInput.select();
+      }
+    }, 20);
+  }
+}
+
+function closeProfileEditSection() {
+  ui.profileEditMode = false;
+  ui.profileEditSection = "";
+  renderProfilePanel();
+}
+
+function getUnlockedProfileThemeWorldIds() {
+  return TROPHY_WORLDS
+    .map((world) => world.id)
+    .filter((worldId) => isTrophyWorldUnlocked(worldId));
+}
+
+function getSelectedProfileThemeWorldId() {
+  const preferred = normalizeTrophyWorldId(state.profileThemeWorldId);
+  const unlockedThemes = getUnlockedProfileThemeWorldIds();
+  return unlockedThemes.includes(preferred) ? preferred : getHighestUnlockedTrophyWorldId();
+}
+
+function getNicknameChangePrice(changeCount = Number(state.nicknameChangeCount || 0)) {
+  if (changeCount <= 0) {
+    return 0;
+  }
+
+  if (changeCount === 1) {
+    return 5000;
+  }
+
+  if (changeCount === 2) {
+    return 10000;
+  }
+
+  if (changeCount === 3) {
+    return 15000;
+  }
+
+  return 20000;
+}
+
+function getNicknameChangePriceLabel(changeCount = Number(state.nicknameChangeCount || 0)) {
+  const price = getNicknameChangePrice(changeCount);
+  return price <= 0 ? "za darmo" : `${price} monet`;
+}
+
+function buildProfileThemeChoiceMarkup(worldId, activeWorldId) {
+  const world = getTrophyWorldById(worldId);
+  if (!world) {
+    return "";
+  }
+
+  return `
+    <button
+      class="profile-theme-choice${worldId === activeWorldId ? " active" : ""}"
+      data-profile-theme-choice="${worldId}"
+      type="button"
+    >
+      <span class="profile-theme-choice-swatch" data-world-theme="${worldId}" aria-hidden="true"></span>
+      <span class="profile-theme-choice-label">${escapeHtml(world.name)}</span>
+    </button>
+  `;
+}
+
+function renderProfileEditPanel() {
+  if (!profileEditPanel || !profileEditCard) {
+    return;
+  }
+
+  const favoriteCharacter = getProfileFavoriteCharacter();
+  const selectedProfilePhoto = getSelectedProfilePhoto();
+  const activeThemeWorldId = getSelectedProfileThemeWorldId();
+  profileEditCard.hidden = !ui.profileEditMode;
+
+  if (!ui.profileEditMode) {
+    profileEditPanel.innerHTML = "";
+    return;
+  }
+
+  if (profileEditKicker) {
+    profileEditKicker.textContent = ui.profileEditSection === "character"
+      ? "Ulubiona postać"
+      : ui.profileEditSection === "theme"
+        ? "Kolor profilu"
+        : "Zmień nazwę";
+  }
+
+  if (ui.profileEditSection === "character") {
+    profileEditPanel.innerHTML = `
+      <p class="profile-edit-section-title">Zdjęcia profilowe</p>
+      <div class="profile-character-choice-grid profile-photo-choice-grid">
+        ${getOwnedItems("profilePhotos").map((item) => `
+          <button
+            class="profile-character-choice profile-photo-choice${item.id === selectedProfilePhoto?.id ? " active" : ""}"
+            data-profile-photo-choice="${item.id}"
+            type="button"
+            aria-label="Ustaw ${escapeHtml(item.name)}"
+          >
+            ${buildPreviewAssetMarkup(item, {
+              fallbackText: item.name,
+              alt: item.name,
+              imageClass: "avatar-image asset-image",
+              videoClass: "avatar-image asset-video",
+            })}
+          </button>
+        `).join("")}
+      </div>
+      <p class="profile-edit-section-title">Postacie</p>
+      <div class="profile-character-choice-grid">
+        ${getOwnedItems("characters").map((item) => `
+          <button
+            class="profile-character-choice${item.id === favoriteCharacter?.id ? " active" : ""}"
+            data-profile-character-choice="${item.id}"
+            type="button"
+            aria-label="Ustaw ${escapeHtml(item.name)}"
+          >
+            ${buildPreviewAssetMarkup(item, {
+              fallbackText: item.name,
+              alt: item.name,
+              imageClass: "avatar-image asset-image",
+              videoClass: "avatar-image asset-video",
+              usePoster: false,
+            })}
+          </button>
+        `).join("")}
+      </div>
+      <p class="profile-edit-note">Naciśnij zdjęcie lub filmik, aby ustawić ulubioną postać.</p>
+      <div class="profile-edit-actions profile-edit-actions-simple">
+        <button class="pixel-button small-button subtle-button" data-profile-edit-cancel type="button">ZAMKNIJ</button>
+      </div>
+    `;
+    syncBrokenAssets(profileEditPanel);
+    syncAnimatedAssets(profileEditPanel);
+    return;
+  }
+
+  if (ui.profileEditSection === "theme") {
+    profileEditPanel.innerHTML = `
+      <div class="profile-theme-choice-grid">
+        ${getUnlockedProfileThemeWorldIds().map((worldId) => buildProfileThemeChoiceMarkup(worldId, activeThemeWorldId)).join("")}
+      </div>
+      <p class="profile-edit-note">Wybierz kolor profilu z odblokowanych światów.</p>
+      <div class="profile-edit-actions profile-edit-actions-simple">
+        <button class="pixel-button small-button subtle-button" data-profile-edit-cancel type="button">ZAMKNIJ</button>
+      </div>
+    `;
+    return;
+  }
+
+  const renamePrice = getNicknameChangePrice();
+  profileEditPanel.innerHTML = `
+    <label class="settings-field profile-name-edit-field" for="profile-name-input-dynamic">
+      <span class="settings-field-label">Twoja nazwa</span>
+      <input
+        class="settings-input"
+        id="profile-name-input-dynamic"
+        type="text"
+        maxlength="18"
+        placeholder="Gracz1234"
+        value="${escapeHtml(getPlayerNickname())}"
+      />
+    </label>
+    <p class="profile-edit-note">
+      ${renamePrice <= 0 ? "Pierwsza zmiana nazwy jest darmowa." : `Ta zmiana kosztuje ${getNicknameChangePriceLabel()}.`}
+    </p>
+    <div class="profile-edit-actions">
+      <button class="pixel-button small-button settings-action-button" data-profile-name-save type="button">
+        ${renamePrice <= 0 ? "ZMIEŃ ZA DARMO" : `ZMIEŃ ZA ${renamePrice}`}
+      </button>
+      <button class="pixel-button small-button subtle-button" data-profile-edit-cancel type="button">ANULUJ</button>
+    </div>
+  `;
+}
+
+function applyProfileFavoriteCharacterChange(characterId) {
+  const nextCharacterId = sanitizeStoredId(characterId);
+  if (!nextCharacterId || !state.ownedCharacters.includes(nextCharacterId)) {
+    return;
+  }
+
+  state.selectedProfilePhotoId = "";
+  state.favoriteCharacterId = nextCharacterId;
+  saveState();
+  closeProfileEditSection();
+  renderAll();
+  scheduleRemoteProfileSync(true);
+}
+
+function applyProfilePhotoChange(photoId) {
+  const nextPhotoId = sanitizeStoredId(photoId);
+  if (!nextPhotoId || !state.ownedProfilePhotos.includes(nextPhotoId)) {
+    return;
+  }
+
+  state.selectedProfilePhotoId = nextPhotoId;
+  saveState();
+  closeProfileEditSection();
+  renderAll();
+  scheduleRemoteProfileSync(true);
+}
+
+function applyProfileThemeChange(worldId) {
+  const nextThemeWorldId = normalizeTrophyWorldId(worldId);
+  if (!getUnlockedProfileThemeWorldIds().includes(nextThemeWorldId)) {
+    return;
+  }
+
+  state.profileThemeWorldId = nextThemeWorldId;
+  saveState();
+  closeProfileEditSection();
+  renderAll();
+  scheduleRemoteProfileSync(true);
 }
 
 function setPhoneModeEnabled(isEnabled) {
@@ -2668,26 +3812,16 @@ function renderSettingsPanel() {
 }
 
 function renderProfilePanel() {
-  if (!profileTabMeButton || !profileTabUsersButton || !profileTabPanelMe || !profileTabPanelUsers) {
+  if (!profileTabPanelMe) {
     return;
   }
 
-  const favoriteCharacter = getProfileFavoriteCharacter();
-  const favoritePet = getProfileFavoritePet();
-  const highestWorldId = getHighestUnlockedTrophyWorldId();
+  const profileVisualItem = getProfileVisualItem();
+  const profileThemeWorldId = getSelectedProfileThemeWorldId();
 
-  profileTabMeButton.classList.toggle("active", ui.profileTab === "me");
-  profileTabUsersButton.classList.toggle("active", ui.profileTab === "users");
-  profileTabPanelMe.hidden = ui.profileTab !== "me";
-  profileTabPanelUsers.hidden = ui.profileTab !== "users";
-
-  if (profileCloudStatus) {
-    profileCloudStatus.textContent = socialProfile.ready
-      ? state.accountPasswordSet
-        ? "CHMURA + LOGOWANIE"
-        : "PROFIL W CHMURZE"
-      : "PROFIL LOKALNY";
-    profileCloudStatus.dataset.kind = socialProfile.ready ? "cloud" : "local";
+  profileTabPanelMe.hidden = false;
+  if (profileTabPanelUsers) {
+    profileTabPanelUsers.hidden = true;
   }
 
   if (profileNameHeading) {
@@ -2695,104 +3829,31 @@ function renderProfilePanel() {
   }
 
   if (profileWorldBar) {
-    profileWorldBar.dataset.worldTheme = highestWorldId;
+    profileWorldBar.dataset.worldTheme = profileThemeWorldId;
   }
 
   if (profileMainCard) {
-    profileMainCard.dataset.worldTheme = highestWorldId;
+    profileMainCard.dataset.worldTheme = profileThemeWorldId;
   }
 
-  if (profileHeroNote) {
-    profileHeroNote.textContent = socialProfile.lastError
-      ? socialProfile.lastError
-      : state.accountPasswordSet
-        ? "To konto jest gotowe do logowania."
-        : "Tutaj zobaczysz swoje ustawienia profilu.";
-  }
-
-  if (profileNameInput && document.activeElement !== profileNameInput) {
-    profileNameInput.value = getPlayerNickname();
-  }
-
-  if (profileSummaryName) {
-    profileSummaryName.textContent = getPlayerNickname();
-  }
-
-  if (profileFavoriteCharacterSelect) {
-    profileFavoriteCharacterSelect.innerHTML = getOwnedItems("characters")
-      .map((item) => `<option value="${item.id}" ${item.id === favoriteCharacter?.id ? "selected" : ""}>${escapeHtml(item.name)}</option>`)
-      .join("");
-  }
-
-  if (profileFavoritePetSelect) {
-    const petOptions = [`<option value="">BRAK PLATOYI</option>`].concat(
-      getOwnedItems("pets").map(
-        (item) => `<option value="${item.id}" ${item.id === favoritePet?.id ? "selected" : ""}>${escapeHtml(item.name)}</option>`
-      )
-    );
-    profileFavoritePetSelect.innerHTML = petOptions.join("");
-  }
-
-  renderPreviewAssetIntoFrame(profileFavoriteCharacterFrame, favoriteCharacter, {
+  renderPreviewAssetIntoFrame(profileCharacterButton || profileFavoriteCharacterFrame, profileVisualItem, {
     elementId: "profile-favorite-character-image",
     imageClass: "avatar-image asset-image",
     videoClass: "avatar-image asset-video",
     fallbackText: "POSTAĆ",
-    alt: favoriteCharacter?.name || "Ulubiona postać",
+    alt: profileVisualItem?.name || "Profil",
+    usePoster: false,
   });
-  renderPreviewAssetIntoFrame(profileFavoritePetFrame, favoritePet, {
-    elementId: "profile-favorite-pet-image",
-    imageClass: "pet-image asset-image",
-    videoClass: "pet-image asset-video",
-    fallbackText: "PLATOYA",
-    alt: favoritePet?.name || "Ulubiona PlatoYa",
-  });
-
-  if (profileFavoriteCharacterLabel) {
-    profileFavoriteCharacterLabel.textContent = favoriteCharacter?.name || "Ulubiona postać";
-  }
-
-  if (profileSummaryCharacter) {
-    profileSummaryCharacter.textContent = favoriteCharacter?.name || "Brak";
-  }
-
-  if (profileFavoritePetLabel) {
-    profileFavoritePetLabel.textContent = favoritePet?.name || "Brak ulubionej PlatoYI";
-  }
-
-  if (profileSummaryPet) {
-    profileSummaryPet.textContent = favoritePet?.name || "Brak";
-  }
-
-  if (profileEditPanel) {
-    profileEditPanel.hidden = !ui.profileEditMode;
-  }
-
-  if (profileEditButton) {
-    profileEditButton.hidden = ui.profileEditMode;
-  }
 
   if (profileStatTrophies) {
     profileStatTrophies.textContent = String(state.trophies);
   }
 
-  if (profileStatGames) {
-    profileStatGames.textContent = String(state.completedGamesTotal);
+  if (profileThemePicker) {
+    profileThemePicker.hidden = true;
   }
 
-  if (profileStatRobots) {
-    profileStatRobots.textContent = String(state.robotsDefeatedTotal);
-  }
-
-  if (profileStatCharacters) {
-    profileStatCharacters.textContent = `${state.ownedCharacters.length} / ${CATALOG.characters.length}`;
-  }
-
-  if (profileStatPets) {
-    profileStatPets.textContent = `${state.ownedPets.length} / ${CATALOG.pets.length}`;
-  }
-
-  renderOtherUsersPanel();
+  renderProfileEditPanel();
 }
 
 function renderLobby() {
@@ -2839,6 +3900,14 @@ function renderLobby() {
     lobbyPlayButton.textContent = isPartyActive() && !isPartyGameActive() && isLocalPartyReady()
       ? "ANULUJ GOTOWOŚĆ"
       : "GRAJ";
+  }
+
+  if (lobbyBookButton) {
+    lobbyBookButton.hidden = !isTowerWorldUnlocked();
+  }
+
+  if (lobbyLayout) {
+    lobbyLayout.classList.toggle("book-unlocked", !lobbyBookButton?.hidden);
   }
 
   if (partyTeammateShowcase) {
@@ -2917,7 +3986,7 @@ function renderOtherUsersPanel() {
           <p class="profile-user-row-rank">#${index + 1}</p>
           <p class="profile-user-row-name">${escapeHtml(entry.nickname || "Gracz")}${ownTag}</p>
           <p class="profile-user-row-trophies">
-            <img class="profile-user-row-icon" src="./monety_2.png" alt="Pucharki" />
+            <img class="profile-user-row-icon" src="./assets/currencies/monety_2.png" alt="Pucharki" />
             <span>${Number(entry.trophies || 0)}</span>
           </p>
         </button>
@@ -3213,10 +4282,14 @@ function getSuggestedFriendProfiles() {
 
 function buildFriendsProfileCard(profile, options = {}) {
   const themeId = getProfileThemeWorldId(profile);
+  const profilePhoto = profile?.profilePhotoId
+    ? CATALOG.profilePhotos.find((item) => item.id === profile.profilePhotoId) || null
+    : null;
   const favoriteCharacterId = profile?.equippedCharacterId || profile?.favoriteCharacterId;
   const favoriteCharacter = favoriteCharacterId
     ? CATALOG.characters.find((item) => item.id === favoriteCharacterId) || null
     : null;
+  const profileVisual = profilePhoto || favoriteCharacter;
   const title = escapeHtml(profile?.nickname || "Gracz");
   const actions = Array.isArray(options.actions) ? options.actions.join("") : "";
   const presence = getProfilePresenceMeta(profile);
@@ -3225,11 +4298,11 @@ function buildFriendsProfileCard(profile, options = {}) {
     <article class="friends-profile-card" data-world-theme="${themeId}">
       <div class="friends-profile-visual">
         <div class="avatar-frame profile-preview-frame friends-profile-frame">
-          ${buildPreviewAssetMarkup(favoriteCharacter, {
+          ${buildPreviewAssetMarkup(profileVisual, {
             imageClass: "avatar-image asset-image",
             videoClass: "avatar-image asset-video",
-            fallbackText: "POSTAĆ",
-            alt: favoriteCharacter?.name || "Postać",
+            fallbackText: "PROFIL",
+            alt: profileVisual?.name || "Profil",
             usePreviewVideo: false,
           })}
         </div>
@@ -3241,7 +4314,7 @@ function buildFriendsProfileCard(profile, options = {}) {
         <h4 class="friends-profile-name">${title}</h4>
         <p class="friends-profile-presence" data-presence-state="${presence.state}">${presence.label}</p>
         <div class="profile-trophy-line profile-trophy-line-plain friends-profile-trophy-line">
-          <img class="profile-trophy-icon profile-trophy-icon-plain" src="./monety_2.png" alt="Pucharki" />
+          <img class="profile-trophy-icon profile-trophy-icon-plain" src="./assets/currencies/monety_2.png" alt="Pucharki" />
           <p class="profile-trophy-value profile-trophy-value-small friends-profile-trophy-value">${Number(profile?.trophies || 0)}</p>
         </div>
         ${actions ? `<div class="friends-profile-actions">${actions}</div>` : ""}
@@ -3438,6 +4511,446 @@ function renderFriendsView() {
 
   syncBrokenAssets(friendsContent);
   syncAnimatedAssets(friendsContent);
+}
+
+function getBookAnimals() {
+  return CATALOG.pets.filter((item) => item.unlockWorld === "tower");
+}
+
+function getBookGrandRewardCharacter() {
+  return CATALOG.characters.find((item) => item.id === "coco-nkosi") || null;
+}
+
+function getBookAnimalsOwnedCount() {
+  return getBookAnimals().filter((pet) => state.ownedPets.includes(pet.id)).length;
+}
+
+function getBookMissionProgressState() {
+  if (!state.bookMissionProgress || typeof state.bookMissionProgress !== "object") {
+    state.bookMissionProgress = {
+      totalRobotDamage: 0,
+      fullClearStreak: 0,
+      currentRunRobots: 0,
+      junglePetRoundsPlayed: 0,
+      robotsDefeatedSinceMissions: 0,
+      trophiesEarnedSinceMissions: 0,
+    };
+  }
+
+  state.bookMissionProgress.totalRobotDamage = Math.max(0, Number(state.bookMissionProgress.totalRobotDamage || 0));
+  state.bookMissionProgress.fullClearStreak = Math.max(0, Number(state.bookMissionProgress.fullClearStreak || 0));
+  state.bookMissionProgress.currentRunRobots = Math.max(0, Number(state.bookMissionProgress.currentRunRobots || 0));
+  state.bookMissionProgress.junglePetRoundsPlayed = Math.max(0, Number(state.bookMissionProgress.junglePetRoundsPlayed || 0));
+  state.bookMissionProgress.robotsDefeatedSinceMissions = Math.max(0, Number(state.bookMissionProgress.robotsDefeatedSinceMissions || 0));
+  state.bookMissionProgress.trophiesEarnedSinceMissions = Math.max(0, Number(state.bookMissionProgress.trophiesEarnedSinceMissions || 0));
+
+  if (!Array.isArray(state.claimedBookMissionIds)) {
+    state.claimedBookMissionIds = [];
+  }
+
+  return state.bookMissionProgress;
+}
+
+function isJungleBookPetId(petId) {
+  return CATALOG.pets.some((pet) => pet.id === petId && pet.unlockWorld === "tower");
+}
+
+function getBookMissionDefinitions() {
+  const progress = getBookMissionProgressState();
+
+  return [
+    {
+      id: "tower-mission-robots-180",
+      title: "Misja 1",
+      description: "Pokonaj 180 Robotów",
+      progress: progress.robotsDefeatedSinceMissions,
+      goal: 180,
+      rewardLabel: "Skrzynia Dżungli",
+      rewardCrateId: "dzunglowa-skrzynia",
+      image: "./assets/robots/robot_wieza.jpeg",
+      fallbackText: "ROBOT",
+    },
+    {
+      id: "tower-mission-perfect-streak",
+      title: "Misja 2",
+      description: "Przetrwaj 5 fal 4 razy z rzędu",
+      progress: progress.fullClearStreak,
+      goal: 4,
+      rewardLabel: "Skrzynia Dżungli",
+      rewardCrateId: "dzunglowa-skrzynia",
+      image: "./assets/shop/skrzyniadzungla.jpeg",
+      fallbackText: "SKRZYNIA",
+    },
+    {
+      id: "tower-mission-trophies-200",
+      title: "Misja 3",
+      description: "Zdobądź 200 pucharów",
+      progress: progress.trophiesEarnedSinceMissions,
+      goal: 200,
+      rewardLabel: "Skrzynia Dżungli",
+      rewardCrateId: "dzunglowa-skrzynia",
+      image: TROPHY_ICON_IMAGE,
+      fallbackText: "PUCH",
+    },
+    {
+      id: "tower-mission-damage-12000",
+      title: "Misja 4",
+      description: "Zadaj robotom łącznie 12000 obrażeń",
+      progress: progress.totalRobotDamage,
+      goal: 12000,
+      rewardLabel: "Skrzynia Dżungli",
+      rewardCrateId: "dzunglowa-skrzynia",
+      image: "./assets/robots/robot_wieza.jpeg",
+      fallbackText: "ROBOT",
+    },
+    {
+      id: "tower-mission-one-run-35",
+      title: "Misja 5",
+      description: "Pokonaj w jednej grze 35 robotów",
+      progress: progress.currentRunRobots,
+      goal: 35,
+      rewardLabel: "Skrzynia Dżungli",
+      rewardCrateId: "dzunglowa-skrzynia",
+      image: "./assets/robots/robot_wieza.jpeg",
+      fallbackText: "ROBOT",
+    },
+    {
+      id: "tower-mission-jungle-rounds-3",
+      title: "Misja 6",
+      description: "Zagraj trzy rundy z dowolnym dżunglowym PlatoYA",
+      progress: progress.junglePetRoundsPlayed,
+      goal: 3,
+      rewardLabel: "Skrzynia Dżungli",
+      rewardCrateId: "dzunglowa-skrzynia",
+      image: "./assets/alley/księga.jpeg",
+      fallbackText: "KSIĘGA",
+    },
+  ];
+}
+
+function isBookMissionClaimed(missionId) {
+  return Array.isArray(state.claimedBookMissionIds) && state.claimedBookMissionIds.includes(missionId);
+}
+
+function buildBookTabs() {
+  return `
+    <div class="book-tabs" role="tablist" aria-label="Zakładki Księgi Dżungli">
+      <button
+        class="book-tab-button${ui.bookTab === "book" ? " active" : ""}"
+        data-book-tab="book"
+        type="button"
+        role="tab"
+        aria-selected="${ui.bookTab === "book"}"
+      >
+        KSIĘGA
+      </button>
+      <button
+        class="book-tab-button${ui.bookTab === "missions" ? " active" : ""}"
+        data-book-tab="missions"
+        type="button"
+        role="tab"
+        aria-selected="${ui.bookTab === "missions"}"
+      >
+        MISJE
+      </button>
+    </div>
+  `;
+}
+
+function buildBookPetCard(pet) {
+  const owned = state.ownedPets.includes(pet.id);
+  const stateLabel = owned ? "POSIADASZ" : "NIE POSIADASZ";
+  const clickAttrs = owned ? 'disabled aria-disabled="true"' : `data-book-pet="${pet.id}"`;
+
+  return `
+    <button
+      class="book-pet-card${owned ? " owned" : ""}"
+      data-world-theme="tower"
+      ${clickAttrs}
+      type="button"
+    >
+      <div class="book-pet-art">
+        <img
+          class="item-image asset-image"
+          src="${pet.image}"
+          alt="${pet.name}"
+          data-fallback-text="${pet.name}"
+        />
+        <div class="asset-fallback">${pet.name}</div>
+      </div>
+      <p class="book-pet-title">${pet.name}</p>
+      <p class="book-pet-state">${stateLabel}</p>
+    </button>
+  `;
+}
+
+function buildBookGrandRewardCard(character, ownedCount, totalCount) {
+  const isOwned = state.ownedCharacters.includes(character.id);
+  const missingCount = Math.max(0, totalCount - ownedCount);
+  const note = isOwned
+    ? "COCO N'KOSI JEST JUŻ TWOJA."
+    : missingCount === 0
+      ? "NACIŚNIJ ABY ODEBRAĆ COCO N'KOSI"
+      : missingCount === 1
+        ? "BRAKUJE CI JESZCZE JEDNEGO ZWIERZĘTA"
+        : `BRAKUJE CI JESZCZE ${missingCount} ZWIERZĄT`;
+
+  return `
+    <button
+      class="book-grand-reward-card${isOwned ? " owned" : ""}"
+      data-book-grand-reward="${character.id}"
+      type="button"
+    >
+      <div class="book-grand-reward-art item-art" data-world-theme="tower">
+        ${buildPreviewAssetMarkup(character, {
+          fallbackText: "COCO",
+          alt: character.name,
+          imageClass: "item-image asset-image",
+          videoClass: "item-image asset-video",
+          usePoster: false,
+        })}
+      </div>
+      <p class="book-grand-reward-note">${note}</p>
+    </button>
+  `;
+}
+
+function buildBookMissionCard(mission) {
+  const claimed = isBookMissionClaimed(mission.id);
+  const completed = mission.progress >= mission.goal;
+  const clampedProgress = Math.min(mission.goal, Math.max(0, Number(mission.progress || 0)));
+
+  return `
+    <article class="book-mission-card${claimed ? " claimed" : ""}${completed && !claimed ? " completed" : ""}" data-world-theme="tower">
+      <div class="book-mission-art">
+        <img
+          class="item-image asset-image"
+          src="${mission.image}"
+          alt="${mission.title}"
+          data-fallback-text="${mission.fallbackText}"
+        />
+        <div class="asset-fallback">${mission.fallbackText}</div>
+      </div>
+      <p class="book-mission-title">${mission.title}</p>
+      <p class="book-mission-description">${mission.description}</p>
+      <p class="book-mission-progress">${clampedProgress}/${mission.goal}</p>
+      <p class="book-mission-reward">Nagroda: ${mission.rewardLabel}</p>
+      <button
+        class="pixel-button small-button book-mission-claim"
+        data-book-mission-claim="${mission.id}"
+        type="button"
+        ${claimed || !completed ? "disabled" : ""}
+      >
+        ${claimed ? "ODEBRANA" : completed ? "ODBIERZ" : "W TRAKCIE"}
+      </button>
+    </article>
+  `;
+}
+
+function buildBookMissionsView() {
+  return `
+    <div class="book-mission-strip">
+      <div class="book-missions-grid">
+        ${getBookMissionDefinitions().map((mission) => buildBookMissionCard(mission)).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderBookView() {
+  if (!bookContent) {
+    return;
+  }
+
+  if (!isTowerWorldUnlocked()) {
+    bookContent.innerHTML = `
+      ${buildBookTabs()}
+      <div class="profile-users-empty">Księga Dżungli odblokuje się po wejściu do Świata Dżungli.</div>
+    `;
+    return;
+  }
+
+  const junglePets = getBookAnimals();
+  const ownedCount = getBookAnimalsOwnedCount();
+  const grandRewardCharacter = getBookGrandRewardCharacter();
+  const rightPaneContent = ui.bookTab === "missions"
+    ? buildBookMissionsView()
+    : `
+      <div class="book-pet-strip">
+        <div class="book-pet-grid">
+          ${junglePets.map((pet) => buildBookPetCard(pet)).join("")}
+        </div>
+      </div>
+    `;
+
+  bookContent.innerHTML = `
+    ${buildBookTabs()}
+    <div class="book-layout">
+      <aside class="book-hero-card" data-world-theme="tower">
+        <div class="book-hero-visual">
+          <div class="book-hero-stage">
+            <div class="book-hero-glow" aria-hidden="true"></div>
+            <div class="book-hero-art item-art" data-world-theme="tower">
+              <img
+                class="item-image asset-image book-hero-image"
+                src="./assets/alley/księga.jpeg"
+                alt="Księga Dżungli"
+                data-fallback-text="KSIEGA"
+              />
+              <div class="asset-fallback">KSIEGA</div>
+            </div>
+          </div>
+        </div>
+        <p class="book-hero-title">Księga Dżungli</p>
+        <p class="book-hero-count">${ownedCount} / ${junglePets.length} zwierząt</p>
+        ${grandRewardCharacter ? buildBookGrandRewardCard(grandRewardCharacter, ownedCount, junglePets.length) : ""}
+      </aside>
+
+      <div class="book-main-column">
+        ${rightPaneContent}
+      </div>
+    </div>
+  `;
+
+  syncBrokenAssets(bookContent);
+  syncAnimatedAssets(bookContent);
+}
+
+async function claimBookGrandReward(characterId) {
+  const character = CATALOG.characters.find((item) => item.id === characterId);
+
+  if (!character || state.ownedCharacters.includes(character.id)) {
+    return;
+  }
+
+  const totalCount = getBookAnimals().length;
+  const ownedCount = getBookAnimalsOwnedCount();
+
+  if (ownedCount < totalCount) {
+    return;
+  }
+
+  state.ownedCharacters.push(character.id);
+  saveState();
+  renderAll();
+
+  await showRewardShowcase({
+    image: character.image,
+    previewVideo: character.previewVideo || "",
+    name: character.name,
+    superTheme: "tower",
+    soundEffectName: "characterUnlock",
+  });
+}
+
+async function claimBookMission(missionId) {
+  const mission = getBookMissionDefinitions().find((entry) => entry.id === missionId);
+
+  if (!mission || isBookMissionClaimed(mission.id) || mission.progress < mission.goal) {
+    return;
+  }
+
+  if (!Array.isArray(state.claimedBookMissionIds)) {
+    state.claimedBookMissionIds = [];
+  }
+
+  state.claimedBookMissionIds.push(mission.id);
+  saveState();
+  renderAll();
+
+  const crate = CATALOG.crates.find((item) => item.id === mission.rewardCrateId);
+  if (!crate) {
+    return;
+  }
+
+  const preparedSession = createChestSession(crate);
+  await showCrateRewardScene(crate, preparedSession.rewards, {
+    superTheme: getCrateRewardTheme(crate),
+  });
+}
+
+async function buyBookPet(petId) {
+  const pet = CATALOG.pets.find((item) => item.id === petId && item.unlockWorld === "tower");
+
+  if (!pet || state.ownedPets.includes(pet.id)) {
+    return;
+  }
+
+  if (state.diamonds < Number(pet.price || 0)) {
+    openModal({
+      title: "Za mało diamentów",
+      message: `Brakuje ci ${Math.max(0, Number(pet.price || 0) - state.diamonds)} diamentów.`,
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  state.diamonds -= Number(pet.price || 0);
+  state.ownedPets.push(pet.id);
+  saveState();
+  renderAll();
+
+  await showRewardShowcase({
+    image: pet.image,
+    name: pet.name,
+    superTheme: "tower",
+    soundEffectName: getPetVoiceEffect(pet.id),
+  });
+}
+
+function openBookPetPurchaseModal(petId) {
+  const pet = CATALOG.pets.find((item) => item.id === petId && item.unlockWorld === "tower");
+
+  if (!pet || state.ownedPets.includes(pet.id)) {
+    return;
+  }
+
+  openStoreCharacterPurchase({
+    ...pet,
+    kind: "book-pet",
+    worldTheme: "tower",
+    price: Number(pet.price || 0),
+    currency: "diamonds",
+    purchaseCopy: pet.description || "Dżunglowy PlatoYa z własną mocą.",
+    missingCopy: (missing) => `Brakuje ci ${missing} diamentów.`,
+    confirmLabel: "Kup za 100 diamentów",
+  });
+}
+
+function openBookGrandRewardModal(characterId) {
+  const character = CATALOG.characters.find((item) => item.id === characterId);
+
+  if (!character) {
+    return;
+  }
+
+  const totalCount = getBookAnimals().length;
+  const ownedCount = getBookAnimalsOwnedCount();
+  const missingAnimals = Math.max(0, totalCount - ownedCount);
+  const alreadyOwned = state.ownedCharacters.includes(character.id);
+
+  openStoreCharacterPurchase({
+    ...character,
+    kind: "book-grand-reward",
+    worldTheme: "tower",
+    price: 0,
+    usePoster: false,
+    currency: "progress",
+    progressCurrent: ownedCount,
+    progressTotal: totalCount,
+    alreadyOwned,
+    purchaseCopy: alreadyOwned
+      ? "Masz już tę darmową animowaną postać z Księgi Dżungli."
+      : missingAnimals === 0
+        ? "Masz wszystkie zwierzęta. Odbierz darmową animowaną postać."
+        : "Odblokuj wszystkie zwierzęta, aby otrzymać darmową animowaną postać.",
+    missingCopy: (missing, total) => alreadyOwned
+      ? "Masz już tę postać."
+      : `Brakuje Ci ${missing}/${total} zwierząt.`,
+    confirmLabel: "Odbierz Coco N'Kosi",
+  });
 }
 
 async function copyOwnProfileId() {
@@ -4313,7 +5826,7 @@ function schedulePartyMemberSync(immediate = false, overrides = {}) {
 async function togglePartyReady() {
   if (!isPartyActive()) {
     ui.pendingPartyLaunch = null;
-    showView("game");
+    await startGameLaunchTransition();
     return;
   }
 
@@ -4329,6 +5842,53 @@ async function togglePartyReady() {
     x: 0,
     y: 0,
   });
+}
+
+function showGameLaunchOverlay({
+  kicker = "START RUNDY",
+  title = "WCZYTYWANIE GRY",
+  copy = "Przygotowywanie robotów",
+  stage = "ETAP 1/4",
+} = {}) {
+  if (gameLaunchKicker) {
+    gameLaunchKicker.textContent = kicker;
+  }
+
+  if (gameLaunchTitle) {
+    gameLaunchTitle.textContent = title;
+  }
+
+  if (gameLaunchCopy) {
+    gameLaunchCopy.textContent = copy;
+  }
+
+  if (gameLaunchStage) {
+    gameLaunchStage.textContent = stage;
+  }
+
+  if (gameLaunchBackdrop) {
+    gameLaunchBackdrop.hidden = false;
+    gameLaunchBackdrop.classList.add("active");
+  }
+}
+
+function hideGameLaunchOverlay() {
+  if (!gameLaunchBackdrop) {
+    return;
+  }
+
+  gameLaunchBackdrop.classList.remove("active");
+  gameLaunchBackdrop.hidden = true;
+}
+
+function cancelGameLaunchTransition() {
+  gameLaunchTransitionToken += 1;
+  gameLaunchTransitionBusy = false;
+  hideGameLaunchOverlay();
+}
+
+async function startGameLaunchTransition() {
+  showView("game");
 }
 
 async function maybeStartPartyGameSession() {
@@ -4425,6 +5985,14 @@ async function maybeStartPartyGameSession() {
 
 function getProfileFavoriteCharacter() {
   return getOwnedItem("characters", state.favoriteCharacterId) || getOwnedItem("characters", state.equippedCharacter) || CATALOG.characters[0];
+}
+
+function getSelectedProfilePhoto() {
+  return getOwnedItem("profilePhotos", state.selectedProfilePhotoId) || null;
+}
+
+function getProfileVisualItem() {
+  return getSelectedProfilePhoto() || getProfileFavoriteCharacter();
 }
 
 function getProfileFavoritePet() {
@@ -4678,6 +6246,7 @@ function buildPublicProfilePayload() {
     robotsDefeatedTotal: Number(state.robotsDefeatedTotal || 0),
     ownedCharactersCount: state.ownedCharacters.length,
     ownedPetsCount: state.ownedPets.length,
+    profilePhotoId: sanitizeStoredId(state.selectedProfilePhotoId),
     favoriteCharacterId: favoriteCharacter?.id || "",
     favoritePetId: favoritePet?.id || "",
     equippedCharacterId: sanitizeStoredId(state.equippedCharacter),
@@ -4844,13 +6413,16 @@ async function syncRemoteSaveBlob() {
 }
 
 async function saveProfileDetails() {
-  if (!profileNameInput) {
+  const dynamicNameInput = document.getElementById("profile-name-input-dynamic");
+
+  if (!dynamicNameInput) {
     return;
   }
 
-  const nextNickname = sanitizePlayerNickname(profileNameInput.value);
-  const nextCharacterId = sanitizeStoredId(profileFavoriteCharacterSelect?.value);
-  const nextPetId = sanitizeStoredId(profileFavoritePetSelect?.value);
+  const nextNickname = sanitizePlayerNickname(dynamicNameInput.value);
+  const currentNickname = getPlayerNickname();
+  const renamePrice = getNicknameChangePrice();
+  const saveButton = profileEditPanel?.querySelector("[data-profile-name-save]") || profileSaveNameButton;
 
   if (!nextNickname) {
     openModal({
@@ -4862,10 +6434,27 @@ async function saveProfileDetails() {
     return;
   }
 
-  profileSaveNameButton.disabled = true;
+  if (nextNickname === currentNickname) {
+    closeProfileEditSection();
+    return;
+  }
+
+  if (renamePrice > state.coins) {
+    openModal({
+      title: "Brakuje monet",
+      message: `Brakuje Ci ${renamePrice - state.coins} monet do zmiany nazwy.`,
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  if (saveButton) {
+    saveButton.disabled = true;
+  }
 
   try {
-    if (nextNickname !== getPlayerNickname() && socialProfile.ready) {
+    if (socialProfile.ready) {
       const reserved = await tryClaimRemoteNickname(nextNickname);
       if (!reserved) {
         openModal({
@@ -4878,19 +6467,21 @@ async function saveProfileDetails() {
       }
     }
 
-    state.playerNickname = nextNickname;
-    state.nicknamePromptSeen = true;
-
-    if (nextCharacterId && state.ownedCharacters.includes(nextCharacterId)) {
-      state.favoriteCharacterId = nextCharacterId;
+    if (renamePrice > 0) {
+      state.coins = Math.max(0, state.coins - renamePrice);
     }
 
-    state.favoritePetId = nextPetId && state.ownedPets.includes(nextPetId) ? nextPetId : "";
+    state.playerNickname = nextNickname;
+    state.nicknamePromptSeen = true;
+    state.nicknameChangeCount = Math.max(0, Number(state.nicknameChangeCount || 0)) + 1;
     saveState();
-    ui.profileEditMode = false;
+    closeProfileEditSection();
     renderAll();
+    scheduleRemoteProfileSync(true);
   } finally {
-    profileSaveNameButton.disabled = false;
+    if (saveButton) {
+      saveButton.disabled = false;
+    }
   }
 }
 
@@ -5237,23 +6828,78 @@ async function decryptTextWithSecret(ciphertext, ivBase64, secretBase64) {
 function renderStore() {
   ensureStoreOffersCurrent();
   storeGrid.className = "store-main";
-  const crate = CATALOG.crates[0];
+  if (viewNodes.store) {
+    viewNodes.store.dataset.storeMode = ui.storeMode;
+  }
+  if (ui.storeMode === MAGICIANS_PET_STORE_MODE) {
+    storeGrid.innerHTML = buildMagiciansPetKeyBooth();
+    syncBrokenAssets(storeGrid);
+    syncAnimatedAssets(storeGrid);
+
+    if (ui.currentView === "store") {
+      queueStoreViewportSync();
+    }
+    return;
+  }
+
+  if (ui.storeMode === WINTER_PET_STORE_MODE) {
+    storeGrid.innerHTML = [
+      buildWinterPetKeyBooth(),
+      buildWinterMagiciansPetReturnBooth(),
+    ].filter(Boolean).join("");
+    syncBrokenAssets(storeGrid);
+    syncAnimatedAssets(storeGrid);
+
+    if (ui.currentView === "store") {
+      queueStoreViewportSync();
+    }
+    return;
+  }
+
+  const woodenCrate = CATALOG.crates.find((entry) => entry.id === "drewniana-skrzynia") || CATALOG.crates[0];
+  const jungleCrate = CATALOG.crates.find((entry) => entry.id === "dzunglowa-skrzynia") || null;
   const winterBundle = CATALOG.bundles[0];
   const dailyCharacters = getCurrentStoreOfferItems("characters");
 
   const booths = [
-    buildWinterBundleBooth(winterBundle),
     buildDailyCharacterBooth(dailyCharacters),
-    buildCrateShopBooth(crate),
+    buildCrateShopBooth(woodenCrate),
     buildCoinBooth(),
     buildDiamondBooth(),
     buildTrophyBooth(),
+    buildJungleCrateShopBooth(jungleCrate),
+    buildWinterBundleBooth(winterBundle),
     buildStoreCatalogBooth(),
   ].filter(Boolean);
 
   storeGrid.innerHTML = booths.join("");
   syncBrokenAssets(storeGrid);
   syncAnimatedAssets(storeGrid);
+
+  if (ui.currentView === "store") {
+    queueStoreViewportSync();
+  }
+}
+
+function queueStoreViewportSync() {
+  window.requestAnimationFrame(() => {
+    if (ui.currentView !== "store") {
+      return;
+    }
+
+    const storePanel = viewNodes.store?.querySelector(".section-panel");
+
+    if (storePanel) {
+      storePanel.scrollTop = 0;
+    }
+
+    if (!storeGridWrap) {
+      return;
+    }
+
+    storeGridWrap.scrollLeft = 0;
+    ui.storeScrollLeft = 0;
+  });
 }
 
 function getStoreOffersSignature() {
@@ -5275,7 +6921,7 @@ function updateStoreRefreshNote() {
     return;
   }
 
-  refreshNote.textContent = `Nowe oferty codziennie o 09:00. Za ${formatRemainingTime(getStoreRefreshRemainingMs())}.`;
+  refreshNote.textContent = `ZA ${formatStoreRefreshCountdown(getStoreRefreshRemainingMs())}`;
 }
 
 function refreshStoreViewTick() {
@@ -5294,29 +6940,184 @@ function hasCompletedMagiciansWorld() {
   return hasClaimedWinterUnlockReward();
 }
 
-function getCurrencyIconSrc(currency = "coins") {
-  return currency === "diamonds" ? TROPHY_DIAMOND_IMAGE : "./monety_1.png";
+function getStoreWorldThemeIdForTrophyWorldId(worldId = getActiveTrophyWorldId()) {
+  return worldId === "alley" ? "magicians" : worldId;
+}
+
+function getCurrencyBalance(currency = "coins") {
+  if (currency === "diamonds") {
+    return Number(state.diamonds || 0);
+  }
+
+  if (currency === "plato-keys") {
+    return Math.max(0, Number(state.platoKeys || 0));
+  }
+
+  return Number(state.coins || 0);
+}
+
+function getCurrencyDisplayName(currency = "coins", amount = 0) {
+  if (currency === "diamonds") {
+    return Math.abs(Number(amount || 0)) === 1 ? "diamentu" : "diamentow";
+  }
+
+  if (currency === "plato-keys") {
+    return formatPolishCountdownUnit(amount, "klucza PlatoYI", "kluczy PlatoYI", "kluczy PlatoYI");
+  }
+
+  return Math.abs(Number(amount || 0)) === 1 ? "monety" : "monet";
+}
+
+function getPlatoKeyThemeForWorld(worldId = "alley") {
+  return worldId === "alley" ? "magicians" : "winter";
+}
+
+function getStorePlatoKeyTheme() {
+  return ui.storeMode === WINTER_PET_STORE_MODE ? "winter" : "magicians";
+}
+
+function getPlatoKeyImageForTheme(keyTheme = "magicians") {
+  return keyTheme === "winter" ? WINTER_PLATOYA_KEY_IMAGE : MAGICIANS_PLATOYA_KEY_IMAGE;
+}
+
+function getRewardSceneWorldThemeFromCharacter(item) {
+  const worldTheme = getStoreCharacterWorldTheme(item).id;
+  return worldTheme === "magicians" ? "alley" : worldTheme;
+}
+
+function getRewardSceneWorldThemeFromPet(item) {
+  if (!item) {
+    return "";
+  }
+
+  if (item.unlockWorld === "winter") {
+    return "winter";
+  }
+
+  if (item.unlockWorld === "tower") {
+    return "tower";
+  }
+
+  if (item.unlockWorld === "alley" || item.categoryId === "magicy") {
+    return "alley";
+  }
+
+  return "";
+}
+
+function getRewardSceneWorldTheme(kind, item) {
+  if (!item) {
+    return "";
+  }
+
+  if (kind === "characters") {
+    return getRewardSceneWorldThemeFromCharacter(item);
+  }
+
+  if (kind === "pets") {
+    return getRewardSceneWorldThemeFromPet(item);
+  }
+
+  return "";
+}
+
+function getCurrencyIconSrc(currency = "coins", options = {}) {
+  if (currency === "diamonds") {
+    return TROPHY_DIAMOND_IMAGE;
+  }
+
+  if (currency === "plato-keys") {
+    return getPlatoKeyImageForTheme(options.keyTheme || getStorePlatoKeyTheme());
+  }
+
+  return "./assets/currencies/monety_1.png";
 }
 
 function getCurrencyIconAlt(currency = "coins") {
-  return currency === "diamonds" ? "Diamenty" : "Monety";
+  if (currency === "diamonds") {
+    return "Diamenty";
+  }
+
+  if (currency === "plato-keys") {
+    return "Klucze PlatoYI";
+  }
+
+  return "Monety";
 }
 
-function buildCurrencyAmountMarkup(amount, currency = "coins") {
+function buildCurrencyAmountMarkup(amount, currency = "coins", options = {}) {
+  const keyThemeAttribute = currency === "plato-keys"
+    ? ` data-key-theme="${options.keyTheme || getStorePlatoKeyTheme()}"`
+    : "";
+
   return `
-    <span class="price-inline" data-currency="${currency}">
+    <span class="price-inline" data-currency="${currency}"${keyThemeAttribute}>
       <span class="price-amount">${amount} x</span>
-      <img class="price-icon" src="${getCurrencyIconSrc(currency)}" alt="${getCurrencyIconAlt(currency)}" />
+      <img class="price-icon" src="${getCurrencyIconSrc(currency, options)}" alt="${getCurrencyIconAlt(currency)}" />
     </span>
   `;
 }
 
-function buildCurrencyPriceChipMarkup(amount, currency = "coins") {
+function buildCurrencyPriceChipMarkup(amount, currency = "coins", options = {}) {
   return `
     <div class="item-price price-chip" data-currency="${currency}">
-      ${buildCurrencyAmountMarkup(amount, currency)}
+      ${buildCurrencyAmountMarkup(amount, currency, options)}
     </div>
   `;
+}
+
+function getMagiciansPetShopItems() {
+  return CATALOG.pets.filter((item) => item.categoryId === "magicy");
+}
+
+function getWinterPetShopItems() {
+  return CATALOG.pets.filter((item) => item.unlockWorld === "winter" && ["niedzwiedz-polarny", "sniezynka", "sowa"].includes(item.id));
+}
+
+function getMagiciansPetKeyPrice(item, storefrontWorldId = "alley") {
+  const basePrice = item?.id === "pies-magik" ? 1 : 3;
+  return storefrontWorldId === "winter" ? basePrice * 2 : basePrice;
+}
+
+function getWinterPetKeyPrice(item) {
+  return item?.id === "niedzwiedz-polarny" ? 1 : 3;
+}
+
+function formatPlatoKeyCountText(amount) {
+  const normalizedAmount = Math.max(0, Number(amount || 0));
+  return `${normalizedAmount} ${formatPolishCountdownUnit(normalizedAmount, "klucz", "klucze", "kluczy")} PlatoYI`;
+}
+
+function formatPlatoKeyCountLabel(amount) {
+  return formatPlatoKeyCountText(amount).toUpperCase();
+}
+
+function changeCurrencyBalance(currency = "coins", amount = 0) {
+  const normalizedAmount = Number(amount || 0);
+
+  if (currency === "diamonds") {
+    state.diamonds = Math.max(0, Number(state.diamonds || 0) + normalizedAmount);
+    return;
+  }
+
+  if (currency === "plato-keys") {
+    state.platoKeys = Math.max(0, Number(state.platoKeys || 0) + normalizedAmount);
+    return;
+  }
+
+  state.coins = Math.max(0, Number(state.coins || 0) + normalizedAmount);
+}
+
+function buildStoreInsufficientBalanceMessage(currency = "coins") {
+  if (currency === "diamonds") {
+    return "Na razie nie masz tylu diamentow, aby kupic ten przedmiot.";
+  }
+
+  if (currency === "plato-keys") {
+    return "Na razie nie masz tylu kluczy PlatoYI, aby kupic tego PlatoYasa.";
+  }
+
+  return "Na razie nie masz tyle monet, aby kupic ten przedmiot.";
 }
 
 function buildPreviewAssetMarkup(item, options = {}) {
@@ -5326,6 +7127,7 @@ function buildPreviewAssetMarkup(item, options = {}) {
   const videoClass = options.videoClass || imageClass.replace("asset-image", "asset-video");
   const imageSrc = options.imageSrc || item?.image || "";
   const previewVideo = options.usePreviewVideo === false ? "" : item?.previewVideo || "";
+  const usePoster = options.usePoster !== false && item?.previewPoster !== false;
   const elementId = options.elementId ? ` id="${options.elementId}"` : "";
 
   if (previewVideo) {
@@ -5334,7 +7136,7 @@ function buildPreviewAssetMarkup(item, options = {}) {
         ${elementId}
         class="${videoClass}"
         src="${previewVideo}"
-        poster="${imageSrc}"
+        ${usePoster && imageSrc ? `poster="${imageSrc}"` : ""}
         autoplay
         muted
         loop
@@ -5395,10 +7197,14 @@ function isStoreCharacterVisibleInShop(item) {
 function buildStoreOfferCard(kind, item, options = {}) {
   const price = Number(options.price ?? item.price ?? 0);
   const currency = options.currency || "coins";
+  const balance = getCurrencyBalance(currency);
+  const alreadyOwned = isSinglePurchaseStoreItem(kind) && isOwned(kind, item.id);
   const buttonLabel = options.buttonLabel || buildCurrencyAmountMarkup(price, currency);
+  const pricingMarkup = options.pricingMarkup || "";
   const disabled =
     Boolean(options.disabled) ||
-    (!options.allowInsufficientPreview && state.coins < price);
+    alreadyOwned ||
+    (!options.allowInsufficientPreview && balance < price);
   const note =
     Object.prototype.hasOwnProperty.call(options, "note")
       ? options.note
@@ -5430,6 +7236,7 @@ function buildStoreOfferCard(kind, item, options = {}) {
         })}
       </div>
       <p class="item-title">${item.name}</p>
+      ${pricingMarkup}
       ${badge}
       ${oldPrice}
       ${note ? `<p class="item-note">${note}</p>` : ""}
@@ -5438,6 +7245,8 @@ function buildStoreOfferCard(kind, item, options = {}) {
           class="pixel-button small-button"
           data-store-buy="${item.id}"
           data-store-kind="${kind}"
+          data-store-currency="${currency}"
+          data-store-price="${price}"
           ${buttonAttributes}
           ${disabled ? "disabled" : ""}
         >
@@ -5471,7 +7280,7 @@ function getStoreCharacterWorldTheme(item) {
   const worldId = item?.storeWorld || item?.worldTheme || item?.unlockWorld;
 
   if (worldId === "tower") {
-    return { id: "tower", label: "SWIAT WYSOKIEJ WIEZY" };
+    return { id: "tower", label: "SWIAT DŻUNGLI" };
   }
 
   if (worldId === "winter") {
@@ -5525,7 +7334,12 @@ function buildWinterBundleBooth(bundle) {
 }
 
 function buildDailyCharacterBooth(items = []) {
-  const refreshIn = formatRemainingTime(getStoreRefreshRemainingMs());
+  if (items.length === 0 && getActiveStoreWorldId() === "tower") {
+    return "";
+  }
+
+  const refreshTheme = getActiveStoreWorldId();
+  const refreshIn = formatStoreRefreshCountdown(getStoreRefreshRemainingMs());
   const cards = items.length > 0
     ? items
       .slice(0, 2)
@@ -5547,10 +7361,154 @@ function buildDailyCharacterBooth(items = []) {
     <section class="store-booth store-character-booth">
       <div class="store-booth-copy">
         <p class="item-title">2 dzisiejsze postacie sklepu</p>
-        <p class="item-note store-refresh-note">Nowe oferty codziennie o 09:00. Za ${refreshIn}.</p>
+        <div class="store-refresh-frame" data-store-world="${refreshTheme}">
+          <p class="store-refresh-kicker">ODŚWIEŻENIE OFERT</p>
+          <p class="item-note store-refresh-note">ZA ${refreshIn}</p>
+        </div>
       </div>
       <div class="store-booth-grid">
         ${cards}
+      </div>
+    </section>
+  `;
+}
+
+function buildMagiciansPetKeyBooth() {
+  const items = getMagiciansPetShopItems();
+
+  if (items.length === 0) {
+    return "";
+  }
+
+  return `
+    <section class="store-booth store-magicians-key-booth">
+      <div class="store-booth-copy">
+        <p class="item-title">Sklep PlatoYI Magikow</p>
+        <p class="item-note">Masz teraz ${formatPlatoKeyCountText(state.platoKeys)}. Tutaj kupujesz tylko PlatoYe ze Świata Magikow.</p>
+      </div>
+      <div class="store-booth-grid">
+        ${items
+          .map((item) => {
+            const price = getMagiciansPetKeyPrice(item, "alley");
+            const alreadyOwned = state.ownedPets.includes(item.id);
+            const oldPrice = price * 2;
+
+            return buildStoreOfferCard("pets", item, {
+              price,
+              currency: "plato-keys",
+              pricingMarkup: alreadyOwned
+                ? `<div class="store-key-price-stack"><p class="store-key-price-owned">POSIADASZ</p></div>`
+                : `
+                  <div class="store-key-price-stack discount">
+                    <p class="store-key-price-old">${buildCurrencyAmountMarkup(oldPrice, "plato-keys", { keyTheme: "magicians" })}</p>
+                    <p class="store-key-price-now">${buildCurrencyAmountMarkup(price, "plato-keys", { keyTheme: "magicians" })}</p>
+                  </div>
+                `,
+              note: "",
+              disabled: alreadyOwned,
+              buttonLabel: alreadyOwned ? "POSIADASZ" : "ODBIERZ",
+              extraAction: `<button class="pixel-button small-button" data-pet-description="${item.id}" type="button">MOC</button>`,
+            });
+          })
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function buildWinterPetKeyBalanceBanner() {
+  return `
+    <section class="store-key-balance-banner" data-key-theme="winter" aria-label="Saldo kluczy PlatoYI">
+      <img class="store-key-balance-icon" src="${WINTER_PLATOYA_KEY_IMAGE}" alt="Klucz PlatoYI" />
+      <p class="store-key-balance-value">${state.platoKeys}</p>
+    </section>
+  `;
+}
+
+function buildWinterPetStoreExitButton() {
+  return `
+    <div class="store-mini-exit">
+      <button class="pixel-button small-button" data-store-exit-view="trophies" type="button">WROC</button>
+    </div>
+  `;
+}
+
+function buildWinterPetKeyBooth() {
+  const items = getWinterPetShopItems();
+
+  if (items.length === 0) {
+    return "";
+  }
+
+  return `
+    ${buildWinterPetKeyBalanceBanner()}
+    ${buildWinterPetStoreExitButton()}
+    <section class="store-booth store-magicians-key-booth store-winter-pet-booth">
+      <div class="store-booth-copy">
+        <p class="item-title">Zimowe PlatoYe</p>
+      </div>
+      <div class="store-booth-grid">
+        ${items
+          .map((item) => {
+            const price = getWinterPetKeyPrice(item);
+            const alreadyOwned = state.ownedPets.includes(item.id);
+            const oldPrice = price * 2;
+
+            return buildStoreOfferCard("pets", item, {
+              price,
+              currency: "plato-keys",
+              pricingMarkup: alreadyOwned
+                ? `<div class="store-key-price-stack"><p class="store-key-price-owned">POSIADASZ</p></div>`
+                : `
+                  <div class="store-key-price-stack discount">
+                    <p class="store-key-price-old">${buildCurrencyAmountMarkup(oldPrice, "plato-keys", { keyTheme: "winter" })}</p>
+                    <p class="store-key-price-now">${buildCurrencyAmountMarkup(price, "plato-keys", { keyTheme: "winter" })}</p>
+                  </div>
+                `,
+              note: "",
+              disabled: alreadyOwned,
+              buttonLabel: alreadyOwned ? "POSIADASZ" : "ODBIERZ",
+              extraAction: `<button class="pixel-button small-button" data-pet-description="${item.id}" type="button">MOC</button>`,
+            });
+          })
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function buildWinterMagiciansPetReturnBooth() {
+  const items = getMagiciansPetShopItems();
+
+  if (items.length === 0) {
+    return "";
+  }
+
+  return `
+    <section class="store-booth store-magicians-key-booth store-winter-pet-booth">
+      <div class="store-booth-copy">
+        <p class="item-title">Magiczne PlatoYe w zimie</p>
+        <p class="item-note">Te PlatoYe wracaja w Świecie Zimowym, ale kosztuja juz podwojona liczbe kluczy.</p>
+      </div>
+      <div class="store-booth-grid">
+        ${items
+          .map((item) => {
+            const price = getMagiciansPetKeyPrice(item, "winter");
+            const alreadyOwned = state.ownedPets.includes(item.id);
+
+            return buildStoreOfferCard("pets", item, {
+              price,
+              currency: "plato-keys",
+              pricingMarkup: alreadyOwned
+                ? `<div class="store-key-price-stack"><p class="store-key-price-owned">POSIADASZ</p></div>`
+                : `<div class="store-key-price-stack"><p class="store-key-price-now">${buildCurrencyAmountMarkup(price, "plato-keys", { keyTheme: "winter" })}</p></div>`,
+              note: "",
+              disabled: alreadyOwned,
+              buttonLabel: alreadyOwned ? "POSIADASZ" : "ODBIERZ",
+              extraAction: `<button class="pixel-button small-button" data-pet-description="${item.id}" type="button">MOC</button>`,
+            });
+          })
+          .join("")}
       </div>
     </section>
   `;
@@ -5591,7 +7549,6 @@ function buildStoreCatalogBooth() {
               </div>
               <p class="item-title">${item.name}</p>
               ${buildCurrencyPriceChipMarkup(item.price, "coins")}
-              <p class="item-note">${item.storeNote || "Sklepowa postac kolekcjonerska."}</p>
               <span class="item-badge">KATALOG</span>
             </article>
           `;
@@ -5603,6 +7560,10 @@ function buildStoreCatalogBooth() {
 }
 
 function buildCrateShopBooth(crate) {
+  if (!crate) {
+    return "";
+  }
+
   const packs = [
     { id: "crate-pack-1", amount: 1, price: 20 },
     { id: "crate-pack-2", amount: 2, price: 35 },
@@ -5613,7 +7574,7 @@ function buildCrateShopBooth(crate) {
       <div class="store-booth-copy">
         <div class="store-booth-head">
           <p class="item-title">Skrzynie</p>
-          <button class="circle-icon-button" data-chest-odds="store" aria-label="Szanse skrzyni">?</button>
+          <button class="circle-icon-button" data-chest-odds="${crate.id}" aria-label="Szanse skrzyni">?</button>
         </div>
       </div>
       <div class="store-booth-grid">
@@ -5640,6 +7601,51 @@ function buildCrateShopBooth(crate) {
             `
           )
           .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function buildJungleCrateShopBooth(crate) {
+  if (!crate || getActiveStoreWorldId() !== "tower") {
+    return "";
+  }
+
+  const packs = [
+    { id: "jungle-crate-pack-1", amount: 1, price: 50 },
+    { id: "jungle-crate-pack-2", amount: 2, price: 95 },
+  ];
+
+  return `
+    <section class="store-booth">
+      <div class="store-booth-copy">
+        <div class="store-booth-head">
+          <p class="item-title">Skrzynie Dżungli</p>
+          <button class="circle-icon-button" data-chest-odds="${crate.id}" aria-label="Szanse skrzyni">?</button>
+        </div>
+        <p class="item-note">Ta skrzynia daje tylko diamenty i może też wyrzucić dżunglowego PlatoYasa.</p>
+      </div>
+      <div class="store-booth-grid">
+        ${packs.map((pack) => `
+          <article class="item-card store-compact-card store-world-card" data-store-world="tower">
+            <p class="store-world-ribbon" data-store-world="tower">SWIAT DŻUNGLI</p>
+            <div class="item-art">
+              <img
+                class="item-image asset-image"
+                src="${crate.image}"
+                alt="${crate.name}"
+                data-fallback-text="${crate.fallbackText}"
+              />
+              <div class="asset-fallback">${crate.fallbackText}</div>
+            </div>
+            <p class="item-title">${pack.amount} x ${crate.name}</p>
+            <div class="card-actions">
+              <button class="pixel-button small-button" data-buy-crate-pack="${pack.id}" ${state.diamonds >= pack.price ? "" : "disabled"}>
+                ${buildCurrencyAmountMarkup(pack.price, "diamonds")}
+              </button>
+            </div>
+          </article>
+        `).join("")}
       </div>
     </section>
   `;
@@ -5860,6 +7866,30 @@ function formatRemainingTime(ms) {
   return `${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
 }
 
+function formatPolishCountdownUnit(value, singular, paucal, plural) {
+  const absolute = Math.abs(Number(value || 0));
+  const lastTwoDigits = absolute % 100;
+  const lastDigit = absolute % 10;
+
+  if (absolute === 1) {
+    return singular;
+  }
+
+  if (lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 12 || lastTwoDigits > 14)) {
+    return paucal;
+  }
+
+  return plural;
+}
+
+function formatStoreRefreshCountdown(ms) {
+  const totalMinutes = Math.max(0, Math.ceil(ms / 60000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  return `${hours} ${formatPolishCountdownUnit(hours, "GODZINĘ", "GODZINY", "GODZIN")}, ${minutes} ${formatPolishCountdownUnit(minutes, "MINUTĘ", "MINUTY", "MINUT")}`;
+}
+
 function getClaimableTrophyRewards(worldId) {
   const world = getTrophyWorldById(worldId);
 
@@ -5922,8 +7952,8 @@ function getTrophyWorldOverlayConfig(worldId) {
       theme: "tower",
       visibility: "always",
       align: "start",
-      image: "./ładowanie_3.jpeg",
-      fallbackText: "WIEZA",
+      image: "./assets/alley/jungle.jpeg",
+      fallbackText: "DZUNGLA",
       message: "NAJPIERW ZAKOŃCZ ŚWIAT ZIMOWY",
     };
   }
@@ -5933,7 +7963,7 @@ function getTrophyWorldOverlayConfig(worldId) {
       theme: "winter",
       visibility: "always",
       align: "start",
-      image: "./ładowanie_2.png",
+      image: "./assets/backgrounds/ładowanie_2.png",
       fallbackText: "ZIMA",
       message: "NAJPIERW ZAKOŃCZ ŚWIAT MAGIKÓW",
     };
@@ -5946,7 +7976,7 @@ function getTrophyWorldOverlayConfig(worldId) {
       theme: "alley",
       visibility: "always",
       align: "end",
-      image: "./ładowanie_1.png",
+      image: "./assets/backgrounds/ładowanie_1.png",
       fallbackText: "MAGIA",
       message: "UKOŃCZYŁEŚ JUŻ ŚWIAT MAGIKÓW",
       actionWorldId: claimableRewards.length > 0 ? "alley" : "",
@@ -5961,7 +7991,7 @@ function getTrophyWorldOverlayConfig(worldId) {
       theme: "winter",
       visibility: "tower",
       align: "end",
-      image: "./ładowanie_2.png",
+      image: "./assets/backgrounds/ładowanie_2.png",
       fallbackText: "ZIMA",
       message: "UKOŃCZYŁEŚ JUŻ ŚWIAT ZIMOWY",
       actionWorldId: claimableRewards.length > 0 ? "winter" : "",
@@ -6073,20 +8103,20 @@ function getTrophyRewardUiState(worldId, reward) {
 function getWorldPromoVisual(worldId) {
   if (worldId === "tower") {
     return {
-      image: "./ładowanie_3.jpeg",
-      fallbackText: "WIEŻA",
+      image: "./assets/alley/jungle.jpeg",
+      fallbackText: "DZUNGLA",
     };
   }
 
   if (worldId === "winter") {
     return {
-      image: "./ładowanie_2.png",
+      image: "./assets/backgrounds/ładowanie_2.png",
       fallbackText: "ZIMA",
     };
   }
 
   return {
-    image: "./ładowanie_1.png",
+    image: "./assets/backgrounds/ładowanie_1.png",
     fallbackText: "MAGIA",
   };
 }
@@ -6120,6 +8150,25 @@ function getTrophyWorldBannerStatus(worldId) {
 function buildTrophyWorldStartCard(world) {
   const visual = getWorldPromoVisual(world.id);
   const superAlleyActive = isSuperAlleyActiveForWorld(world.id);
+  const hasPetKeyShop = world.id === "winter";
+  const keyShopMode = WINTER_PET_STORE_MODE;
+  const petKeyBalance = hasPetKeyShop
+    ? `
+      <p class="trophy-world-banner-label trophy-world-banner-keys">
+        ${formatPlatoKeyCountLabel(state.platoKeys)}
+      </p>
+    `
+    : "";
+  const petShopButton = hasPetKeyShop
+    ? `
+      <button
+        class="pixel-button small-button trophy-world-banner-button trophy-world-banner-keyshop-button"
+        data-open-pet-key-store="${keyShopMode}"
+      >
+        SKLEP ZIMOWYCH PLATOYI
+      </button>
+    `
+    : "";
 
   return `
     <article class="trophy-world-banner trophy-world-banner-start" data-world-theme="${world.id}">
@@ -6135,6 +8184,8 @@ function buildTrophyWorldStartCard(world) {
       <div class="trophy-world-banner-meta">
         <p class="trophy-world-banner-label trophy-world-banner-world">${world.name}</p>
         <p class="trophy-world-banner-label trophy-world-banner-state">${getTrophyWorldBannerStatus(world.id)}</p>
+        ${petKeyBalance}
+        ${petShopButton}
         ${superAlleyActive ? "" : `
           <button
             class="pixel-button small-button trophy-world-banner-button trophy-world-banner-super-button"
@@ -6218,6 +8269,7 @@ async function transitionToTrophyWorld(targetWorldId) {
   const previousWorld = TROPHY_WORLDS[targetIndex - 1];
   const previousVisual = getWorldPromoVisual(previousWorld.id);
   const targetVisual = getWorldPromoVisual(targetWorld.id);
+  const completionVisual = targetWorld.id === "tower" ? targetVisual : previousVisual;
   const previousWorldCompletionTitle = previousWorld.id === "alley"
     ? "UKOŃCZYŁEŚ ŚWIAT MAGIKÓW"
     : previousWorld.id === "winter"
@@ -6226,12 +8278,12 @@ async function transitionToTrophyWorld(targetWorldId) {
   const targetWorldCopy = targetWorld.id === "winter"
     ? "Możesz przejsc do Świata Zimowego"
     : targetWorld.id === "tower"
-      ? "Możesz przejsc do Świata Wysokiej Wieży"
+      ? "Możesz przejsc do Świata Dżungli"
       : `Możesz przejsc do ${targetWorld.name}`;
   const targetWorldWelcomeTitle = targetWorld.id === "winter"
     ? "Witaj w Świecie Zimowym"
     : targetWorld.id === "tower"
-      ? "Witaj w Świecie Wysokiej Wieży"
+      ? "Witaj w Świecie Dżungli"
       : `Witaj w ${targetWorld.name}`;
 
   try {
@@ -6239,8 +8291,8 @@ async function transitionToTrophyWorld(targetWorldId) {
       {
         title: previousWorldCompletionTitle,
         copy: targetWorldCopy,
-        image: previousVisual.image,
-        fallbackText: previousVisual.fallbackText,
+        image: completionVisual.image,
+        fallbackText: completionVisual.fallbackText,
         theme: previousWorld.id,
         durationMs: 2600,
       },
@@ -6280,7 +8332,14 @@ function renderTrophyRoad() {
   worldProgressValue.textContent = String(state.trophies);
   const world = getActiveTrophyWorld();
   worldTitle.textContent = world.name;
+  if (worldHeaderPanel) {
+    worldHeaderPanel.dataset.worldTheme = world.id;
+  }
+  if (trophyRoadTitleBadge) {
+    trophyRoadTitleBadge.dataset.worldTheme = world.id;
+  }
   const worldProgress = getTrophyWorldProgressPercent(world);
+  renderMagicWorldHeaderControls(world, worldProgress);
   const progressLabels = world.rewards.map((reward) => `
     <span class="trophy-world-progress-label">${reward.trophies}</span>
   `).join("");
@@ -6458,8 +8517,8 @@ function buildInventoryWorldEmptyCard(kind, worldLabel) {
     : `Brak postaci z ${worldLabel}`;
   const note = worldLabel === "Swiat Zimowy"
     ? "Gdy odblokujesz kolejne zimowe nagrody, pojawia sie tutaj."
-    : worldLabel === "Swiat Wysokiej Wiezy"
-      ? "Gdy odblokujesz kolejne nagrody z Wiezy, pojawia sie tutaj."
+    : worldLabel === "Swiat Dzungli"
+      ? "Gdy odblokujesz kolejne nagrody z Dżungli, pojawia sie tutaj."
     : "Kup cos w sklepie albo odbierz nagrode z Alei, aby uzupelnic te miejsce.";
 
   return `
@@ -6572,19 +8631,51 @@ function renderGameLoadout() {
     gamePetImage.src = pet.image;
     gamePetImage.alt = pet.name;
     gamePetImage.classList.remove("broken");
+    gamePetEntity.dataset.petId = pet.id;
   } else {
     gamePetEntity.hidden = true;
     gamePetImage.src = "";
     gamePetImage.alt = "PlatoYa";
     gamePetImage.classList.add("broken");
+    delete gamePetEntity.dataset.petId;
   }
 }
 
+function handleStoreDragStart(event) {
+  return;
+}
+
+function handleStoreDragMove(event) {
+  return;
+}
+
+function handleStoreDragEnd(event) {
+  return;
+}
+
+function handleStoreWheelScroll(event) {
+  return;
+}
+
+function handleStoreScroll() {
+  if (!storeGridWrap) {
+    return;
+  }
+
+  ui.storeScrollLeft = storeGridWrap.scrollLeft;
+}
+
 function handleStoreClick(event) {
+  if (Date.now() < storeDragState.suppressClickUntil) {
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
+
   const chestOddsButton = event.target.closest("[data-chest-odds]");
 
   if (chestOddsButton) {
-    openChestOddsModal();
+    openChestOddsModal(chestOddsButton.dataset.chestOdds || "drewniana-skrzynia");
     return;
   }
 
@@ -6628,6 +8719,14 @@ function handleStoreClick(event) {
     return;
   }
 
+  const exitButton = event.target.closest("[data-store-exit-view]");
+
+  if (exitButton) {
+    ui.storeMode = DEFAULT_STORE_MODE;
+    showView(exitButton.dataset.storeExitView || "trophies");
+    return;
+  }
+
   const button = event.target.closest("[data-store-buy]");
 
   if (!button) {
@@ -6637,6 +8736,8 @@ function handleStoreClick(event) {
   const kind = button.dataset.storeKind;
   const itemId = button.dataset.storeBuy;
   const item = CATALOG[kind].find((entry) => entry.id === itemId);
+  const currency = button.dataset.storeCurrency || "coins";
+  const price = Number(button.dataset.storePrice || item?.price || 0);
 
   if (!item) {
     return;
@@ -6673,10 +8774,10 @@ function handleStoreClick(event) {
     return;
   }
 
-  if (state.coins < item.price) {
+  if (getCurrencyBalance(currency) < price) {
     openModal({
-      title: "Za malo monet",
-      message: "Na razie nie masz tyle monet, aby kupic ten przedmiot.",
+      title: currency === "plato-keys" ? "Za malo kluczy" : currency === "diamonds" ? "Za malo diamentow" : "Za malo monet",
+      message: buildStoreInsufficientBalanceMessage(currency),
       buttonText: "OK",
       dismissible: true,
       onConfirm: closeModal,
@@ -6684,7 +8785,7 @@ function handleStoreClick(event) {
     return;
   }
 
-  buyItem(kind, item);
+  buyItem(kind, item, { currency, price });
 }
 
 function confirmAccountReset() {
@@ -6734,6 +8835,16 @@ function handleTrophyClick(event) {
     return;
   }
 
+  const openPetKeyStoreButton = event.target.closest("[data-open-pet-key-store]");
+
+  if (openPetKeyStoreButton) {
+    ui.storeMode = openPetKeyStoreButton.dataset.openPetKeyStore === WINTER_PET_STORE_MODE
+      ? WINTER_PET_STORE_MODE
+      : MAGICIANS_PET_STORE_MODE;
+    showView("store");
+    return;
+  }
+
   const transitionButton = event.target.closest("[data-trophy-transition]");
 
   if (transitionButton) {
@@ -6755,7 +8866,7 @@ function handleTrophyClick(event) {
   const chestOddsButton = event.target.closest("[data-chest-odds]");
 
   if (chestOddsButton) {
-    openChestOddsModal();
+    openChestOddsModal(chestOddsButton.dataset.chestOdds || "drewniana-skrzynia");
     return;
   }
 
@@ -6776,10 +8887,13 @@ function handleTrophyClick(event) {
   void claimTrophyReward(world, reward);
 }
 
-function buyItem(kind, item) {
+function buyItem(kind, item, options = {}) {
   if (isWorldLockedItem(item)) {
     return;
   }
+
+  const currency = options.currency || item.currency || "coins";
+  const price = Number(options.price ?? item.price ?? 0);
 
   if (isSinglePurchaseStoreItem(kind) && isOwned(kind, item.id)) {
     openModal({
@@ -6792,11 +8906,11 @@ function buyItem(kind, item) {
     return;
   }
 
-  if (state.coins < item.price) {
+  if (getCurrencyBalance(currency) < price) {
     return;
   }
 
-  state.coins -= item.price;
+  changeCurrencyBalance(currency, -price);
   ui.inventoryTab = kind;
 
   if (kind === "characters") {
@@ -6819,6 +8933,7 @@ function buyItem(kind, item) {
     image: item.image,
     name: item.name,
     previewVideo: item.previewVideo || "",
+    superTheme: getRewardSceneWorldTheme(kind, item),
     soundEffectName:
       kind === "pets"
         ? getPetVoiceEffect(item.id)
@@ -6902,7 +9017,7 @@ function playAlleyIntro() {
   return playAlleyIntroSequence([
     {
       title: "Witaj w Świecie Magików",
-      image: "./ładowanie_1.png",
+      image: "./assets/backgrounds/ładowanie_1.png",
       fallbackText: "MAGICY",
       theme: "alley",
       durationMs: 4200,
@@ -6947,7 +9062,7 @@ function renderSuperAlleyControls() {
 
   if (isActive) {
     superAlleyStatus.textContent = isTowerWorld
-      ? "Aleja Super Świata Wysokiej Wieży aktywna. Super nagrody sa odblokowane."
+      ? "Aleja Super Świata Dżungli aktywna. Super nagrody sa odblokowane."
       : isWinterWorld
         ? "Aleja Super Swiata Zimowego aktywna. Super nagrody sa odblokowane."
         : "Aleja Super aktywna. Super nagrody sa odblokowane.";
@@ -6966,13 +9081,335 @@ function renderSuperAlleyControls() {
   }
 
   superAlleyStatus.textContent = isTowerWorld
-    ? "Aktywuj Aleję Super, aby odbierac jasnozielone nagrody premium."
+    ? "Aktywuj Aleję Super, aby odbierac zielone nagrody premium Dżungli."
     : isWinterWorld
       ? "Aktywuj Aleję Super, aby odbierac jasnoniebieskie nagrody premium."
       : "Aktywuj Aleję Super, aby odbierac rozowe nagrody premium.";
   superAlleyButton.textContent = "AKTYWUJ ALEJĘ SUPER";
   superAlleyButton.disabled = false;
   superAlleyButton.classList.remove("active");
+}
+
+function renderMagicWorldHeaderControls(world, worldProgress = 0) {
+  if (!worldHeaderActions || !worldHeaderMachineButton) {
+    return;
+  }
+
+  const showMachineControls = world?.id === "alley";
+  const normalizedProgress = Math.max(0, Math.min(100, Number(worldProgress || 0)));
+
+  worldHeaderActions.hidden = !showMachineControls;
+  worldHeaderActions.setAttribute("aria-hidden", String(!showMachineControls));
+  worldHeaderMachineButton.hidden = !showMachineControls;
+  worldHeaderMachineButton.disabled = !showMachineControls;
+  if (worldHeaderMiniProgress) {
+    worldHeaderMiniProgress.hidden = true;
+    worldHeaderMiniProgress.setAttribute("aria-hidden", "true");
+  }
+  if (worldHeaderMiniProgressFill) {
+    worldHeaderMiniProgressFill.style.width = showMachineControls ? `${normalizedProgress}%` : "0%";
+  }
+
+  if (showMachineControls) {
+    syncBrokenAssets(worldHeaderActions);
+  }
+}
+
+function getMagicMachinePrizePool() {
+  return getMagiciansPetShopItems();
+}
+
+function isMagicMachineFirstPurchase() {
+  return !state.magicMachineFirstPurchaseDone;
+}
+
+function getMagicMachineCurrentCost() {
+  return isMagicMachineFirstPurchase() ? MAGIC_MACHINE_FIRST_PRICE : MAGIC_MACHINE_PRICE;
+}
+
+function pickMagicMachineRewardPet() {
+  if (isMagicMachineFirstPurchase()) {
+    return CATALOG.pets.find((item) => item.id === MAGIC_MACHINE_FIRST_REWARD_PET_ID) || null;
+  }
+
+  const prizePool = getMagicMachinePrizePool();
+  const unownedPool = prizePool.filter((item) => !state.ownedPets.includes(item.id));
+  const rollPool = unownedPool.length > 0 ? unownedPool : prizePool;
+
+  if (rollPool.length === 0) {
+    return null;
+  }
+
+  return rollPool[Math.floor(Math.random() * rollPool.length)] || null;
+}
+
+function getMagicMachineMissingKeysText(missingCount = 1) {
+  const missing = Math.max(1, Math.floor(Number(missingCount) || 1));
+
+  if (missing === 1) {
+    return "POTRZEBUJESZ JESZCZE JEDNEGO KLUCZA";
+  }
+
+  if (missing === 2) {
+    return "POTRZEBUJESZ JESZCZE DWÓCH KLUCZY";
+  }
+
+  return `POTRZEBUJESZ JESZCZE ${missing} KLUCZY`;
+}
+
+function showMagicMachineMissingKeysMessage(missingCount = 1) {
+  if (!magicMachineLabel) {
+    return;
+  }
+
+  const missingText = missingCount <= 1 ? "BRAK JEDNEGO KLUCZA" : "BRAKUJE DWÓCH KLUCZY";
+  magicMachineLabel.textContent = missingText;
+  magicMachineLabel.classList.add("missing-keys");
+
+  window.setTimeout(() => {
+    if (!magicMachineBackdrop || magicMachineBackdrop.hidden || magicMachineStage !== "buy") {
+      return;
+    }
+
+    magicMachineLabel.classList.add("fade-out");
+  }, 1050);
+
+  window.setTimeout(() => {
+    if (!magicMachineBackdrop || magicMachineBackdrop.hidden || magicMachineStage !== "buy") {
+      return;
+    }
+
+    magicMachineLabel.textContent = "MASZYNA PLATOYI";
+    magicMachineLabel.classList.remove("missing-keys");
+    magicMachineLabel.classList.remove("fade-out");
+  }, 1520);
+}
+
+function setMagicMachineMessage(message = "", priceMarkup = "") {
+  if (!magicMachineNote || !magicMachinePrice) {
+    return;
+  }
+
+  magicMachineNote.textContent = message;
+  magicMachineNote.hidden = !message;
+  magicMachinePrice.innerHTML = priceMarkup;
+  magicMachinePrice.hidden = !priceMarkup;
+}
+
+function canCloseMagicMachineBackdrop() {
+  return !magicMachineBusy && magicMachineStage === "buy";
+}
+
+function setMagicMachineSceneMode(mode = "buy") {
+  if (
+    !magicMachineScene ||
+    !magicMachineCard ||
+    !magicMachineArt ||
+    !magicMachineImage ||
+    !magicMachineLabel ||
+    !magicMachineWord ||
+    !magicMachineNote ||
+    !magicMachinePrice
+  ) {
+    return;
+  }
+
+  magicMachineStage = mode;
+  magicMachineScene.dataset.machineStage = mode;
+  magicMachineCard.dataset.machineStage = mode;
+  magicMachineArt.dataset.visual = mode === "reward" ? "reward" : "machine";
+  magicMachineArt.classList.remove("reward-visible");
+  magicMachineArt.classList.remove("blink");
+  magicMachineArt.setAttribute("aria-disabled", String(mode === "rolling" || mode === "reward"));
+  magicMachineLabel.textContent = "MASZYNA PLATOYI";
+  magicMachineLabel.hidden = false;
+  magicMachineLabel.classList.remove("missing-keys");
+  magicMachineLabel.classList.remove("fade-out");
+  magicMachineWord.hidden = true;
+
+  if (magicMachineLaunchBall) {
+    magicMachineLaunchBall.hidden = true;
+    magicMachineLaunchBall.classList.remove("active");
+  }
+  if (magicMachineBallSplit) {
+    magicMachineBallSplit.hidden = true;
+    magicMachineBallSplit.classList.remove("active");
+  }
+  if (magicMachineRewardGlow) {
+    magicMachineRewardGlow.hidden = mode !== "reward";
+  }
+  if (magicMachineRewardImage && mode !== "reward") {
+    magicMachineRewardImage.hidden = true;
+    magicMachineRewardImage.classList.remove("show");
+    magicMachineRewardImage.src = "";
+    magicMachineRewardImage.alt = "";
+  }
+
+  const fallback = magicMachineImage.nextElementSibling;
+  magicMachineImage.src = MAGIC_MACHINE_IMAGE;
+  magicMachineImage.alt = "Automat PlatoYI";
+  magicMachineImage.dataset.fallbackText = "AUTOMAT";
+  magicMachineImage.classList.toggle("split-hidden", mode === "reward");
+  magicMachineArt.setAttribute("aria-label", mode === "reward" ? "Wylosowany PlatoYA" : "Automat PlatoYI");
+  if (fallback) {
+    fallback.textContent = "AUTOMAT";
+  }
+
+  if (mode === "buy") {
+    magicMachineArt.classList.add("blink");
+    setMagicMachineMessage("");
+  } else if (mode === "rolling") {
+    setMagicMachineMessage("");
+  } else if (mode === "reward") {
+    const rewardPet = getMagicMachinePrizePool().find((item) => item.id === magicMachineRewardPetId) || null;
+    setMagicMachineMessage(rewardPet?.name?.toUpperCase?.() || "");
+  } else {
+    setMagicMachineMessage("");
+  }
+
+  syncBrokenAssets(magicMachineBackdrop || magicMachineCard);
+}
+
+function openMagicMachine() {
+  if (
+    !magicMachineBackdrop ||
+    !magicMachineScene ||
+    !magicMachineCard ||
+    !magicMachineImage ||
+    getActiveTrophyWorldId() !== "alley" ||
+    !magicMachineBackdrop.hidden
+  ) {
+    return;
+  }
+
+  if (getMagicMachinePrizePool().length === 0) {
+    openModal({
+      title: "Brak PlatoYI",
+      message: "Najpierw dodaj PlatoYe do świata magików, aby automat miał z czego losować.",
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  magicMachineSequenceId += 1;
+  magicMachineBusy = false;
+  magicMachineRewardPetId = "";
+  setMagicMachineSceneMode("buy");
+  playOneShotSound("superIntro", 0.82);
+  magicMachineBackdrop.hidden = false;
+  syncBrokenAssets(magicMachineBackdrop);
+  syncBackgroundMusic();
+}
+
+function closeMagicMachineBackdrop(shouldSyncMusic = true) {
+  if (!magicMachineBackdrop) {
+    return;
+  }
+
+  magicMachineSequenceId += 1;
+  magicMachineBusy = false;
+  magicMachineRewardPetId = "";
+  setMagicMachineSceneMode("buy");
+  magicMachineBackdrop.hidden = true;
+
+  if (shouldSyncMusic) {
+    syncBackgroundMusic();
+  }
+}
+
+async function handleMagicMachineAction() {
+  if (!magicMachineBackdrop || magicMachineBackdrop.hidden || magicMachineBusy) {
+    return;
+  }
+
+  if (magicMachineStage === "buy") {
+    await startMagicMachineRoll();
+  }
+}
+
+async function startMagicMachineRoll() {
+  if (!magicMachineBackdrop || magicMachineBackdrop.hidden || magicMachineBusy || magicMachineStage !== "buy") {
+    return;
+  }
+
+  const currentCost = getMagicMachineCurrentCost();
+  const rewardPet = pickMagicMachineRewardPet();
+
+  if (!rewardPet) {
+    openModal({
+      title: "Brak PlatoYI",
+      message: "Automat nie znalazł żadnego magicznego PlatoYasa.",
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  const keyBalance = getCurrencyBalance("plato-keys");
+  if (keyBalance < currentCost) {
+    const sequenceId = ++magicMachineSequenceId;
+    showMagicMachineMissingKeysMessage(currentCost - keyBalance);
+    setMagicMachineMessage("");
+    await wait(1700);
+
+    if (
+      sequenceId !== magicMachineSequenceId ||
+      !magicMachineBackdrop ||
+      magicMachineBackdrop.hidden ||
+      magicMachineStage !== "buy"
+    ) {
+      return;
+    }
+    return;
+  }
+
+  changeCurrencyBalance("plato-keys", -currentCost);
+  if (isMagicMachineFirstPurchase()) {
+    state.magicMachineFirstPurchaseDone = true;
+  }
+  saveState();
+  renderAll();
+
+  const sequenceId = ++magicMachineSequenceId;
+  magicMachineRewardPetId = rewardPet.id;
+  magicMachineBusy = true;
+  setMagicMachineSceneMode("rolling");
+  playOneShotSound("magicMachineRoll", 0.82);
+  await wait(940);
+
+  if (sequenceId !== magicMachineSequenceId || !magicMachineBackdrop || magicMachineBackdrop.hidden) {
+    return;
+  }
+
+  await grantMagicMachineReward(rewardPet);
+}
+
+async function grantMagicMachineReward(rewardPetOverride = null) {
+  const rewardPet = rewardPetOverride || getMagicMachinePrizePool().find((item) => item.id === magicMachineRewardPetId) || pickMagicMachineRewardPet();
+  magicMachineBusy = false;
+
+  if (!rewardPet) {
+    closeMagicMachineBackdrop();
+    return;
+  }
+
+  if (!state.ownedPets.includes(rewardPet.id)) {
+    state.ownedPets.push(rewardPet.id);
+  }
+
+  saveState();
+  renderAll();
+  closeMagicMachineBackdrop(false);
+  await showRewardShowcase({
+    image: rewardPet.image,
+    name: rewardPet.name,
+    mode: "magic",
+    autoCloseMs: 2500,
+  });
+  syncBackgroundMusic();
 }
 
 function isSuperAlleyReward(worldId, reward) {
@@ -7143,7 +9580,6 @@ async function claimTrophyCrateRewardInBatch(crate, rewards = [], options = {}) 
     image: crate.image,
     name: crate.name,
     countLabel: "Skrzynia z Alei",
-    superTheme: options.superTheme || "",
     mode: "crate",
     autoCloseMs: 1500,
     soundEffectName: "crateAward",
@@ -7174,6 +9610,8 @@ async function claimTrophyReward(world, reward, options = {}) {
     state.coins += reward.amount;
   } else if (reward.type === "diamonds") {
     state.diamonds += reward.amount;
+  } else if (reward.type === "plato-keys") {
+    state.platoKeys += reward.amount;
   } else if (reward.type === "crate") {
     const crate = CATALOG.crates.find((entry) => entry.id === reward.crateId);
     saveState();
@@ -7183,11 +9621,11 @@ async function claimTrophyReward(world, reward, options = {}) {
       const preparedSession = createChestSession(crate);
       if (batchMode) {
         await claimTrophyCrateRewardInBatch(crate, preparedSession.rewards, {
-          superTheme: rewardSuperTheme,
+          superTheme: rewardSuperTheme || getCrateRewardTheme(crate),
         });
       } else {
         void showCrateRewardScene(crate, preparedSession.rewards, {
-          superTheme: rewardSuperTheme,
+          superTheme: rewardSuperTheme || getCrateRewardTheme(crate),
         });
       }
     }
@@ -7195,6 +9633,10 @@ async function claimTrophyReward(world, reward, options = {}) {
   } else if (reward.type === "pet") {
     if (!state.ownedPets.includes(reward.itemId)) {
       state.ownedPets.push(reward.itemId);
+    }
+  } else if (reward.type === "profile-photo") {
+    if (!state.ownedProfilePhotos.includes(reward.itemId)) {
+      state.ownedProfilePhotos.push(reward.itemId);
     }
   } else if (reward.type === "character") {
     if (!state.ownedCharacters.includes(reward.itemId)) {
@@ -7205,7 +9647,7 @@ async function claimTrophyReward(world, reward, options = {}) {
   saveState();
   renderAll();
 
-  if (reward.type === "pet" || reward.type === "character") {
+  if (reward.type === "pet" || reward.type === "character" || reward.type === "profile-photo") {
     if (batchMode) {
       await showAlleyRewardScene(reward, {
         superTheme: rewardSuperTheme,
@@ -7255,6 +9697,25 @@ async function claimTrophyReward(world, reward, options = {}) {
     return;
   }
 
+  if (reward.type === "plato-keys") {
+    if (batchMode) {
+      await showPlatoKeyRewardScene(reward.amount, {
+        title: `Klucze PlatoYI z ${world.name}`,
+        autoCloseMs: 2200,
+        superTheme: rewardSuperTheme,
+        keyTheme: reward.keyTheme || getPlatoKeyThemeForWorld(world.id),
+      });
+    } else {
+      void showPlatoKeyRewardScene(reward.amount, {
+        title: `Klucze PlatoYI z ${world.name}`,
+        autoCloseMs: 2500,
+        superTheme: rewardSuperTheme,
+        keyTheme: reward.keyTheme || getPlatoKeyThemeForWorld(world.id),
+      });
+    }
+    return;
+  }
+
   openModal({
     title: "Nagroda odebrana",
     message: `${reward.label} trafia teraz na twoje konto.`,
@@ -7295,20 +9756,36 @@ function isWorldLockedItem(item) {
 
 function getTrophyRewardImage(reward) {
   if (reward.type === "coins") {
-    return { src: "./monety_1.png", fallbackText: "MONETY" };
+    return { src: COIN_REWARD_IMAGE, fallbackText: "MONETY" };
   }
 
   if (reward.type === "diamonds") {
-    return { src: TROPHY_DIAMOND_IMAGE, fallbackText: "DIAMENTY" };
+    return { src: DIAMOND_REWARD_IMAGE, fallbackText: "DIAMENTY" };
+  }
+
+  if (reward.type === "plato-keys") {
+    return {
+      src: getPlatoKeyImageForTheme(reward.keyTheme || "magicians"),
+      fallbackText: "KLUCZ",
+    };
   }
 
   if (reward.type === "crate") {
-    return { src: "./skrzynia_1.png", fallbackText: "SKRZYNIA" };
+    const crate = CATALOG.crates.find((item) => item.id === reward.crateId);
+    return {
+      src: crate?.image || "./assets/shop/skrzynia_1.png",
+      fallbackText: crate?.fallbackText || "SKRZYNIA",
+    };
   }
 
   if (reward.type === "pet") {
     const pet = CATALOG.pets.find((item) => item.id === reward.itemId);
     return { src: pet?.image || "", fallbackText: pet?.name || "PLATOYA" };
+  }
+
+  if (reward.type === "profile-photo") {
+    const profilePhoto = CATALOG.profilePhotos.find((item) => item.id === reward.itemId);
+    return { src: profilePhoto?.image || "", fallbackText: profilePhoto?.name || "PROFIL" };
   }
 
   if (reward.type === "character") {
@@ -7338,7 +9815,7 @@ function getWorldLockedMessage(item) {
   }
 
   if (item.unlockWorld === "tower") {
-    return "Ten przedmiot odblokujesz w dalszej części Świata Wysokiej Wieży.";
+    return "Ten przedmiot odblokujesz w dalszej części Świata Dżungli.";
   }
 
   return "Ten przedmiot odblokujesz w dalszej części Alei Pucharów.";
@@ -7543,14 +10020,29 @@ function setStoreCharacterPurchaseScene(item = activeStoreCharacterPurchase) {
     return;
   }
 
-  const worldTheme = getStoreCharacterWorldTheme(item);
-  const missingCoins = Math.max(0, Number(item.price || 0) - state.coins);
-  const canAfford = missingCoins === 0;
+  const isBookPet = item.kind === "book-pet";
+  const isBookGrandReward = item.kind === "book-grand-reward";
+  const isBookScene = isBookPet || isBookGrandReward;
+  const worldTheme = isBookScene ? { id: "tower", label: "SWIAT DŻUNGLI" } : getStoreCharacterWorldTheme(item);
+  const currency = item.currency || "coins";
+  const isProgressGate = currency === "progress";
+  const balance = isProgressGate ? 0 : currency === "diamonds" ? state.diamonds : state.coins;
+  const progressCurrent = Number(item.progressCurrent || 0);
+  const progressTotal = Number(item.progressTotal || 0);
+  const missingAmount = isProgressGate
+    ? Math.max(0, progressTotal - progressCurrent)
+    : Math.max(0, Number(item.price || 0) - balance);
+  const canAfford = item.alreadyOwned ? false : missingAmount === 0;
 
   if (worldTheme.id === "winter") {
     storeCharacterPurchaseScene.dataset.theme = "winter";
     if (storeCharacterPurchaseBackdrop) {
       storeCharacterPurchaseBackdrop.dataset.theme = "winter";
+    }
+  } else if (worldTheme.id === "tower") {
+    storeCharacterPurchaseScene.dataset.theme = "tower";
+    if (storeCharacterPurchaseBackdrop) {
+      storeCharacterPurchaseBackdrop.dataset.theme = "tower";
     }
   } else {
     delete storeCharacterPurchaseScene.dataset.theme;
@@ -7567,15 +10059,24 @@ function setStoreCharacterPurchaseScene(item = activeStoreCharacterPurchase) {
     alt: item.name,
   });
 
+  if (storeCharacterPurchaseKicker) {
+    storeCharacterPurchaseKicker.textContent = isBookScene ? "Księga Dżungli" : "Dzisiejsza postac sklepu";
+  }
   storeCharacterPurchaseTitle.textContent = item.name;
-  storeCharacterPurchaseCopy.textContent = "Potwierdz zakup tej postaci.";
+  storeCharacterPurchaseCopy.textContent = item.purchaseCopy || "Potwierdz zakup tej postaci.";
   storeCharacterPurchaseActions.hidden = !canAfford;
   storeCharacterPurchaseMissing.hidden = canAfford;
-  storeCharacterPurchaseMissing.textContent = `Brakuje ci ${missingCoins} monet.`;
+  storeCharacterPurchaseMissing.textContent = typeof item.missingCopy === "function"
+    ? item.missingCopy(missingAmount, progressTotal, progressCurrent)
+    : item.alreadyOwned
+      ? "Masz już tę postać."
+      : currency === "diamonds"
+      ? `Brakuje ci ${missingAmount} diamentów.`
+      : `Brakuje ci ${missingAmount} monet.`;
 
   if (storeCharacterPurchaseConfirmButton) {
     storeCharacterPurchaseConfirmButton.disabled = storeCharacterPurchaseBusy;
-    storeCharacterPurchaseConfirmButton.textContent = "Potwierdz zakup";
+    storeCharacterPurchaseConfirmButton.textContent = item.confirmLabel || "Potwierdz zakup";
   }
 }
 
@@ -7618,7 +10119,14 @@ async function confirmStoreCharacterPurchase() {
     return;
   }
 
-  if (state.coins < activeStoreCharacterPurchase.price) {
+  const item = activeStoreCharacterPurchase;
+  const currency = item.currency || "coins";
+  const isProgressGate = currency === "progress";
+  const balance = isProgressGate ? 0 : currency === "diamonds" ? state.diamonds : state.coins;
+  const progressCurrent = Number(item.progressCurrent || 0);
+  const progressTotal = Number(item.progressTotal || 0);
+
+  if ((!isProgressGate && balance < item.price) || (isProgressGate && progressCurrent < progressTotal)) {
     setStoreCharacterPurchaseScene(activeStoreCharacterPurchase);
     return;
   }
@@ -7628,7 +10136,18 @@ async function confirmStoreCharacterPurchase() {
     storeCharacterPurchaseConfirmButton.disabled = true;
   }
 
-  const item = activeStoreCharacterPurchase;
+  if (item.kind === "book-pet") {
+    closeStoreCharacterPurchase();
+    await buyBookPet(item.id);
+    return;
+  }
+
+  if (item.kind === "book-grand-reward") {
+    closeStoreCharacterPurchase();
+    await claimBookGrandReward(item.id);
+    return;
+  }
+
   closeStoreCharacterPurchase();
   buyItem("characters", item);
 }
@@ -7788,11 +10307,13 @@ function buyTrophyPack(item) {
 
 async function buyDiamondCratePack(packId) {
   const packs = {
-    "crate-pack-1": { amount: 1, price: 20 },
-    "crate-pack-2": { amount: 2, price: 35 },
+    "crate-pack-1": { amount: 1, price: 20, crateId: "drewniana-skrzynia" },
+    "crate-pack-2": { amount: 2, price: 35, crateId: "drewniana-skrzynia" },
+    "jungle-crate-pack-1": { amount: 1, price: 50, crateId: "dzunglowa-skrzynia" },
+    "jungle-crate-pack-2": { amount: 2, price: 95, crateId: "dzunglowa-skrzynia" },
   };
   const pack = packs[packId];
-  const crate = CATALOG.crates.find((entry) => entry.id === "drewniana-skrzynia");
+  const crate = CATALOG.crates.find((entry) => entry.id === pack?.crateId);
 
   if (!pack) {
     return;
@@ -7822,7 +10343,9 @@ async function buyDiamondCratePack(packId) {
 async function openPurchasedCrates(crate, amount = 1) {
   for (let index = 0; index < amount; index += 1) {
     const preparedSession = createChestSession(crate);
-    await showCrateRewardScene(crate, preparedSession.rewards, preparedSession.chestNumber);
+    await showCrateRewardScene(crate, preparedSession.rewards, {
+      superTheme: getCrateRewardTheme(crate),
+    });
     await wait(120);
   }
 }
@@ -7851,7 +10374,9 @@ function claimFreeCrate(crate) {
   saveState();
   renderAll();
   const preparedSession = createChestSession(crate);
-  void showCrateRewardScene(crate, preparedSession.rewards, preparedSession.chestNumber);
+  void showCrateRewardScene(crate, preparedSession.rewards, {
+    superTheme: getCrateRewardTheme(crate),
+  });
 }
 
 function createChestSession(crate) {
@@ -7971,7 +10496,7 @@ function renderChestSummary() {
   const summaryLines = rewards.map((reward) => reward.summaryLabel).join(", ");
 
   chestRewardCard.hidden = false;
-  chestRewardImage.src = "./skrzynia_1.png";
+  chestRewardImage.src = "./assets/shop/skrzynia_1.png";
   chestRewardImage.alt = "Podsumowanie nagród";
   chestRewardImage.classList.remove("broken");
   chestRewardTitle.textContent = "Podsumowanie";
@@ -7995,92 +10520,165 @@ function closeChestScene() {
 }
 
 function buildChestRewards(crate, chestNumber) {
+  if (crate.id === "dzunglowa-skrzynia") {
+    const diamondAmount = randomBetween(1, 20);
+    const rewards = [
+      buildChestCurrencyReward("diamonds", diamondAmount, {
+        title: "Diamenty z Dżungli",
+        note: "Ta skrzynia daje tylko diamenty oraz moze skrywac dżunglowego PlatoYasa.",
+      }),
+    ];
+    const junglePetPool = CATALOG.pets.filter(
+      (item) => item.unlockWorld === "tower" && !state.ownedPets.includes(item.id)
+    );
+
+    if (junglePetPool.length > 0 && Math.random() < 0.33) {
+      const item = junglePetPool[randomBetween(0, junglePetPool.length - 1)];
+      rewards.push(buildChestItemReward("pets", item));
+    }
+
+    return rewards;
+  }
+
   if (crate.id !== "drewniana-skrzynia") {
     return [];
   }
 
-  const rewards = [];
-  const coinAmount = rollChestCoinAmount();
+  return buildWoodenChestReward(chestNumber);
+}
 
-  rewards.push({
+function buildChestCurrencyReward(type, amount, options = {}) {
+  if (type === "diamonds") {
+    return {
+      type: "diamonds",
+      amount,
+      image: DIAMOND_REWARD_IMAGE,
+      title: options.title || "Diamenty",
+      countLabel: `+${amount} diamentow`,
+      note: options.note || "Diamenty ze skrzyni trafiaja prosto do twojego salda.",
+      summaryLabel: options.summaryLabel || `${amount} diamentow`,
+    };
+  }
+
+  return {
     type: "coins",
-    amount: coinAmount,
-    image: "./monety_1.png",
-    title: "Monety",
-    countLabel: `+${coinAmount} monet`,
-    note: "Monety ze skrzyni trafiaja prosto do twojego salda.",
-    summaryLabel: `${coinAmount} monet`,
-  });
-
-  const bonusReward = rollChestBonusReward();
-
-  if (bonusReward) {
-    rewards.push(bonusReward);
-  }
-
-  return rewards;
+    amount,
+    image: COIN_REWARD_IMAGE,
+    title: options.title || "Monety",
+    countLabel: `+${amount} monet`,
+    note: options.note || "Monety ze skrzyni trafiaja prosto do twojego salda.",
+    summaryLabel: options.summaryLabel || `${amount} monet`,
+  };
 }
 
-function rollChestCoinAmount() {
-  const roll = Math.random() * 98;
+function getChestEligibleStoreCharactersForCurrentWorld() {
+  const worldThemeId = getStoreWorldThemeIdForTrophyWorldId(getActiveTrophyWorldId());
 
-  if (roll < 90) {
-    return randomBetween(100, 2000);
-  }
-
-  if (roll < 95) {
-    return randomBetween(2001, 4000);
-  }
-
-  return randomBetween(4001, 10000);
-}
-
-function getChestEligibleItems(kind) {
-  return CATALOG[kind].filter(
+  return CATALOG.characters.filter(
     (item) =>
-      !item.unlockWorld &&
+      getStoreCharacterWorldTheme(item).id === worldThemeId &&
       Number(item.price || 0) > 0 &&
-      !isOwned(kind, item.id)
+      !state.ownedCharacters.includes(item.id)
   );
 }
 
-function buildChestItemReward(kind, item) {
+function getChestEligibleWorldPetsForCurrentWorld() {
+  const worldId = getActiveTrophyWorldId();
+
+  return CATALOG.pets.filter(
+    (item) =>
+      item.unlockWorld === worldId &&
+      !state.ownedPets.includes(item.id)
+  );
+}
+
+function buildChestItemReward(kind, item, options = {}) {
   return {
     type: "item",
     kind,
     item,
     image: item.image,
-    title: item.name,
-    countLabel: kind === "characters" ? "Postac ze skrzyni" : "PlatoYa ze skrzyni",
-    note: "Nagroda bonusowa ze skrzyni trafia do twojej szafy.",
-    summaryLabel: item.name,
+    title: options.title || item.name,
+    countLabel: options.countLabel || (kind === "characters" ? "Postac ze skrzyni" : "PlatoYa ze skrzyni"),
+    note: options.note || (item.unlockWorld === "tower"
+      ? "Dżunglowa nagroda bonusowa trafia do twojej szafy."
+      : "Nagroda bonusowa ze skrzyni trafia do twojej szafy."),
+    summaryLabel: options.summaryLabel || item.name,
   };
 }
 
-function rollChestBonusReward() {
-  const petPool = getChestEligibleItems("pets");
-  const characterPool = getChestEligibleItems("characters");
-  const roll = Math.random() * 100;
+function buildWoodenChestReward() {
+  const activeWorld = getActiveTrophyWorld();
+  const characterPool = getChestEligibleStoreCharactersForCurrentWorld();
+  const petPool = getChestEligibleWorldPetsForCurrentWorld();
+  const rewardPool = [
+    {
+      chance: 60,
+      create: () => buildChestCurrencyReward("coins", rollWoodenChestCoinAmount()),
+    },
+    {
+      chance: 37,
+      create: () => buildChestCurrencyReward("diamonds", randomBetween(3, 35)),
+    },
+  ];
 
-  if (roll < 1.5) {
-    if (petPool.length === 0) {
-      return null;
-    }
-
-    const item = petPool[randomBetween(0, petPool.length - 1)];
-    return buildChestItemReward("pets", item);
+  if (characterPool.length > 0) {
+    rewardPool.push({
+      chance: 2.5,
+      create: () => {
+        const item = characterPool[randomBetween(0, characterPool.length - 1)];
+        return buildChestItemReward("characters", item, {
+          note: `Sklepowa postac z ${activeWorld?.name || "biezacego swiata"} trafia do twojej szafy.`,
+        });
+      },
+    });
   }
 
-  if (roll < 3) {
-    if (characterPool.length === 0) {
-      return null;
-    }
-
-    const item = characterPool[randomBetween(0, characterPool.length - 1)];
-    return buildChestItemReward("characters", item);
+  if (petPool.length > 0) {
+    rewardPool.push({
+      chance: 0.5,
+      create: () => {
+        const item = petPool[randomBetween(0, petPool.length - 1)];
+        return buildChestItemReward("pets", item, {
+          note: `PlatoYa z Alei ${activeWorld?.name || "biezacego swiata"} trafia do twojej kolekcji.`,
+        });
+      },
+    });
   }
 
-  return null;
+  const totalChance = rewardPool.reduce((sum, reward) => sum + reward.chance, 0);
+  let roll = Math.random() * totalChance;
+
+  for (const reward of rewardPool) {
+    if (roll < reward.chance) {
+      return [reward.create()];
+    }
+    roll -= reward.chance;
+  }
+
+  return [rewardPool[0].create()];
+}
+
+function rollWoodenChestCoinAmount() {
+  const buckets = [
+    { weight: 40, min: 50, max: 1500 },
+    { weight: 13, min: 1500, max: 6000 },
+    { weight: 5, min: 6000, max: 9000 },
+    { weight: 0.7, min: 9000, max: 10000 },
+    { weight: 0.3, min: 10000, max: 15000 },
+  ];
+  const totalWeight = buckets.reduce((sum, bucket) => sum + bucket.weight, 0);
+  let roll = Math.random() * totalWeight;
+
+  for (const bucket of buckets) {
+    if (roll < bucket.weight) {
+      return randomBetween(bucket.min, bucket.max);
+    }
+    roll -= bucket.weight;
+  }
+
+  const fallbackBucket = buckets[0];
+  return randomBetween(fallbackBucket.min, fallbackBucket.max);
 }
 
 function getFreeCrateCount(crateId) {
@@ -8123,7 +10721,7 @@ async function maybeRunIntro() {
       renderAll();
 
       await showRewardShowcase({
-        image: "./postac_1.png",
+        image: "./assets/characters/postac_1.png",
         name: "Magik Millo",
         soundEffectName: "characterUnlock",
       });
@@ -9233,24 +11831,30 @@ function showRewardShowcase({
   name,
   previewVideo = "",
   superTheme = "",
+  keyTheme = "",
   countLabel = "",
+  hideName = false,
   mode = "default",
   autoCloseMs = 2800,
   interactionMode = "auto",
   onInteract = null,
   soundEffectName = null,
 }) {
-  if (!image || !name || !alleyRewardBackdrop || !alleyRewardCard) {
+  if (!image || !alleyRewardBackdrop || !alleyRewardCard) {
     return Promise.resolve();
   }
 
+  const safeName = name || "Nagroda";
+
   if (soundEffectName) {
-    playOneShotSound(soundEffectName, mode === "coin" || mode === "diamond" ? 0.82 : 0.8);
+    playOneShotSound(soundEffectName, mode === "coin" || mode === "diamond" || mode === "key" ? 0.82 : 0.8);
   }
 
   closeAlleyRewardScene();
   alleyRewardBackdrop.classList.toggle("coin-mode", mode === "coin");
   alleyRewardBackdrop.classList.toggle("diamond-mode", mode === "diamond");
+  alleyRewardBackdrop.classList.toggle("magic-mode", mode === "magic");
+  alleyRewardBackdrop.classList.toggle("key-mode", mode === "key");
   alleyRewardBackdrop.classList.toggle("trophy-mode", mode === "trophy");
   alleyRewardBackdrop.classList.toggle("payment-mode", mode === "payment");
   alleyRewardBackdrop.classList.toggle("crate-mode", mode === "crate");
@@ -9259,22 +11863,28 @@ function showRewardShowcase({
   } else {
     delete alleyRewardBackdrop.dataset.superTheme;
   }
+  if (keyTheme && mode === "key") {
+    alleyRewardBackdrop.dataset.keyTheme = keyTheme;
+  } else {
+    delete alleyRewardBackdrop.dataset.keyTheme;
+  }
   renderPreviewAssetIntoFrame(
     alleyRewardArtFrame,
     {
       image,
-      name,
+      name: safeName,
       previewVideo,
     },
     {
       elementId: "alley-reward-image",
       imageClass: "modal-image asset-image",
       videoClass: "modal-image asset-video",
-      fallbackText: name,
-      alt: name,
+      fallbackText: safeName,
+      alt: safeName,
     },
   );
-  alleyRewardName.textContent = name;
+  alleyRewardName.textContent = safeName;
+  alleyRewardName.hidden = hideName;
   alleyRewardCount.textContent = countLabel;
   alleyRewardCount.hidden = !countLabel;
   alleyRewardCard.classList.toggle("interactive", interactionMode === "manual");
@@ -9306,6 +11916,10 @@ function showRewardShowcase({
 }
 
 function getAlleyRewardItem(reward) {
+  if (reward.type === "profile-photo") {
+    return CATALOG.profilePhotos.find((item) => item.id === reward.itemId) || null;
+  }
+
   if (reward.type === "pet") {
     return CATALOG.pets.find((item) => item.id === reward.itemId) || null;
   }
@@ -9335,11 +11949,11 @@ function showAlleyRewardScene(reward, options = {}) {
     image: item.image,
     name: item.name,
     previewVideo: item.previewVideo || "",
-    superTheme: options.superTheme || "",
+    superTheme: options.superTheme || getRewardSceneWorldTheme(reward.type === "pet" ? "pets" : "characters", item),
     soundEffectName:
       reward.type === "pet"
         ? getPetVoiceEffect(item.id)
-        : reward.type === "character"
+        : reward.type === "character" || reward.type === "profile-photo"
           ? "characterUnlock"
           : null,
   });
@@ -9350,7 +11964,7 @@ function showCoinRewardScene(amount, options = {}) {
   const autoCloseMs = options.autoCloseMs || 2500;
 
   return showRewardShowcase({
-    image: "./monety_1.png",
+    image: COIN_REWARD_IMAGE,
     name: title,
     countLabel: `+${amount} monet`,
     superTheme: options.superTheme || "",
@@ -9365,11 +11979,27 @@ function showDiamondRewardScene(amount, options = {}) {
   const autoCloseMs = options.autoCloseMs || 2500;
 
   return showRewardShowcase({
-    image: TROPHY_DIAMOND_IMAGE,
+    image: DIAMOND_REWARD_IMAGE,
     name: title,
     countLabel: `+${amount} diamenty`,
     superTheme: options.superTheme || "",
     mode: "diamond",
+    autoCloseMs,
+    soundEffectName: "diamondShine",
+  });
+}
+
+function showPlatoKeyRewardScene(amount, options = {}) {
+  const title = options.title || "Klucze PlatoYI";
+  const autoCloseMs = options.autoCloseMs || 2500;
+  const keyTheme = options.keyTheme || "magicians";
+
+  return showRewardShowcase({
+    image: getPlatoKeyImageForTheme(keyTheme),
+    name: title,
+    countLabel: `+${formatPlatoKeyCountLabel(amount)}`,
+    keyTheme,
+    mode: "key",
     autoCloseMs,
     soundEffectName: "coins",
   });
@@ -9394,7 +12024,6 @@ function showCrateRewardScene(crate, rewards = [], options = {}) {
     image: crate.image,
     name: crate.name,
     countLabel: "Nacisnij!",
-    superTheme: options.superTheme || "",
     mode: "crate",
     interactionMode: "manual",
     soundEffectName: "crateAward",
@@ -9424,15 +12053,19 @@ function closeAlleyRewardScene() {
 
   alleyRewardBackdrop.classList.remove("coin-mode");
   alleyRewardBackdrop.classList.remove("diamond-mode");
+  alleyRewardBackdrop.classList.remove("magic-mode");
+  alleyRewardBackdrop.classList.remove("key-mode");
   alleyRewardBackdrop.classList.remove("trophy-mode");
   alleyRewardBackdrop.classList.remove("payment-mode");
   alleyRewardBackdrop.classList.remove("crate-mode");
   delete alleyRewardBackdrop.dataset.superTheme;
+  delete alleyRewardBackdrop.dataset.keyTheme;
   alleyRewardBackdrop.hidden = true;
   alleyRewardCard.classList.remove("show");
   alleyRewardCard.classList.remove("manual-show");
   alleyRewardCard.classList.remove("opening");
   alleyRewardCard.classList.remove("interactive");
+  alleyRewardName.hidden = false;
   alleyRewardCount.hidden = true;
   alleyRewardCount.textContent = "";
   if (alleyRewardBurstLayer) {
@@ -9480,10 +12113,16 @@ async function animateChestBurst(rewards = [], burstLayer = alleyRewardBurstLaye
 
   burstLayer.innerHTML = "";
   const tokens = [];
+  const currencyImages = rewards
+    .filter((reward) => reward.type === "coins" || reward.type === "diamonds")
+    .map((reward) => reward.image)
+    .filter(Boolean);
+  const burstImages = currencyImages.length ? currencyImages : [COIN_REWARD_IMAGE];
 
   for (let index = 0; index < 10; index += 1) {
     const token = document.createElement("div");
     token.className = "alley-reward-burst-token coin";
+    token.style.setProperty("--burst-token-image", `url("${burstImages[index % burstImages.length]}")`);
     token.style.transform = `translate(-50%, -50%) scale(${randomBetween(70, 120) / 100}) rotate(${randomBetween(-20, 20)}deg)`;
     burstLayer.appendChild(token);
     tokens.push(token);
@@ -9582,6 +12221,7 @@ async function grantChestRewardsDirect(rewards = []) {
       image: reward.image,
       name: reward.title,
       previewVideo: reward.item?.previewVideo || "",
+      superTheme: getRewardSceneWorldTheme(reward.kind, reward.item),
       countLabel: reward.countLabel || "Nagroda ze skrzyni",
       autoCloseMs: 2300,
       soundEffectName:
@@ -9594,11 +12234,28 @@ async function grantChestRewardsDirect(rewards = []) {
   }
 }
 
-function openChestOddsModal() {
+function getCrateRewardTheme(crate) {
+  return "";
+}
+
+function openChestOddsModal(crateId = "drewniana-skrzynia") {
+  if (crateId === "dzunglowa-skrzynia") {
+    openModal({
+      title: "Szanse Skrzyni Dżungli",
+      message: "Skrzynia Dżungli zawsze daje od 1 do 20 diamentów i nigdy nie daje monet. Dodatkowo ma 33% szansy na dżunglowego PlatoYasa.",
+      image: "./assets/shop/skrzyniadzungla.jpeg",
+      imageAlt: "Szanse Skrzyni Dżungli",
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
   openModal({
     title: "Szanse skrzyni",
-    message: "Skrzynia zawsze daje monety: 90% na 100-2000, 5% na 2001-4000, 3% na 4001-10000. Dodatkowo jest 1,5% na sklepowego PlatoYa i 1,5% na sklepowa postac. Przedmioty z Alei nie wypadaja ze skrzyni.",
-    image: "./skrzynia_1.png",
+    message: "Drewniana skrzynia daje jedna nagrode. Monety dalej maja 60%, ale w ich puli sa zakresy: 50-1500, 1500-6000, 6000-9000, 9000-10000 i 10000-15000. Poza tym 37% to diamenty, 2,5% to sklepowa postac z aktualnego swiata, a 0,5% to PlatoYa z Alei aktualnego swiata.",
+    image: "./assets/shop/skrzynia_1.png",
     imageAlt: "Szanse skrzyni",
     buttonText: "OK",
     dismissible: true,
@@ -9607,7 +12264,14 @@ function openChestOddsModal() {
 }
 
 async function animateCoinsToBalance(fastMode = false) {
-  const target = balanceTarget.getBoundingClientRect();
+  const targetElement = getCoinFlyTargetElement();
+
+  if (!targetElement) {
+    await wait(700);
+    return;
+  }
+
+  const target = targetElement.getBoundingClientRect();
   const startX = window.innerWidth / 2 - 24;
   const startY = window.innerHeight / 2 - 24;
   const targetX = target.left + target.width / 2 - 24;
@@ -9746,10 +12410,11 @@ function createGameState() {
       mode: "a",
       shieldActive: false,
       shieldTimerMs: 0,
-      shieldCooldownMs: 0,
-      targetId: null,
-      pascalTriggered: false,
-      pascalInvisibleMs: 0,
+    shieldCooldownMs: 0,
+    targetId: null,
+    jaguarNextTriggerHp: 2500,
+    pascalTriggered: false,
+    pascalInvisibleMs: 0,
     },
     petPack: [],
     hadActiveRobots: false,
@@ -9770,6 +12435,8 @@ function createGameState() {
     currentWaveStageIndex: -1,
     currentWaveConfig: null,
     robotsKilledTotal: 0,
+    damageDealtRun: 0,
+    runPetId: "",
     trophiesEarnedRun: 0,
     statsCounted: false,
     firstRobotPreludeActive: false,
@@ -9795,6 +12462,7 @@ function createGameState() {
     pickups: [],
     barriers: [],
     waterFields: [],
+    jungleFields: [],
   };
 }
 
@@ -10109,7 +12777,7 @@ function applyMultiplayerPendingResult() {
   }
 
   state.trophies = Math.max(0, state.trophies + delta);
-  trophyBalance.textContent = String(state.trophies);
+  updateBalanceDisplays();
   game.trophiesEarnedRun = delta;
   saveState();
   multiplayer.resultApplied = true;
@@ -10158,6 +12826,46 @@ function getProjectileKindForCharacterId(characterId) {
 
   if (characterId === "ann") {
     return "ann-shot";
+  }
+
+  if (characterId === "ivy") {
+    return "ivy-shot";
+  }
+
+  if (characterId === "ozdobiona-ivy" || characterId === "ivy-obronczyni-dzungli") {
+    return "ivy-shot";
+  }
+
+  if (characterId === "coco-nkosi") {
+    return "coco-shot";
+  }
+
+  if (characterId === "roco-nkosi") {
+    return "coco-shot";
+  }
+
+  if (characterId === "aslan") {
+    return "aslan-shot";
+  }
+
+  if (characterId === "aslan-za-mlodu" || characterId === "naomi") {
+    return "aslan-shot";
+  }
+
+  if (characterId === "wojownik-aslan") {
+    return "aslan-shot";
+  }
+
+  if (characterId === "kora" || characterId === "krolowa-kora") {
+    return "kora-shot";
+  }
+
+  if (characterId === "kira") {
+    return "kira-shot";
+  }
+
+  if (characterId === "wodzu") {
+    return "wodzu-shot";
   }
 
   if (characterId === "zlotowlosa") {
@@ -10594,6 +13302,9 @@ function stopGameSession() {
   barriersLayer.innerHTML = "";
   pickupsLayer.innerHTML = "";
   waterFieldsLayer.innerHTML = "";
+  if (jungleFieldsLayer) {
+    jungleFieldsLayer.innerHTML = "";
+  }
   if (multiplayerPlayersLayer) {
     multiplayerPlayersLayer.innerHTML = "";
   }
@@ -10645,6 +13356,8 @@ function resetGameSession() {
   game.currentWaveStageIndex = -1;
   game.currentWaveConfig = null;
   game.robotsKilledTotal = 0;
+  game.damageDealtRun = 0;
+  game.runPetId = getEquippedPet()?.id || "";
   game.trophiesEarnedRun = 0;
   game.statsCounted = false;
   game.firstRobotPreludeActive = false;
@@ -10670,6 +13383,10 @@ function resetGameSession() {
   game.pickups = [];
   game.barriers = [];
   game.waterFields = [];
+  game.jungleFields = [];
+  if (state.bookMissionProgress && typeof state.bookMissionProgress === "object") {
+    state.bookMissionProgress.currentRunRobots = 0;
+  }
   setupGameAmmo();
   game.player.hp = getPlayerMaxHp();
   game.player.x = game.width / 2;
@@ -10687,6 +13404,7 @@ function resetGameSession() {
   game.pet.shieldTimerMs = 0;
   game.pet.shieldCooldownMs = 0;
   game.pet.targetId = null;
+  game.pet.jaguarNextTriggerHp = 2500;
   game.pet.pascalTriggered = false;
   game.pet.pascalInvisibleMs = 0;
   game.touch.moveX = 0;
@@ -10934,7 +13652,7 @@ function damageCoopPlayer(profileId, amount) {
   const appliedDamage = Math.min(amount, Number(player.hp || 0));
   player.hp = Math.max(0, Number(player.hp || 0) - amount);
   player.alive = player.hp > 0;
-  spawnFloatingText(player.x, player.y - 120, `-${appliedDamage}`, "hit");
+  spawnFloatingText(player.x, player.y - 120, `-${appliedDamage}`, "hurt");
 
   if (player.profileId === state.profileId) {
     game.player.hp = player.hp;
@@ -10967,6 +13685,7 @@ function updateCoopHostFrame(deltaMs, deltaSeconds, timestamp) {
     updateBarriers(deltaMs);
     updatePickups(deltaMs);
     updateWaterFields(deltaSeconds);
+    updateJungleSupportFields(deltaMs, deltaSeconds);
     updateRobots(deltaSeconds);
     updateProjectiles(deltaSeconds);
     cleanupDeadRobots();
@@ -11119,6 +13838,7 @@ function runGameFrame(timestamp) {
       updateBarriers(deltaMs);
       updatePickups(deltaMs);
       updateWaterFields(deltaSeconds);
+      updateJungleSupportFields(deltaMs, deltaSeconds);
     } else {
       game.waterFields = [];
     }
@@ -11441,6 +14161,7 @@ function spawnRobot(waveConfig = getWaveConfig(game.currentWave || 1)) {
     x,
     y,
     hp: robotStats.hp,
+    maxHp: robotStats.hp,
     damage: robotStats.damage,
     attackIntervalMs: robotStats.attackIntervalMs,
     speed: robotStats.speed,
@@ -11451,6 +14172,13 @@ function spawnRobot(waveConfig = getWaveConfig(game.currentWave || 1)) {
     poisonDamageTimer: 0,
     slowTimerMs: 0,
     slowMultiplier: 1,
+    jaguarRepelMs: 0,
+    snakeVenomTimerMs: 0,
+    snakeDamageMultiplier: 1,
+    monkeyMarked: false,
+    frogDamageTimer: 0,
+    elephantRoamTargetX: x,
+    elephantRoamTargetY: y,
     stunTimerMs: 0,
     history: [],
     bubbleTimerMs: 0,
@@ -11514,6 +14242,17 @@ function updateRobots(deltaSeconds) {
       }
     }
 
+    if (robot.jaguarRepelMs > 0) {
+      robot.jaguarRepelMs = Math.max(0, robot.jaguarRepelMs - deltaMs);
+    }
+
+    if (robot.snakeVenomTimerMs > 0) {
+      robot.snakeVenomTimerMs = Math.max(0, robot.snakeVenomTimerMs - deltaMs);
+      if (robot.snakeVenomTimerMs === 0) {
+        robot.snakeDamageMultiplier = 1;
+      }
+    }
+
     if (robot.poisonTimerMs > 0) {
       robot.poisonTimerMs = Math.max(0, robot.poisonTimerMs - deltaMs);
       robot.poisonDamageTimer += deltaSeconds;
@@ -11527,21 +14266,52 @@ function updateRobots(deltaSeconds) {
     }
 
     const fieldEffect = getWaterFieldEffect(robot.x, robot.y);
+    const jungleFieldEffect = getJungleFieldEffect(robot.x, robot.y);
+    const frogFieldEffect = getFrogPuddleEffect(robot.x, robot.y);
+    if (jungleFieldEffect.insideField) {
+      robot.jaguarRepelMs = Math.max(robot.jaguarRepelMs || 0, GAME_RULES.jaguarFieldDurationMs);
+    }
     robot.fieldDamageTimer = fieldEffect.insideField ? robot.fieldDamageTimer + deltaSeconds : 0;
+    robot.frogDamageTimer = frogFieldEffect.fields.length > 0 ? robot.frogDamageTimer + deltaSeconds : 0;
 
     while (robot.fieldDamageTimer >= 1) {
       robot.fieldDamageTimer -= 1;
       damageRobot(robot, 50, "krab-syrena");
     }
 
+    while (robot.frogDamageTimer >= 1) {
+      robot.frogDamageTimer -= 1;
+      damageRobot(robot, GAME_RULES.frogPuddleRobotDamagePerSecond, "zaba-dzungli");
+    }
+
     if (robot.dead) {
       return;
     }
 
-    const contactDamage = Math.round(robot.damage * fieldEffect.damageMultiplier);
+    const contactDamage = Math.round(
+      robot.damage * fieldEffect.damageMultiplier * getRobotDamageMultiplier(robot)
+    );
     const attackIntervalSeconds = Math.max(0.05, Number(robot.attackIntervalMs || 100) / 1000);
 
     if (robot.stunTimerMs > 0) {
+      robot.attackTimer = 0;
+      return;
+    }
+
+    if (getEquippedPet()?.id === "slon-dzungli" && game.pet.targetId === robot.id && game.pet.castTimerMs > 0) {
+      robot.attackTimer = 0;
+      return;
+    }
+
+    if (robot.jaguarRepelMs > 0) {
+      const awayDx = robot.x - game.player.x;
+      const awayDy = robot.y - game.player.y;
+      const awayDistance = Math.hypot(awayDx, awayDy) || 1;
+      const awaySpeed =
+        robot.speed * fieldEffect.speedMultiplier * getRobotSlowMultiplier(robot);
+      const awayStep = awaySpeed * deltaSeconds;
+      robot.x = clamp(robot.x + (awayDx / awayDistance) * awayStep, 24, Math.max(24, game.width - 24));
+      robot.y = clamp(robot.y + (awayDy / awayDistance) * awayStep, 24, Math.max(24, game.height - 24));
       robot.attackTimer = 0;
       return;
     }
@@ -11679,6 +14449,8 @@ function updateProjectiles(deltaSeconds) {
         stunRobot(target, GAME_RULES.parrotStunDurationMs);
       } else if (projectile.kind === "polar-bear-shot") {
         damageRobot(target, GAME_RULES.polarBearProjectileDamage, "niedzwiedz-polarny");
+      } else if (projectile.kind === "jungle-venom-shot") {
+        applyJungleSnakeVenom(target);
       } else if (projectile.kind === "lpsotka") {
         damageRobot(target, 150, "l-psotka");
 
@@ -11707,12 +14479,20 @@ function updateProjectiles(deltaSeconds) {
 function updatePet(deltaSeconds, deltaMs) {
   const pet = getEquippedPet();
 
+  updateJungleMonkeyMarks();
+
   if (!pet) {
+    game.jungleFields = [];
     game.hadActiveRobots = false;
     return;
   }
 
   const hasRobots = game.robots.some((robot) => !robot.dead);
+  const keepsJungleFields = pet.id === "jaguar" || pet.id === "zaba-dzungli";
+
+  if (!keepsJungleFields) {
+    game.jungleFields = [];
+  }
 
   if (pet.id === "pies-magik") {
     updateDogPet(deltaSeconds);
@@ -11740,6 +14520,60 @@ function updatePet(deltaSeconds, deltaMs) {
 
   if (pet.id === "sowa") {
     updateOwlPet(deltaSeconds, deltaMs);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === "jaguar") {
+    updateJaguarPet(deltaSeconds, deltaMs);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === "papuga-dzungli") {
+    movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === "malpa-dzungli") {
+    movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === "waz-dzungli") {
+    updateJungleSnakePet(deltaSeconds, deltaMs);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === "slon-dzungli") {
+    updateElephantPet(deltaSeconds, deltaMs);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === "zaba-dzungli") {
+    updateFrogPet(deltaSeconds, deltaMs);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === "leniwiec-dzungli") {
+    updateSlothPet(deltaSeconds, deltaMs);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === "tygrys-dzungli") {
+    movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === "krokodyl-dzungli") {
+    updateCrocodilePet(deltaSeconds, deltaMs);
     game.hadActiveRobots = hasRobots;
     return;
   }
@@ -11908,6 +14742,200 @@ function updateCatPet(deltaSeconds, deltaMs) {
 function updateSnowflakePet(deltaSeconds, deltaMs) {
   movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
   updateSnowflakeShield(deltaMs);
+}
+
+function createJaguarField() {
+  game.jungleFields.push({
+    id: `jaguar-field-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    kind: "jaguar",
+    x: game.player.x,
+    y: game.player.y,
+    radius: GAME_RULES.jaguarFieldRadius,
+    ttlMs: GAME_RULES.jaguarFieldDurationMs,
+  });
+}
+
+function createFrogPuddle() {
+  game.jungleFields.push({
+    id: `frog-puddle-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    kind: "frog",
+    x: game.player.x,
+    y: game.player.y,
+    radius: GAME_RULES.frogPuddleRadius,
+    ttlMs: GAME_RULES.frogPuddleDurationMs,
+    playerHealTimerMs: 0,
+    coopHealTimers: {},
+  });
+}
+
+function updateJaguarPet(deltaSeconds, deltaMs) {
+  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+  updateJungleFields(deltaMs);
+
+  while (
+    game.player.hp > 0 &&
+    game.pet.jaguarNextTriggerHp > 0 &&
+    game.player.hp <= game.pet.jaguarNextTriggerHp
+  ) {
+    createJaguarField();
+    spawnFloatingText(game.player.x, game.player.y - 136, "JAGUAR", "heal");
+    game.pet.jaguarNextTriggerHp -= 500;
+  }
+}
+
+function updateJungleSnakePet(deltaSeconds, deltaMs) {
+  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+  game.pet.castTimerMsSecondary += deltaMs;
+
+  while (game.pet.castTimerMsSecondary >= GAME_RULES.jungleSnakeCastIntervalMs) {
+    game.pet.castTimerMsSecondary -= GAME_RULES.jungleSnakeCastIntervalMs;
+    const targets = findNearestRobots(
+      game.pet.x,
+      game.pet.y,
+      GAME_RULES.jungleSnakeTargetCount
+    );
+
+    targets.forEach((target) => {
+      spawnProjectile({
+        x: game.pet.x,
+        y: game.pet.y - 10,
+        targetId: target.id,
+        kind: "jungle-venom-shot",
+      });
+    });
+  }
+}
+
+function updateElephantPet(deltaSeconds, deltaMs) {
+  let target = game.robots.find((robot) => robot.id === game.pet.targetId && !robot.dead) || null;
+
+  if (target && game.pet.castTimerMs > 0) {
+    game.pet.castTimerMs = Math.max(0, game.pet.castTimerMs - deltaMs);
+
+    const targetDistance = Math.hypot(
+      Number(target.elephantRoamTargetX || target.x) - target.x,
+      Number(target.elephantRoamTargetY || target.y) - target.y
+    );
+
+    if (!Number.isFinite(target.elephantRoamTargetX) || !Number.isFinite(target.elephantRoamTargetY) || targetDistance < 36) {
+      target.elephantRoamTargetX = randomBetween(48, Math.max(48, game.width - 48));
+      target.elephantRoamTargetY = randomBetween(84, Math.max(84, game.height - 48));
+    }
+
+    const dx = target.elephantRoamTargetX - target.x;
+    const dy = target.elephantRoamTargetY - target.y;
+    const distance = Math.hypot(dx, dy) || 1;
+    const step = GAME_RULES.elephantRideSpeed * deltaSeconds;
+    target.x = clamp(target.x + (dx / distance) * Math.min(step, distance), 24, Math.max(24, game.width - 24));
+    target.y = clamp(target.y + (dy / distance) * Math.min(step, distance), 24, Math.max(24, game.height - 24));
+    game.pet.x = target.x + 10;
+    game.pet.y = target.y - 18;
+    target.attackTimer = 0;
+
+    if (game.pet.castTimerMs === 0 && !target.dead) {
+      damageRobot(target, target.hp, "slon-dzungli");
+      spawnFloatingText(target.x, target.y - 132, "SLON", "heal");
+      game.pet.targetId = null;
+    }
+
+    return;
+  }
+
+  if (!target) {
+    game.pet.targetId = null;
+    game.pet.castTimerMs = 0;
+  }
+
+  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+  game.pet.castTimerMsSecondary += deltaMs;
+
+  while (game.pet.castTimerMsSecondary >= GAME_RULES.elephantRideCooldownMs) {
+    game.pet.castTimerMsSecondary -= GAME_RULES.elephantRideCooldownMs;
+    const aliveRobots = game.robots.filter((robot) => !robot.dead);
+
+    if (aliveRobots.length === 0) {
+      continue;
+    }
+
+    target = aliveRobots[randomBetween(0, aliveRobots.length - 1)];
+    game.pet.targetId = target.id;
+    game.pet.castTimerMs = GAME_RULES.elephantRideDurationMs;
+    target.elephantRoamTargetX = randomBetween(48, Math.max(48, game.width - 48));
+    target.elephantRoamTargetY = randomBetween(84, Math.max(84, game.height - 48));
+    spawnFloatingText(target.x, target.y - 132, "PRZEJAZDZKA", "heal");
+    break;
+  }
+}
+
+function updateFrogPet(deltaSeconds, deltaMs) {
+  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+  updateJungleFields(deltaMs);
+  game.pet.castTimerMsSecondary += deltaMs;
+
+  while (game.pet.castTimerMsSecondary >= GAME_RULES.frogPuddleIntervalMs) {
+    game.pet.castTimerMsSecondary -= GAME_RULES.frogPuddleIntervalMs;
+    createFrogPuddle();
+    spawnFloatingText(game.player.x, game.player.y - 136, "ZABA", "heal");
+  }
+}
+
+function updateSlothPet(deltaSeconds, deltaMs) {
+  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+
+  if (game.pet.castTimerMs > 0) {
+    game.pet.castTimerMs = Math.max(0, game.pet.castTimerMs - deltaMs);
+  }
+
+  game.pet.castTimerMsSecondary += deltaMs;
+
+  while (game.pet.castTimerMsSecondary >= GAME_RULES.slothSlowCooldownMs) {
+    game.pet.castTimerMsSecondary -= GAME_RULES.slothSlowCooldownMs;
+    game.pet.castTimerMs = GAME_RULES.slothSlowDurationMs;
+    spawnFloatingText(game.player.x, game.player.y - 136, "LENIWIEC", "heal");
+  }
+}
+
+function updateCrocodilePet(deltaSeconds, deltaMs) {
+  let target = game.robots.find((robot) => robot.id === game.pet.targetId && !robot.dead) || null;
+
+  if (!target) {
+    game.pet.targetId = null;
+    game.pet.castTimerMs = 0;
+  }
+
+  if (game.pet.targetId && target) {
+    game.pet.castTimerMs = Math.max(0, game.pet.castTimerMs - deltaMs);
+    game.pet.x = target.x;
+    game.pet.y = target.y + 12;
+    target.attackTimer = 0;
+
+    if (game.pet.castTimerMs === 0) {
+      damageRobot(target, target.hp, "krokodyl-dzungli");
+      spawnFloatingText(target.x, target.y - 132, "KROKODYL", "heal");
+      game.pet.targetId = null;
+      game.pet.castTimerMsSecondary = 0;
+    }
+
+    return;
+  }
+
+  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+  game.pet.castTimerMsSecondary += deltaMs;
+
+  if (game.pet.castTimerMsSecondary < GAME_RULES.crocodileSurfaceDurationMs) {
+    return;
+  }
+
+  target = findNearestRobot(game.player.x, game.player.y);
+
+  if (!target) {
+    return;
+  }
+
+  game.pet.targetId = target.id;
+  game.pet.castTimerMs = GAME_RULES.crocodileBurrowDurationMs;
+  game.pet.castTimerMsSecondary = 0;
+  spawnFloatingText(target.x, target.y - 132, "POD ZIEMIA", "heal");
 }
 
 function updatePascalPet(deltaSeconds, deltaMs) {
@@ -12137,25 +15165,32 @@ function damagePlayer(amount) {
     : amount;
 
   game.player.hp = Math.max(0, game.player.hp - reducedAmount);
-  spawnFloatingText(game.player.x, game.player.y - 120, `-${reducedAmount}`, "hit");
+  spawnFloatingText(game.player.x, game.player.y - 120, `-${reducedAmount}`, "hurt");
+
+  if (game.player.hp > 0 && getEquippedPet()?.id === "papuga-dzungli") {
+    healPlayer(Math.max(1, Math.round(reducedAmount * GAME_RULES.jungleParrotHealMultiplier)));
+  }
+
   maybeTriggerPascalEmergency();
 }
 
 function awardCoins(amount) {
   state.coins += amount;
-  coinBalance.textContent = String(state.coins);
+  updateBalanceDisplays();
   saveState();
 }
 
 function awardTrophies(amount) {
   game.trophiesEarnedRun += amount;
+  const missionProgress = getBookMissionProgressState();
+  missionProgress.trophiesEarnedSinceMissions += Math.max(0, Number(amount || 0));
 
   if (isCoopMatchActive()) {
     return;
   }
 
   state.trophies += amount;
-  trophyBalance.textContent = String(state.trophies);
+  updateBalanceDisplays();
   saveState();
 }
 
@@ -12176,18 +15211,47 @@ function healPlayer(amount) {
   spawnFloatingText(game.player.x, game.player.y - 120, `+${realHeal}`, "heal");
 }
 
+function updateBookMissionProgressAfterRound(status, options = {}) {
+  const progress = getBookMissionProgressState();
+  const wasVictory = status === "Zwyciestwo";
+  const robotsKilledTotal = Math.max(0, Number(options.robotsKilledTotal || 0));
+  const damageDealtRun = Math.max(0, Number(options.damageDealtRun || 0));
+  const petId = String(options.petId || "");
+
+  progress.totalRobotDamage += damageDealtRun;
+  progress.currentRunRobots = robotsKilledTotal;
+  progress.fullClearStreak = wasVictory ? progress.fullClearStreak + 1 : 0;
+
+  if (isJungleBookPetId(petId)) {
+    progress.junglePetRoundsPlayed += 1;
+  }
+}
+
 function damageRobot(robot, amount, source = "generic") {
   if (!robot || robot.dead) {
     return;
   }
 
-  const appliedDamage = Math.min(amount, robot.hp);
-  robot.hp = Math.max(0, robot.hp - amount);
+  let boostedAmount = amount;
+
+  if (source === "player") {
+    boostedAmount += getTigerDamageBonus();
+
+    if (getEquippedPet()?.id === "malpa-dzungli" && robot.monkeyMarked) {
+      boostedAmount = Math.round(boostedAmount * GAME_RULES.jungleMonkeyDamageMultiplier);
+    }
+  }
+
+  const appliedDamage = Math.min(boostedAmount, robot.hp);
+  robot.hp = Math.max(0, robot.hp - boostedAmount);
+  game.damageDealtRun += appliedDamage;
   spawnFloatingText(robot.x, robot.y - 92, `-${appliedDamage}`, "hit");
 
   if (robot.hp <= 0) {
     robot.dead = true;
     game.robotsKilledTotal += 1;
+    const missionProgress = getBookMissionProgressState();
+    missionProgress.robotsDefeatedSinceMissions += 1;
     awardTrophies(getRobotKillReward());
   }
 }
@@ -12280,6 +15344,20 @@ function slowRobot(robot, durationMs, speedMultiplier = 0.5) {
   robot.slowTimerMs = Math.max(robot.slowTimerMs || 0, durationMs);
   robot.slowMultiplier = Math.min(robot.slowMultiplier || 1, speedMultiplier);
   spawnFloatingText(robot.x, robot.y - 118, "SLOW", "heal");
+}
+
+function applyJungleSnakeVenom(robot) {
+  if (!robot || robot.dead) {
+    return;
+  }
+
+  slowRobot(robot, GAME_RULES.jungleSnakeDurationMs, GAME_RULES.jungleSnakeSlowMultiplier);
+  robot.snakeVenomTimerMs = Math.max(robot.snakeVenomTimerMs || 0, GAME_RULES.jungleSnakeDurationMs);
+  robot.snakeDamageMultiplier = Math.min(
+    robot.snakeDamageMultiplier || 1,
+    GAME_RULES.jungleSnakeDamageMultiplier
+  );
+  spawnFloatingText(robot.x, robot.y - 118, "JAD", "heal");
 }
 
 function updateBarriers(deltaMs) {
@@ -12507,6 +15585,11 @@ function concludeGameSession(status, note) {
     game.statsCounted = true;
     state.completedGamesTotal += 1;
     state.robotsDefeatedTotal += Math.max(0, Number(game.robotsKilledTotal || 0));
+    updateBookMissionProgressAfterRound(status, {
+      robotsKilledTotal: game.robotsKilledTotal,
+      damageDealtRun: game.damageDealtRun,
+      petId: game.runPetId,
+    });
     saveState();
   }
 
@@ -12544,11 +15627,16 @@ function concludeCoopGameSession(status, note, overrides = {}) {
     game.statsCounted = true;
     state.completedGamesTotal += 1;
     state.robotsDefeatedTotal += robotsKilledTotal;
+    updateBookMissionProgressAfterRound(status, {
+      robotsKilledTotal,
+      damageDealtRun: overrides.damageDealtRun ?? game.damageDealtRun,
+      petId: overrides.petId ?? game.runPetId,
+    });
   }
 
   if (trophiesEarnedRun > 0) {
     state.trophies = Math.max(0, state.trophies + trophiesEarnedRun);
-    trophyBalance.textContent = String(state.trophies);
+    updateBalanceDisplays();
   }
 
   saveState();
@@ -12582,6 +15670,16 @@ function findNearestRobot(x, y) {
   });
 
   return nearest;
+}
+
+function findNearestRobots(x, y, count = 1) {
+  return game.robots
+    .filter((robot) => !robot.dead)
+    .sort(
+      (first, second) =>
+        Math.hypot(first.x - x, first.y - y) - Math.hypot(second.x - x, second.y - y)
+    )
+    .slice(0, Math.max(0, count));
 }
 
 function findNearestRobotExcluding(x, y, excludedRobotId) {
@@ -12766,71 +15864,101 @@ function playProjectileSound(projectile) {
   const visual = getProjectileVisual(projectile);
 
   if (
-    visual.src === "./atak_elfie.jpeg" ||
-    visual.src === "./atak_wojowniczka.jpeg" ||
-    visual.src === "./atak_elinda.jpeg"
+    visual.src === "./assets/attacks/atak_elfie.jpeg" ||
+    visual.src === "./assets/attacks/atak_wojowniczka.jpeg" ||
+    visual.src === "./assets/attacks/atak_elinda.jpeg"
   ) {
-    playOneShotSound("shotElfie", 0.76);
+    playOneShotSound("shotElfie", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
-  if (visual.src === "./atak_2.png") {
-    playOneShotSound("shot2", 0.76);
+  if (visual.src === "./assets/attacks/atak_2.png") {
+    playOneShotSound("shot2", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
-  if (visual.src === "./atak_3.png") {
-    playOneShotSound("shot3", 0.76);
+  if (visual.src === "./assets/attacks/atak_3.png") {
+    playOneShotSound("shot3", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
-  if (visual.src === "./atak_4.png") {
-    playOneShotSound("shot4", 0.55);
+  if (visual.src === "./assets/attacks/atak_4.png") {
+    playOneShotSound("shot4", getBoostedAttackSoundVolume(0.55));
     return;
   }
 
-  if (visual.src === "./atak_nora.png") {
-    playOneShotSound("shotNora", 1, 3);
+  if (visual.src === "./assets/attacks/atak_nora.png") {
+    playOneShotSound("shotNora", getBoostedAttackSoundVolume(1), 3);
     return;
   }
 
-  if (visual.src === "./atak_cloud.png") {
-    playOneShotSound("shotCloud", 0.51);
+  if (visual.src === "./assets/attacks/atak_cloud.png") {
+    playOneShotSound("shotCloud", getBoostedAttackSoundVolume(0.51));
     return;
   }
 
-  if (visual.src === "./atak_ann.png") {
-    playOneShotSound("shotAnn", 0.78);
+  if (visual.src === "./assets/attacks/atak_ann.png") {
+    playOneShotSound("shotAnn", getBoostedAttackSoundVolume(0.78));
     return;
   }
 
-  if (visual.src === "./atak_zlotowlosa.jpeg") {
-    playOneShotSound("shotZlotowlosa", 0.76);
+  if (visual.src === "./assets/attacks/atak_ivy.jpeg") {
+    playOneShotSound("shotIvy", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
-  if (visual.src === "./atak_gertruda.jpeg") {
-    playOneShotSound("shotGertruda", 0.76);
+  if (visual.src === "./assets/attacks/coco_atak.jpeg") {
+    playOneShotSound("shotCoco", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
-  if (visual.src === "./atak_malarka.jpeg") {
-    playOneShotSound("shotMalarka", 0.76);
+  if (visual.src === "./assets/attacks/atakk.jpeg") {
+    playOneShotSound("shotAslan", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
-  if (visual.src === "./atak_ptasia.jpeg") {
-    playOneShotSound("shotPtasia", 0.76);
+  if (visual.src === "./assets/attacks/koraa.jpeg") {
+    playOneShotSound("shotKora", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
-  if (visual.src === "./atak_leołyżwiaż.jpeg" || visual.src === "./atak_lilyrozowa.jpeg") {
-    playOneShotSound("shotIceSkater", 0.55);
+  if (visual.src === "./assets/attacks/wodza.jpeg") {
+    playOneShotSound("shotWodzu", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
-  if (visual.src === "./atak_5.png") {
-    playOneShotSound("shot4", 0.55);
+  if (visual.src === "./assets/attacks/aslan_atak.jpeg") {
+    playOneShotSound("shotAslan", getBoostedAttackSoundVolume(0.76));
+    return;
+  }
+
+  if (visual.src === "./assets/attacks/atak_zlotowlosa.jpeg") {
+    playOneShotSound("shotZlotowlosa", getBoostedAttackSoundVolume(0.76));
+    return;
+  }
+
+  if (visual.src === "./assets/attacks/atak_gertruda.jpeg") {
+    playOneShotSound("shotGertruda", getBoostedAttackSoundVolume(0.76));
+    return;
+  }
+
+  if (visual.src === "./assets/attacks/atak_malarka.jpeg") {
+    playOneShotSound("shotMalarka", getBoostedAttackSoundVolume(0.76));
+    return;
+  }
+
+  if (visual.src === "./assets/attacks/atak_ptasia.jpeg") {
+    playOneShotSound("shotPtasia", getBoostedAttackSoundVolume(0.76));
+    return;
+  }
+
+  if (visual.src === "./assets/attacks/atak_leołyżwiaż.jpeg" || visual.src === "./assets/attacks/atak_lilyrozowa.jpeg") {
+    playOneShotSound("shotIceSkater", getBoostedAttackSoundVolume(0.55));
+    return;
+  }
+
+  if (visual.src === "./assets/attacks/atak_5.png") {
+    playOneShotSound("shot4", getBoostedAttackSoundVolume(0.55));
   }
 }
 
@@ -12865,6 +15993,46 @@ function getPlayerProjectileKind(ammoIndex) {
 
   if (character?.id === "ann") {
     return "ann-shot";
+  }
+
+  if (character?.id === "ivy") {
+    return "ivy-shot";
+  }
+
+  if (character?.id === "ozdobiona-ivy" || character?.id === "ivy-obronczyni-dzungli") {
+    return "ivy-shot";
+  }
+
+  if (character?.id === "coco-nkosi") {
+    return "coco-shot";
+  }
+
+  if (character?.id === "roco-nkosi") {
+    return "coco-shot";
+  }
+
+  if (character?.id === "aslan") {
+    return "aslan-shot";
+  }
+
+  if (character?.id === "aslan-za-mlodu" || character?.id === "naomi") {
+    return "aslan-shot";
+  }
+
+  if (character?.id === "wojownik-aslan") {
+    return "aslan-shot";
+  }
+
+  if (character?.id === "kora" || character?.id === "krolowa-kora") {
+    return "kora-shot";
+  }
+
+  if (character?.id === "kira") {
+    return "kira-shot";
+  }
+
+  if (character?.id === "wodzu") {
+    return "wodzu-shot";
   }
 
   if (character?.id === "zlotowlosa") {
@@ -12934,6 +16102,37 @@ function getParrotRange() {
   return Math.sqrt(area / Math.PI);
 }
 
+function updateJungleMonkeyMarks() {
+  game.robots.forEach((robot) => {
+    robot.monkeyMarked = false;
+  });
+
+  if (getEquippedPet()?.id !== "malpa-dzungli") {
+    return;
+  }
+
+  findNearestRobots(
+    game.player.x,
+    game.player.y,
+    GAME_RULES.jungleMonkeyMarkedTargets
+  ).forEach((robot) => {
+    robot.monkeyMarked = true;
+  });
+}
+
+function isSlothSlowActive() {
+  return Boolean(getEquippedPet()?.id === "leniwiec-dzungli" && game.pet.castTimerMs > 0);
+}
+
+function getTigerDamageBonus() {
+  if (getEquippedPet()?.id !== "tygrys-dzungli") {
+    return 0;
+  }
+
+  const missingHp = Math.max(0, getPlayerMaxHp() - Math.max(0, Number(game.player.hp || 0)));
+  return Math.floor(missingHp / GAME_RULES.tigerDamageStepHp) * GAME_RULES.tigerDamagePerStep;
+}
+
 function getRobotSlowMultiplier(robot) {
   if (!robot || robot.dead) {
     return 1;
@@ -12945,7 +16144,19 @@ function getRobotSlowMultiplier(robot) {
     multiplier = Math.min(multiplier, 0.75);
   }
 
+  if (isSlothSlowActive()) {
+    multiplier = Math.min(multiplier, GAME_RULES.slothSlowMultiplier);
+  }
+
   return multiplier;
+}
+
+function getRobotDamageMultiplier(robot) {
+  if (!robot || robot.dead) {
+    return 1;
+  }
+
+  return robot.snakeVenomTimerMs > 0 ? (robot.snakeDamageMultiplier || 1) : 1;
 }
 
 function isPascalInvisibilityActive() {
@@ -13029,6 +16240,22 @@ function getWaterFieldEffect(x, y) {
   };
 }
 
+function getJungleFieldEffect(x, y) {
+  return {
+    insideField: game.jungleFields.some(
+      (field) => field.kind !== "frog" && Math.hypot(field.x - x, field.y - y) <= field.radius
+    ),
+  };
+}
+
+function getFrogPuddleEffect(x, y) {
+  return {
+    fields: game.jungleFields.filter(
+      (field) => field.kind === "frog" && Math.hypot(field.x - x, field.y - y) <= field.radius
+    ),
+  };
+}
+
 function updateWaterFields(deltaSeconds) {
   const pet = getEquippedPet();
 
@@ -13046,15 +16273,89 @@ function updateWaterFields(deltaSeconds) {
   game.waterFields = [];
 }
 
+function updateJungleFields(deltaMs) {
+  game.jungleFields = (game.jungleFields || [])
+    .map((field) => ({
+      ...field,
+      ttlMs: Number(field.ttlMs || 0) - deltaMs,
+    }))
+    .filter((field) => field.ttlMs > 0);
+}
+
+function healCoopPlayer(profileId, amount) {
+  const player = game.coopPlayers[sanitizeProfileId(profileId)];
+
+  if (!player || player.alive === false) {
+    return;
+  }
+
+  const maxHp = Number(player.maxHp || getPlayerMaxHpForLoadout(player.characterId, player.petId));
+  const realHeal = Math.min(amount, Math.max(0, maxHp - Number(player.hp || 0)));
+
+  if (realHeal <= 0) {
+    return;
+  }
+
+  player.hp = Math.min(maxHp, Number(player.hp || 0) + realHeal);
+  if (player.profileId === state.profileId) {
+    game.player.hp = player.hp;
+  }
+  spawnFloatingText(player.x, player.y - 120, `+${realHeal}`, "heal");
+}
+
+function updateJungleSupportFields(deltaMs, deltaSeconds) {
+  const pet = getEquippedPet();
+
+  if (!pet || pet.id !== "zaba-dzungli") {
+    return;
+  }
+
+  const frogFields = game.jungleFields.filter((field) => field.kind === "frog");
+
+  frogFields.forEach((field) => {
+    const localInside = Math.hypot(field.x - game.player.x, field.y - game.player.y) <= field.radius;
+    field.playerHealTimerMs = localInside ? Number(field.playerHealTimerMs || 0) + deltaMs : 0;
+
+    while (field.playerHealTimerMs >= GAME_RULES.frogPuddleHealIntervalMs) {
+      field.playerHealTimerMs -= GAME_RULES.frogPuddleHealIntervalMs;
+      healPlayer(GAME_RULES.frogPuddleHealAmount);
+    }
+
+    if (!isCoopMatchActive() || !game.coopIsHost) {
+      return;
+    }
+
+    getRemoteCoopPlayers().forEach((player) => {
+      const profileId = sanitizeProfileId(player.profileId);
+      const inside = Math.hypot(field.x - Number(player.x || 0), field.y - Number(player.y || 0)) <= field.radius;
+      const currentTimer = Number(field.coopHealTimers?.[profileId] || 0);
+      const nextTimer = inside ? currentTimer + deltaMs : 0;
+      field.coopHealTimers = {
+        ...(field.coopHealTimers || {}),
+        [profileId]: nextTimer,
+      };
+
+      while (field.coopHealTimers[profileId] >= GAME_RULES.frogPuddleHealIntervalMs) {
+        field.coopHealTimers[profileId] -= GAME_RULES.frogPuddleHealIntervalMs;
+        healCoopPlayer(profileId, GAME_RULES.frogPuddleHealAmount);
+      }
+    });
+  });
+}
+
 function buildMultiplayerRemotePlayerMarkup(player) {
   const character = CATALOG.characters.find((item) => item.id === player.characterId) || CATALOG.characters[0];
   const pet = CATALOG.pets.find((item) => item.id === player.petId) || null;
   const petX = Math.round(player.x + 42);
   const petY = Math.round(player.y + 22);
+  const maxHp = Number(player.maxHp || getPlayerMaxHpForLoadout(player.characterId, player.petId));
+  const healthFill = getHealthFillPercent(player.hp || 0, maxHp);
 
   return `
     <div class="entity remote-player-entity" style="left:${player.x}px; top:${player.y}px;">
-      <p class="entity-health opponent-health">${Math.max(0, Math.ceil(player.hp || 0))} pz</p>
+      <p class="entity-health opponent-health" style="--health-fill:${healthFill};">
+        <span class="health-label-text">${Math.max(0, Math.ceil(player.hp || 0))}</span>
+      </p>
       <p class="opponent-nickname">${player.nickname || "Gracz"}</p>
       <div class="player-visual opponent-visual">
         <div class="player-sprite-frame opponent-sprite-frame remote-player-frame">
@@ -13126,6 +16427,7 @@ function renderGameScene() {
   waveBanner.hidden =
     (!multiplayerCountdownActive && !pauseResumeCountdownActive && game.waveIntroMs <= 0) ||
     (multiplayerMode && !multiplayerCountdownActive);
+  syncBackgroundMusicVolume(0.18);
   waveBannerTitle.textContent = multiplayerCountdownActive
     ? "GRACZE GOTOWI"
     : pauseResumeCountdownActive
@@ -13162,7 +16464,8 @@ function renderGameScene() {
   playerEntity.style.left = `${game.player.x}px`;
   playerEntity.style.top = `${game.player.y}px`;
   playerEntity.classList.toggle("pascal-invisible", isPascalInvisibilityActive());
-  playerHealthLabel.textContent = `${Math.ceil(game.player.hp)} pz`;
+  playerHealthLabel.innerHTML = `<span class="health-label-text">${Math.ceil(game.player.hp)}</span>`;
+  playerHealthLabel.style.setProperty("--health-fill", getHealthFillPercent(game.player.hp, getPlayerMaxHp()));
   const winterShieldActive = isSnowflakeShieldActive() || isOwlShieldActive();
   playerShield.hidden = !isCatShieldActive() && !winterShieldActive;
   playerShield.dataset.kind = winterShieldActive ? "winter" : "default";
@@ -13183,12 +16486,14 @@ function renderGameScene() {
     gamePetEntity.hidden = false;
     gamePetEntity.style.left = `${game.pet.x}px`;
     gamePetEntity.style.top = `${game.pet.y}px`;
+    gamePetEntity.dataset.petId = pet.id;
     petCooldownBar.hidden = multiplayerMode || petCooldownState === null;
     petCooldownBar.dataset.kind = !multiplayerMode && petCooldownState?.kind ? petCooldownState.kind : "";
     petCooldownFill.style.transform = `scaleY(${multiplayerMode || petCooldownState === null ? 0 : petCooldownState.progress})`;
     petPackLayer.innerHTML = "";
   } else {
     gamePetEntity.hidden = true;
+    delete gamePetEntity.dataset.petId;
     petCooldownBar.hidden = true;
     petCooldownBar.dataset.kind = "";
     petPackLayer.innerHTML = "";
@@ -13232,7 +16537,7 @@ function renderGameScene() {
           class="barrier-wall cage"
           style="left:${barrier.x}px; top:${barrier.y}px; width:${barrier.size}px; height:${barrier.size}px;"
         >
-          <p class="barrier-health">${Math.ceil(barrier.hp)} pz</p>
+          <p class="barrier-health">${Math.ceil(barrier.hp)}</p>
         </div>
       `
     )
@@ -13257,13 +16562,28 @@ function renderGameScene() {
     )
     .join("");
 
+  if (jungleFieldsLayer) {
+    jungleFieldsLayer.innerHTML = game.jungleFields
+      .map(
+        (field) => `
+          <div
+            class="jungle-field${field.kind === "frog" ? " frog-puddle" : ""}"
+            style="left:${field.x}px; top:${field.y}px; width:${field.radius * 2}px; height:${field.radius * 2}px;"
+          ></div>
+        `
+      )
+      .join("");
+  }
+
   const robotVisual = getRobotVisual();
 
   robotsLayer.innerHTML = game.robots
     .map(
       (robot) => `
-        <div class="robot-entity${robot.sizeClass === "final-wave" ? " final-wave-robot" : ""}${robot.poisonTimerMs > 0 ? " poisoned" : ""}${isFirstRobotTutorialPaused() && robot.id === getFirstRobotTutorialTarget()?.id ? " tutorial-focus" : ""}" style="left:${robot.x}px; top:${robot.y}px;">
-          <p class="robot-health">${Math.ceil(robot.hp)} pz</p>
+        <div class="robot-entity${robot.sizeClass === "final-wave" ? " final-wave-robot" : ""}${robot.poisonTimerMs > 0 ? " poisoned" : ""}${robot.snakeVenomTimerMs > 0 ? " venomed" : ""}${robot.monkeyMarked ? " monkey-marked" : ""}${isFirstRobotTutorialPaused() && robot.id === getFirstRobotTutorialTarget()?.id ? " tutorial-focus" : ""}" style="left:${robot.x}px; top:${robot.y}px;">
+          <p class="robot-health" style="--health-fill:${getHealthFillPercent(robot.hp, robot.maxHp || robot.hp || 1)};">
+            <span class="health-label-text">${Math.ceil(robot.hp)}</span>
+          </p>
           <div class="robot-sprite-frame">
             <img
               class="entity-image asset-image robot-core-image"
@@ -13301,9 +16621,9 @@ function renderGameScene() {
     .map(
       (projectile) => {
         const visual = getProjectileVisual(projectile);
-        return `
-        <div class="projectile" style="left:${projectile.x}px; top:${projectile.y}px;">
-          <div class="projectile-shell${projectile.kind === "snake-shot" ? " snake-shot" : projectile.kind === "elfie-shot" ? " elfie-shot" : projectile.kind === "millo-elfie-shot" ? " millo-elfie-shot" : projectile.kind === "lpsotka" ? " lpsotka-shot" : projectile.kind === "linda-shot" ? " linda-shot" : projectile.kind === "lily-shot" ? " lily-shot" : projectile.kind === "nora-shot" ? " nora-shot" : projectile.kind === "cloud-shot" ? " cloud-shot" : projectile.kind === "ann-shot" ? " ann-shot" : projectile.kind === "polar-bear-shot" ? " polar-bear-shot" : projectile.kind === "tricky-shot" ? " tricky-shot" : ""}">
+        const projectileBody = projectile.kind === "jungle-venom-shot"
+          ? `<div class="jungle-venom-core" aria-hidden="true"></div>`
+          : `
             <img
               class="projectile-image asset-image"
               src="${visual.src}"
@@ -13311,6 +16631,11 @@ function renderGameScene() {
               data-fallback-text="${visual.fallbackText}"
             />
             <div class="asset-fallback">${visual.fallbackText}</div>
+          `;
+        return `
+        <div class="projectile" style="left:${projectile.x}px; top:${projectile.y}px;">
+          <div class="projectile-shell${projectile.kind === "snake-shot" ? " snake-shot" : projectile.kind === "jungle-venom-shot" ? " jungle-venom-shot" : projectile.kind === "elfie-shot" ? " elfie-shot" : projectile.kind === "millo-elfie-shot" ? " millo-elfie-shot" : projectile.kind === "lpsotka" ? " lpsotka-shot" : projectile.kind === "linda-shot" ? " linda-shot" : projectile.kind === "lily-shot" ? " lily-shot" : projectile.kind === "nora-shot" ? " nora-shot" : projectile.kind === "cloud-shot" ? " cloud-shot" : projectile.kind === "ann-shot" ? " ann-shot" : projectile.kind === "polar-bear-shot" ? " polar-bear-shot" : projectile.kind === "tricky-shot" ? " tricky-shot" : ""}">
+            ${projectileBody}
           </div>
         </div>
       `;
@@ -13350,6 +16675,12 @@ function showGameResult() {
       });
     });
   });
+}
+
+function getHealthFillPercent(currentHp, maxHp) {
+  const safeMaxHp = Math.max(1, Number(maxHp || 0));
+  const ratio = clamp(Number(currentHp || 0) / safeMaxHp, 0, 1);
+  return `${(ratio * 100).toFixed(2)}%`;
 }
 
 function animateResultCounter(node, targetValue, delayMs, onDone) {
@@ -13734,6 +17065,65 @@ function renderGameModeInfo() {
       return;
     }
 
+    if (pet && pet.id === "jaguar") {
+      const nextThreshold = Math.max(0, Number(game.pet.jaguarNextTriggerHp || 0));
+      gameModeInfo.textContent = nextThreshold > 0
+        ? `Jaguar: kolejny zielony krąg pojawi się przy ${nextThreshold} pz lub niżej.`
+        : "Jaguar: wykorzystał już wszystkie progi życia w tej rundzie.";
+      return;
+    }
+
+    if (pet && pet.id === "papuga-dzungli") {
+      gameModeInfo.textContent = "Papuga: po każdym trafieniu od robota oddaje ci 10% zadanych obrażeń jako leczenie.";
+      return;
+    }
+
+    if (pet && pet.id === "malpa-dzungli") {
+      gameModeInfo.textContent = "Małpa: dwa najbliższe roboty są oznaczone na zielono i dostają od ciebie o 50% więcej obrażeń.";
+      return;
+    }
+
+    if (pet && pet.id === "waz-dzungli") {
+      const secondsLeft = Math.max(0, (GAME_RULES.jungleSnakeCastIntervalMs - game.pet.castTimerMsSecondary) / 1000);
+      gameModeInfo.textContent = `Wąż: kolejny zielony jad poleci w dwa najbliższe roboty za ${secondsLeft.toFixed(1)} s.`;
+      return;
+    }
+
+    if (pet && pet.id === "slon-dzungli") {
+      if (game.pet.targetId && game.pet.castTimerMs > 0) {
+        gameModeInfo.textContent = `Słoń: trwa przejażdżka z robotem, koniec za ${(game.pet.castTimerMs / 1000).toFixed(1)} s.`;
+      } else {
+        const secondsLeft = Math.max(0, (GAME_RULES.elephantRideCooldownMs - game.pet.castTimerMsSecondary) / 1000);
+        gameModeInfo.textContent = `Słoń: kolejny robot poleci na przejażdżkę za ${secondsLeft.toFixed(1)} s.`;
+      }
+      return;
+    }
+
+    if (pet && pet.id === "zaba-dzungli") {
+      const secondsLeft = Math.max(0, (GAME_RULES.frogPuddleIntervalMs - game.pet.castTimerMsSecondary) / 1000);
+      gameModeInfo.textContent = `Żaba: kolejna toksyczna kałuża pojawi się pod tobą za ${secondsLeft.toFixed(1)} s.`;
+      return;
+    }
+
+    if (pet && pet.id === "leniwiec-dzungli") {
+      gameModeInfo.textContent = isSlothSlowActive()
+        ? `Leniwiec: wszystko poza graczami jest spowolnione jeszcze ${(game.pet.castTimerMs / 1000).toFixed(1)} s.`
+        : `Leniwiec: kolejna fala spowolnienia za ${Math.max(0, (GAME_RULES.slothSlowCooldownMs - game.pet.castTimerMsSecondary) / 1000).toFixed(1)} s.`;
+      return;
+    }
+
+    if (pet && pet.id === "tygrys-dzungli") {
+      gameModeInfo.textContent = `Tygrys: twój obecny bonus obrażeń to +${getTigerDamageBonus()} pz.`;
+      return;
+    }
+
+    if (pet && pet.id === "krokodyl-dzungli") {
+      gameModeInfo.textContent = game.pet.targetId && game.pet.castTimerMs > 0
+        ? `Krokodyl: jest pod ziemią i wyskoczy za ${(game.pet.castTimerMs / 1000).toFixed(1)} s.`
+        : `Krokodyl: po ${Math.max(0, (GAME_RULES.crocodileSurfaceDurationMs - game.pet.castTimerMsSecondary) / 1000).toFixed(1)} s ruszy po kolejnego robota.`;
+      return;
+    }
+
     if (pet && pet.id === "l-psotka") {
       gameModeInfo.textContent = "L'Psotka: co 5 s wypuszcza bańkę, zabiera 150 pz i cofa robota o 2 s wstecz.";
       return;
@@ -13849,7 +17239,11 @@ function syncAnimatedAssets(scope) {
 
 function getProjectileVisual(projectile) {
   if (projectile.kind && projectile.kind.startsWith("papuga")) {
-    return { src: "./atak_2.png", alt: "Gwiazdy papugi", fallbackText: "GWIAZDY" };
+    return { src: "./assets/attacks/atak_2.png", alt: "Gwiazdy papugi", fallbackText: "GWIAZDY" };
+  }
+
+  if (projectile.kind === "jungle-venom-shot") {
+    return { src: "./assets/attacks/atak_3.png", alt: "Jad Węża", fallbackText: "JAD" };
   }
 
   if (projectile.kind === "elfie-shot") {
@@ -13858,7 +17252,7 @@ function getProjectileVisual(projectile) {
     const isNatureVariant = projectileCharacterId === "elfie-w-swojej-naturze";
 
     return {
-      src: isWarriorVariant ? "./atak_wojowniczka.jpeg" : "./atak_elfie.jpeg",
+      src: isWarriorVariant ? "./assets/attacks/atak_wojowniczka.jpeg" : "./assets/attacks/atak_elfie.jpeg",
       alt: isWarriorVariant
         ? "Atak Elfie Wojowniczki"
         : isNatureVariant
@@ -13869,11 +17263,11 @@ function getProjectileVisual(projectile) {
   }
 
   if (projectile.kind === "millo-elfie-shot") {
-    return { src: "./atak_2.png", alt: "Atak Millo jako Elfie", fallbackText: "MILLO ELFIE" };
+    return { src: "./assets/attacks/atak_2.png", alt: "Atak Millo jako Elfie", fallbackText: "MILLO ELFIE" };
   }
 
   if (projectile.kind === "lpsotka") {
-    return { src: "./atak_3.png", alt: "Atak L'Psotki", fallbackText: "PSOTKA" };
+    return { src: "./assets/attacks/atak_3.png", alt: "Atak L'Psotki", fallbackText: "PSOTKA" };
   }
 
   if (projectile.kind === "linda-shot") {
@@ -13881,13 +17275,13 @@ function getProjectileVisual(projectile) {
 
     if (projectileCharacterId === "elfie-jako-linda") {
       return {
-        src: "./atak_elinda.jpeg",
+        src: "./assets/attacks/atak_elinda.jpeg",
         alt: "Atak Elfie jako Lindy",
         fallbackText: "E LINDA",
       };
     }
 
-    return { src: "./atak_3.png", alt: "Atak Lindy", fallbackText: "LINDA" };
+    return { src: "./assets/attacks/atak_3.png", alt: "Atak Lindy", fallbackText: "LINDA" };
   }
 
   if (projectile.kind === "lily-shot") {
@@ -13898,15 +17292,15 @@ function getProjectileVisual(projectile) {
       projectileCharacterId === "lyzwiarz-leo";
     const isLilySkaterVariant = projectileCharacterId === "lyzwiarka-lily";
     const isLilyMasterVariant = projectileCharacterId === "mistrzyni-lyzwiarstwa-lily";
-    const isSkiJumperVariant = equippedCharacter?.id === "leo-skoczek-narciarski";
-    const isSkaterLeoVariant = equippedCharacter?.id === "lyzwiarz-leo";
+    const isSkiJumperVariant = projectileCharacterId === "leo-skoczek-narciarski";
+    const isSkaterLeoVariant = projectileCharacterId === "lyzwiarz-leo";
     const isIceSkaterVariant = isLilySkaterVariant || isSkaterLeoVariant;
     return {
       src: isLilyMasterVariant
-        ? "./atak_lilyrozowa.jpeg"
+        ? "./assets/attacks/atak_lilyrozowa.jpeg"
         : isIceSkaterVariant
-          ? "./atak_leołyżwiaż.jpeg"
-          : "./atak_4.png",
+          ? "./assets/attacks/atak_leołyżwiaż.jpeg"
+          : "./assets/attacks/atak_4.png",
       alt: isSkiJumperVariant
         ? "Atak Leo Skoczek Narciarski"
         : isSkaterLeoVariant
@@ -13924,7 +17318,7 @@ function getProjectileVisual(projectile) {
 
   if (projectile.kind === "nora-shot") {
     return {
-      src: "./atak_nora.png",
+      src: "./assets/attacks/atak_nora.png",
       alt: "Atak Nory",
       fallbackText: "NORA",
     };
@@ -13932,7 +17326,7 @@ function getProjectileVisual(projectile) {
 
   if (projectile.kind === "cloud-shot") {
     return {
-      src: "./atak_cloud.png",
+      src: "./assets/attacks/atak_cloud.png",
       alt: "Atak Clouda",
       fallbackText: "CLOUD",
     };
@@ -13940,23 +17334,71 @@ function getProjectileVisual(projectile) {
 
   if (projectile.kind === "ann-shot") {
     return {
-      src: "./atak_ann.png",
+      src: "./assets/attacks/atak_ann.png",
       alt: "Atak Ann",
       fallbackText: "ANN",
     };
   }
 
+  if (projectile.kind === "ivy-shot") {
+    return {
+      src: "./assets/attacks/atak_ivy.jpeg",
+      alt: "Atak Ivy",
+      fallbackText: "IVY",
+    };
+  }
+
+  if (projectile.kind === "coco-shot") {
+    return {
+      src: "./assets/attacks/coco_atak.jpeg",
+      alt: "Atak Coco N'Kosi",
+      fallbackText: "COCO",
+    };
+  }
+
+  if (projectile.kind === "aslan-shot") {
+    return {
+      src: "./assets/attacks/aslan_atak.jpeg",
+      alt: "Atak Aslana",
+      fallbackText: "ASLAN",
+    };
+  }
+
+  if (projectile.kind === "kira-shot") {
+    return {
+      src: "./assets/attacks/atakk.jpeg",
+      alt: "Atak Kiry",
+      fallbackText: "KIRA",
+    };
+  }
+
+  if (projectile.kind === "kora-shot") {
+    return {
+      src: "./assets/attacks/koraa.jpeg",
+      alt: "Atak Kory",
+      fallbackText: "KORA",
+    };
+  }
+
+  if (projectile.kind === "wodzu-shot") {
+    return {
+      src: "./assets/attacks/wodza.jpeg",
+      alt: "Atak Wodzu",
+      fallbackText: "WODZU",
+    };
+  }
+
   if (projectile.kind === "zlotowlosa-shot") {
     return {
-      src: "./atak_zlotowlosa.jpeg",
+      src: "./assets/attacks/atak_zlotowlosa.jpeg",
       alt: "Atak Złotowłosej",
-      fallbackText: "WIEZA",
+      fallbackText: "ZLOTA",
     };
   }
 
   if (projectile.kind === "gertruda-shot") {
     return {
-      src: "./atak_gertruda.jpeg",
+      src: "./assets/attacks/atak_gertruda.jpeg",
       alt: (projectile.characterId || getEquippedCharacter()?.id) === "gertruda-zla-macocha"
         ? "Atak Gertrudy Złej Macochy"
         : "Atak Gertrudy",
@@ -13966,7 +17408,7 @@ function getProjectileVisual(projectile) {
 
   if (projectile.kind === "malarka-shot") {
     return {
-      src: "./atak_malarka.jpeg",
+      src: "./assets/attacks/atak_malarka.jpeg",
       alt: "Atak Złotowłosej Malarki",
       fallbackText: "MALARKA",
     };
@@ -13975,7 +17417,7 @@ function getProjectileVisual(projectile) {
   if (projectile.kind === "ptasia-shot") {
     const projectileCharacterId = projectile.characterId || getEquippedCharacter()?.id;
     return {
-      src: "./atak_ptasia.jpeg",
+      src: "./assets/attacks/atak_ptasia.jpeg",
       alt: projectileCharacterId === "cassandra-przygotowana-do-walki"
         ? "Atak Cassandry Przygotowanej do Walki"
         : "Atak Cassandry w Ptasiej odsłonie",
@@ -13985,7 +17427,7 @@ function getProjectileVisual(projectile) {
 
   if (projectile.kind === "polar-bear-shot") {
     return {
-      src: "./atak_4.png",
+      src: "./assets/attacks/atak_4.png",
       alt: "Atak Niedźwiedzia Polarnego",
       fallbackText: "NIEDZWIEDZ",
     };
@@ -13995,7 +17437,7 @@ function getProjectileVisual(projectile) {
     const projectileCharacterId = projectile.characterId || getEquippedCharacter()?.id;
     const isReindeerVariant = projectileCharacterId === "tricky-renifer";
     return {
-      src: "./atak_5.png",
+      src: "./assets/attacks/atak_5.png",
       alt: isReindeerVariant ? "Atak Tricky Renifer" : "Atak Tricky",
       fallbackText: isReindeerVariant ? "RENIFER" : "TRICKY",
     };
@@ -14004,41 +17446,43 @@ function getProjectileVisual(projectile) {
   const character = getEquippedCharacter();
 
   if (character?.id === "magik-millo") {
-    return { src: "./atak_2.png", alt: "Atak Magika Millo", fallbackText: "MILLO" };
+    return { src: "./assets/attacks/atak_2.png", alt: "Atak Magika Millo", fallbackText: "MILLO" };
   }
 
   if (character?.id === "magiczna-lidsay") {
-    return { src: "./atak_2.png", alt: "Atak Magicznej Lidsay", fallbackText: "LIDSAY" };
+    return { src: "./assets/attacks/atak_2.png", alt: "Atak Magicznej Lidsay", fallbackText: "LIDSAY" };
   }
 
   const weapon = getOwnedItem("weapons", state.equippedWeapon) || CATALOG.weapons[0];
   return { src: weapon.image, alt: weapon.name, fallbackText: weapon.name };
 }
 
-function getRobotVisual() {
-  const worldTheme = getGlobalVisualWorldTheme();
-
-  if (worldTheme === "tower") {
+function getRobotVisualForWorldId(worldId = getGlobalVisualWorldTheme()) {
+  if (worldId === "tower") {
     return {
-      src: "./robot_wieza.jpeg",
-      alt: "Robot Wysokiej Wieży",
+      src: "./assets/robots/robot_wieza.jpeg",
+      alt: "Robot Dżungli",
       fallbackText: "ROBOT",
     };
   }
 
-  if (worldTheme === "winter") {
+  if (worldId === "winter") {
     return {
-      src: "./robot_zimowy.jpeg",
+      src: "./assets/robots/robot_zimowy.jpeg",
       alt: "Robot Zimowy",
       fallbackText: "ROBOT",
     };
   }
 
   return {
-    src: "./robot_magik.jpeg",
+    src: "./assets/robots/robot_magik.jpeg",
     alt: "Robot Magików",
     fallbackText: "ROBOT",
   };
+}
+
+function getRobotVisual() {
+  return getRobotVisualForWorldId(getGlobalVisualWorldTheme());
 }
 
 function loadState() {
@@ -14061,9 +17505,12 @@ function defaultState() {
     coins: 0,
     trophies: 0,
     diamonds: 0,
+    platoKeys: 0,
+    magicMachineFirstPurchaseDone: false,
     seenIntro: false,
     playedFirstGame: false,
     seenFirstRobotTutorial: false,
+    seenJungleBookGuide: false,
     seenTrophyRoadIntro: false,
     superAlleyActive: false,
     superAlleyWinterActive: false,
@@ -14077,10 +17524,23 @@ function defaultState() {
     profileId: "",
     publicId: "",
     profileCreatedAt: 0,
+    profileThemeWorldId: "",
+    nicknameChangeCount: 0,
+    ownedProfilePhotos: [],
+    selectedProfilePhotoId: "",
     favoriteCharacterId: "",
     favoritePetId: "",
     completedGamesTotal: 0,
     robotsDefeatedTotal: 0,
+    bookMissionProgress: {
+      totalRobotDamage: 0,
+      fullClearStreak: 0,
+      currentRunRobots: 0,
+      junglePetRoundsPlayed: 0,
+      robotsDefeatedSinceMissions: 0,
+      trophiesEarnedSinceMissions: 0,
+    },
+    claimedBookMissionIds: [],
     accountPasswordSet: false,
     accountPasswordHash: "",
     accountPasswordSalt: "",
@@ -14093,12 +17553,15 @@ function defaultState() {
     equippedWeapon: "atak-1",
     crateInventory: {
       "drewniana-skrzynia": 0,
+      "dzunglowa-skrzynia": 0,
     },
     openedCrates: {
       "drewniana-skrzynia": 0,
+      "dzunglowa-skrzynia": 0,
     },
     freeCrates: {
       "drewniana-skrzynia": 0,
+      "dzunglowa-skrzynia": 0,
     },
     claimedTrophyRewards: {
       alley: [],
@@ -14126,6 +17589,7 @@ function hydrateSavedState(saved) {
     ...baseState,
     ...saved,
     ownedCharacters: Array.isArray(saved.ownedCharacters) ? saved.ownedCharacters : [],
+    ownedProfilePhotos: Array.isArray(saved.ownedProfilePhotos) ? saved.ownedProfilePhotos : [],
     ownedPets: Array.isArray(saved.ownedPets) ? saved.ownedPets : [],
     ownedWeapons: Array.isArray(saved.ownedWeapons) ? saved.ownedWeapons : ["atak-1"],
     crateInventory:
@@ -14140,6 +17604,10 @@ function hydrateSavedState(saved) {
       saved.freeCrates && typeof saved.freeCrates === "object"
         ? { ...baseState.freeCrates, ...saved.freeCrates }
         : { ...baseState.freeCrates },
+    bookMissionProgress:
+      saved.bookMissionProgress && typeof saved.bookMissionProgress === "object"
+        ? { ...baseState.bookMissionProgress, ...saved.bookMissionProgress }
+        : { ...baseState.bookMissionProgress },
     claimedTrophyRewards:
       saved.claimedTrophyRewards && typeof saved.claimedTrophyRewards === "object"
         ? { ...baseState.claimedTrophyRewards, ...saved.claimedTrophyRewards }
@@ -14155,6 +17623,8 @@ function hydrateSavedState(saved) {
   merged.superAlleyActive = Boolean(saved.superAlleyActive);
   merged.superAlleyWinterActive = Boolean(saved.superAlleyWinterActive);
   merged.superAlleyTowerActive = Boolean(saved.superAlleyTowerActive);
+  merged.platoKeys = Math.max(0, Number(saved.platoKeys || 0));
+  merged.magicMachineFirstPurchaseDone = Boolean(saved.magicMachineFirstPurchaseDone);
   merged.phoneModeEnabled = Boolean(saved.phoneModeEnabled);
   merged.seenWinterWorldIntro = Boolean(saved.seenWinterWorldIntro);
   merged.seenTowerWorldIntro = Boolean(saved.seenTowerWorldIntro);
@@ -14163,8 +17633,26 @@ function hydrateSavedState(saved) {
   merged.profileId = sanitizeProfileId(saved.profileId);
   merged.publicId = sanitizePublicPlayerId(saved.publicId);
   merged.profileCreatedAt = Math.max(0, Number(saved.profileCreatedAt || 0));
+  merged.profileThemeWorldId = normalizeTrophyWorldId(saved.profileThemeWorldId);
+  merged.nicknameChangeCount = Math.max(0, Number(saved.nicknameChangeCount || 0));
+  merged.selectedProfilePhotoId = sanitizeStoredId(saved.selectedProfilePhotoId);
   merged.completedGamesTotal = Math.max(0, Number(saved.completedGamesTotal || 0));
   merged.robotsDefeatedTotal = Math.max(0, Number(saved.robotsDefeatedTotal || 0));
+  merged.bookMissionProgress = {
+    ...baseState.bookMissionProgress,
+    ...(saved.bookMissionProgress && typeof saved.bookMissionProgress === "object"
+      ? saved.bookMissionProgress
+      : {}),
+  };
+  merged.bookMissionProgress.totalRobotDamage = Math.max(0, Number(merged.bookMissionProgress.totalRobotDamage || 0));
+  merged.bookMissionProgress.fullClearStreak = Math.max(0, Number(merged.bookMissionProgress.fullClearStreak || 0));
+  merged.bookMissionProgress.currentRunRobots = Math.max(0, Number(merged.bookMissionProgress.currentRunRobots || 0));
+  merged.bookMissionProgress.junglePetRoundsPlayed = Math.max(0, Number(merged.bookMissionProgress.junglePetRoundsPlayed || 0));
+  merged.bookMissionProgress.robotsDefeatedSinceMissions = Math.max(0, Number(merged.bookMissionProgress.robotsDefeatedSinceMissions || 0));
+  merged.bookMissionProgress.trophiesEarnedSinceMissions = Math.max(0, Number(merged.bookMissionProgress.trophiesEarnedSinceMissions || 0));
+  merged.claimedBookMissionIds = Array.isArray(saved.claimedBookMissionIds)
+    ? saved.claimedBookMissionIds.map((entry) => String(entry || "")).filter(Boolean)
+    : [];
   merged.favoriteCharacterId = sanitizeStoredId(saved.favoriteCharacterId);
   merged.favoritePetId = sanitizeStoredId(saved.favoritePetId);
   merged.accountPasswordHash = sanitizeStoredToken(saved.accountPasswordHash);
@@ -14179,7 +17667,9 @@ function hydrateSavedState(saved) {
   merged.seenFirstRobotTutorial = Object.prototype.hasOwnProperty.call(saved, "seenFirstRobotTutorial")
     ? Boolean(saved.seenFirstRobotTutorial)
     : Boolean(saved.playedFirstGame);
+  merged.seenJungleBookGuide = Boolean(saved.seenJungleBookGuide);
   merged.ownedCharacters = sanitizeOwnedIds(merged.ownedCharacters, CATALOG.characters);
+  merged.ownedProfilePhotos = sanitizeOwnedIds(merged.ownedProfilePhotos, CATALOG.profilePhotos);
   merged.ownedPets = sanitizeOwnedIds(merged.ownedPets, CATALOG.pets);
   merged.ownedWeapons = sanitizeOwnedIds(merged.ownedWeapons, CATALOG.weapons);
 
@@ -14244,11 +17734,28 @@ function ensureStateProfileDefaults(targetState) {
       : targetState.ownedCharacters[0] || "magik-millo";
   }
 
+  if (!targetState.selectedProfilePhotoId || !targetState.ownedProfilePhotos.includes(targetState.selectedProfilePhotoId)) {
+    targetState.selectedProfilePhotoId = "";
+  }
+
+  const unlockedThemeIds = ["alley"];
+  if (normalizeTrophyWorldId(targetState.activeTrophyWorld) === "tower") {
+    unlockedThemeIds.push("winter", "tower");
+  } else if (normalizeTrophyWorldId(targetState.activeTrophyWorld) === "winter") {
+    unlockedThemeIds.push("winter");
+  }
+
+  if (!unlockedThemeIds.includes(normalizeTrophyWorldId(targetState.profileThemeWorldId))) {
+    targetState.profileThemeWorldId = unlockedThemeIds[unlockedThemeIds.length - 1];
+  }
+
   if (!targetState.favoritePetId || !targetState.ownedPets.includes(targetState.favoritePetId)) {
     targetState.favoritePetId = targetState.equippedPet && targetState.ownedPets.includes(targetState.equippedPet)
       ? targetState.equippedPet
       : targetState.ownedPets[0] || "";
   }
+
+  targetState.nicknameChangeCount = Math.max(0, Number(targetState.nicknameChangeCount || 0));
 
   if (!targetState.accountPasswordSet) {
     targetState.accountPasswordHash = "";
@@ -14378,6 +17885,8 @@ function getOwnedItems(kind) {
   const ownedIds =
     kind === "characters"
       ? state.ownedCharacters
+      : kind === "profilePhotos"
+        ? state.ownedProfilePhotos
       : kind === "pets"
         ? state.ownedPets
         : kind === "weapons"
