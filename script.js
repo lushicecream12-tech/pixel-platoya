@@ -121,6 +121,12 @@ const moveDockIndicator = (index) => {
   const step = getDockStep();
 
   activeDockIndex = clampedIndex;
+  appScreen.dataset.view = clampedIndex === 3 ? "notifications" : "home";
+
+  if (clampedIndex === 3) {
+    renderNotifications();
+  }
+
   bottomDock.style.setProperty("--dock-x", `${step * clampedIndex}px`);
   bottomDock.style.setProperty("--dock-drag-x", "0px");
   bottomDock.style.setProperty("--dock-wobble", "0px");
@@ -1404,7 +1410,6 @@ dockTabs.forEach((tab, index) => {
     setComposeOpen(false);
     const direction = Math.sign(index - activeDockIndex);
     moveDockIndicator(index);
-    setView(index === 3 ? "notifications" : "home");
     bottomDock.classList.add("is-switching");
     bottomDock.style.setProperty("--dock-scale-x", "1.18");
     bottomDock.style.setProperty("--dock-skew", `${direction * 5.2}deg`);
