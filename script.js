@@ -8,6 +8,7 @@ const usersButton = document.querySelector("[data-users-open]");
 const usersList = document.querySelector(".users-list");
 const postForm = document.querySelector(".post-form");
 const postsFeed = document.querySelector(".posts-feed");
+const notificationsFeed = document.querySelector(".notifications-feed");
 const composeMessage = document.querySelector(".compose-message");
 const authTabs = document.querySelectorAll("[data-auth-mode]");
 const authForms = document.querySelectorAll("[data-auth-form]");
@@ -452,6 +453,23 @@ const postDateLabel = (value) =>
     minute: "2-digit",
   }).format(new Date(value));
 
+const relativeTimeLabel = (value) => {
+  const diff = Date.now() - new Date(value).getTime();
+  const minutes = Math.max(1, Math.floor(diff / 60000));
+
+  if (minutes < 60) {
+    return `${minutes} min temu`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `${hours} godz. temu`;
+  }
+
+  const days = Math.floor(hours / 24);
+  return `${days} dni temu`;
+};
+
 const createHeartButton = ({ isLiked, count, label, postId, commentId = "" }) => {
   const button = document.createElement("button");
   const likeKey = commentId ? `${postId}:${commentId}` : postId;
@@ -601,7 +619,10 @@ const renderPosts = async () => {
     );
 
     const socialModal = document.createElement("div");
-    socialModal.className = `post-social-modal${openType ? " is-open" : ""} ${openType ? `is-${openType}` : ""}`;
+    socialModal.className = `post-social-modal ${openType ? `is-${openType}` : ""}`;
+    if (openType) {
+      socialModal.dataset.pendingOpen = "true";
+    }
     const modalTitle = document.createElement("span");
     modalTitle.className = "post-social-title";
     modalTitle.textContent = isLikesOpen ? "Polubili post" : "Komentarze";
@@ -700,7 +721,78 @@ const renderPosts = async () => {
     postsFeed.append(card);
   });
 
+  window.requestAnimationFrame(() => {
+    document.querySelectorAll(".post-social-modal[data-pending-open]").forEach((modal) => {
+      modal.classList.add("is-open");
+      modal.removeAttribute("data-pending-open");
+    });
+  });
   window.setTimeout(scheduleDockContrast, 0);
+};
+
+const renderNotifications = async () => {
+  const user = readCurrentUser();
+  notificationsFeed.innerHTML = "";
+
+  if (!user) {
+    const loginNotice = document.createElement("p");
+    loginNotice.className = "notifications-empty";
+    loginNotice.textContent = "Zaloguj się, aby móc otrzymywać powiadomienia.";
+    notificationsFeed.append(loginNotice);
+    return;
+  }
+
+  const posts = sortPosts(await getPosts());
+  const items = [];
+
+  posts.forEach((post) => {
+    items.push({
+      createdAt: post.createdAt,
+      text: `Kacper Czarnojan wstawił post pod tytułem ${post.title}, ${relativeTimeLabel(post.createdAt)}.`,
+    });
+
+    (post.comments || []).forEach((comment) => {
+      if (comment.userId !== user.id) {
+        return;
+      }
+
+      Object.entries(comment.likes || {}).forEach(([likerId, likerName]) => {
+        if (likerId === user.id) {
+          return;
+        }
+
+        items.push({
+          createdAt: comment.createdAt || post.createdAt,
+          text: `${typeof likerName === "string" ? likerName : "Ktoś"} polubił(a) twój komentarz.`,
+        });
+      });
+    });
+  });
+
+  if (!items.length) {
+    const empty = document.createElement("p");
+    empty.className = "notifications-empty";
+    empty.textContent = "Nie masz jeszcze powiadomień.";
+    notificationsFeed.append(empty);
+    return;
+  }
+
+  items
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .forEach((item) => {
+      const row = document.createElement("article");
+      row.className = "notification-card";
+      row.textContent = item.text;
+      notificationsFeed.append(row);
+    });
+};
+
+const setView = async (view) => {
+  appScreen.dataset.view = view;
+
+  if (view === "notifications") {
+    await renderNotifications();
+  }
 };
 
 const fileToDataUrl = (file) =>
@@ -754,12 +846,14 @@ const setLoggedView = (user) => {
     authMessage.textContent = "";
     updateAuthorUi();
     renderPosts();
+    renderNotifications();
     return;
   }
 
   setAuthMode("login");
   updateAuthorUi();
   renderPosts();
+  renderNotifications();
 };
 
 elasticButtons.forEach((button) => {
@@ -1177,6 +1271,7 @@ postsFeed.addEventListener("click", async (event) => {
 
   await savePost(post);
   await renderPosts();
+  await renderNotifications();
   window.setTimeout(() => {
     lastLikedKey = "";
   }, 520);
@@ -1292,6 +1387,7 @@ postsFeed.addEventListener("submit", async (event) => {
   input.value = "";
   await savePost(post);
   await renderPosts();
+  await renderNotifications();
 });
 
 dockTabs.forEach((tab, index) => {
@@ -1308,6 +1404,7 @@ dockTabs.forEach((tab, index) => {
     setComposeOpen(false);
     const direction = Math.sign(index - activeDockIndex);
     moveDockIndicator(index);
+    setView(index === 3 ? "notifications" : "home");
     bottomDock.classList.add("is-switching");
     bottomDock.style.setProperty("--dock-scale-x", "1.18");
     bottomDock.style.setProperty("--dock-skew", `${direction * 5.2}deg`);
