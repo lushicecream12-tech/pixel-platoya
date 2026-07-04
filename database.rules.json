@@ -74,6 +74,20 @@
       "$partyId": {
         ".write": true
       }
+    },
+    "wakacjeZBogiem": {
+      "users": {
+        ".read": true,
+        "$userId": {
+          ".write": true
+        }
+      },
+      "posts": {
+        ".read": true,
+        "$postId": {
+          ".write": true
+        }
+      }
     }
   }
 }

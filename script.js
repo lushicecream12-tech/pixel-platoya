@@ -1,7 +1,8 @@
-const TOTAL_LOADING_TIME = 10000;
+const TOTAL_LOADING_TIME = 900;
 const STEP_INTERVAL_MIN = 200;
 const STEP_INTERVAL_MAX = 950;
-const STORAGE_KEY = "pixel-platoya-save-v1";
+const STORAGE_KEY = "pixel-platoya-save-v2";
+const LEGACY_STORAGE_KEYS = ["pixel-platoya-save-v1"];
 const FIREBASE_MULTIPLAYER_CONFIG = null;
 const FIREBASE_SOCIAL_CONFIG = window.PIXEL_PLATOYA_FIREBASE_CONFIG || null;
 const PROFILE_SYNC_DEBOUNCE_MS = 900;
@@ -25,16 +26,513 @@ const MULTIPLAYER_PLAYER_STALE_MS = 6000;
 const MULTIPLAYER_ROOM_STALE_MS = 45000;
 const TROPHY_NODE_WIDTH = 220;
 const TROPHY_NODE_GAP = 20;
+const MAGICIANS_TROPHY_NODE_WIDTH = 176;
+const MAGICIANS_ALLEY_PROGRESS_SLOTS = Array.from({ length: 40 }, (_, index) => (index + 1) * 50);
+const WINTER_ALLEY_PROGRESS_SLOTS = Array.from({ length: 40 }, (_, index) => WINTER_WORLD_START_TROPHIES + (index * 50));
+const MAGICIANS_PORTAL_SPACER_WIDTH = 520;
+const MAGICIANS_PORTAL_SIZE = 240;
 const TROPHY_ICON_IMAGE = "./assets/currencies/monety_2.png";
+const PET_RANK_STEP_TROPHIES = 50;
+const PET_RANK_MAX_LEVEL = 10;
 const TROPHY_DIAMOND_IMAGE = "./assets/currencies/diamenty_.png";
 const COIN_REWARD_IMAGE = "./assets/currencies/wymiatanie.png";
 const DIAMOND_REWARD_IMAGE = "./assets/currencies/wypaddanie.png";
+const ELIXIR_REWARD_IMAGE = "./eliksir.png";
+const SILVER_REWARD_IMAGE = "./esencja.png";
+const PORTAL_IMAGE = "./portal.png";
+const MAGICIANS_PREMIUM_CROWN_IMAGE = "./korona.png";
+const MAGICIANS_PREMIUM_LOCK_IMAGE = "./magicznaklodka.png";
+const WINTER_PREMIUM_LOCK_IMAGE = "./zimowaklodka.png";
+const MAGICIANS_LOCK_IMAGE = "./klodka.png";
+const MAGICIANS_CLAIMED_IMAGE = "./haczyk.png";
 const MAGICIANS_PLATOYA_KEY_IMAGE = "./klucz.magikow.png";
 const WINTER_PLATOYA_KEY_IMAGE = "./klucz.zimowy.png";
 const TROPHY_STORE_CODE = "2010";
+const ALL_PLATOYA_STORE_CODE = "2010";
 const DEFAULT_STORE_MODE = "default";
 const MAGICIANS_PET_STORE_MODE = "magicians-pets";
 const WINTER_PET_STORE_MODE = "winter-pets";
+const STORE_OFFER_TAB_MAGIC = "magic";
+const STORE_OFFER_TAB_HIGH_TOWER = "high-tower";
+const STORE_OFFER_TAB_PIRATE = "pirate";
+const STORE_DAILY_CHARACTER_PRICE = 129;
+const STORE_PET_SKIN_VISIBLE_COUNT = 2;
+const STORE_PET_SKIN_REFRESH_INTERVAL_MS = 9 * 60 * 60 * 1000;
+const STORE_PET_SKIN_SLOT_BUNDLE_PRICES = [199, 219];
+const STORE_STARTER_PACK_ACTIVE_MS = 3 * 24 * 60 * 60 * 1000;
+const STORE_STARTER_PACK_OFFER = {
+  id: "starter-pack",
+  title: "STARTER PACK",
+  priceLabel: "6,99zł",
+  machineCount: 1,
+  coins: 600,
+  elixirs: 1,
+};
+const STORE_MAX_PLATOYA_OFFER = {
+  id: "max-platoya",
+  title: "WYMAKSUJ PLATOYĘ!",
+  priceLabel: "4,99zł",
+  coins: 12600,
+  elixirs: 20,
+};
+const CONTENT_CREATOR_NICKNAMES = new Set(["kacper0", "hdisjf"]);
+const CONTENT_CREATOR_DIAMOND_REWARD = 299;
+const CONTENT_CREATOR_MACHINE_OFFER_ID = "content-creator-machine";
+const STORE_RANKING_CARD_DECK_OFFER = {
+  id: "ranking-card-deck",
+  title: "KARTY",
+  oldPrice: 59,
+  price: 29,
+};
+const STORE_EMERALD_SKIN_OFFER = {
+  id: "emerald-mystic-skin",
+  basePetId: "papuga-manipulantka",
+  skinPetId: "mistyczny-mag-emerald",
+  title: "OFERTA PRZEBRANIA",
+  skinName: "Mistyczny Mag Emerald",
+  bundleOldPrice: 258,
+  bundlePrice: 199,
+  skinPrice: 89,
+  skinScale: 0.85,
+  singleScale: 1.08,
+};
+const STORE_PET_SKIN_OFFER_DEFAULTS = {
+  title: "OFERTA PRZEBRANIA",
+  bundleOldPrice: 258,
+  bundlePrice: 199,
+  skinPrice: 89,
+};
+const STORE_PET_SKIN_OFFERS = [
+  {
+    ...STORE_PET_SKIN_OFFER_DEFAULTS,
+    ...STORE_EMERALD_SKIN_OFFER,
+    tab: "magic",
+  },
+  {
+    ...STORE_PET_SKIN_OFFER_DEFAULTS,
+    id: "lpsotka-soap-princess-skin",
+    basePetId: "l-psotka",
+    skinPetId: "mydlana-ksiezniczka-plotka",
+    skinName: "Mydlana Księżniczka Psotka",
+    tab: "magic",
+    skinScale: 1,
+    singleScale: 1.14,
+  },
+  {
+    ...STORE_PET_SKIN_OFFER_DEFAULTS,
+    id: "osmo-banana-king-skin",
+    basePetId: "malpka-jasnoksieznik",
+    skinPetId: "bananowy-wladca-osmo",
+    skinName: "Bananowy Władca Osmo",
+    tab: "magic",
+    skinScale: 0.86,
+    singleScale: 1.08,
+  },
+  {
+    ...STORE_PET_SKIN_OFFER_DEFAULTS,
+    id: "emerald-pirate-wand-skin",
+    basePetId: "papuga-manipulantka",
+    skinPetId: "kapitan-rozdzka-emerald",
+    skinName: "Kapitan Różdżka Emerald",
+    tab: "pirate",
+    skinScale: 0.86,
+    singleScale: 1.08,
+  },
+  {
+    ...STORE_PET_SKIN_OFFER_DEFAULTS,
+    id: "magic-dog-sailor-skin",
+    basePetId: "pies-magik",
+    skinPetId: "pies-majtek",
+    skinName: "Pies Majtek",
+    tab: "pirate",
+    skinScale: 1.09,
+    singleScale: 1.15,
+  },
+  {
+    ...STORE_PET_SKIN_OFFER_DEFAULTS,
+    id: "pluto-forbidden-barrel-skin",
+    basePetId: "pluto",
+    skinPetId: "pluto-z-zakazanej-beczki",
+    skinName: "Pluto Z Zakazanej Beczki",
+    tab: "pirate",
+    skinScale: 1.09,
+    singleScale: 1.16,
+  },
+];
+const MAGICIANS_SILVER_GATE_TROPHIES = MAGICIANS_WORLD_END_TROPHIES;
+const WINTER_WORLD_SILVER_REQUIREMENT = 200;
+const SILVER_TO_DIAMONDS_RATE = 2;
+const MAGICIANS_BRIDGE_ROBOT_COIN_REWARD = 20;
+const RANKING_ALLEY_UNLOCK_TROPHIES = 500;
+const RANKING_ALLEY_PREMIUM_DIAMOND_PRICE = 249;
+const RANKING_ALLEY_PREMIUM_CASH_PRICE_LABEL = "33,99zł";
+const RANKING_ALLEY_POINT_ICON = "./punktyrankingu.png";
+const RANKING_ALLEY_TICKET_IMAGE = "./bilett.png";
+const RANKING_GAME_TICKET_IMAGE = "./bilecik.png";
+const RANKING_ALLEY_ENTRY_IMAGE = "./ranking.png";
+const RANKING_ALLEY_UNLOCK_IMAGE = "./ranking.png";
+const RANKING_PROFILE_PHOTO_IMAGE = "./zdjęcie_11.png";
+const HIGH_TOWER_ENTRY_IMAGE = "./wiea.png";
+const HIGH_TOWER_CHEST_IMAGE = "./skrzynia.png";
+const HIGH_TOWER_SPARKLES_IMAGE = "./blyskotki.png";
+const HIGH_TOWER_SPARKLES_REWARD_IMAGE = "./wypadanko.png";
+const HIGH_TOWER_FLARO_ID = "flaro";
+const HIGH_TOWER_COSTUME_SPARKLE_PRICE = 15000;
+const HIGH_TOWER_FLARO_SPARKLE_PRICE = 250000;
+const HIGH_TOWER_CHEST_COSTUME_PITY_LIMIT = 20;
+const HIGH_TOWER_FREE_CHEST_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const HIGH_TOWER_DAILY_VICTORY_CHEST_LIMIT = 6;
+const HIGH_TOWER_DEADLINE_AT = new Date(2026, 8, 1, 0, 0, 0).getTime();
+const HIGH_TOWER_CHEST_CRATE = {
+  id: "skrzynia-wysokiej-wierzy",
+  name: "Skrzynia Wysokiej Wieży",
+  image: HIGH_TOWER_CHEST_IMAGE,
+  theme: "high-tower",
+  appearSound: "highTowerChestAppear",
+  openSound: "highTowerChestOpen",
+};
+const STORE_HIGH_TOWER_OFFERS = [
+  {
+    id: "high-tower-climb-pack",
+    title: "OFERTA WSPINACZKOWA",
+    chestCount: 3,
+    oldPrice: 57,
+    price: 39,
+    priceCurrency: "diamonds",
+    dailyPurchaseKey: "highTowerClimbPackPurchasedCycleKey",
+  },
+  {
+    id: "high-tower-luck-pack",
+    title: "OFERTA SZCZĘŚCIA!",
+    chestCount: 6,
+    oldPrice: 114,
+    price: 79,
+    priceCurrency: "diamonds",
+    dailyPurchaseKey: "highTowerLuckPackPurchasedCycleKey",
+  },
+  {
+    id: "high-tower-lut-szczescia",
+    title: "ŁUT SZCZĘŚCIA",
+    chestCount: 1,
+    sparkles: 1000,
+    price: 15000,
+    priceCurrency: "coins",
+    dailyPurchaseKey: "highTowerCoinLuckPackPurchasedCycleKey",
+  },
+  {
+    id: "high-tower-spark-pack",
+    title: "WZBOGAĆ SIĘ O BŁYSK!",
+    chestCount: 1,
+    sparkles: 30000,
+    priceLabel: "11,99zł",
+    priceCurrency: "cash",
+    oneTimePurchaseKey: "highTowerSparkPackPurchased",
+  },
+  {
+    id: "high-tower-flaro-diamonds",
+    title: "FLARO PŁOŃ!",
+    flaro: true,
+    price: 199,
+    priceCurrency: "diamonds",
+  },
+  {
+    id: "high-tower-flaro-cash",
+    title: "FLARO PŁOŃ!",
+    flaro: true,
+    priceLabel: "11,99zł",
+    priceCurrency: "cash",
+  },
+];
+const HIGH_TOWER_REWARDS = [
+  {
+    id: "zamknieta-w-wiezy-ksiezniczka-psotka",
+    name: "Zamknięta w wieży Księżniczka Psotka",
+    image: "./zamknieta.png",
+  },
+  {
+    id: "czerwony-smok-pies-magik",
+    name: "Pies Magik w Przebraniu Czerwonego Smoka",
+    image: "./smok.png",
+  },
+  {
+    id: "zielony-dinozaur-pies-magik",
+    name: "Pies Magik w Przebraniu Zielonego Dinozaura",
+    image: "./dinozaur.png",
+  },
+  {
+    id: "astralny-mag-emerald",
+    name: "Astralny Mag Emerald",
+    image: "./atralny.png",
+  },
+  {
+    id: "stroz-jednorozec-ozzy",
+    name: "Stróż Jednorożec Ozzy",
+    image: "./jednorozec.png",
+  },
+  {
+    id: "pluto-wylacznie-trzy-zyczenia",
+    name: "Pluto Wyłącznie Trzy Życzenia",
+    image: "./trzy.png",
+  },
+];
+const HIGH_TOWER_REWARD_IDS = new Set(HIGH_TOWER_REWARDS.map((reward) => reward.id));
+const RANKING_CARD_DECK_IMAGE = "./talia.png";
+const RANKING_CARD_BACK_IMAGES = ["./karta1.png", "./karta2.png", "./karta3.png", "./karta4.png", "./karta5.png", "./karta6.png"];
+const SHULLA_ATTACK_CARD_IMAGES = ["./shulla-karta-1.png", "./shulla-karta-2.png", "./shulla-karta-3.png"];
+const RANKING_CARD_FRONT_IMAGES = {
+  coins: "./ranking-card-front-coins.png",
+  diamonds: "./ranking-card-front-diamonds.png",
+  elixir: "./ranking-card-front-elixir.png",
+  ranking: "./ranking-card-front-ranking.png",
+  shell: "./ranking-card-front-shell.png",
+};
+const PET_MINI_ALLEY_UNLOCK_TROPHIES = 500;
+const PET_MINI_ALLEY_RANK_POINTS = 1000;
+const PET_MINI_ALLEY_POINT_ICON = "./punkkkty.png";
+const PET_MINI_ALLEY_LOCK_IMAGE = "./klodka.png";
+const PET_MINI_ALLEY_PET_ID = "pies-magik";
+const PET_MINI_SECRET_POINTS_REWARD = 100;
+const PET_MINI_SECRET_POINTS_CLICKS = 10;
+const PET_MINI_SECRET_POINTS_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const PET_MINI_ALLEY_RANKS = [
+  {
+    id: "emerald",
+    title: "Klasa Szmaragdowa",
+    points: 1000,
+    rewardPetId: "szmaragdowy-pies-magik",
+    rewardName: "Szmaragdowy Pies Magik",
+    rewardImage: "./skinmagik_1.png",
+    dotClass: "emerald",
+  },
+  {
+    id: "quartz",
+    title: "Klasa Kwarcowa",
+    points: 2000,
+    rewardPetId: "kwarcowy-pies-magik",
+    rewardName: "Kwarcowy Pies Magik",
+    rewardImage: "./skinmagik_2.png",
+    dotClass: "quartz",
+  },
+  {
+    id: "pearl",
+    title: "Klasa Perłowa",
+    points: 3000,
+    rewardPetId: "perlowy-pies-magik",
+    rewardName: "Perłowy Pies Magik",
+    rewardImage: "./skinmagik3.png",
+    dotClass: "pearl",
+  },
+];
+const EMERALD_MINI_ALLEY_RANKS = [
+  {
+    id: "emerald",
+    title: "Klasa Szmaragdowa",
+    points: 1000,
+    rewardPetId: "szmaragdowa-emerald",
+    rewardName: "Szmaragdowa Emerald",
+    rewardImage: "./szemerald.png",
+    dotClass: "emerald",
+  },
+  {
+    id: "quartz",
+    title: "Klasa Kwarcowa",
+    points: 2000,
+    rewardPetId: "kwarcowa-emerald",
+    rewardName: "Kwarcowa Emerald",
+    rewardImage: "./kemerald.png",
+    dotClass: "quartz",
+  },
+  {
+    id: "pearl",
+    title: "Klasa Perłowa",
+    points: 3000,
+    rewardPetId: "perlowa-emerald",
+    rewardName: "Perłowa Emerald",
+    rewardImage: "./pemerald.png",
+    dotClass: "pearl",
+  },
+];
+const PET_MINI_ALLEY_MISSIONS = [
+  {
+    id: "play",
+    title: "Rozegraj 10 gier z Psem Magikiem",
+    target: 10,
+    rewardPoints: 50,
+    repeat: true,
+  },
+  {
+    id: "full-waves",
+    title: "Przetrwaj wszystkie fale z Psem Magikiem trzy razy",
+    target: 3,
+    rewardPoints: 50,
+    repeat: true,
+  },
+  {
+    id: "upgrade",
+    title: "Ulepsz Psa Magika o 1 poziom",
+    target: 1,
+    rewardPoints: 100,
+    maxStage: 6,
+  },
+  {
+    id: "damage",
+    title: "Niech Pies Magik zada robotom 2000 obrażeń",
+    target: 2000,
+    rewardPoints: 50,
+    repeat: true,
+  },
+  {
+    id: "trophies",
+    title: "Wbij na Psie Magiku łącznie 600 pucharów",
+    target: 600,
+    targetStep: 100,
+    rewardPoints: 50,
+    repeat: true,
+  },
+];
+const PET_MINI_ALLEY_CONFIGS = {
+  [PET_MINI_ALLEY_PET_ID]: {
+    petId: PET_MINI_ALLEY_PET_ID,
+    petName: "Pies Magik",
+    petNameInstrumental: "Psem Magikiem",
+    petNameGenitive: "Psa Magika",
+    petPointsName: "Punkty Psa Magika",
+    petPointsStatus: "+100 PUNKTÓW PSA MAGIKA",
+    title: "KLASA PLATOYI",
+    pointIcon: PET_MINI_ALLEY_POINT_ICON,
+    ranks: PET_MINI_ALLEY_RANKS,
+    missions: PET_MINI_ALLEY_MISSIONS,
+  },
+  "papuga-manipulantka": {
+    petId: "papuga-manipulantka",
+    petName: "Emerald",
+    petNameInstrumental: "Emerald",
+    petNameGenitive: "Emerald",
+    petPointsName: "Punkty Emerald",
+    petPointsStatus: "+100 PUNKTÓW EMERALD",
+    title: "KLASA PLATOYI",
+    pointIcon: "./pktemeralda.png",
+    ranks: EMERALD_MINI_ALLEY_RANKS,
+    missions: PET_MINI_ALLEY_MISSIONS.map((mission) => ({
+      ...mission,
+      title: mission.title
+        .replace("Psem Magikiem", "Emerald")
+        .replace("Psa Magika", "Emerald")
+        .replace("Pies Magik", "Emerald"),
+    })),
+  },
+};
+const RANKING_ROAD_NODE_SIZE = 176;
+const RANKING_ROAD_NODE_GAP = 54;
+const RANKING_SHIP_MAX_HP = 1000000;
+const RANKING_SHIP_MATCH_DURATION_MS = 180000;
+const RANKING_SHIP_BOT_HP = 600;
+const RANKING_SHIP_BOT_DAMAGE = 5000;
+const RANKING_SHIP_SPAWN_INTERVAL_MS = 1450;
+const RANKING_SHIP_BOT_SPEED_MULTIPLIER = 1.18;
+const PET_UPGRADE_COIN_MULTIPLIER = 3;
+const CORAL_PET_STATS = {
+  hp: 800,
+  respawnSeconds: 15,
+  cooldownMs: 5500,
+  damage: 100,
+  blindMs: 3000,
+  damagedThreshold: 0.8,
+  pulseDamage: 50,
+  pulseIntervalMs: 2000,
+};
+const RANKING_ALLEY_REWARDS = {
+  premium: [
+    { id: "ranking-premium-250-thalia", lane: "premium", points: 250, type: "character", itemId: "thalia", amount: 1, label: "Thalia" },
+    { id: "ranking-premium-500-elixir", lane: "premium", points: 500, type: "elixir", amount: 6, label: "6 eliksirów" },
+    { id: "ranking-premium-750-coins", lane: "premium", points: 750, type: "coins", amount: 1000, label: "1000 monet" },
+    { id: "ranking-premium-1000-shulla", lane: "premium", points: 1000, type: "character", itemId: "shulla", amount: 1, label: "Shulla" },
+    { id: "ranking-premium-1250-profile-photo", lane: "premium", points: 1250, type: "profile-photo", itemId: "ranking-photo-11", amount: 1, label: "Zdjęcie Profilu" },
+    { id: "ranking-premium-1500-coral", lane: "premium", points: 1500, type: "pet", itemId: "coral", amount: 1, label: "Coral" },
+    { id: "ranking-premium-1750-coins", lane: "premium", points: 1750, type: "coins", amount: 1000, label: "1000 monet" },
+  ],
+  free: [
+    { id: "ranking-free-250-crate", lane: "free", points: 250, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+    { id: "ranking-free-500-card-deck", lane: "free", points: 500, type: "card-deck", amount: 1, label: "Karty" },
+    { id: "ranking-free-750-crate", lane: "free", points: 750, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+    { id: "ranking-free-1000-elixir", lane: "free", points: 1000, type: "elixir", amount: 3, label: "3 eliksiry" },
+    { id: "ranking-free-1250-diamonds", lane: "free", points: 1250, type: "diamonds", amount: 5, label: "5 diamentów" },
+    { id: "ranking-free-1500-crate", lane: "free", points: 1500, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+    { id: "ranking-free-1750-elixir", lane: "free", points: 1750, type: "elixir", amount: 3, label: "3 eliksiry" },
+  ],
+};
+const STORE_DAILY_CHARACTER_IDS_BY_WORLD = {
+  magicians: ["nerissa", "hookcrab"],
+  winter: ["nora", "ann", "cloud", "mistrzyni-lyzwiarstwa-lily"],
+};
+const STORE_SPECIAL_CURRENCY_OFFERS = [
+  {
+    id: "special-coins-10000",
+    type: "coins",
+    amount: 10000,
+    name: "10000 monet",
+    title: "10000 MONET",
+    priceLabel: "4,99zł",
+    image: COIN_REWARD_IMAGE,
+    icon: "./assets/currencies/monety_1.png",
+  },
+  {
+    id: "special-diamonds-99",
+    type: "diamonds",
+    amount: 99,
+    name: "99 diamentów",
+    title: "99 DIAMENTÓW",
+    priceLabel: "4,99zł",
+    image: DIAMOND_REWARD_IMAGE,
+    icon: TROPHY_DIAMOND_IMAGE,
+  },
+  {
+    id: "special-elixirs-34",
+    type: "elixirs",
+    amount: 34,
+    name: "34 eliksiry",
+    title: "34 ELIKSIRY",
+    priceLabel: "4,99zł",
+    image: ELIXIR_REWARD_IMAGE,
+    icon: ELIXIR_REWARD_IMAGE,
+  },
+];
+const STORE_PLATOYA_MACHINE_OFFERS = [
+  {
+    id: "plato-machine-magicians",
+    amount: 1,
+    price: 89,
+    name: "Maszyna Platoi",
+    title: "MASZYNA PLATOI",
+    image: "./automat.1.png",
+  },
+];
+const STORE_PREMIUM_ALLEY_OFFERS = [
+  {
+    id: "premium-alley-cash",
+    type: "cash",
+    priceLabel: SUPER_ALLEY_CASH_PRICE_LABEL,
+  },
+  {
+    id: "premium-alley-coins",
+    type: "coins",
+    price: 50000,
+  },
+  {
+    id: "premium-alley-diamonds",
+    type: "diamonds",
+    price: 119,
+  },
+];
+const STORE_WINTER_PREMIUM_BOOST_OFFER = {
+  id: "winter-premium-boost",
+  type: "cash",
+  priceLabel: "24,99zł",
+  title: "ALEJA PREMIUM",
+  copy: "5 POZIOMÓW W GÓRĘ",
+  image: "./bilet.png",
+  trophyBoost: 250,
+};
 const MAGIC_MACHINE_PRICE = 2;
 const MAGIC_MACHINE_FIRST_PRICE = 1;
 const MAGIC_MACHINE_FIRST_REWARD_PET_ID = "pies-magik";
@@ -43,8 +541,10 @@ const MAGIC_MACHINE_BALL_IMAGE = "./kulka.1.png";
 const SUPER_ALLEY_REWARD_THRESHOLDS = {
   alley: new Set([100, 250, 350, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1750, 1850, 1950]),
   winter: new Set([2100, 2250, 2350, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500, 3600, 3750, 3850, 3950]),
-  tower: new Set([4150, 4250, 4350, 4500, 4650, 4800, 5000, 5100, 5200, 5300, 5400, 5500, 5600, 5750, 5850, 6150, 6250, 6400, 6500, 6600, 6750, 6850]),
 };
+const LEGACY_ALLEY_SUPER_REWARD_THRESHOLDS = new Set([
+  100, 250, 350, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1750, 1850, 1950,
+]);
 const SOUND_EFFECT_SOURCES = {
   shot2: ["./assets/sounds/attacks/strzał_2.mp3", "./assets/sounds/attacks/strzał_2.mp3"],
   shot3: ["./assets/sounds/attacks/strzał_3.mp3", "./assets/sounds/attacks/strzał_3.mp3"],
@@ -54,15 +554,46 @@ const SOUND_EFFECT_SOURCES = {
   shotCloud: ["./assets/sounds/attacks/strzał_cloud.mp3", "./assets/sounds/attacks/strzał_cloud.mp3"],
   shotAnn: ["./assets/sounds/attacks/strzał_ann.mp3", "./assets/sounds/attacks/strzał_ann.mp3"],
   shotIceSkater: ["./assets/sounds/attacks/strzał_leołyżwiaż.mp3", "./assets/sounds/attacks/strzał_leołyżwiaż.mp3"],
-  shotIvy: ["./assets/sounds/attacks/strzal_ivy.mp3"],
-  shotCoco: ["./assets/sounds/characters/coco_dzwiek.mp3"],
-  shotAslan: ["./assets/sounds/characters/aslan.mp3"],
-  shotKora: ["./assets/sounds/characters/kora.mp3"],
-  shotWodzu: ["./assets/sounds/attacks/strzalwodza.mp3"],
+  shotGrifos: ["./grifos.mp3"],
+  shotMycelia: ["./mycelia.mp3"],
+  shotSylas: ["./sylas.mp3"],
+  shotNerissa: ["./nerissa.mp3"],
+  shotHookcrab: ["./hook.mp3"],
+  shotLunella: ["./lunella.mp3"],
+  shotThalia: ["./thalia.mp3", "./assets/sounds/attacks/thalia.mp3"],
+  shotShulla: ["./shulla.mp3"],
+  coralFlash: ["./flash.mp3", "./assets/sounds/pets/flash.mp3"],
+  flaroFire: ["./zianie.mp3", "./assets/sounds/pets/zianie.mp3"],
+  towerShot: ["./strzall.mp3", "./assets/sounds/game/strzall.mp3"],
+  towerSpawn: ["./spawn.mp3", "./assets/sounds/game/spawn.mp3"],
   walkingLoop: ["./assets/sounds/game/chodzenie_1.mp3"],
   coins: ["./assets/sounds/game/dźwięk_1.mp3", "./assets/sounds/game/dźwięk_1.mp3"],
   diamondShine: ["./benkirb-shine-2-268904.mp3"],
+  keyReward: ["./klucz.mp3"],
+  portalLock: ["./klodka.mp3", "./assets/sounds/game/klodka.mp3"],
+  rankingEnter: ["./hahaha.mp3", "./assets/sounds/game/hahaha.mp3"],
+  rankingPremiumUnlock: ["./lalala.mp3", "./assets/sounds/game/lalala.mp3"],
+  rankingCardDeckUnlock: ["./talija.mp3", "./assets/sounds/game/talija.mp3"],
+  hiraVoice: ["./hira.mp3", "./assets/sounds/game/hira.mp3"],
+  rankingCardPick1: ["./1.mp3", "./assets/sounds/game/1.mp3"],
+  rankingCardPick2: ["./2.mp3", "./assets/sounds/game/2.mp3"],
+  rankingCardPick3: ["./3.mp3", "./assets/sounds/game/3.mp3"],
+  rankingCardRottenShell: ["./ooh.mp3", "./assets/sounds/game/ooh.mp3"],
+  petMiniPoints: ["./punktyyy.mp3"],
+  highTowerSparkles: ["./blyskotki.mp3"],
+  elixirReward: ["./eliksir.mp3"],
   characterUnlock: ["./assets/sounds/game/character_1.mp3"],
+  petUpgrade: ["./ulepszenie.mp3"],
+  voiceMagikMillo: ["./millovoice_1.mp3", "./millovoice_2.mp3", "./millovoice_3.mp3", "./millovoice.mp3", "./magikmillovoice.mp3"],
+  voiceElfie: ["./elfievoice_1.mp3", "./elfievoice_2.mp3", "./elfievoice_3.mp3", "./elfievoice.mp3"],
+  voiceMycelia: ["./myceliavoice_1.mp3", "./myceliavoice_2.mp3", "./myceliavoice_3.mp3", "./myceliavoice.mp3"],
+  voiceGrifos: ["./grifosvoice_1.mp3", "./grifosvoice_2.mp3", "./grifosvoice_3.mp3", "./grifosvoice.mp3"],
+  voiceNerissa: ["./nerrisavoice_1.mp3", "./nerrisavoice_2.mp3", "./nerrisavoice_3.mp3", "./nerrisavoice.mp3"],
+  voiceLinda: ["./lindavoice_1.mp3", "./lindavoice_2.mp3", "./lindavoice_3.mp3", "./lindavoice.mp3"],
+  voiceHookcrab: ["./hookcrabvoice_1.mp3", "./hookcrabvoice_2.mp3", "./hookcrabvoice_3.mp3", "./hookcrabvoice.mp3"],
+  voiceThalia: ["./thaliavoice_1.mp3", "./thaliavoice_2.mp3", "./thaliavoice_3.mp3", "./thaliavoice.mp3"],
+  voiceSylias: ["./syliasvoice_1.mp3", "./syliasvoice_2.mp3", "./syliasvoice_3.mp3", "./syliasvoice.mp3"],
+  voiceShulla: ["./shullavoice_1.mp3", "./shullavoice_2.mp3", "./shullavoice_3.mp3", "./shullavoice.mp3"],
   superIntro: ["./assets/sounds/game/super_1.mp3"],
   magicMachineRoll: ["./losowanie.mp3"],
   magicMachineOpen: ["./losowanie2.mp3"],
@@ -71,6 +602,8 @@ const SOUND_EFFECT_SOURCES = {
   roundEndResult: ["./assets/sounds/game/kn_3.mp3"],
   crateAward: ["./assets/sounds/game/skrzynia_1.mp3"],
   crateOpen: ["./assets/sounds/game/skrzynia_2.mp3"],
+  highTowerChestAppear: ["./11.mp3"],
+  highTowerChestOpen: ["./12.mp3"],
   dogVoice: ["./assets/sounds/pets/pies_1.mp3"],
   parrotVoice: ["./assets/sounds/pets/papuga_1.mp3"],
   catVoice: ["./assets/sounds/pets/kot_1.mp3"],
@@ -83,7 +616,8 @@ const SOUND_EFFECT_SOURCES = {
 const BACKGROUND_MUSIC_SOURCES = {
   alley: ["./assets/sounds/game/muzyka_1.mp3"],
   winter: ["./assets/sounds/game/zima_mp4.mp4", "./zima_mp4", "./assets/sounds/game/zima_mp4.mp4"],
-  tower: ["./assets/sounds/game/dzungla.mp4", "./dzungla", "./assets/sounds/game/muzyka_1.mp3"],
+  ranking: ["./piracci.mp3", "./assets/sounds/game/piracci.mp3"],
+  tower: ["./wierzaa.mp3", "./assets/sounds/game/muzyka_1.mp3"],
 };
 const GAMEPLAY_BACKGROUND_MUSIC_SOURCES = [
   "./gra_1.ogg",
@@ -92,18 +626,79 @@ const GAMEPLAY_BACKGROUND_MUSIC_SOURCES = [
 ];
 const BACKGROUND_MUSIC_DEFAULT_VOLUME = 0.42;
 const BACKGROUND_MUSIC_DUCKED_VOLUME = 0.22;
+const BACKGROUND_MUSIC_EFFECT_DUCK_FACTOR = 0.1;
+const SETTINGS_VOLUME_MIN = 1;
+const SETTINGS_VOLUME_MAX = 100;
 const ATTACK_SOUND_VOLUME_MULTIPLIER = 1.5;
+const CHARACTER_VOICE_INTERVAL_MS = 13000;
+const DAILY_GIFT_CHECK_DELAY_MS = 180;
+const DAILY_GIFT_AUTO_POPUP_ENABLED = false;
+const WAVE_INTRO_FULL_MS = 3000;
+const WAVE_INTRO_SHORT_MS = 2000;
+const WAVE_DURATION_MS = 35000;
+const WAVE_BANNER_TONES = ["pink", "blue", "yellow", "purple", "green"];
+const DAILY_GIFT_CATEGORY_WEIGHTS = {
+  alley: { coins: 58, diamonds: 32, platoKeys: 10 },
+  winter: { coins: 58, diamonds: 32, platoKeys: 10 },
+};
+const PORTAL_MISSION_DAILY_COUNT = 4;
+const PORTAL_MISSION_PREMIUM_DAILY_COUNT = 0;
+const PORTAL_MISSION_COLORS = ["blue", "pink", "purple", "yellow", "green"];
+const PORTAL_DAILY_BONUS_TARGET = 3;
+const PORTAL_DAILY_BONUS_ESSENCE_REWARD = 30;
+const PORTAL_DAILY_BONUS_COIN_REWARD = 500;
+const PORTAL_DAILY_BONUS_IMAGE = "./assets/shop/skrzynia_1.png";
+const PORTAL_FAIRY_REWARD_IMAGE = "./wrozkowy.png";
+const PORTAL_LUNELLA_CHARACTER_ID = "lunella";
+const PORTAL_MISSION_DEFINITIONS = [
+  {
+    id: "play-5",
+    event: "game-played",
+    title: "Zagraj 5 meczy",
+    target: 5,
+    reward: 50,
+    unit: "meczy",
+    image: "./zagraj.png",
+  },
+  {
+    id: "robots-150",
+    event: "robot-kill",
+    title: "Pokonaj łącznie 150 robotów",
+    target: 150,
+    reward: 50,
+    unit: "robotów",
+    image: "./robotki.png",
+  },
+  {
+    id: "damage-50000",
+    event: "damage",
+    title: "Zadaj łącznie 50000 obrażeń robotom",
+    target: 50000,
+    reward: 50,
+    unit: "obrażeń",
+    image: "./robotki.png",
+  },
+  {
+    id: "full-waves-3",
+    event: "full-waves",
+    title: "Przejdź 5 fali trzy razy",
+    target: 3,
+    reward: 50,
+    unit: "razy",
+    image: "./falee.png",
+  },
+];
 
 const GAME_RULES = {
-  playerMaxHp: 3000,
+  playerMaxHp: 1000,
   robotMaxHp: 1000,
   robotSpawnMs: 6000,
   robotMaxCount: 4,
-  robotSpeed: 117,
+  robotSpeed: 135.14,
   robotDamagePerSecond: 250,
   projectileDamage: 200,
   projectileSpeed: 580,
-  playerSpeed: 230,
+  playerSpeed: 165.6,
   baseAmmoCount: 3,
   ammoRechargeSeconds: 3,
   hamsterAmmoPenaltySeconds: 0.8,
@@ -114,7 +709,7 @@ const GAME_RULES = {
   monkeyLeapSpeed: 320,
   monkeyDamagePerSecond: 200,
   monkeyHealPerSecond: 200,
-  parrotCastIntervalMs: 4000,
+  parrotCastIntervalMs: 8000,
   parrotStunDurationMs: 4000,
   parrotRangeAreaFactor: 0.33,
   polarBearCastIntervalMs: 4000,
@@ -122,35 +717,8 @@ const GAME_RULES = {
   polarBearProjectileDamage: 50,
   snowflakeShieldDurationMs: 3000,
   snowflakeShieldCooldownMs: 10000,
-  owlShieldDurationMs: 3000,
+  owlShieldDurationMs: 2000,
   owlShieldCooldownMs: 10000,
-  owlHealAmount: Math.round(3000 * 0.2),
-  jaguarFieldRadius: 128,
-  jaguarFieldDurationMs: 5000,
-  frogPuddleRadius: 86,
-  frogPuddleDurationMs: 6000,
-  frogPuddleIntervalMs: 5000,
-  frogPuddleHealIntervalMs: 2000,
-  frogPuddleHealAmount: 50,
-  frogPuddleRobotDamagePerSecond: 100,
-  jungleParrotHealMultiplier: 0.1,
-  jungleMonkeyMarkedTargets: 2,
-  jungleMonkeyDamageMultiplier: 1.5,
-  jungleSnakeCastIntervalMs: 6000,
-  jungleSnakeTargetCount: 2,
-  jungleSnakeDurationMs: 5000,
-  jungleSnakeSlowMultiplier: 0.2,
-  jungleSnakeDamageMultiplier: 0.5,
-  elephantRideCooldownMs: 10000,
-  elephantRideDurationMs: 10000,
-  elephantRideSpeed: 300,
-  slothSlowCooldownMs: 10000,
-  slothSlowDurationMs: 8000,
-  slothSlowMultiplier: 0.45,
-  tigerDamagePerStep: 4,
-  tigerDamageStepHp: 50,
-  crocodileSurfaceDurationMs: 5000,
-  crocodileBurrowDurationMs: 3000,
   lpsotkaCastIntervalMs: 5000,
   snakeWallActiveMs: 5000,
   snakeWallCooldownMs: 5000,
@@ -170,542 +738,717 @@ const GAME_RULES = {
   lpsotkaBubbleRewindMs: 2000,
 };
 
+const TREE_CONFIG = {
+  image: "./drzewko.png",
+  width: 226,
+  height: 252,
+  zoneRadiusX: 116,
+  zoneRadiusY: 42,
+  firstAppleSpawnMs: 3000,
+  minAppleSpawnMs: 10000,
+  maxAppleSpawnMs: 15000,
+  appleEatMs: 3000,
+  leafMinSpawnMs: 420,
+  leafMaxSpawnMs: 920,
+  greenShieldMs: 10000,
+  yellowSpeedMs: 8000,
+  blueSlowMs: 15000,
+  orangeAmmoMs: 8000,
+  purpleInvisibleMs: 3000,
+  specialCopyMs: 20000,
+};
+
+const TREE_MAP_ENABLED = false;
+const TREE_LEAF_IMAGES = ["./lisc_1.png", "./lisc_2.png"];
+
+const TREE_APPLE_TYPES = {
+  red: {
+    image: "./czerwone.png",
+    label: "CZERWONE",
+    weight: 70,
+    minCount: 1,
+    maxCount: 4,
+  },
+  yellow: {
+    image: "./zolte.png",
+    label: "ZOLTE",
+    weight: 35,
+    minCount: 1,
+    maxCount: 3,
+  },
+  green: {
+    image: "./zielone.png",
+    label: "ZIELONE",
+    weight: 10,
+    minCount: 1,
+    maxCount: 1,
+  },
+  blue: {
+    image: "./niebieskie.png",
+    label: "NIEBIESKIE",
+    weight: 4,
+    minCount: 1,
+    maxCount: 1,
+  },
+  orange: {
+    image: "./pomaranczowe.png",
+    label: "POMARANCZOWE",
+    weight: 0.7,
+    minCount: 1,
+    maxCount: 1,
+  },
+  purple: {
+    image: "./fioletowe.png",
+    label: "FIOLETOWE",
+    weight: 0.2,
+    minCount: 1,
+    maxCount: 1,
+  },
+  special: {
+    image: "./specjalne.png",
+    label: "SPECJALNE",
+    weight: 0.1,
+    minCount: 1,
+    maxCount: 1,
+  },
+};
+
+const TREE_APPLE_CROWN_SPOTS = [
+  { x: -76, y: -178 },
+  { x: -52, y: -214 },
+  { x: -28, y: -150 },
+  { x: -8, y: -202 },
+  { x: 24, y: -166 },
+  { x: 46, y: -212 },
+  { x: 72, y: -184 },
+  { x: -86, y: -136 },
+  { x: 86, y: -138 },
+  { x: 6, y: -118 },
+];
+
+const TOWER_CONFIG = {
+  image: "./wierzyczka.png",
+  robotIdleImage: "./robocik.png",
+  robotWalkImage: "./ida\u0328cy.png",
+  projectileImage: "./kula.png",
+  sparksImage: "./iskierki.png",
+  killIcon: "./roboniek.png",
+  width: 176,
+  height: 176,
+  blockerRadiusX: 72,
+  blockerRadiusY: 38,
+  spawnIntervalMs: 5000,
+  spawnSpacing: 64,
+  robotHp: 300,
+  robotSpeed: GAME_RULES.robotSpeed,
+  robotDamage: 100,
+  projectileSpeed: 312,
+  projectileHitRadius: 42,
+  projectileTtlMs: 4600,
+  hazardRadius: 88,
+  hazardTtlMs: 5000,
+  hazardDamage: 50,
+  hazardDamageIntervalMs: 500,
+  minDistance: 218,
+  maxDistance: 350,
+  attackRange: 720,
+};
+
 const CATALOG = {
   profilePhotos: [
     {
-      id: "drzemka-pod-golym-niebem",
-      name: "Drzemka pod gołym niebem",
-      image: "./assets/profile-images/drzemka.jpeg",
-      unlockWorld: "tower",
-    },
-    {
-      id: "raj-dla-papug",
-      name: "Raj dla papug",
-      image: "./assets/profile-images/papug.jpeg",
-      unlockWorld: "tower",
-    },
-    {
-      id: "bagienna-kapiel",
-      name: "Bagienna Kąpiel",
-      image: "./assets/profile-images/kapiel.jpeg",
-      unlockWorld: "tower",
-    },
-    {
-      id: "sledztwo-w-sprawie",
-      name: "Śledztwo w sprawie",
-      image: "./assets/profile-images/sledztwo.jpeg",
-      unlockWorld: "tower",
+      id: "ranking-photo-11",
+      name: "Zdjęcie Profilu",
+      image: RANKING_PROFILE_PHOTO_IMAGE,
     },
   ],
   characters: [
     {
-      id: "magik-millo",
-      name: "Magik Millo",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_1.png",
-      storeNote: "Postac startowa z magicznym atakiem.",
-    },
+          id: "magik-millo",
+          name: "Magik Millo",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_1.png",
+          storeNote: "Postac startowa z magicznym atakiem.",
+        },
     {
-      id: "elfie",
-      name: "Elfie",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_2.png",
-      unlockWorld: "alley",
-      storeNote: "Zdobadz w Alei Pucharow.",
-    },
+          id: "elfie",
+          name: "Elfie",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_2.png",
+          unlockWorld: "alley",
+          storeNote: "Zdobadz w Alei Pucharow.",
+        },
     {
-      id: "linda",
-      name: "Linda",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_3.png",
-      unlockWorld: "alley",
-      storeNote: "Zdobadz na koncu Alei Pucharow.",
-    },
+          id: "linda",
+          name: "Linda",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_3.png",
+          unlockWorld: "alley",
+          storeNote: "Zdobadz na koncu Alei Pucharow.",
+        },
     {
-      id: "roslinna-krolowa-linda",
-      name: "Roslinna Krolowa Linda",
-      price: 10000,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_4.png",
-      storeNote: "Skorka premium Lindy z królewskim atakiem natury.",
-    },
+          id: "roslinna-krolowa-linda",
+          name: "Roslinna Krolowa Linda",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_4.png",
+          storeNote: "Skorka premium Lindy z królewskim atakiem natury.",
+        },
     {
-      id: "magiczna-lidsay",
-      name: "Magiczna Lidsay",
-      price: 10000,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_10.png",
-      storeNote: "Magiczna postac sklepowa z atakiem jak Magik Millo.",
-    },
+          id: "elfie-wojowniczka",
+          name: "Elfie Wojowniczka",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_5.png",
+          storeNote: "Skorka Elfie gotowa do walki.",
+        },
     {
-      id: "elfie-wojowniczka",
-      name: "Elfie Wojowniczka",
-      price: 10000,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_5.png",
-      storeNote: "Skorka Elfie gotowa do walki.",
-    },
+          id: "elfie-w-swojej-naturze",
+          name: "Elfie w swojej naturze",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_6.png",
+          storeNote: "Naturalna wersja Elfie ze swoim atakiem.",
+        },
     {
-      id: "elfie-w-swojej-naturze",
-      name: "Elfie w swojej naturze",
-      price: 10000,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_6.png",
-      storeNote: "Naturalna wersja Elfie ze swoim atakiem.",
-    },
+          id: "grifos",
+          name: "Grifos",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./grifos.png",
+          unlockWorld: "alley",
+          storeNote: "Nagroda premium za koniec Alei Magików.",
+        },
     {
-      id: "elfie-jako-linda",
-      name: "Elfie jako Linda",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_7.png",
-      unlockWorld: "alley",
-      storeNote: "Skorka z konca Alei Pucharow.",
-    },
+          id: "mycelia",
+          name: "Mycelia",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./mycelia.png",
+          unlockWorld: "alley",
+          storeNote: "Nagroda premium z Alei Magików.",
+        },
     {
-      id: "millo-jako-elfie",
-      name: "Millo jako Elfie",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_8.png",
-      unlockWorld: "alley",
-      storeNote: "Nagroda za dalsza czesc Alei Pucharow.",
-    },
+          id: "lazurowa-mycelia",
+          name: "Lazurowa Mycelia",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./lazorowa.png",
+          unlockWorld: "alley",
+          storeNote: "Skin Mycelii z Alei Magików.",
+        },
     {
-      id: "linda-wojownicza-ksiezniczka",
-      name: "Linda Wojownicza Ksiezniczka",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_9.png",
-      unlockWorld: "alley",
-      storeNote: "Nagroda z dalszej czesci Alei Pucharow.",
-    },
+          id: "sylas",
+          name: "Sylias",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./sylas.png",
+          unlockWorld: "alley",
+          storeNote: "Nagroda premium z Alei Magików.",
+        },
     {
-      id: "lily",
-      name: "Lily",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_11.png",
-      unlockWorld: "winter",
-      storeNote: "Nagroda z konca Swiata Zimowego.",
-    },
+          id: "elegancki-sylias",
+          name: "Elegancki Sylias",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./sluzacy.png",
+          unlockWorld: "alley",
+          storeNote: "Skin Syliasa z Alei Magików.",
+        },
     {
-      id: "tricky",
-      name: "Tricky",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_12.png",
-      unlockWorld: "winter",
-      storeNote: "Nagroda z dalszego konca Swiata Zimowego.",
-    },
+          id: "nerissa",
+          name: "Nerissa",
+          price: 129,
+          currency: "diamonds",
+          cashPriceLabel: "",
+          image: "./Nerissa.png",
+          storeWorld: "magicians",
+          storeNote: "Sklepowa postać z własnym atakiem i dźwiękiem.",
+          description: "Niepowstrzymana Piratka i kapitanka statku wraz z Hookcrabem, która utrzymuje wszystko pod kontrolą... nie licząc Shulli, która karze losować jej jakieś dziwne karty",
+        },
     {
-      id: "tricky-renifer",
-      name: "Tricky Renifer",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_13.png",
-      unlockWorld: "winter",
-      storeNote: "Nagroda za sam koniec Swiata Zimowego.",
-    },
+          id: "hookcrab",
+          name: "Hookcrab",
+          price: 129,
+          currency: "diamonds",
+          cashPriceLabel: "",
+          image: "./hookcrab.png",
+          storeWorld: "magicians",
+          storeNote: "Sklepowa postać z pirackiej dziennej oferty.",
+          description: "Ahrrr agrr… klak-klak! Skrrrba gruuum, arghh-rak-rak! Muszelki!",
+        },
     {
-      id: "leo",
-      name: "Leo",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_17.png",
-      unlockWorld: "winter",
-      storeNote: "Nagroda za final Swiata Zimowego.",
-    },
+          id: "lunella",
+          name: "Lunella",
+          price: STORE_DAILY_CHARACTER_PRICE,
+          currency: "diamonds",
+          cashPriceLabel: "",
+          image: "./lunella.png",
+          storeWorld: "magicians",
+          storeNote: "Sklepowa postać z dziennej oferty.",
+        },
     {
-      id: "leo-skoczek-narciarski",
-      name: "Leo Skoczek Narciarski",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_14.png",
-      unlockWorld: "winter",
-      storeNote: "Nagroda Super ze Swiata Zimowego.",
-    },
+          id: "thalia",
+          name: "Thalia",
+          price: 0,
+          currency: "",
+          cashPriceLabel: "",
+          image: "./thalia.png",
+          unlockWorld: "alley",
+          storeNote: "Nagroda premium z Alei Rankingowej.",
+          description: "Kolekcjonerka pereł, nie dopuszcza nikogo do swojego sekretnego pokoju na statku, w którym pewnie nie znajduje się nic poza stertą błyskotek...",
+        },
     {
-      id: "lyzwiarka-lily",
-      name: "Łyżwiarka Lily",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_15.png",
-      unlockWorld: "winter",
-      storeNote: "Postac z zimowego pakietu.",
-    },
+          id: "shulla",
+          name: "Shulla",
+          price: 0,
+          currency: "",
+          cashPriceLabel: "",
+          image: "./Shulla.png",
+          unlockWorld: "alley",
+          storeNote: "Nagroda premium z Alei Rankingowej.",
+          description: "Cóż... może chcesz wylosować kartę? Tak będzie dla Ciebie lepiej, jeśli chcesz wyjść cały spod macek tej piratko - kałamarnicy!",
+        },
     {
-      id: "lyzwiarz-leo",
-      name: "Łyżwiaż Leo",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_16.png",
-      unlockWorld: "winter",
-      storeNote: "Postac z zimowego pakietu.",
-    },
+          id: "lily",
+          name: "Lily",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_11.png",
+          unlockWorld: "winter",
+          storeNote: "Nagroda z konca Swiata Zimowego.",
+        },
     {
-      id: "mistrzyni-lyzwiarstwa-lily",
-      name: "Mistrzyni Łyżwiarstwa Lily",
-      price: 10000,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_18.png",
-      unlockWorld: "winter",
-      storeNote: "Zimowa sklepowa postac z atakiem jak Lily.",
-    },
+          id: "tricky",
+          name: "Tricky",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_12.png",
+          unlockWorld: "winter",
+          storeNote: "Nagroda z dalszego konca Swiata Zimowego.",
+        },
     {
-      id: "nora",
-      name: "NORA",
-      price: 20000,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_nora.png",
-      previewVideo: "./assets/characters/nora_1.mov",
-      unlockWorld: "winter",
-      storeWorld: "winter",
-      storeNote: "Animowany zimowy skin z własnym atakiem i dźwiękiem.",
-    },
+          id: "tricky-renifer",
+          name: "Tricky Renifer",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_13.png",
+          unlockWorld: "winter",
+          storeNote: "Nagroda za sam koniec Swiata Zimowego.",
+        },
     {
-      id: "cloud",
-      name: "Cloud",
-      price: 20000,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_cloud.mp4",
-      previewVideo: "./assets/characters/postac_cloud.mp4",
-      unlockWorld: "winter",
-      storeWorld: "winter",
-      storeNote: "Animowany zimowy skin z własnym atakiem chmur.",
-    },
+          id: "leo",
+          name: "Leo",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_17.png",
+          unlockWorld: "winter",
+          storeNote: "Nagroda za final Swiata Zimowego.",
+        },
     {
-      id: "ann",
-      name: "Ann",
-      price: 20000,
-      cashPriceLabel: "",
-      image: "./assets/characters/postac_ann.mov",
-      previewVideo: "./assets/characters/postac_ann.mov",
-      unlockWorld: "winter",
-      storeWorld: "winter",
-      storeNote: "Animowany zimowy skin z własnym atakiem.",
-    },
+          id: "leo-skoczek-narciarski",
+          name: "Leo Skoczek Narciarski",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_14.png",
+          unlockWorld: "winter",
+          storeNote: "Nagroda Super ze Swiata Zimowego.",
+        },
     {
-      id: "ivy",
-      name: "Ivy",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/ivy.jpeg",
-      unlockWorld: "tower",
-      storeNote: "Nagroda Super ze Świata Dżungli.",
-    },
+          id: "lyzwiarka-lily",
+          name: "Łyżwiarka Lily",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_15.png",
+          unlockWorld: "winter",
+          storeNote: "Postac z zimowego pakietu.",
+        },
     {
-      id: "coco-nkosi",
-      name: "Coco N'Kosi",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/ivy.jpeg",
-      previewVideo: "./assets/characters/coco.mp4",
-      previewPoster: false,
-      unlockWorld: "tower",
-      storeNote: "Darmowa animowana postać za zebranie wszystkich zwierząt z Księgi Dżungli.",
-    },
+          id: "lyzwiarz-leo",
+          name: "Łyżwiaż Leo",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_16.png",
+          unlockWorld: "winter",
+          storeNote: "Postac z zimowego pakietu.",
+        },
     {
-      id: "aslan",
-      name: "Aslan",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/aslan.jpeg",
-      unlockWorld: "tower",
-      storeNote: "Nagroda Super ze Świata Dżungli.",
-    },
+          id: "mistrzyni-lyzwiarstwa-lily",
+          name: "Mistrzyni Łyżwiarstwa Lily",
+          price: 10000,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_18.png",
+          unlockWorld: "winter",
+          storeNote: "Zimowa sklepowa postac z atakiem jak Lily.",
+        },
     {
-      id: "ozdobiona-ivy",
-      name: "Ozdobiona Ivy",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/ozdobiona.jpeg",
-      unlockWorld: "tower",
-      storeNote: "Nagroda Super z dalszej części Świata Dżungli.",
-    },
+          id: "nora",
+          name: "NORA",
+          price: 20000,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_nora.png",
+          previewVideo: "./assets/characters/nora_1.mov",
+          unlockWorld: "winter",
+          storeWorld: "winter",
+          storeNote: "Animowany zimowy skin z własnym atakiem i dźwiękiem.",
+        },
     {
-      id: "aslan-za-mlodu",
-      name: "Aslan za Młodu",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/mlodu.jpeg",
-      unlockWorld: "tower",
-      storeNote: "Nagroda za koniec dalszej części Świata Dżungli.",
-    },
+          id: "cloud",
+          name: "Cloud",
+          price: 20000,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_cloud.mp4",
+          previewVideo: "./assets/characters/postac_cloud.mp4",
+          unlockWorld: "winter",
+          storeWorld: "winter",
+          storeNote: "Animowany zimowy skin z własnym atakiem chmur.",
+        },
     {
-      id: "ivy-obronczyni-dzungli",
-      name: "Ivy Obrończyni Dżunglii",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/obronczyni.jpeg",
-      unlockWorld: "tower",
-      storeNote: "Nagroda Super z dalszej części Świata Dżungli.",
-    },
-    {
-      id: "kora",
-      name: "Kora",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/kora.jpeg",
-      unlockWorld: "tower",
-      storeNote: "Nagroda Super ze Świata Dżungli z własnym atakiem.",
-    },
-    {
-      id: "krolowa-kora",
-      name: "Królowa Kora",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/krolowa.jpeg",
-      unlockWorld: "tower",
-      storeNote: "Nagroda Super z końcówki Świata Dżungli.",
-    },
-    {
-      id: "wojownik-aslan",
-      name: "Wojownik Aslan",
-      price: 0,
-      cashPriceLabel: "",
-      image: "./assets/characters/wojownik.jpeg",
-      unlockWorld: "tower",
-      storeNote: "Nagroda za finał dalszej części Świata Dżungli.",
-    },
-    {
-      id: "roco-nkosi",
-      name: "Roco N'kosi",
-      price: 20000,
-      cashPriceLabel: "",
-      image: "./assets/characters/ivy.jpeg",
-      previewVideo: "./assets/characters/roco.mp4",
-      previewPoster: false,
-      unlockWorld: "tower",
-      storeWorld: "tower",
-      storeNote: "Animowana dżunglowa postać sklepowa z atakiem jak Coco.",
-    },
-    {
-      id: "wodzu",
-      name: "Wodzu",
-      price: 20000,
-      cashPriceLabel: "",
-      image: "./assets/attacks/wodza.jpeg",
-      previewVideo: "./assets/characters/wodzu.mp4",
-      previewPoster: false,
-      unlockWorld: "tower",
-      storeWorld: "tower",
-      storeNote: "Animowana dżunglowa postać sklepowa z własnym atakiem wodza.",
-    },
-    {
-      id: "naomi",
-      name: "Naomi",
-      price: 20000,
-      cashPriceLabel: "",
-      image: "./assets/characters/aslan.jpeg",
-      previewVideo: "./assets/characters/naomi.mp4",
-      previewPoster: false,
-      unlockWorld: "tower",
-      storeWorld: "tower",
-      storeNote: "Animowana dżunglowa postać sklepowa z atakiem jak Aslan.",
-    },
-    {
-      id: "kira",
-      name: "Kira",
-      price: 10000,
-      cashPriceLabel: "",
-      image: "./assets/characters/kira.jpeg",
-      unlockWorld: "tower",
-      storeWorld: "tower",
-      storeNote: "Dżunglowa sklepowa postać z własnym atakiem i dźwiękiem jak Aslan.",
-    },
+          id: "ann",
+          name: "Ann",
+          price: 20000,
+          cashPriceLabel: "",
+          image: "./assets/characters/postac_ann.mov",
+          previewVideo: "./assets/characters/postac_ann.mov",
+          unlockWorld: "winter",
+          storeWorld: "winter",
+          storeNote: "Animowany zimowy skin z własnym atakiem.",
+        },
   ],
   pets: [
     {
-      id: "pies-magik",
-      name: "Pies Magik",
-      price: 500,
-      image: "./assets/pets/platoya_1.png",
-      categoryId: "magicy",
-      unlockWorld: "alley",
-      rarityLabel: "Pospolity PlatoYa",
-      rarityClass: "common",
-      description: "Biegnie do robotow i stale zadaje 100 pz na sekunde, dopoki na mapie sa przeciwnicy.",
-    },
+          id: "pies-magik",
+          name: "Pies Magik",
+          price: 500,
+          image: "./assets/pets/platoya_1.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Pospolity PlatoYa",
+          rarityClass: "common",
+          description: "Jeśli Pies Magik znajduje się wystarczająco blisko robota, zadaje mu ujemne punkty życia na sekundę.",
+        },
     {
-      id: "papuga-manipulantka",
-      name: "Papuga Manipulantka",
-      price: 500,
-      image: "./assets/pets/platoya_2.png",
-      categoryId: "magicy",
-      unlockWorld: "alley",
-      rarityLabel: "Pospolity PlatoYa",
-      rarityClass: "common",
-      description: "Co 4 sekundy wyrzuca gwiazdki w najblizszego robota. Trafiony robot przez 4 sekundy nie rusza sie i nie atakuje.",
-    },
+          id: "szmaragdowy-pies-magik",
+          name: "Szmaragdowy Pies Magik",
+          price: 0,
+          image: "./skinmagik_1.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Psa Magika",
+          rarityClass: "rare",
+          description: "Szmaragdowy skin Psa Magika z mini alei rang.",
+        },
     {
-      id: "l-psotka",
-      name: "L'Psotka",
-      price: 0,
-      image: "./assets/pets/platoya_3.png",
-      categoryId: "magicy",
-      unlockWorld: "alley",
-      rarityLabel: "Pospolity PlatoYa",
-      rarityClass: "common",
-      description: "Co 5 sekund psoci najblizszemu robotowi podobnie do papugi i na chwile go zatrzymuje.",
-    },
+          id: "kwarcowy-pies-magik",
+          name: "Kwarcowy Pies Magik",
+          price: 0,
+          image: "./skinmagik_2.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Psa Magika",
+          rarityClass: "rare",
+          description: "Kwarcowy skin Psa Magika z mini alei rang.",
+        },
     {
-      id: "el-kruk",
-      name: "El Kruk",
-      price: 0,
-      image: "./assets/pets/platoya_4.png",
-      categoryId: "magicy",
-      unlockWorld: "alley",
-      rarityLabel: "Pospolity PlatoYa",
-      rarityClass: "common",
-      description: "Leczy o 500 co 5 sekund po utracie zycia, a przy skinach Elfie przyspiesza zielona amunicje.",
-    },
+          id: "perlowy-pies-magik",
+          name: "Perłowy Pies Magik",
+          price: 0,
+          image: "./skinmagik3.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Psa Magika",
+          rarityClass: "legendary",
+          description: "Perłowy skin Psa Magika z mini alei rang.",
+        },
     {
-      id: "malpka-jasnoksieznik",
-      name: "Małpka Jasnoksiężnik",
-      price: 2500,
-      originalPrice: 3000,
-      image: "./assets/pets/platoya_malpka.png",
-      categoryId: "magicy",
-      rarityLabel: "Legendarny PlatoYa",
-      rarityClass: "legendary",
-      description: "Przeskakuje na najblizszego robota i zadaje mu 200 pz na sekunde. Po pokonaniu celu wraca do ciebie i leczy o 200 pz na sekunde, dopoki nie odzyskasz calego zycia.",
-    },
+          id: "czerwony-smok-pies-magik",
+          name: "Pies Magik w Przebraniu Czerwonego Smoka",
+          price: 0,
+          image: "./smok.png",
+          categoryId: "magicy",
+          unlockWorld: "limited",
+          rarityLabel: "Limitowane przebranie Psa Magika",
+          rarityClass: "legendary",
+          description: "Limitowane przebranie z Wyzwania Wysokiej Wieży.",
+        },
     {
-      id: "niedzwiedz-polarny",
-      name: "Niedźwiedź Polarny",
-      price: 0,
-      image: "./assets/pets/platoya_6.png",
-      categoryId: "balonowi",
-      unlockWorld: "winter",
-      rarityLabel: "Zimowy PlatoYa",
-      rarityClass: "legendary",
-      description: "Co 4 sekundy wypuszcza dwa lodowe strzaly po 50 pz z opoznieniem 0,5 s.",
-    },
+          id: "zielony-dinozaur-pies-magik",
+          name: "Pies Magik w Przebraniu Zielonego Dinozaura",
+          price: 0,
+          image: "./dinozaur.png",
+          categoryId: "magicy",
+          unlockWorld: "limited",
+          rarityLabel: "Limitowane przebranie Psa Magika",
+          rarityClass: "legendary",
+          description: "Limitowane przebranie z Wyzwania Wysokiej Wieży.",
+        },
     {
-      id: "sniezynka",
-      name: "Śnieżynka",
-      price: 0,
-      image: "./assets/pets/platoya_7.png",
-      categoryId: "balonowi",
-      unlockWorld: "winter",
-      rarityLabel: "Super PlatoYa",
-      rarityClass: "ultra",
-      description: "Co 10 sekund daje ci na 3 sekundy zimowa tarcze, ktora chroni przed obrazeniami.",
-    },
+          id: "papuga-manipulantka",
+          name: "Emerald",
+          price: 500,
+          image: "./assets/pets/platoya_2.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Pospolity PlatoYa",
+          rarityClass: "common",
+          description: "Emerald manipuluje co 8 sekund jednego robota, wystrzeliwując w jego stronę strzał, który karze mu atakować inne roboty, ale przez co inne roboty atakują też jego.",
+        },
     {
-      id: "sowa",
-      name: "Sowa",
-      price: 0,
-      image: "./assets/pets/platoya_9.png",
-      categoryId: "balonowi",
-      unlockWorld: "winter",
-      rarityLabel: "Super PlatoYa",
-      rarityClass: "ultra",
-      description: "Wcisnij W, aby na 3 sekundy zatrzymac ruch, wlaczyc zimowa tarcze i po niej odnowic 20% zycia.",
-    },
+          id: "szmaragdowa-emerald",
+          name: "Szmaragdowa Emerald",
+          price: 0,
+          image: "./szemerald.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Emerald",
+          rarityClass: "rare",
+          description: "Szmaragdowy skin Emerald z klasy PlatoYI.",
+        },
     {
-      id: "jaguar",
-      name: "Jaguar",
-      price: 100,
-      image: "./assets/pets/jaguar.jpeg",
-      categoryId: "dzungla",
-      unlockWorld: "tower",
-      rarityLabel: "Dżunglowy PlatoYa",
-      rarityClass: "legendary",
-      description: "Po spadku poniżej kolejnych progów życia tworzy zielone pole, które odpycha roboty od ciebie przez 5 sekund.",
-    },
+          id: "kwarcowa-emerald",
+          name: "Kwarcowa Emerald",
+          price: 0,
+          image: "./kemerald.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Emerald",
+          rarityClass: "rare",
+          description: "Kwarcowy skin Emerald z klasy PlatoYI.",
+        },
     {
-      id: "papuga-dzungli",
-      name: "Papuga",
-      price: 100,
-      image: "./assets/pets/papuga.jpeg",
-      categoryId: "dzungla",
-      unlockWorld: "tower",
-      rarityLabel: "Dżunglowy PlatoYa",
-      rarityClass: "legendary",
-      description: "Za każdym razem leczy cię o 10% obrażeń zadanych ci przez roboty.",
-    },
+          id: "perlowa-emerald",
+          name: "Perłowa Emerald",
+          price: 0,
+          image: "./pemerald.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Emerald",
+          rarityClass: "legendary",
+          description: "Perłowy skin Emerald z klasy PlatoYI.",
+        },
     {
-      id: "malpa-dzungli",
-      name: "Małpa",
-      price: 100,
-      image: "./assets/pets/małpka.jpeg",
-      categoryId: "dzungla",
-      unlockWorld: "tower",
-      rarityLabel: "Dżunglowy PlatoYa",
-      rarityClass: "legendary",
-      description: "Oznacza na zielono dwa roboty, którym zadajesz o 50% więcej obrażeń.",
-    },
+          id: "mistyczny-mag-emerald",
+          name: "Mistyczny Mag Emerald",
+          price: 0,
+          image: "./mistyk.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Emerald",
+          rarityClass: "legendary",
+          description: "Mistyczne przebranie Emerald ze sklepu.",
+        },
     {
-      id: "waz-dzungli",
-      name: "Wąż",
-      price: 100,
-      image: "./assets/pets/wąż.jpeg",
-      categoryId: "dzungla",
-      unlockWorld: "tower",
-      rarityLabel: "Dżunglowy PlatoYa",
-      rarityClass: "legendary",
-      description: "Co 6 sekund zatruwa dwa najbliższe roboty, mocno je spowalnia i osłabia ich obrażenia na 5 sekund.",
-    },
+          id: "prestizowy-detektyw-em3rald",
+          name: "Prestiżowy Detektyw Em3rald",
+          price: 0,
+          image: "./em3rald.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Emerald",
+          rarityClass: "legendary",
+          description: "Prestiżowe przebranie Emerald ze skrzyni.",
+        },
     {
-      id: "slon-dzungli",
-      name: "Słoń",
-      price: 100,
-      image: "./assets/pets/słoń.jpeg",
-      categoryId: "dzungla",
-      unlockWorld: "tower",
-      rarityLabel: "Dżunglowy PlatoYa",
-      rarityClass: "legendary",
-      description: "Co 10 sekund porywa jednego robota na dziką przejażdżkę po mapie, a po 10 sekundach go eliminuje.",
-    },
+          id: "kapitan-rozdzka-emerald",
+          name: "Kapitan Różdżka Emerald",
+          price: 0,
+          image: "./piratek.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Emerald",
+          rarityClass: "legendary",
+          description: "Pirackie przebranie Emerald ze sklepu.",
+        },
     {
-      id: "zaba-dzungli",
-      name: "Żaba",
-      price: 100,
-      image: "./assets/pets/żaba.jpeg",
-      categoryId: "dzungla",
-      unlockWorld: "tower",
-      rarityLabel: "Dżunglowy PlatoYa",
-      rarityClass: "legendary",
-      description: "Co 5 sekund tworzy małą toksyczną kałużę, która leczy graczy i rani roboty.",
-    },
+          id: "astralny-mag-emerald",
+          name: "Astralny Mag Emerald",
+          price: 0,
+          image: "./atralny.png",
+          categoryId: "magicy",
+          unlockWorld: "limited",
+          rarityLabel: "Limitowane przebranie Emerald",
+          rarityClass: "legendary",
+          description: "Limitowane przebranie z Wyzwania Wysokiej Wieży.",
+        },
     {
-      id: "leniwiec-dzungli",
-      name: "Leniwiec",
-      price: 100,
-      image: "./assets/pets/leniwiec.jpeg",
-      categoryId: "dzungla",
-      unlockWorld: "tower",
-      rarityLabel: "Dżunglowy PlatoYa",
-      rarityClass: "legendary",
-      description: "Co 10 sekund spowalnia wszystko poza graczami na 8 sekund.",
-    },
+          id: "l-psotka",
+          name: "Psotka",
+          price: 0,
+          image: "./assets/pets/platoya_3.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Pospolity PlatoYa",
+          rarityClass: "common",
+          description: "Co 5 sekund wystrzeliwuje bańkę Lindy, która uniemożliwia ruch robotom, a dodatkowo cofa ich do tyłu, do momentu skończenia efektu - 2 sekundy.",
+        },
     {
-      id: "tygrys-dzungli",
-      name: "Tygrys",
-      price: 100,
-      image: "./assets/pets/tygrys.jpeg",
-      categoryId: "dzungla",
-      unlockWorld: "tower",
-      rarityLabel: "Dżunglowy PlatoYa",
-      rarityClass: "legendary",
-      description: "Im mniej życia ci brakuje, tym więcej dodatkowych obrażeń zadajesz robotom.",
-    },
+          id: "mydlana-ksiezniczka-plotka",
+          name: "Mydlana Księżniczka Psotka",
+          price: 0,
+          image: "./mydlana.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Psotki",
+          rarityClass: "legendary",
+          description: "Mydlane przebranie Psotki ze sklepu.",
+        },
     {
-      id: "krokodyl-dzungli",
-      name: "Krokodyl",
-      price: 100,
-      image: "./assets/pets/krokodyl.jpeg",
-      categoryId: "dzungla",
-      unlockWorld: "tower",
-      rarityLabel: "Dżunglowy PlatoYa",
-      rarityClass: "legendary",
-      description: "Po krótkiej ochronie przy graczu chowa się pod ziemię, tropi robota i zabija go jednym wyskokiem.",
-    },
+          id: "zamknieta-w-wiezy-ksiezniczka-psotka",
+          name: "Zamknięta w wieży Księżniczka Psotka",
+          price: 0,
+          image: "./zamknieta.png",
+          categoryId: "magicy",
+          unlockWorld: "limited",
+          rarityLabel: "Limitowane przebranie Psotki",
+          rarityClass: "legendary",
+          description: "Limitowane przebranie z Wyzwania Wysokiej Wieży.",
+        },
+    {
+          id: "el-kruk",
+          name: "Ozzy",
+          price: 0,
+          image: "./assets/pets/platoya_4.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Pospolity PlatoYa",
+          rarityClass: "common",
+          description: "Leczy o 100/s jeśli twoje punkty życia spadną do 2500.",
+        },
+    {
+          id: "stroz-jednorozec-ozzy",
+          name: "Stróż Jednorożec Ozzy",
+          price: 0,
+          image: "./jednorozec.png",
+          categoryId: "magicy",
+          unlockWorld: "limited",
+          rarityLabel: "Limitowane przebranie Ozziego",
+          rarityClass: "legendary",
+          description: "Limitowane przebranie z Wyzwania Wysokiej Wieży.",
+        },
+    {
+          id: "malpka-jasnoksieznik",
+          name: "Osmo",
+          price: 2500,
+          originalPrice: 3000,
+          image: "./assets/pets/platoya_malpka.png",
+          categoryId: "magicy",
+          rarityLabel: "Legendarny PlatoYa",
+          rarityClass: "legendary",
+          description: "Jako skoczna małpka zadaje robotowi 200 obrażeń na sekundę lub leczy nas o 200 pż.",
+        },
+    {
+          id: "bananowy-wladca-osmo",
+          name: "Bananowy Władca Osmo",
+          price: 0,
+          image: "./banana.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Osmo",
+          rarityClass: "legendary",
+          description: "Bananowe przebranie Osmo ze sklepu.",
+        },
+    {
+          id: "pluto",
+          name: "Pluto",
+          price: 500,
+          image: "./pluto.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Pospolity PlatoYa",
+          rarityClass: "common",
+          description: "Spowalnia lecące pociski mini-robotów za pomocą magicznej bransoletki.",
+        },
+    {
+          id: "pluto-z-zakazanej-beczki",
+          name: "Pluto Z Zakazanej Beczki",
+          price: 0,
+          image: "./zakazane.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Pluto",
+          rarityClass: "legendary",
+          description: "Pirackie przebranie Pluta ze sklepu.",
+        },
+    {
+          id: "pluto-wylacznie-trzy-zyczenia",
+          name: "Pluto Wyłącznie Trzy Życzenia",
+          price: 0,
+          image: "./trzy.png",
+          categoryId: "magicy",
+          unlockWorld: "limited",
+          rarityLabel: "Limitowane przebranie Pluta",
+          rarityClass: "legendary",
+          description: "Limitowane przebranie z Wyzwania Wysokiej Wieży.",
+        },
+    {
+          id: "flaro",
+          name: "Flaro",
+          price: 0,
+          image: "./flaro.png",
+          categoryId: "magicy",
+          unlockWorld: "limited",
+          rarityLabel: "Limitowana PlatoYa",
+          rarityClass: "legendary",
+          description: "Po dwóch otrzymanych obrażeniach zieje ogniem we wszystkie roboty na mapie, oddając im moc uderzenia i podpalając je.",
+        },
+    {
+          id: "pies-majtek",
+          name: "Pies Majtek",
+          price: 0,
+          image: "./majtek.png",
+          categoryId: "magicy",
+          unlockWorld: "alley",
+          rarityLabel: "Skin Psa Magika",
+          rarityClass: "legendary",
+          description: "Pirackie przebranie Psa Magika ze sklepu.",
+        },
+    {
+          id: "niedzwiedz-polarny",
+          name: "Nimbo",
+          price: 0,
+          image: "./assets/pets/platoya_6.png",
+          categoryId: "balonowi",
+          unlockWorld: "winter",
+          rarityLabel: "Zimowy PlatoYa",
+          rarityClass: "legendary",
+          description: "Obrzuca roboty dwoma śnieżkami.",
+        },
+    {
+          id: "sniezynka",
+          name: "Śnieżynka",
+          price: 0,
+          image: "./assets/pets/platoya_7.png",
+          categoryId: "balonowi",
+          unlockWorld: "winter",
+          rarityLabel: "Super PlatoYa",
+          rarityClass: "ultra",
+          description: "Przez całą grę nakłada tarczę, która zmniejsza obrażenia robotów o 10%.",
+        },
+    {
+          id: "sowa",
+          name: "Vivi",
+          price: 0,
+          image: "./assets/pets/platoya_9.png",
+          categoryId: "balonowi",
+          unlockWorld: "winter",
+          rarityLabel: "Super PlatoYa",
+          rarityClass: "ultra",
+          description: "Co 10 sekund przechodzisz w sen zimowy, a w tym czasie przez dwie sekundy roboty atakują siebie nazwajem.",
+        },
+    {
+          id: "coral",
+          name: "Coral",
+          price: 0,
+          image: "./coral.png",
+          categoryId: "magicy",
+          unlockWorld: "ranking",
+          rarityLabel: "Rankingowa PlatoYa",
+          rarityClass: "legendary",
+          description: "Oślepia osłabionego robota strumieniem światła z pereł morskich, zadając 100 obrażeń i wybijając robota z rytmu na 3 sekundy.",
+        },
   ],
   coins: [
     { id: "coins-10000", name: "10000 monet", priceLabel: "13,99zł", amount: 10000, image: COIN_REWARD_IMAGE },
@@ -725,6 +1468,15 @@ const CATALOG = {
       description: "Specjalna oferta, ktora wymaga wpisania kodu.",
     },
   ],
+  platoYaUnlocks: [
+    {
+      id: "all-platoyas-code",
+      name: "Wszystkie PlatoYe",
+      price: 1,
+      image: "./assets/pets/platoya_1.png",
+      description: "Odblokowuje do szafy wszystkie PlatoYe. Wymaga hasla.",
+    },
+  ],
   bundles: [
     {
       id: "winter-ice-pack",
@@ -738,21 +1490,13 @@ const CATALOG = {
   ],
   crates: [
     {
-      id: "drewniana-skrzynia",
-      name: "Drewniana Skrzynia",
-      image: "./assets/shop/skrzynia_1.png",
-      fallbackText: "SKRZYNIA",
-      betaFreeClaims: 3,
-      description: "Nowość beta. Odbierz darmowe skrzynie z oferty i sprawdź, co jest w środku.",
-    },
-    {
-      id: "dzunglowa-skrzynia",
-      name: "Skrzynia Dżungli",
-      image: "./assets/shop/skrzyniadzungla.jpeg",
-      fallbackText: "DZUNGLA",
-      betaFreeClaims: 0,
-      description: "Daje wyłącznie diamenty oraz ma szansę na dżunglowego PlatoYasa.",
-    },
+          id: "drewniana-skrzynia",
+          name: "Drewniana Skrzynia",
+          image: "./assets/shop/skrzynia_1.png",
+          fallbackText: "SKRZYNIA",
+          betaFreeClaims: 3,
+          description: "Nowość beta. Odbierz darmowe skrzynie z oferty i sprawdź, co jest w środku.",
+        },
   ],
   weapons: [
     { id: "atak-1", name: "Atak 1", price: 0, image: "./assets/attacks/atak_2.png" },
@@ -792,193 +1536,523 @@ const PET_CATEGORIES = [
   },
 ];
 
-const INVENTORY_WORLD_GROUPS = [
-  {
-    id: "magicians",
-    label: "Swiat Magikow",
-  },
-  {
-    id: "winter",
-    label: "Swiat Zimowy",
-  },
-  {
-    id: "tower",
-    label: "Swiat Dzungli",
-  },
+const PET_POWER_UPGRADES = {
+  "pies-magik": [
+    { level: 1, hp: 1500, damage: 100, respawnSeconds: 15, cost: null },
+    { level: 2, hp: 1800, damage: 115, respawnSeconds: 14, cost: { elixirs: 1, coins: 200 } },
+    { level: 3, hp: 2100, damage: 140, respawnSeconds: 12.5, cost: { elixirs: 2, coins: 500 } },
+    { level: 4, hp: 2400, damage: 150, respawnSeconds: 11.5, cost: { elixirs: 3, coins: 800 } },
+    { level: 5, hp: 2700, damage: 155, respawnSeconds: 10.8, cost: { elixirs: 5, coins: 1200 } },
+    { level: 6, hp: 3000, damage: 160, respawnSeconds: 10, cost: { elixirs: 5, coins: 1500 }, maxLabel: true },
+  ],
+  "papuga-manipulantka": [
+    { level: 1, castIntervalSeconds: 8, manipulateSeconds: 4, cost: null },
+    { level: 2, castIntervalSeconds: 6.5, manipulateSeconds: 4, cost: { elixirs: 1, coins: 200 } },
+    { level: 3, castIntervalSeconds: 5.7, manipulateSeconds: 4, cost: { elixirs: 2, coins: 500 } },
+    { level: 4, castIntervalSeconds: 5.3, manipulateSeconds: 4, cost: { elixirs: 3, coins: 800 } },
+    { level: 5, castIntervalSeconds: 4.3, manipulateSeconds: 4, cost: { elixirs: 5, coins: 1200 } },
+    { level: 6, castIntervalSeconds: 3.8, manipulateSeconds: 4, cost: { elixirs: 5, coins: 1500 }, maxLabel: true },
+  ],
+  "l-psotka": [
+    { level: 1, castIntervalSeconds: 5, bubbleSeconds: 2, cost: null },
+    { level: 2, castIntervalSeconds: 5, bubbleSeconds: 2.5, cost: { elixirs: 1, coins: 200 } },
+    { level: 3, castIntervalSeconds: 5, bubbleSeconds: 3.2, cost: { elixirs: 2, coins: 500 } },
+    { level: 4, castIntervalSeconds: 5, bubbleSeconds: 4.5, cost: { elixirs: 3, coins: 800 } },
+    { level: 5, castIntervalSeconds: 5, bubbleSeconds: 5.8, cost: { elixirs: 5, coins: 1200 } },
+    { level: 6, castIntervalSeconds: 5, bubbleSeconds: 7, cost: { elixirs: 5, coins: 1500 }, maxLabel: true },
+  ],
+  "el-kruk": [
+    { level: 1, hp: 500, healPerSecond: 100, respawnSeconds: 15, cost: null },
+    { level: 2, hp: 600, healPerSecond: 150, respawnSeconds: 14, cost: { elixirs: 1, coins: 200 } },
+    { level: 3, hp: 700, healPerSecond: 200, respawnSeconds: 12.5, cost: { elixirs: 2, coins: 500 } },
+    { level: 4, hp: 800, healPerSecond: 250, respawnSeconds: 11.5, cost: { elixirs: 3, coins: 800 } },
+    { level: 5, hp: 900, healPerSecond: 300, respawnSeconds: 10.8, cost: { elixirs: 5, coins: 1200 } },
+    { level: 6, hp: 1000, healPerSecond: 350, respawnSeconds: 10, cost: { elixirs: 5, coins: 1500 }, maxLabel: true },
+  ],
+  "malpka-jasnoksieznik": [
+    { level: 1, hp: 1000, power: 200, respawnSeconds: 20, cost: null },
+    { level: 2, hp: 1200, power: 220, respawnSeconds: 18.5, cost: { elixirs: 1, coins: 200 } },
+    { level: 3, hp: 1400, power: 240, respawnSeconds: 16, cost: { elixirs: 2, coins: 500 } },
+    { level: 4, hp: 1600, power: 250, respawnSeconds: 14.5, cost: { elixirs: 3, coins: 800 } },
+    { level: 5, hp: 1500, power: 260, respawnSeconds: 13.5, cost: { elixirs: 5, coins: 1200 } },
+    { level: 6, hp: 1800, power: 280, respawnSeconds: 12, cost: { elixirs: 5, coins: 1500 }, maxLabel: true },
+  ],
+  pluto: [
+    { level: 1, projectileSlow: 0.2, cost: null },
+    { level: 2, projectileSlow: 0.25, cost: { elixirs: 1, coins: 200 } },
+    { level: 3, projectileSlow: 0.3, cost: { elixirs: 2, coins: 500 } },
+    { level: 4, projectileSlow: 0.35, cost: { elixirs: 3, coins: 800 } },
+    { level: 5, projectileSlow: 0.4, cost: { elixirs: 5, coins: 1200 } },
+    { level: 6, projectileSlow: 0.45, cost: { elixirs: 5, coins: 1500 }, maxLabel: true },
+  ],
+  flaro: [
+    { level: 1, hp: 1000, burnSeconds: 2, respawnSeconds: 15, cost: null },
+    { level: 2, hp: 1300, burnSeconds: 4.5, respawnSeconds: 14, cost: { elixirs: 1, coins: 200 } },
+    { level: 3, hp: 1600, burnSeconds: 7, respawnSeconds: 12.5, cost: { elixirs: 2, coins: 500 } },
+    { level: 4, hp: 1900, burnSeconds: 9.5, respawnSeconds: 11.5, cost: { elixirs: 3, coins: 800 } },
+    { level: 5, hp: 2200, burnSeconds: 12, respawnSeconds: 10.8, cost: { elixirs: 5, coins: 1200 } },
+    { level: 6, hp: 2500, burnSeconds: 14.5, respawnSeconds: 10, cost: { elixirs: 5, coins: 1500 }, maxLabel: true },
+  ],
+  "niedzwiedz-polarny": [
+    { level: 1, hp: 1500, snowballDamage: 50, respawnSeconds: 15, cost: null },
+    { level: 2, hp: 1800, snowballDamage: 60, respawnSeconds: 14, cost: { elixirs: 1, coins: 200 } },
+    { level: 3, hp: 2100, snowballDamage: 75, respawnSeconds: 12.5, cost: { elixirs: 2, coins: 500 } },
+    { level: 4, hp: 2400, snowballDamage: 85, respawnSeconds: 11.5, cost: { elixirs: 3, coins: 800 } },
+    { level: 5, hp: 2700, snowballDamage: 95, respawnSeconds: 10.8, cost: { elixirs: 5, coins: 1200 } },
+    { level: 6, hp: 3000, snowballDamage: 110, respawnSeconds: 10, cost: { elixirs: 5, coins: 1500 }, maxLabel: true },
+  ],
+  sniezynka: [
+    { level: 1, damageReduction: 0.1, cost: null },
+    { level: 2, damageReduction: 0.15, cost: { elixirs: 1, coins: 200 } },
+    { level: 3, damageReduction: 0.2, cost: { elixirs: 2, coins: 500 } },
+    { level: 4, damageReduction: 0.25, cost: { elixirs: 3, coins: 800 } },
+    { level: 5, damageReduction: 0.3, cost: { elixirs: 5, coins: 1200 } },
+    { level: 6, damageReduction: 0.35, cost: { elixirs: 5, coins: 1500 }, maxLabel: true },
+  ],
+  sowa: [
+    { level: 1, sleepSeconds: 2, cost: null },
+    { level: 2, sleepSeconds: 2.5, cost: { elixirs: 1, coins: 200 } },
+    { level: 3, sleepSeconds: 3.5, cost: { elixirs: 2, coins: 500 } },
+    { level: 4, sleepSeconds: 4, cost: { elixirs: 3, coins: 800 } },
+    { level: 5, sleepSeconds: 4.5, cost: { elixirs: 5, coins: 1200 } },
+    { level: 6, sleepSeconds: 5, cost: { elixirs: 5, coins: 1500 }, maxLabel: true },
+  ],
+  coral: [
+    { level: 1, hp: 800, respawnSeconds: 15, damagedThreshold: 0.8, damage: 100, blindMs: 3000, cooldownMs: 5500, cost: null },
+    { level: 2, hp: 1000, respawnSeconds: 13, damagedThreshold: 0.7, damage: 100, blindMs: 3000, cooldownMs: 5500, cost: { elixirs: 1, coins: 200 } },
+    { level: 3, hp: 1200, respawnSeconds: 12, damagedThreshold: 0.65, damage: 100, blindMs: 3000, cooldownMs: 5500, cost: { elixirs: 2, coins: 500 } },
+    { level: 4, hp: 1400, respawnSeconds: 11, damagedThreshold: 0.6, damage: 100, blindMs: 3000, cooldownMs: 5500, cost: { elixirs: 3, coins: 800 } },
+    { level: 5, hp: 1600, respawnSeconds: 10, damagedThreshold: 0.55, damage: 100, blindMs: 3000, cooldownMs: 5500, cost: { elixirs: 5, coins: 1200 } },
+    { level: 6, hp: 2000, respawnSeconds: 9, damagedThreshold: 0.5, damage: 100, blindMs: 3000, cooldownMs: 5500, cost: { elixirs: 5, coins: 1500 }, maxLabel: true },
+  ],
+};
+
+const PET_RANK_REWARDS = [
+  { id: "rank-1-elixir", rank: 1, type: "elixir", amount: 1, label: "x1", title: "1 eliksir" },
+  { id: "rank-2-coins", rank: 2, type: "coins", amount: 500, label: "x500", title: "500 monet" },
+  { id: "rank-3-diamonds", rank: 3, type: "diamonds", amount: 3, label: "x3", title: "3 diamenty" },
+  { id: "rank-4-elixirs", rank: 4, type: "elixir", amount: 2, label: "x2", title: "2 eliksiry" },
+  { id: "rank-5-coins", rank: 5, type: "coins", amount: 1000, label: "x1000", title: "1000 monet" },
+  { id: "rank-5-diamonds", rank: 5, type: "diamonds", amount: 6, label: "x6", title: "6 diamentów" },
+  { id: "rank-6-crate", rank: 6, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "x1", title: "Drewniana Skrzynia" },
+  { id: "rank-7-elixirs", rank: 7, type: "elixir", amount: 3, label: "x3", title: "3 eliksiry" },
+  { id: "rank-8-coins", rank: 8, type: "coins", amount: 2000, label: "x2000", title: "2000 monet" },
+  { id: "rank-9-diamonds", rank: 9, type: "diamonds", amount: 10, label: "x10", title: "10 diamentów" },
+  { id: "rank-10-key", rank: 10, type: "plato-keys", amount: 1, label: "x1", title: "Klucz PlatoYA" },
 ];
 
-const TROPHY_WORLDS = [
-  {
-    id: "alley",
-    name: "Świat Magików",
-    threshold: 0,
-    rewards: [
-      { id: "alley-50-coins", trophies: 50, type: "coins", amount: 300, label: "300 monet" },
-      { id: "alley-100-crate", trophies: 100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-150-diamonds", trophies: 150, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "alley-200-pies-magik", trophies: 200, type: "plato-keys", amount: 1, label: "1 klucz PlatoYI", keyTheme: "magicians" },
-      { id: "alley-250-crate", trophies: 250, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-300-coins", trophies: 300, type: "coins", amount: 3000, label: "3000 monet" },
-      { id: "alley-350-crate", trophies: 350, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-400-diamonds", trophies: 400, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "alley-450-crate", trophies: 450, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "alley-500-elfie", trophies: 500, type: "character", itemId: "elfie", label: "Elfie" },
-      { id: "alley-550-coins", trophies: 550, type: "coins", amount: 300, label: "300 monet" },
-      { id: "alley-600-crate", trophies: 600, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-650-diamonds", trophies: 650, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "alley-700-crate", trophies: 700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-750-coins", trophies: 750, type: "coins", amount: 300, label: "300 monet" },
-      { id: "alley-800-l-psotka", trophies: 800, type: "plato-keys", amount: 2, label: "2 klucze PlatoYI", keyTheme: "magicians" },
-      { id: "alley-850-diamonds", trophies: 850, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "alley-900-crate", trophies: 900, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "alley-950-coins", trophies: 950, type: "coins", amount: 300, label: "300 monet" },
-      { id: "alley-1000-linda", trophies: 1000, type: "character", itemId: "linda", label: "Linda" },
-      { id: "alley-1050-diamonds", trophies: 1050, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "alley-1100-crate", trophies: 1100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "alley-1150-coins", trophies: 1150, type: "coins", amount: 300, label: "300 monet" },
-      { id: "alley-1200-crate", trophies: 1200, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "alley-1250-diamonds", trophies: 1250, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "alley-1300-el-kruk", trophies: 1300, type: "plato-keys", amount: 2, label: "2 klucze PlatoYI", keyTheme: "magicians" },
-      { id: "alley-1350-coins", trophies: 1350, type: "coins", amount: 300, label: "300 monet" },
-      { id: "alley-1400-crate", trophies: 1400, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "alley-1450-diamonds", trophies: 1450, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "alley-1500-elfie-jako-linda", trophies: 1500, type: "character", itemId: "elfie-jako-linda", label: "Elfie jako Linda" },
-      { id: "alley-1550-coins", trophies: 1550, type: "coins", amount: 300, label: "300 monet" },
-      { id: "alley-1600-crate", trophies: 1600, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "alley-1650-diamonds", trophies: 1650, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "alley-1700-crate", trophies: 1700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "alley-1750-linda-wojownicza-ksiezniczka", trophies: 1750, type: "character", itemId: "linda-wojownicza-ksiezniczka", label: "Linda Wojownicza Księżniczka" },
-      { id: "alley-1800-coins", trophies: 1800, type: "coins", amount: 300, label: "300 monet" },
-      { id: "alley-1850-crate", trophies: 1850, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "alley-1900-diamonds", trophies: 1900, type: "plato-keys", amount: 1, label: "1 klucz PlatoYI", keyTheme: "magicians" },
-      { id: "alley-1950-coins", trophies: 1950, type: "coins", amount: 5000, label: "5000 monet" },
-      { id: "alley-2000-millo-jako-elfie", trophies: 2000, type: "character", itemId: "millo-jako-elfie", label: "Millo jako Elfie" },
-    ],
-  },
-  {
-    id: "winter",
-    name: "Świat Zimowy",
-    threshold: MAGICIANS_WORLD_END_TROPHIES,
-    rewards: [
-      { id: "winter-2050-coins", trophies: 2050, type: "coins", amount: 300, label: "300 monet" },
-      { id: "winter-2100-crate", trophies: 2100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2150-diamonds", trophies: 2150, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "winter-2200-niedzwiedz-polarny", trophies: 2200, type: "plato-keys", amount: 1, label: "1 klucz PlatoYI", keyTheme: "winter" },
-      { id: "winter-2250-crate", trophies: 2250, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2300-coins", trophies: 2300, type: "coins", amount: 3000, label: "3000 monet" },
-      { id: "winter-2350-crate", trophies: 2350, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2400-diamonds", trophies: 2400, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "winter-2450-crate", trophies: 2450, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "winter-2500-lily", trophies: 2500, type: "character", itemId: "lily", label: "Lily" },
-      { id: "winter-2550-coins", trophies: 2550, type: "coins", amount: 300, label: "300 monet" },
-      { id: "winter-2600-crate", trophies: 2600, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2650-diamonds", trophies: 2650, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "winter-2700-crate", trophies: 2700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2750-coins", trophies: 2750, type: "coins", amount: 300, label: "300 monet" },
-      { id: "winter-2800-sniezynka", trophies: 2800, type: "plato-keys", amount: 2, label: "2 klucze PlatoYI", keyTheme: "winter" },
-      { id: "winter-2850-diamonds", trophies: 2850, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "winter-2900-crate", trophies: 2900, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "winter-2950-coins", trophies: 2950, type: "coins", amount: 300, label: "300 monet" },
-      { id: "winter-3000-tricky", trophies: 3000, type: "character", itemId: "tricky", label: "Tricky" },
-      { id: "winter-3050-diamonds", trophies: 3050, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "winter-3100-crate", trophies: 3100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "winter-3150-coins", trophies: 3150, type: "coins", amount: 300, label: "300 monet" },
-      { id: "winter-3200-crate", trophies: 3200, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "winter-3250-diamonds", trophies: 3250, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "winter-3300-sowa", trophies: 3300, type: "plato-keys", amount: 2, label: "2 klucze PlatoYI", keyTheme: "winter" },
-      { id: "winter-3350-coins", trophies: 3350, type: "coins", amount: 300, label: "300 monet" },
-      { id: "winter-3400-crate", trophies: 3400, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "winter-3450-diamonds", trophies: 3450, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "winter-3500-tricky-renifer", trophies: 3500, type: "character", itemId: "tricky-renifer", label: "Tricky Renifer" },
-      { id: "winter-3550-coins", trophies: 3550, type: "coins", amount: 300, label: "300 monet" },
-      { id: "winter-3600-crate", trophies: 3600, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "winter-3650-diamonds", trophies: 3650, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "winter-3700-crate", trophies: 3700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "winter-3750-leo-skoczek-narciarski", trophies: 3750, type: "character", itemId: "leo-skoczek-narciarski", label: "Leo Skoczek Narciarski" },
-      { id: "winter-3800-coins", trophies: 3800, type: "coins", amount: 300, label: "300 monet" },
-      { id: "winter-3850-crate", trophies: 3850, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Skrzynia" },
-      { id: "winter-3900-diamonds", trophies: 3900, type: "plato-keys", amount: 1, label: "1 darmowy klucz PlatoYI", keyTheme: "winter" },
-      { id: "winter-3950-coins", trophies: 3950, type: "coins", amount: 5000, label: "5000 monet" },
-      { id: "winter-4000-leo", trophies: 4000, type: "character", itemId: "leo", label: "Leo" },
-    ],
-  },
-  {
-    id: "tower",
-    name: "Świat Dżungli",
-    threshold: 4000,
-    rewards: [
-      { id: "tower-4050-jungle-crate", trophies: 4050, type: "crate", crateId: "dzunglowa-skrzynia", amount: 1, label: "Skrzynia Dżungli" },
-      { id: "tower-4100-coins", trophies: 4100, type: "coins", amount: 500, label: "500 monet" },
-      { id: "tower-4150-diamonds", trophies: 4150, type: "diamonds", amount: 10, label: "10 diamentów" },
-      { id: "tower-4200-profile-photo-drzemka", trophies: 4200, type: "profile-photo", itemId: "drzemka-pod-golym-niebem", label: "Drzemka pod gołym niebem" },
-      { id: "tower-4250-diamonds", trophies: 4250, type: "diamonds", amount: 10, label: "10 diamentów" },
-      { id: "tower-4300-jungle-crate", trophies: 4300, type: "crate", crateId: "dzunglowa-skrzynia", amount: 1, label: "Skrzynia Dżungli" },
-      { id: "tower-4350-wood-crate", trophies: 4350, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-4400-diamonds", trophies: 4400, type: "diamonds", amount: 5, label: "5 diamentów" },
-      { id: "tower-4450-coins", trophies: 4450, type: "coins", amount: 300, label: "300 monet" },
-      { id: "tower-4500-ivy", trophies: 4500, type: "character", itemId: "ivy", label: "Ivy" },
-      { id: "tower-4550-jungle-crate", trophies: 4550, type: "crate", crateId: "dzunglowa-skrzynia", amount: 1, label: "Skrzynia Dżungli" },
-      { id: "tower-4600-diamonds", trophies: 4600, type: "diamonds", amount: 10, label: "10 diamentów" },
-      { id: "tower-4650-profile-photo-papugi", trophies: 4650, type: "profile-photo", itemId: "raj-dla-papug", label: "Raj dla papug" },
-      { id: "tower-4700-coins", trophies: 4700, type: "coins", amount: 500, label: "500 monet" },
-      { id: "tower-4750-jungle-crate", trophies: 4750, type: "crate", crateId: "dzunglowa-skrzynia", amount: 1, label: "Skrzynia Dżungli" },
-      { id: "tower-4800-diamonds", trophies: 4800, type: "diamonds", amount: 10, label: "10 diamentów" },
-      { id: "tower-4850-coins", trophies: 4850, type: "coins", amount: 300, label: "300 monet" },
-      { id: "tower-4900-jungle-crate", trophies: 4900, type: "crate", crateId: "dzunglowa-skrzynia", amount: 1, label: "Skrzynia Dżungli" },
-      { id: "tower-4950-diamonds", trophies: 4950, type: "diamonds", amount: 10, label: "10 diamentów" },
-      { id: "tower-5000-aslan", trophies: 5000, type: "character", itemId: "aslan", label: "Aslan" },
-      { id: "tower-5050-diamonds", trophies: 5050, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "tower-5100-wood-crate", trophies: 5100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-5150-coins", trophies: 5150, type: "coins", amount: 300, label: "300 monet" },
-      { id: "tower-5200-wood-crate", trophies: 5200, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-5250-diamonds", trophies: 5250, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "tower-5300-profile-photo-kapiel", trophies: 5300, type: "profile-photo", itemId: "bagienna-kapiel", label: "Bagienna Kąpiel" },
-      { id: "tower-5350-coins", trophies: 5350, type: "coins", amount: 300, label: "300 monet" },
-      { id: "tower-5400-wood-crate", trophies: 5400, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-5450-diamonds", trophies: 5450, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "tower-5500-ozdobiona-ivy", trophies: 5500, type: "character", itemId: "ozdobiona-ivy", label: "Ozdobiona Ivy" },
-      { id: "tower-5550-coins", trophies: 5550, type: "coins", amount: 300, label: "300 monet" },
-      { id: "tower-5600-wood-crate", trophies: 5600, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-5650-diamonds", trophies: 5650, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "tower-5700-wood-crate-free", trophies: 5700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-5750-profile-photo-sledztwo", trophies: 5750, type: "profile-photo", itemId: "sledztwo-w-sprawie", label: "Śledztwo w sprawie" },
-      { id: "tower-5800-coins", trophies: 5800, type: "coins", amount: 300, label: "300 monet" },
-      { id: "tower-5850-wood-crate", trophies: 5850, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-5900-diamonds", trophies: 5900, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "tower-5950-coins", trophies: 5950, type: "coins", amount: 300, label: "300 monet" },
-      { id: "tower-6000-aslan-za-mlodu", trophies: 6000, type: "character", itemId: "aslan-za-mlodu", label: "Aslan za Młodu" },
-      { id: "tower-6050-diamonds", trophies: 6050, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "tower-6100-coins", trophies: 6100, type: "coins", amount: 800, label: "800 monet" },
-      { id: "tower-6150-wood-crate", trophies: 6150, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-6200-diamonds", trophies: 6200, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "tower-6250-ivy-obronczyni-dzungli", trophies: 6250, type: "character", itemId: "ivy-obronczyni-dzungli", label: "Ivy Obrończyni Dżunglii" },
-      { id: "tower-6300-coins", trophies: 6300, type: "coins", amount: 800, label: "800 monet" },
-      { id: "tower-6350-jungle-crate", trophies: 6350, type: "crate", crateId: "dzunglowa-skrzynia", amount: 1, label: "Skrzynia Dżungli" },
-      { id: "tower-6400-diamonds", trophies: 6400, type: "diamonds", amount: 10, label: "10 diamentów" },
-      { id: "tower-6450-coins", trophies: 6450, type: "coins", amount: 800, label: "800 monet" },
-      { id: "tower-6500-kora", trophies: 6500, type: "character", itemId: "kora", label: "Kora" },
-      { id: "tower-6550-diamonds", trophies: 6550, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "tower-6600-wood-crate", trophies: 6600, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-6700-coins", trophies: 6700, type: "coins", amount: 800, label: "800 monet" },
-      { id: "tower-6750-krolowa-kora", trophies: 6750, type: "character", itemId: "krolowa-kora", label: "Królowa Kora" },
-      { id: "tower-6800-wood-crate-free", trophies: 6800, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-6850-coins", trophies: 6850, type: "coins", amount: 5000, label: "5000 monet" },
-      { id: "tower-6900-diamonds", trophies: 6900, type: "diamonds", amount: 3, label: "3 diamenty" },
-      { id: "tower-6950-wood-crate-free", trophies: 6950, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-      { id: "tower-7000-wojownik-aslan", trophies: 7000, type: "character", itemId: "wojownik-aslan", label: "Wojownik Aslan" },
-    ],
-  },
+const INVENTORY_WORLD_GROUPS = [
+    {
+        id: "magicians",
+        label: "Swiat Magikow",
+      },
+    {
+        id: "winter",
+        label: "Swiat Zimowy",
+      },
+    {
+        id: "ranking",
+        label: "Rankingowe",
+      },
+  ];
+
+const MAGICIANS_ALLEY_STANDARD_REWARD_DATA = [
+  { id: "alley-base-50", rewardLane: "base", trophies: 50, type: "coins", amount: 100, label: "100 monet" },
+  { id: "alley-base-100", rewardLane: "base", trophies: 100, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-base-150", rewardLane: "base", trophies: 150, type: "diamonds", amount: 3, label: "3 klejnoty" },
+  { id: "alley-base-200", rewardLane: "base", trophies: 200, type: "elixir", amount: 2, label: "2 eliksiry" },
+  { id: "alley-base-250", rewardLane: "base", trophies: 250, type: "coins", amount: 500, label: "500 monet" },
+  { id: "alley-base-300", rewardLane: "base", trophies: 300, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-base-350", rewardLane: "base", trophies: 350, type: "coins", amount: 100, label: "100 monet" },
+  { id: "alley-base-400", rewardLane: "base", trophies: 400, type: "diamonds", amount: 5, label: "5 klejnotów" },
+  { id: "alley-base-450", rewardLane: "base", trophies: 450, type: "elixir", amount: 2, label: "2 eliksiry" },
+  { id: "alley-base-500", rewardLane: "base", trophies: 500, type: "ranking-unlock", amount: 1, label: "Odblokowanie Rankingu" },
+  { id: "alley-base-550", rewardLane: "base", trophies: 550, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-base-600", rewardLane: "base", trophies: 600, type: "diamonds", amount: 3, label: "3 klejnoty" },
+  { id: "alley-base-650", rewardLane: "base", trophies: 650, type: "coins", amount: 100, label: "100 monet" },
+  { id: "alley-base-700", rewardLane: "base", trophies: 700, type: "elixir", amount: 2, label: "2 eliksiry" },
+  { id: "alley-base-750", rewardLane: "base", trophies: 750, type: "coins", amount: 500, label: "500 monet" },
+  { id: "alley-base-800", rewardLane: "base", trophies: 800, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-base-850", rewardLane: "base", trophies: 850, type: "diamonds", amount: 5, label: "5 klejnotów" },
+  { id: "alley-base-900", rewardLane: "base", trophies: 900, type: "elixir", amount: 2, label: "2 eliksiry" },
+  { id: "alley-base-950", rewardLane: "base", trophies: 950, type: "coins", amount: 100, label: "100 monet" },
+  { id: "alley-base-1000", rewardLane: "base", trophies: 1000, type: "plato-keys", amount: 1, label: "1 klucz", keyTheme: "magicians" },
+  { id: "alley-base-1050", rewardLane: "base", trophies: 1050, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-base-1100", rewardLane: "base", trophies: 1100, type: "coins", amount: 500, label: "500 monet" },
+  { id: "alley-base-1150", rewardLane: "base", trophies: 1150, type: "elixir", amount: 2, label: "2 eliksiry" },
+  { id: "alley-base-1200", rewardLane: "base", trophies: 1200, type: "diamonds", amount: 3, label: "3 klejnoty" },
+  { id: "alley-base-1250", rewardLane: "base", trophies: 1250, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-base-1300", rewardLane: "base", trophies: 1300, type: "coins", amount: 100, label: "100 monet" },
+  { id: "alley-base-1350", rewardLane: "base", trophies: 1350, type: "diamonds", amount: 5, label: "5 klejnotów" },
+  { id: "alley-base-1400", rewardLane: "base", trophies: 1400, type: "elixir", amount: 2, label: "2 eliksiry" },
+  { id: "alley-base-1450", rewardLane: "base", trophies: 1450, type: "coins", amount: 500, label: "500 monet" },
+  { id: "alley-base-1500", rewardLane: "base", trophies: 1500, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-base-1550", rewardLane: "base", trophies: 1550, type: "diamonds", amount: 3, label: "3 klejnoty" },
+  { id: "alley-base-1600", rewardLane: "base", trophies: 1600, type: "elixir", amount: 2, label: "2 eliksiry" },
+  { id: "alley-base-1650", rewardLane: "base", trophies: 1650, type: "coins", amount: 100, label: "100 monet" },
+  { id: "alley-base-1700", rewardLane: "base", trophies: 1700, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-base-1750", rewardLane: "base", trophies: 1750, type: "coins", amount: 5000, label: "5000 monet" },
+  { id: "alley-base-1800", rewardLane: "base", trophies: 1800, type: "diamonds", amount: 5, label: "5 klejnotów" },
+  { id: "alley-base-1850", rewardLane: "base", trophies: 1850, type: "plato-keys", amount: 1, label: "1 klucz", keyTheme: "magicians" },
+  { id: "alley-base-1900", rewardLane: "base", trophies: 1900, type: "elixir", amount: 15, label: "15 eliksirów" },
+  { id: "alley-base-1950", rewardLane: "base", trophies: 1950, type: "coins", amount: 100, label: "100 monet" },
+  { id: "alley-base-2000-diamonds", rewardLane: "base", trophies: 2000, type: "diamonds", amount: 60, label: "60 diamentów" },
 ];
+
+const MAGICIANS_ALLEY_STANDARD_REWARDS = MAGICIANS_ALLEY_STANDARD_REWARD_DATA.filter((reward) => (
+  reward.trophies === 2000 || reward.trophies % 150 !== 0
+));
+
+const MAGICIANS_PREMIUM_LEAD_ROTATION = [
+  { image: COIN_REWARD_IMAGE, fallbackText: "MONETY", alt: "Monety premium" },
+  { image: DIAMOND_REWARD_IMAGE, fallbackText: "DIAMENTY", alt: "Diamenty premium" },
+  { image: MAGICIANS_PLATOYA_KEY_IMAGE, fallbackText: "KLUCZ", alt: "Klucz PlatoYA Magików" },
+  { image: ELIXIR_REWARD_IMAGE, fallbackText: "ELIKSIR", alt: "Eliksiry premium" },
+  { image: "./assets/characters/postac_1.png", fallbackText: "MILLO", alt: "Postać premium Magik Millo" },
+  { image: "./assets/characters/postac_2.png", fallbackText: "ELFIE", alt: "Postać premium Elfie" },
+  { image: "./assets/characters/postac_3.png", fallbackText: "LINDA", alt: "Postać premium Linda" },
+  { image: "./mycelia.png", fallbackText: "MYCELIA", alt: "Postać premium Mycelia" },
+  { image: "./lazorowa.png", fallbackText: "LAZUROWA", alt: "Skin premium Lazurowa Mycelia" },
+  { image: "./sylas.png", fallbackText: "SYLAS", alt: "Postać premium Sylas" },
+  { image: "./sluzacy.png", fallbackText: "ELEGANCKI", alt: "Skin premium Elegancki Sylias" },
+  { image: "./grifos.png", fallbackText: "GRIFOS", alt: "Postać premium Grifos" },
+];
+
+const MAGICIANS_ALLEY_SUPER_REWARDS = [
+  { id: "alley-super-50", rewardLane: "super", trophies: 50, type: "character", itemId: "mycelia", skinItemId: "lazurowa-mycelia", label: "Mycelia + skin" },
+  { id: "alley-super-100", rewardLane: "super", trophies: 100, type: "diamonds", amount: 7, label: "7 klejnotów" },
+  { id: "alley-super-150", rewardLane: "super", trophies: 150, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-200", rewardLane: "super", trophies: 200, type: "coins", amount: 800, label: "800 monet" },
+  { id: "alley-super-250", rewardLane: "super", trophies: 250, type: "elixir", amount: 6, label: "6 eliksirów" },
+  { id: "alley-super-300", rewardLane: "super", trophies: 300, type: "plato-keys", amount: 1, label: "1 klucz", keyTheme: "magicians" },
+  { id: "alley-super-350", rewardLane: "super", trophies: 350, type: "coins", amount: 500, label: "500 monet" },
+  { id: "alley-super-400", rewardLane: "super", trophies: 400, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-450", rewardLane: "super", trophies: 450, type: "diamonds", amount: 7, label: "7 klejnotów" },
+  { id: "alley-super-500", rewardLane: "super", trophies: 500, type: "character", itemId: "sylas", skinItemId: "elegancki-sylias", label: "Sylias + skin" },
+  { id: "alley-super-550", rewardLane: "super", trophies: 550, type: "elixir", amount: 6, label: "6 eliksirów" },
+  { id: "alley-super-600", rewardLane: "super", trophies: 600, type: "coins", amount: 800, label: "800 monet" },
+  { id: "alley-super-650", rewardLane: "super", trophies: 650, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-700", rewardLane: "super", trophies: 700, type: "diamonds", amount: 5, label: "5 klejnotów" },
+  { id: "alley-super-750", rewardLane: "super", trophies: 750, type: "elixir", amount: 6, label: "6 eliksirów" },
+  { id: "alley-super-800", rewardLane: "super", trophies: 800, type: "plato-keys", amount: 1, label: "1 klucz", keyTheme: "magicians" },
+  { id: "alley-super-850", rewardLane: "super", trophies: 850, type: "coins", amount: 500, label: "500 monet" },
+  { id: "alley-super-900", rewardLane: "super", trophies: 900, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-950", rewardLane: "super", trophies: 950, type: "diamonds", amount: 7, label: "7 klejnotów" },
+  { id: "alley-super-1000", rewardLane: "super", trophies: 1000, type: "character", itemId: "linda", label: "Linda" },
+  { id: "alley-super-1050", rewardLane: "super", trophies: 1050, type: "elixir", amount: 6, label: "6 eliksirów" },
+  { id: "alley-super-1100", rewardLane: "super", trophies: 1100, type: "coins", amount: 800, label: "800 monet" },
+  { id: "alley-super-1150", rewardLane: "super", trophies: 1150, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-1200", rewardLane: "super", trophies: 1200, type: "plato-keys", amount: 1, label: "1 klucz", keyTheme: "magicians" },
+  { id: "alley-super-1250", rewardLane: "super", trophies: 1250, type: "diamonds", amount: 7, label: "7 klejnotów" },
+  { id: "alley-super-1300", rewardLane: "super", trophies: 1300, type: "elixir", amount: 6, label: "6 eliksirów" },
+  { id: "alley-super-1350", rewardLane: "super", trophies: 1350, type: "coins", amount: 500, label: "500 monet" },
+  { id: "alley-super-1400", rewardLane: "super", trophies: 1400, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-1450", rewardLane: "super", trophies: 1450, type: "diamonds", amount: 5, label: "5 klejnotów" },
+  { id: "alley-super-1500", rewardLane: "super", trophies: 1500, type: "character", itemId: "elfie", label: "Elfie" },
+  { id: "alley-super-1550", rewardLane: "super", trophies: 1550, type: "elixir", amount: 6, label: "6 eliksirów" },
+  { id: "alley-super-1600", rewardLane: "super", trophies: 1600, type: "diamonds", amount: 7, label: "7 klejnotów" },
+  { id: "alley-super-1650", rewardLane: "super", trophies: 1650, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-1700", rewardLane: "super", trophies: 1700, type: "coins", amount: 800, label: "800 monet" },
+  { id: "alley-super-1750", rewardLane: "super", trophies: 1750, type: "plato-keys", amount: 1, label: "1 klucz", keyTheme: "magicians" },
+  { id: "alley-super-1800", rewardLane: "super", trophies: 1800, type: "elixir", amount: 10, label: "10 eliksirów" },
+  { id: "alley-super-1850", rewardLane: "super", trophies: 1850, type: "diamonds", amount: 40, label: "40 klejnotów" },
+  { id: "alley-super-1900", rewardLane: "super", trophies: 1900, type: "coins", amount: 5000, label: "5000 monet" },
+  { id: "alley-super-1950", rewardLane: "super", trophies: 1950, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-2000", rewardLane: "super", trophies: 2000, type: "character", itemId: "grifos", label: "Grifos" },
+];
+
+const WINTER_PREMIUM_LEAD_ROTATION = [
+  { image: COIN_REWARD_IMAGE, fallbackText: "MONETY", alt: "Monety premium zimy" },
+  { image: DIAMOND_REWARD_IMAGE, fallbackText: "DIAMENTY", alt: "Diamenty premium zimy" },
+  { image: WINTER_PLATOYA_KEY_IMAGE, fallbackText: "KLUCZ", alt: "Klucz PlatoYA Zimy" },
+  { image: ELIXIR_REWARD_IMAGE, fallbackText: "ELIKSIR", alt: "Eliksiry premium zimy" },
+  { image: "./assets/characters/postac_11.png", fallbackText: "LILY", alt: "Postać premium Lily" },
+  { image: "./assets/characters/postac_12.png", fallbackText: "TRICKY", alt: "Postać premium Tricky" },
+  { image: "./assets/characters/postac_17.png", fallbackText: "LEO", alt: "Postać premium Leo" },
+];
+
+const WINTER_ALLEY_STANDARD_REWARDS = MAGICIANS_ALLEY_STANDARD_REWARDS.map((reward) => {
+  const trophies = reward.trophies + MAGICIANS_WORLD_END_TROPHIES;
+
+  if (reward.type === "ranking-unlock") {
+    return {
+      id: `winter-base-${trophies}-coins`,
+      rewardLane: "base",
+      trophies,
+      type: "coins",
+      amount: 500,
+      label: "500 monet",
+    };
+  }
+
+  return {
+    ...reward,
+    id: `winter-base-${trophies}`,
+    trophies,
+    keyTheme: reward.type === "plato-keys" ? "winter" : reward.keyTheme,
+    label: reward.type === "plato-keys"
+      ? `${reward.amount || 1} ${Number(reward.amount || 1) === 1 ? "klucz zimowy" : "klucze zimowe"}`
+      : reward.label,
+  };
+});
+
+const WINTER_ALLEY_SUPER_CHARACTER_REPLACEMENTS = new Map([
+  [1000, { itemId: "lily", label: "Lily" }],
+  [1500, { itemId: "tricky", label: "Tricky" }],
+  [2000, { itemId: "leo", label: "Leo" }],
+]);
+
+const WINTER_ALLEY_SUPER_REWARDS = MAGICIANS_ALLEY_SUPER_REWARDS.map((reward) => {
+  const trophies = reward.trophies + MAGICIANS_WORLD_END_TROPHIES;
+
+  if (reward.type === "character" && reward.skinItemId) {
+    return {
+      id: `winter-super-${trophies}-coins`,
+      rewardLane: "super",
+      trophies,
+      type: "coins",
+      amount: 20000,
+      label: "20000 monet",
+    };
+  }
+
+  if (reward.type === "character") {
+    const replacement = WINTER_ALLEY_SUPER_CHARACTER_REPLACEMENTS.get(reward.trophies);
+
+    if (replacement) {
+      return {
+        id: `winter-super-${trophies}-${replacement.itemId}`,
+        rewardLane: "super",
+        trophies,
+        type: "character",
+        itemId: replacement.itemId,
+        label: replacement.label,
+      };
+    }
+  }
+
+  return {
+    ...reward,
+    id: `winter-super-${trophies}`,
+    rewardLane: "super",
+    trophies,
+    keyTheme: reward.type === "plato-keys" ? "winter" : reward.keyTheme,
+    label: reward.type === "plato-keys"
+      ? `${reward.amount || 1} ${Number(reward.amount || 1) === 1 ? "klucz zimowy" : "klucze zimowe"}`
+      : reward.label,
+  };
+});
+
+const TROPHY_WORLDS = [
+    {
+        id: "alley",
+        name: "Świat Magików",
+        threshold: 0,
+        standardRewards: MAGICIANS_ALLEY_STANDARD_REWARDS,
+        superRewards: MAGICIANS_ALLEY_SUPER_REWARDS,
+      },
+    {
+        id: "winter",
+        name: "Świat Zimowy",
+        threshold: MAGICIANS_WORLD_END_TROPHIES,
+        standardRewards: WINTER_ALLEY_STANDARD_REWARDS,
+        superRewards: WINTER_ALLEY_SUPER_REWARDS,
+      },
+  ];
+
+const CHARACTER_SKIN_GROUPS = {
+  elfie: ["elfie-wojowniczka", "elfie-w-swojej-naturze"],
+  linda: ["roslinna-krolowa-linda"],
+  mycelia: ["lazurowa-mycelia"],
+  sylas: ["elegancki-sylias"],
+  lily: ["lyzwiarka-lily", "mistrzyni-lyzwiarstwa-lily"],
+  tricky: ["tricky-renifer"],
+  leo: ["leo-skoczek-narciarski", "lyzwiarz-leo"],
+};
+
+const CHARACTER_SKIN_BASE_BY_ID = Object.fromEntries(
+  Object.entries(CHARACTER_SKIN_GROUPS).flatMap(([baseId, skinIds]) => (
+    skinIds.map((skinId) => [skinId, baseId])
+  ))
+);
+
+const EXTRA_PET_SKIN_GROUPS = {
+  "pies-magik": [
+    "pies-majtek",
+    "czerwony-smok-pies-magik",
+    "zielony-dinozaur-pies-magik",
+  ],
+  "papuga-manipulantka": [
+    "mistyczny-mag-emerald",
+    "prestizowy-detektyw-em3rald",
+    "kapitan-rozdzka-emerald",
+    "astralny-mag-emerald",
+  ],
+  "l-psotka": [
+    "mydlana-ksiezniczka-plotka",
+    "zamknieta-w-wiezy-ksiezniczka-psotka",
+  ],
+  "el-kruk": ["stroz-jednorozec-ozzy"],
+  "malpka-jasnoksieznik": ["bananowy-wladca-osmo"],
+  pluto: ["pluto-z-zakazanej-beczki", "pluto-wylacznie-trzy-zyczenia"],
+};
+
+const PET_SKIN_BASE_IDS = Array.from(new Set([
+  ...Object.keys(PET_MINI_ALLEY_CONFIGS),
+  ...Object.keys(EXTRA_PET_SKIN_GROUPS),
+]));
+
+const PET_SKIN_GROUPS = Object.fromEntries(
+  PET_SKIN_BASE_IDS.map((baseId) => {
+    const config = PET_MINI_ALLEY_CONFIGS[baseId] || null;
+    return [
+      baseId,
+      [
+        ...(config?.ranks || []).map((rank) => rank.rewardPetId),
+        ...(EXTRA_PET_SKIN_GROUPS[baseId] || []),
+      ],
+    ];
+  })
+);
+
+const PET_SKIN_BASE_BY_ID = Object.fromEntries(
+  Object.entries(PET_SKIN_GROUPS).flatMap(([baseId, skinIds]) => (
+    skinIds.map((skinId) => [skinId, baseId])
+  ))
+);
+
+const PET_ASSET_VISUAL_SCALE_BY_ID = {
+  "szmaragdowy-pies-magik": 1.11,
+  "kwarcowy-pies-magik": 1.11,
+  "perlowy-pies-magik": 1.09,
+  "pies-majtek": 1.09,
+  "czerwony-smok-pies-magik": 1.07,
+  "zielony-dinozaur-pies-magik": 1.07,
+  "szmaragdowa-emerald": 0.85,
+  "kwarcowa-emerald": 0.85,
+  "perlowa-emerald": 0.85,
+  "mistyczny-mag-emerald": 0.85,
+  "prestizowy-detektyw-em3rald": 0.85,
+  "kapitan-rozdzka-emerald": 0.86,
+  "astralny-mag-emerald": 0.85,
+  "mydlana-ksiezniczka-plotka": 1,
+  "zamknieta-w-wiezy-ksiezniczka-psotka": 1,
+  "stroz-jednorozec-ozzy": 0.94,
+  "bananowy-wladca-osmo": 0.86,
+  "pluto-z-zakazanej-beczki": 1.09,
+  "pluto-wylacznie-trzy-zyczenia": 1.09,
+};
+
+const WARDROBE_VISUAL_TUNING = {
+  characters: {
+    default: { leftScale: 0.94, leftX: 0, leftY: -18, listScale: 0.84, listX: 0, listY: -14 },
+    "magik-millo": { leftScale: 0.9, leftY: -18, listScale: 0.8, listY: -13 },
+    elfie: { leftScale: 0.92, leftY: -16, listScale: 0.82, listY: -12 },
+    linda: { leftScale: 0.92, leftY: -16, listScale: 0.82, listY: -12 },
+    grifos: { leftScale: 0.96, leftY: -17, listScale: 0.86, listY: -13 },
+    mycelia: { leftScale: 0.98, leftY: -20, listScale: 0.88, listY: -15 },
+    "lazurowa-mycelia": { leftScale: 0.98, leftY: -20, listScale: 0.88, listY: -15 },
+    sylas: { leftScale: 0.9, leftY: -17, listScale: 0.8, listY: -13 },
+    "elegancki-sylias": { leftScale: 0.9, leftY: -17, listScale: 0.8, listY: -13 },
+    lily: { leftScale: 0.9, leftY: -15, listScale: 0.8, listY: -12 },
+    tricky: { leftScale: 0.92, leftY: -15, listScale: 0.82, listY: -12 },
+    leo: { leftScale: 0.93, leftY: -15, listScale: 0.83, listY: -12 },
+    cloud: { leftScale: 0.9, leftY: -14, listScale: 0.8, listY: -11 },
+    nora: { leftScale: 0.9, leftY: -15, listScale: 0.8, listY: -12 },
+    ann: { leftScale: 0.9, leftY: -15, listScale: 0.8, listY: -12 },
+    nerissa: { leftScale: 0.94, leftY: -18, listScale: 0.84, listY: -14 },
+    hookcrab: { leftScale: 0.96, leftY: -17, listScale: 0.86, listY: -13 },
+    thalia: { leftScale: 0.94, leftY: -18, listScale: 0.84, listY: -14 },
+    shulla: { leftScale: 0.94, leftY: -18, listScale: 0.84, listY: -14 },
+    lunella: { leftScale: 0.94, leftY: -18, listScale: 0.84, listY: -14 },
+  },
+  pets: {
+    default: { leftScale: 1.08, leftX: 0, leftY: -30, listScale: 0.92, listX: 0, listY: -18 },
+    "pies-magik": { leftScale: 1.02, leftY: -28, listScale: 0.9, listY: -17 },
+    "szmaragdowy-pies-magik": { leftScale: 1.04, leftY: -29, listScale: 0.92, listY: -18 },
+    "kwarcowy-pies-magik": { leftScale: 1.04, leftY: -29, listScale: 0.92, listY: -18 },
+    "perlowy-pies-magik": { leftScale: 1.03, leftY: -29, listScale: 0.91, listY: -18 },
+    "pies-majtek": { leftScale: 1.03, leftY: -29, listScale: 0.91, listY: -18 },
+    "czerwony-smok-pies-magik": { leftScale: 1.02, leftY: -28, listScale: 0.9, listY: -17 },
+    "zielony-dinozaur-pies-magik": { leftScale: 1.02, leftY: -28, listScale: 0.9, listY: -17 },
+    "papuga-manipulantka": { leftScale: 0.9, leftY: -24, listScale: 0.78, listY: -15 },
+    "szmaragdowa-emerald": { leftScale: 0.9, leftY: -24, listScale: 0.78, listY: -15 },
+    "kwarcowa-emerald": { leftScale: 0.9, leftY: -24, listScale: 0.78, listY: -15 },
+    "perlowa-emerald": { leftScale: 0.9, leftY: -24, listScale: 0.78, listY: -15 },
+    "mistyczny-mag-emerald": { leftScale: 0.9, leftY: -24, listScale: 0.78, listY: -15 },
+    "kapitan-rozdzka-emerald": { leftScale: 0.9, leftY: -24, listScale: 0.78, listY: -15 },
+    "astralny-mag-emerald": { leftScale: 0.9, leftY: -24, listScale: 0.78, listY: -15 },
+    "l-psotka": { leftScale: 1.04, leftY: -28, listScale: 0.91, listY: -17 },
+    "mydlana-ksiezniczka-plotka": { leftScale: 1.04, leftY: -28, listScale: 0.91, listY: -17 },
+    "malpka-jasnoksieznik": { leftScale: 0.96, leftY: -27, listScale: 0.84, listY: -17 },
+    "bananowy-wladca-osmo": { leftScale: 0.96, leftY: -27, listScale: 0.84, listY: -17 },
+    "el-kruk": { leftScale: 0.86, leftY: -24, listScale: 0.76, listY: -15 },
+    "stroz-jednorozec-ozzy": { leftScale: 0.88, leftY: -24, listScale: 0.78, listY: -15 },
+    pluto: { leftScale: 1.0, leftY: -27, listScale: 0.88, listY: -17 },
+    "pluto-z-zakazanej-beczki": { leftScale: 1.0, leftY: -27, listScale: 0.88, listY: -17 },
+    "pluto-wylacznie-trzy-zyczenia": { leftScale: 1.0, leftY: -27, listScale: 0.88, listY: -17 },
+    coral: { leftScale: 0.98, leftY: -26, listScale: 0.86, listY: -16 },
+    flaro: { leftScale: 1.0, leftY: -28, listScale: 0.88, listY: -17 },
+  },
+};
+
+function getWardrobeVisualStyle(kind, item, placement = "list") {
+  const itemId = sanitizeStoredId(item?.id);
+  const kindConfig = WARDROBE_VISUAL_TUNING[kind] || {};
+  const config = kindConfig[itemId] || kindConfig.default || {};
+  const scaleKey = placement === "left" ? "leftScale" : "listScale";
+  const xKey = placement === "left" ? "leftX" : "listX";
+  const yKey = placement === "left" ? "leftY" : "listY";
+  const fallbackPetScale = kind === "pets" && PET_ASSET_VISUAL_SCALE_BY_ID[itemId]
+    ? PET_ASSET_VISUAL_SCALE_BY_ID[itemId]
+    : 1;
+  const scale = Number.isFinite(Number(config[scaleKey])) ? Number(config[scaleKey]) : fallbackPetScale;
+  const x = Number.isFinite(Number(config[xKey])) ? Number(config[xKey]) : 0;
+  const y = Number.isFinite(Number(config[yKey])) ? Number(config[yKey]) : 0;
+  const adjustedScale = kind === "characters" && placement === "left"
+    ? scale * 0.82
+    : scale;
+  const adjustedY = kind === "characters" && placement === "left"
+    ? y - 20
+    : y;
+
+  return `style="--wardrobe-art-scale:${adjustedScale}; --wardrobe-art-x:${x}px; --wardrobe-art-y:${adjustedY}px;" data-wardrobe-item-id="${escapeHtml(itemId)}"`;
+}
+
+function isDogFireBreathSkinId(petId) {
+  const itemId = sanitizeStoredId(petId);
+  return itemId === "czerwony-smok-pies-magik" || itemId === "zielony-dinozaur-pies-magik";
+}
+
+const CHARACTER_STORY_DESCRIPTIONS = {
+  "magik-millo": "Bardzo nie śmiały początkujący magik, który non-stop na lekcje czarów zapomina wziąć najważniejszy przybór - różdżkę. Bez Psa Magika już dawno wyrzucono by go ze szkoły…",
+  elfie: "Często ludzie pytają jej czy zjadła za dużo szpinaku albo może brokuła… ona ciągle musi im tłumaczyć że ma tak od urodzenia…",
+  linda: "Księżniczka i maginii baniek, zresztą wystarczy na nią spojrzeć i nie trzeba nic więcej dodawać… klasa sama w sobie",
+  grifos: "Wiele plotek mówi, że jeśli któraś z magiń zdecydowałaby się dać mu buziaka, zmieniłby się w przystojnego księcia, ale żadna nie próbowała, nawet Elfie…",
+  mycelia: "Najwspanialsza wróżka, która oprócz tego, że może poruszać się latając lub jeżdżąc na wózku, uwielbia tańczyć ze swoim partnerem tanecznym Syliasem, próbowała kiedyś z Millem, no ale on… no cóż… wstydzi się chłopak",
+  sylas: "Pochodzi z tego samego rodu elfów co Mycelia, jednak nie łączą ich więzy krwi. Wierzy, że jego magiczna czterolistna koniczyna uprawnia go do bycia magikiem, cóż warto mieć marzenia",
+  lily: "Uwielbia zabawy w śniegu, oraz jeżdżenie na łyżwach, chociaż ciężko stwierdzić czy faktycznie z niej taka mistrzyni",
+  tricky: "Kiedyś była nieśmiałą dziewczynką, teraz nadal jest dziewczynką ale nie jest już nie śmiała. Interesuje się życiem codziennym reniferów, wierzy, że kiedy Mikołaj przejdzie na emeryturę będzie mogla zajmować się jego stajnią",
+  leo: "Jego główna pasja to narciarstwo, jednak Lily czasem zmusza go do wspólnej jazdy na łyżwach…",
+  cloud: "Młodszy brat Lily, chociaż on bardziej wolałby aby jego sowa Vivi była jego siostrą…",
+  nora: "Uwielbia ubierać się ciepło ale modnie, Lily czasem zazdrości jej czapki z uszami niedźwiadka polarnego",
+  ann: "Jest przyjaciółką Nory, chociaż zwykle zamiast bawić się w śniegu, woli usiąść przy kominku i napić się cieplej czekolady",
+  nerissa: "Niepowstrzymana Piratka i kapitanka statku wraz z Hookcrabem, która utrzymuje wszystko pod kontrolą... nie licząc Shulli, która karze losować jej jakieś dziwne karty",
+  hookcrab: "Ahrrr agrr… klak-klak! Skrrrba gruuum, arghh-rak-rak! Muszelki!",
+  thalia: "Kolekcjonerka pereł, nie dopuszcza nikogo do swojego sekretnego pokoju na statku, w którym pewnie nie znajduje się nic poza stertą błyskotek...",
+  shulla: "Cóż... może chcesz wylosować kartę? Tak będzie dla Ciebie lepiej, jeśli chcesz wyjść cały spod macek tej piratko - kałamarnicy!",
+};
 
 const state = loadState();
 const ui = {
   currentView: "lobby",
   storeTab: "characters",
   storeMode: DEFAULT_STORE_MODE,
+  storeOfferTab: STORE_OFFER_TAB_MAGIC,
   storeScrollLeft: null,
   inventoryTab: "characters",
+  inventoryWorldFilter: "magicians",
   friendsTab: "friends",
-  bookTab: "book",
   trophyWorldId: state.activeTrophyWorld || "alley",
   nextGameMode: "solo",
   pendingMultiplayerLaunch: null,
@@ -986,6 +2060,16 @@ const ui = {
   profileTab: "me",
   profileEditMode: false,
   profileEditSection: "",
+  profileReadonlyProfileId: "",
+  firstGameAuthMode: "choice",
+  rarityMode: "missions",
+  offlineModalVisible: false,
+  offlinePausedGame: false,
+  rankingGameSelectedPetIds: [],
+  rankingGameOpponent: null,
+  rankingGameSearching: false,
+  rankingGameActivePetId: "",
+  petMiniAlleyMissionsOpen: false,
 };
 
 const game = createGameState();
@@ -994,7 +2078,6 @@ const socialProfile = createSocialProfileState();
 const party = createPartyState();
 
 const loadingScreen = document.getElementById("loading-screen");
-const orientationLockOverlay = document.getElementById("orientation-lock-overlay");
 const gameLaunchBackdrop = document.getElementById("game-launch-backdrop");
 const gameLaunchKicker = document.getElementById("game-launch-kicker");
 const gameLaunchTitle = document.getElementById("game-launch-title");
@@ -1015,11 +2098,16 @@ const superAlleyStatus = document.getElementById("super-alley-status");
 const superAlleyBackdrop = document.getElementById("super-alley-backdrop");
 const superAlleyScene = document.getElementById("super-alley-scene");
 const superAlleyImage = document.getElementById("super-alley-image");
+const superAlleyPreviewCoin = document.getElementById("super-alley-preview-coin");
+const superAlleyPreviewDiamond = document.getElementById("super-alley-preview-diamond");
+const superAlleyPreviewKeyWrap = document.getElementById("super-alley-preview-key-wrap");
+const superAlleyPreviewKey = document.getElementById("super-alley-preview-key");
 const superAlleyTitle = document.getElementById("super-alley-title");
 const superAlleyCopy = document.getElementById("super-alley-copy");
 const superAlleyActions = document.getElementById("super-alley-actions");
 const superAlleyCoinsButton = document.getElementById("super-alley-coins-button");
 const superAlleyCashButton = document.getElementById("super-alley-cash-button");
+const superAlleyCloseButton = document.getElementById("super-alley-close-button");
 const winterBundleBackdrop = document.getElementById("winter-bundle-backdrop");
 const winterBundleScene = document.getElementById("winter-bundle-scene");
 const winterBundleImage = document.getElementById("winter-bundle-image");
@@ -1036,6 +2124,7 @@ const storeCharacterPurchaseTitle = document.getElementById("store-character-pur
 const storeCharacterPurchaseCopy = document.getElementById("store-character-purchase-copy");
 const storeCharacterPurchaseActions = document.getElementById("store-character-purchase-actions");
 const storeCharacterPurchaseConfirmButton = document.getElementById("store-character-purchase-confirm-button");
+const storeCharacterPurchaseCloseButton = document.getElementById("store-character-purchase-close-button");
 const storeCharacterPurchaseMissing = document.getElementById("store-character-purchase-missing");
 const magicMachineBackdrop = document.getElementById("magic-machine-backdrop");
 const magicMachineScene = document.getElementById("magic-machine-scene");
@@ -1058,29 +2147,44 @@ const balanceTarget = document.getElementById("balance-target");
 const lobbyBalanceTarget = document.getElementById("lobby-balance-target");
 const lobbyCoinBalance = document.getElementById("lobby-coin-balance");
 const lobbyDiamondBalance = document.getElementById("lobby-diamond-balance");
+const lobbyElixirBalance = document.getElementById("lobby-elixir-balance");
+const lobbySilverChip = document.getElementById("lobby-silver-chip");
+const lobbySilverDivider = document.getElementById("lobby-silver-divider");
+const lobbySilverBalance = document.getElementById("lobby-silver-balance");
 const storeBalanceTarget = document.getElementById("store-balance-target");
 const storeCoinBalance = document.getElementById("store-coin-balance");
 const storeDiamondBalance = document.getElementById("store-diamond-balance");
 const trophyBalanceTarget = trophyBalance?.closest(".balance-box") || null;
 const lobbyPlayButton = document.getElementById("lobby-play-button");
+const lobbyStreakBadge = document.getElementById("lobby-streak-badge");
+const lobbyStreakCount = document.getElementById("lobby-streak-count");
 const lobbyFriendsButton = document.getElementById("lobby-friends-button");
-const lobbyBookButton = document.getElementById("lobby-book-button");
 const lobbyLayout = document.querySelector(".lobby-layout");
+const lobbyTrophyButton = document.querySelector(".lobby-nav-button[data-view='trophies']");
 const lobbyProfileButton = document.getElementById("lobby-profile-button");
 const lobbyNickname = document.getElementById("lobby-nickname");
+const lobbyPlayLabel = document.getElementById("lobby-play-label");
+const lobbyAlleyProgressFill = document.getElementById("lobby-alley-progress-fill");
+const lobbyAlleyRewardImage = document.getElementById("lobby-alley-reward-image");
+const lobbyAlleyRewardFallback = document.getElementById("lobby-alley-reward-fallback");
+const lobbyAlleyProgressValue = document.getElementById("lobby-alley-progress-value");
 const firstGameGuide = document.getElementById("first-game-guide");
-const bookGuidePrompt = document.getElementById("book-guide-prompt");
-const bookGuideBackdrop = document.getElementById("book-guide-backdrop");
-const bookGuideScene = document.getElementById("book-guide-scene");
-const bookGuideCard = document.getElementById("book-guide-card");
-const bookGuideImage = document.getElementById("book-guide-image");
-const bookGuideArtFrame = bookGuideImage?.parentElement || null;
-const bookGuideTitle = document.getElementById("book-guide-title");
-const bookGuideCopy = document.getElementById("book-guide-copy");
-const bookGuideConfirmButton = document.getElementById("book-guide-confirm-button");
+const firstGameGuideCard = document.getElementById("first-game-guide-card");
+const firstCreateChoiceButton = document.getElementById("first-create-choice");
+const firstLoginChoiceButton = document.getElementById("first-login-choice");
+const firstAuthTitle = document.getElementById("first-auth-title");
+const firstAuthBackButton = document.getElementById("first-auth-back");
+const firstLoginNameInput = document.getElementById("first-login-name");
+const firstLoginPasswordInput = document.getElementById("first-login-password");
+const firstPasswordToggle = document.getElementById("first-password-toggle");
+const firstLoginSaveButton = document.getElementById("first-login-save");
+const firstLoginButton = document.getElementById("first-login-button");
+const firstLoginNote = document.getElementById("first-login-note");
+const trophyRoadGuide = document.getElementById("trophy-road-guide");
 const lobbySettingsButton = document.getElementById("lobby-settings-button");
 const accountResetButton = document.getElementById("account-reset-button");
 const settingsBackdrop = document.getElementById("settings-backdrop");
+const settingsPanel = document.getElementById("settings-panel");
 const settingsCloseButton = document.getElementById("settings-close-button");
 const settingsPhoneStatus = document.getElementById("settings-phone-status");
 const phoneModeToggle = document.getElementById("phone-mode-toggle");
@@ -1090,10 +2194,61 @@ const settingsSetPasswordButton = document.getElementById("settings-set-password
 const settingsLoginNickname = document.getElementById("settings-login-nickname");
 const settingsLoginPassword = document.getElementById("settings-login-password");
 const settingsLoginButton = document.getElementById("settings-login-button");
+const settingsMusicRange = document.getElementById("settings-music-range");
+const settingsMusicValue = document.getElementById("settings-music-value");
+const settingsSoundRange = document.getElementById("settings-sound-range");
+const settingsSoundValue = document.getElementById("settings-sound-value");
+const settingsLogoutButton = document.getElementById("settings-logout-button");
 const lobbyAvatar = document.getElementById("lobby-avatar");
 const lobbyAvatarFrame = lobbyAvatar?.parentElement || null;
 const lobbyPet = document.getElementById("lobby-pet");
 const petWrapper = document.getElementById("pet-wrapper");
+const lobbyPetRank = document.getElementById("lobby-pet-rank");
+const lobbyPetRankImage = document.getElementById("lobby-pet-rank-image");
+const lobbyPetRankTrack = document.getElementById("lobby-pet-rank-track");
+const lobbyPetRankFill = document.getElementById("lobby-pet-rank-fill");
+const lobbyPetRankValue = document.getElementById("lobby-pet-rank-value");
+const petDetailBackdrop = document.getElementById("pet-detail-backdrop");
+const petDetailPanel = document.getElementById("pet-detail-panel");
+const petDetailCloseButton = document.getElementById("pet-detail-close-button");
+const petDetailName = document.getElementById("pet-detail-name");
+const petDetailPower = document.getElementById("pet-detail-power");
+const petDetailRankSlot = document.getElementById("pet-detail-rank-slot");
+const petDetailDescription = document.getElementById("pet-detail-description");
+const petDetailImage = document.getElementById("pet-detail-image");
+const petDetailHealth = document.getElementById("pet-detail-health");
+const petDetailAttack = document.getElementById("pet-detail-attack");
+const petDetailRespawn = document.getElementById("pet-detail-respawn");
+const petDetailHealthDelta = document.getElementById("pet-detail-health-delta");
+const petDetailAttackDelta = document.getElementById("pet-detail-attack-delta");
+const petDetailRespawnDelta = document.getElementById("pet-detail-respawn-delta");
+const petDetailEquipButton = document.getElementById("pet-detail-equip-button");
+const petDetailUpgradeButton = document.getElementById("pet-detail-upgrade-button");
+const petDetailUpgradeTrack = document.getElementById("pet-detail-upgrade-track");
+const petDetailTipButton = document.getElementById("pet-detail-tip-button");
+const petDetailTipBubble = document.getElementById("pet-detail-tip-bubble");
+const petUpgradeCelebration = document.getElementById("pet-upgrade-celebration");
+const petUpgradeImage = document.getElementById("pet-upgrade-image");
+const petUpgradeTitle = document.getElementById("pet-upgrade-title");
+const petUpgradeLevel = document.getElementById("pet-upgrade-level");
+const characterDetailBackdrop = document.getElementById("character-detail-backdrop");
+const characterDetailPanel = document.getElementById("character-detail-panel");
+const characterDetailCloseButton = document.getElementById("character-detail-close-button");
+const characterDetailArt = document.getElementById("character-detail-art");
+const characterDetailImage = document.getElementById("character-detail-image");
+const characterDetailName = document.getElementById("character-detail-name");
+const characterDetailDescription = document.getElementById("character-detail-description");
+const characterDetailEquipButton = document.getElementById("character-detail-equip-button");
+const characterDetailHangerButton = document.getElementById("character-detail-hanger-button");
+const characterSkinTray = document.getElementById("character-skin-tray");
+const characterSkinTrayCloseButton = document.getElementById("character-skin-tray-close");
+const characterSkinList = document.getElementById("character-skin-list");
+const petRankRewardBackdrop = document.getElementById("pet-rank-reward-backdrop");
+const petRankRewardPanel = document.getElementById("pet-rank-reward-panel");
+const petRankRewardClose = document.getElementById("pet-rank-reward-close");
+const petRankRewardTitle = document.getElementById("pet-rank-reward-title");
+const petRankRewardSubtitle = document.getElementById("pet-rank-reward-subtitle");
+const petRankRewardTrack = document.getElementById("pet-rank-reward-track");
 const lobbySelfReadyBadge = document.getElementById("lobby-self-ready-badge");
 const partyTeammateShowcase = document.getElementById("party-teammate-showcase");
 const partyTeammateReadyBadge = document.getElementById("lobby-party-ready-badge");
@@ -1102,6 +2257,7 @@ const partyTeammatePetFrame = document.getElementById("party-teammate-pet-frame"
 const partyTeammateName = document.getElementById("party-teammate-name");
 const partyLeaveButton = document.getElementById("party-leave-button");
 const profileBackdrop = document.getElementById("profile-backdrop");
+const profilePanel = document.getElementById("profile-panel");
 const profileCloseButton = document.getElementById("profile-close-button");
 const profileMainCard = document.getElementById("profile-main-card");
 const profileEditCard = document.getElementById("profile-edit-card");
@@ -1112,7 +2268,15 @@ const profileTabPanelUsers = document.getElementById("profile-tab-panel-users");
 const profileCloudStatus = document.getElementById("profile-cloud-status");
 const profileNameHeading = document.getElementById("profile-name-heading");
 const profileNameButton = document.getElementById("profile-name-button");
+const profileWorldBarShell = document.getElementById("profile-world-bar-shell");
 const profileWorldBar = document.getElementById("profile-world-bar");
+const profileWorldBarFill = document.getElementById("profile-world-bar-fill");
+const profileWorldTipBubble = document.getElementById("profile-world-tip-bubble");
+const profileWorldTipText = document.getElementById("profile-world-tip-text");
+const profileWorldTipCount = document.getElementById("profile-world-tip-count");
+const profileStatCreated = document.getElementById("profile-stat-created");
+const profileStatCharactersOwned = document.getElementById("profile-stat-characters-owned");
+const profileStatPetsOwned = document.getElementById("profile-stat-pets-owned");
 const profileThemeButton = document.getElementById("profile-theme-button");
 const profileThemePicker = document.getElementById("profile-theme-picker");
 const profileHeroNote = document.getElementById("profile-hero-note");
@@ -1155,19 +2319,31 @@ const profileOtherGames = document.getElementById("profile-other-games");
 const profileOtherRobots = document.getElementById("profile-other-robots");
 const profileOtherCharacters = document.getElementById("profile-other-characters");
 const profileOtherPets = document.getElementById("profile-other-pets");
+const offlineBackdrop = document.getElementById("offline-backdrop");
+const offlinePanel = document.getElementById("offline-panel");
+const offlineRefreshButton = document.getElementById("offline-refresh-button");
 const friendsContent = document.getElementById("friends-content");
 const friendsSelfId = document.getElementById("friends-self-id");
 const friendsCopyIdButton = document.getElementById("friends-copy-id-button");
+const friendsIdTipButton = document.getElementById("friends-id-tip-button");
+const friendsIdTooltip = document.getElementById("friends-id-tooltip");
+const friendsIdTooltipValue = document.getElementById("friends-id-tooltip-value");
+const friendsAddIdButton = document.getElementById("friends-add-id-button");
+const friendsAddIdTooltip = document.getElementById("friends-add-id-tooltip");
+const friendsAddIdInput = document.getElementById("friends-add-id-input");
+const friendsAddIdStatus = document.getElementById("friends-add-id-status");
 const friendsInviteIdInput = document.getElementById("friends-invite-id-input");
 const friendsInviteIdButton = document.getElementById("friends-invite-id-button");
-const bookContent = document.getElementById("book-content");
 const storeGridWrap = document.getElementById("store-grid-wrap");
 const storeGrid = document.getElementById("store-grid");
+const storeTitle = document.querySelector(".store-title");
+const storeOfferTabButtons = Array.from(document.querySelectorAll("[data-store-offer-tab]"));
 const inventoryGrid = document.getElementById("inventory-grid");
 const wardrobeOverview = document.getElementById("wardrobe-overview");
 const trophyGrid = document.getElementById("trophy-grid");
 const worldHeaderPanel = document.getElementById("world-header-panel");
 const trophyRoadTitleBadge = document.getElementById("trophy-road-title-badge");
+const trophyRoadTitleBadgeSubtext = document.getElementById("trophy-road-title-badge-subtext");
 const worldTitle = document.getElementById("world-title");
 const worldProgressValue = document.getElementById("world-progress-value");
 const worldHeaderActions = document.getElementById("world-header-actions");
@@ -1196,6 +2372,7 @@ const storeDragState = {
   moved: false,
   suppressClickUntil: 0,
 };
+let storeRefreshTipTimeout = null;
 const chestLeftImage = document.getElementById("chest-left-image");
 const chestRightImage = document.getElementById("chest-right-image");
 const chestRemaining = document.getElementById("chest-remaining");
@@ -1211,8 +2388,10 @@ const alleyRewardBackdrop = document.getElementById("alley-reward-backdrop");
 const alleyRewardCard = document.getElementById("alley-reward-card");
 const alleyRewardImage = document.getElementById("alley-reward-image");
 const alleyRewardArtFrame = alleyRewardImage?.parentElement || null;
+const alleyRewardKicker = document.getElementById("alley-reward-kicker");
 const alleyRewardName = document.getElementById("alley-reward-name");
 const alleyRewardCount = document.getElementById("alley-reward-count");
+const alleyRewardClaimButton = document.getElementById("alley-reward-claim-button");
 const alleyRewardBurstLayer = document.getElementById("alley-reward-burst-layer");
 const bundleUnlockBackdrop = document.getElementById("bundle-unlock-backdrop");
 const bundleUnlockCard = document.getElementById("bundle-unlock-card");
@@ -1242,9 +2421,13 @@ const multiplayerCancelButton = document.getElementById("multiplayer-cancel-butt
 const gameStage = document.getElementById("game-stage");
 const gameMap = document.getElementById("game-map");
 const waveBanner = document.getElementById("wave-banner");
+const waveBannerCharacterFrame = document.getElementById("wave-banner-character-frame");
+const waveBannerTitleFrame = waveBanner?.querySelector(".wave-banner-title-frame") || null;
 const waveBannerTitle = document.getElementById("wave-banner-title");
 const waveBannerLabel = document.getElementById("wave-banner-label");
 const waveBannerCountdown = document.getElementById("wave-banner-countdown");
+const waveBannerCountdownImage = document.getElementById("wave-banner-countdown-image");
+const waveBannerCountdownText = document.getElementById("wave-banner-countdown-text");
 const waveBannerPlayers = document.getElementById("wave-banner-players");
 const gameBackButton = document.getElementById("game-back-button");
 const multiplayerPlayersLayer = document.getElementById("multiplayer-players-layer");
@@ -1261,6 +2444,8 @@ const gamePetEntity = document.getElementById("game-pet-entity");
 const gamePetImage = document.getElementById("game-pet-image");
 const petCooldownBar = document.getElementById("pet-cooldown-bar");
 const petCooldownFill = document.getElementById("pet-cooldown-fill");
+const petHealthLabel = document.getElementById("pet-health");
+const petHealthText = document.getElementById("pet-health-text");
 const ammoBars = document.getElementById("ammo-bars");
 const gameModeInfo = document.getElementById("game-mode-info");
 const touchControls = document.getElementById("touch-controls");
@@ -1271,7 +2456,10 @@ const petPackLayer = document.getElementById("pet-pack-layer");
 const barriersLayer = document.getElementById("barriers-layer");
 const pickupsLayer = document.getElementById("pickups-layer");
 const waterFieldsLayer = document.getElementById("water-fields-layer");
-const jungleFieldsLayer = document.getElementById("jungle-fields-layer");
+const treeBaseLayer = document.getElementById("tree-base-layer");
+const towerLayer = document.getElementById("tower-layer");
+const treeCanopyLayer = document.getElementById("tree-canopy-layer");
+const towerHudLayer = document.getElementById("tower-hud-layer");
 const projectilesLayer = document.getElementById("projectiles-layer");
 const robotsLayer = document.getElementById("robots-layer");
 const effectsLayer = document.getElementById("effects-layer");
@@ -1286,23 +2474,49 @@ const gameResultNote = document.getElementById("game-result-note");
 const gameResultWave = document.getElementById("game-result-wave");
 const gameResultRobots = document.getElementById("game-result-robots");
 const gameResultTrophies = document.getElementById("game-result-trophies");
+const gameResultTrophyLabel = gameResultTrophies?.previousElementSibling || null;
+const gameResultStreak = document.getElementById("game-result-streak");
+const gameResultStreakCount = document.getElementById("game-result-streak-count");
+const gameResultStreakBonus = document.getElementById("game-result-streak-bonus");
 const gameResultButton = document.getElementById("game-result-button");
 
 const viewNodes = {
   lobby: document.getElementById("lobby-view"),
   store: document.getElementById("store-view"),
+  rarity: document.getElementById("rarity-view"),
   inventory: document.getElementById("inventory-view"),
   friends: document.getElementById("friends-view"),
-  book: document.getElementById("book-view"),
   game: document.getElementById("game-view"),
   trophies: document.getElementById("trophies-view"),
+  ranking: document.getElementById("ranking-view"),
+  "tower-challenge": document.getElementById("tower-challenge-view"),
+  "pet-ranks": document.getElementById("pet-ranks-view"),
 };
+const rankingAlleyEntry = document.getElementById("ranking-alley-entry");
+const highTowerEntry = document.getElementById("high-tower-entry");
+const highTowerRewards = document.getElementById("high-tower-rewards");
+const highTowerCountdown = document.getElementById("high-tower-countdown");
+const highTowerEntryCountdown = document.getElementById("high-tower-entry-countdown");
+const highTowerOwnedCounter = document.getElementById("high-tower-owned-counter");
+const highTowerSparkleCounter = document.getElementById("high-tower-sparkle-counter");
+const highTowerFlaroPanel = document.getElementById("high-tower-flaro-panel");
+const highTowerChestCounter = document.getElementById("high-tower-chest-counter");
+const rankingAlleyGrid = document.getElementById("ranking-alley-grid");
+const rankingAlleyClose = document.getElementById("ranking-alley-close");
+const rankingAlleyPointsValue = document.getElementById("ranking-alley-points-value");
+const petMiniAlleyShell = document.getElementById("pet-mini-alley-shell");
+const rankingPremiumBackdrop = document.getElementById("ranking-premium-backdrop");
+const rankingPremiumScene = document.getElementById("ranking-premium-scene");
+const rankingPremiumCloseButton = document.getElementById("ranking-premium-close-button");
+const rankingPremiumDiamondsButton = document.getElementById("ranking-premium-diamonds-button");
+const rankingPremiumCashButton = document.getElementById("ranking-premium-cash-button");
 
 const backgroundMusic = new Audio(BACKGROUND_MUSIC_SOURCES.alley[0]);
 backgroundMusic.loop = true;
 backgroundMusic.preload = "auto";
 backgroundMusic.volume = BACKGROUND_MUSIC_DEFAULT_VOLUME;
 backgroundMusic.dataset.currentSource = BACKGROUND_MUSIC_SOURCES.alley[0];
+backgroundMusic.dataset.currentMusicKey = "lobby:alley";
 backgroundMusic.addEventListener("error", () => {
   const failedSource = backgroundMusic.dataset.currentSource || "";
   if (failedSource) {
@@ -1320,55 +2534,101 @@ let chestSession = null;
 let alleyIntroSequenceId = 0;
 let alleyRewardTimer = null;
 let alleyRewardResolve = null;
+let magiciansPremiumLeadRotationTimer = null;
+let storePremiumOfferRotationTimer = null;
+let rankingCardHiraVoiceAudio = null;
+let lastMagiciansPremiumLeadVisualIndex = { alley: -1, winter: -1 };
 let alleyRewardInteractionMode = "auto";
 let alleyRewardAction = null;
 let alleyRewardBusy = false;
+let alleyRewardManualTrigger = "card";
+let activePetDetailId = "";
+let pendingPetUpgradeConfirmId = "";
+let petDetailAnimationTimers = [];
+let petDetailCloseTimer = null;
+let petDetailTipTimer = null;
+let activeCharacterDetailId = "";
+let activeCharacterDetailSkinId = "";
+let characterDetailCloseTimer = null;
+let characterSkinTrayCloseTimer = null;
+let activePetRankRewardPetId = "";
+let petRankRewardBusy = false;
+let petMiniSecretClickCount = 0;
+let petMiniSecretClickTimer = null;
+let petMiniSecretCooldownRenderTimer = null;
+let activePetMiniAlleyPetId = PET_MINI_ALLEY_PET_ID;
 let introSequenceRunning = false;
 let resultReturnBusy = false;
 let backgroundMusicReady = false;
+let backgroundMusicEffectDuckCount = 0;
+const lobbyMusicPositionsBySource = new Map();
 let superAlleyBusy = false;
 let winterBundleBusy = false;
 let winterBundleStage = "offer";
 let activeWinterBundle = null;
 let storeCharacterPurchaseBusy = false;
 let activeStoreCharacterPurchase = null;
+let activeStoreOfferPurchase = null;
 let magicMachineBusy = false;
 let magicMachineStage = "buy";
 let magicMachineRewardPetId = "";
+let magicMachineRewardPrize = null;
 let magicMachineSequenceId = 0;
-let bookGuideSequenceRunning = false;
-let bookGuideStageResolve = null;
+let magicMachineSource = "alley";
 let trophyWorldBatchClaimBusy = false;
+let trophyNoticeTimer = null;
 let trophyWorldTransitionBusy = false;
+let trophyRoadScrollTimer = null;
+let trophyRoadLastScrollLeft = 0;
+let rankingRoadScrollTimer = null;
+let rankingRoadLastScrollTop = 0;
+let highTowerCountdownTimer = 0;
+let settingsCloseTimer = null;
+let profileCloseTimer = null;
+let profileWorldTipTimer = null;
 let walkingLoopAudio = null;
 let soundEffectsAudioContext = null;
 let bundleUnlockTimer = null;
 let bundleUnlockResolve = null;
+let friendsIdTooltipTimer = null;
+let friendsAddIdTooltipTimer = null;
+let friendsAddIdSubmitting = false;
 let nicknamePromptAfterSave = null;
 let remoteProfileSyncSuspendLevel = 0;
 let gameLaunchTransitionBusy = false;
 let gameLaunchTransitionToken = 0;
+let lobbyViewTransitionTimer = 0;
+let dailyGiftCheckTimer = 0;
+let dailyGiftMidnightTimer = 0;
+let dailyGiftAutoClaimBusy = false;
+let portalMissionSaveTimer = 0;
+let portalMissionDailyTimer = 0;
 const audioBoostMap = new WeakMap();
+const lastRandomizedSoundSourceByName = new Map();
 
 bindEvents();
 renderAll();
-syncOrientationLock();
 bootApp();
 
 function bindEvents() {
+  window.addEventListener("resize", updateTrophyRoadGuideBubblePosition);
+  window.addEventListener("online", syncOfflineAccessState);
+  window.addEventListener("offline", syncOfflineAccessState);
+  document.addEventListener("click", handleTrophyRoadGuideClickCapture, true);
+
+  if (offlineRefreshButton) {
+    offlineRefreshButton.addEventListener("click", refreshOfflineConnection);
+  }
+
   document.querySelectorAll(".lobby-nav-button").forEach((button) => {
     button.addEventListener("click", () => {
-      if (button === lobbyBookButton && shouldShowJungleBookGuidePrompt()) {
-        void startJungleBookGuideFlow();
-        return;
-      }
-
       if (button.dataset.view) {
         if (button.dataset.view === "store") {
           ui.storeMode = DEFAULT_STORE_MODE;
+          ui.storeOfferTab = STORE_OFFER_TAB_MAGIC;
         }
         ui.nextGameMode = button.dataset.view === "game" ? "solo" : ui.nextGameMode;
-        showView(button.dataset.view);
+        showViewWithLobbyTransition(button.dataset.view);
       }
     });
   });
@@ -1378,6 +2638,14 @@ function bindEvents() {
       ui.pendingMultiplayerLaunch = null;
       ui.nextGameMode = "solo";
       togglePartyReady();
+    });
+  }
+
+  if (lobbyAvatarFrame) {
+    lobbyAvatarFrame.addEventListener("click", () => {
+      if (ui.currentView === "lobby") {
+        playEquippedCharacterVoice(0.74);
+      }
     });
   }
 
@@ -1397,9 +2665,9 @@ function bindEvents() {
     });
   }
 
-  if (bookGuideConfirmButton) {
-    bookGuideConfirmButton.addEventListener("click", () => {
-      advanceJungleBookGuideStage();
+  if (gameResultButton) {
+    gameResultButton.addEventListener("click", () => {
+      void returnToLobbyFromResult();
     });
   }
 
@@ -1409,7 +2677,7 @@ function bindEvents() {
     });
   });
 
-  document.querySelectorAll(".tab-button").forEach((button) => {
+  document.querySelectorAll(".tab-button, .wardrobe-world-filter").forEach((button) => {
     button.addEventListener("click", () => {
       const group = button.dataset.tabGroup;
       const tab = button.dataset.tab;
@@ -1427,6 +2695,11 @@ function bindEvents() {
         renderInventory();
       }
 
+      if (group === "inventory-world") {
+        ui.inventoryWorldFilter = tab === "winter" || tab === "ranking" ? tab : "magicians";
+        renderInventory();
+      }
+
       if (group === "friends") {
         ui.friendsTab = tab;
         renderFriendsView();
@@ -1436,19 +2709,57 @@ function bindEvents() {
     });
   });
 
+  storeOfferTabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const requestedTab = button.dataset.storeOfferTab;
+      const tab = normalizeStoreOfferTab(requestedTab);
+
+      if (requestedTab === STORE_OFFER_TAB_HIGH_TOWER && !isHighTowerStoreTabAvailable()) {
+        return;
+      }
+
+      if (requestedTab === STORE_OFFER_TAB_PIRATE && !isRankingAlleyUnlocked()) {
+        triggerStorePirateOfferLockFeedback(button);
+        showTrophyNotice("WYMAGANE 500 PUCHARÓW");
+        return;
+      }
+
+      if (ui.storeOfferTab === tab) {
+        return;
+      }
+
+      ui.storeOfferTab = tab;
+      renderStore({ suppressEntranceAnimation: false });
+    });
+  });
+
   storeGrid.addEventListener("click", handleStoreClick);
+  storeGrid.addEventListener("input", handleStoreInput);
   storeGridWrap.addEventListener("pointerdown", handleStoreDragStart);
   storeGridWrap.addEventListener("pointermove", handleStoreDragMove);
   storeGridWrap.addEventListener("pointerup", handleStoreDragEnd);
   storeGridWrap.addEventListener("pointercancel", handleStoreDragEnd);
   storeGridWrap.addEventListener("scroll", handleStoreScroll, { passive: true });
   storeGridWrap.addEventListener("wheel", handleStoreWheelScroll, { passive: false });
+  viewNodes.rarity?.addEventListener("click", handleRarityClick);
+  rankingAlleyGrid?.addEventListener("click", handleRankingAlleyClick);
+  rankingAlleyClose?.addEventListener("click", () => showView("lobby"));
+  rankingAlleyEntry?.addEventListener("click", handleRankingEntryClick);
+  highTowerEntry?.addEventListener("click", () => showViewWithLobbyTransition("tower-challenge"));
+  viewNodes["tower-challenge"]?.addEventListener("click", handleHighTowerChallengeClick);
+  viewNodes["tower-challenge"]?.addEventListener("keydown", handleHighTowerChallengeKeydown);
+  towerHudLayer?.addEventListener("click", handleRankingShipHudClick);
+  rankingPremiumCloseButton?.addEventListener("click", closeRankingPremiumOffer);
+  rankingPremiumDiamondsButton?.addEventListener("click", () => {
+    void activateRankingPremium("diamonds");
+  });
+  rankingPremiumCashButton?.addEventListener("click", () => {
+    void activateRankingPremium("cash");
+  });
   inventoryGrid.addEventListener("click", handleInventoryClick);
   trophyGrid.addEventListener("click", handleTrophyClick);
-  trophyGrid.addEventListener("scroll", () => {
-    clampTrophyRoadScrollPosition();
-    syncTrophyRoadThemeFromScroll();
-  }, { passive: true });
+  trophyGrid.addEventListener("keydown", handleTrophyKeydown);
+  trophyGrid.addEventListener("scroll", handleTrophyRoadScroll, { passive: true });
   if (lobbySettingsButton) {
     lobbySettingsButton.addEventListener("click", () => {
       openSettingsPanel();
@@ -1471,6 +2782,32 @@ function bindEvents() {
   if (settingsCloseButton) {
     settingsCloseButton.addEventListener("click", () => {
       closeSettingsPanel();
+    });
+  }
+
+  if (settingsBackdrop) {
+    settingsBackdrop.addEventListener("click", (event) => {
+      if (event.target === settingsBackdrop) {
+        closeSettingsPanel();
+      }
+    });
+  }
+
+  if (settingsMusicRange) {
+    settingsMusicRange.addEventListener("input", () => {
+      setMusicVolumePercent(settingsMusicRange.value);
+    });
+  }
+
+  if (settingsSoundRange) {
+    settingsSoundRange.addEventListener("input", () => {
+      setSoundVolumePercent(settingsSoundRange.value);
+    });
+  }
+
+  if (settingsLogoutButton) {
+    settingsLogoutButton.addEventListener("click", () => {
+      confirmLogoutAccount();
     });
   }
 
@@ -1509,14 +2846,39 @@ function bindEvents() {
   }
 
   if (profileCharacterButton) {
-    profileCharacterButton.addEventListener("click", () => {
+    profileCharacterButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (ui.profileTab === "friend") {
+        return;
+      }
       openProfileEditSection("character");
     });
   }
 
   if (profileNameButton) {
-    profileNameButton.addEventListener("click", () => {
+    profileNameButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (ui.profileTab === "friend") {
+        return;
+      }
       openProfileEditSection("name");
+    });
+  }
+
+  if (profileWorldBarShell) {
+    profileWorldBarShell.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      showProfileWorldTipBubble();
+    });
+
+    profileWorldBarShell.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        showProfileWorldTipBubble();
+      }
     });
   }
 
@@ -1546,6 +2908,12 @@ function bindEvents() {
 
   if (profileEditPanel) {
     profileEditPanel.addEventListener("click", (event) => {
+      const editModeButton = event.target.closest("[data-profile-edit-mode]");
+      if (editModeButton) {
+        openProfileEditSection(editModeButton.dataset.profileEditMode || "character");
+        return;
+      }
+
       const photoChoice = event.target.closest("[data-profile-photo-choice]");
       if (photoChoice) {
         applyProfilePhotoChange(photoChoice.dataset.profilePhotoChoice || "");
@@ -1555,6 +2923,12 @@ function bindEvents() {
       const characterChoice = event.target.closest("[data-profile-character-choice]");
       if (characterChoice) {
         applyProfileFavoriteCharacterChange(characterChoice.dataset.profileCharacterChoice || "");
+        return;
+      }
+
+      const petChoice = event.target.closest("[data-profile-pet-choice]");
+      if (petChoice) {
+        applyProfileFavoritePetChange(petChoice.dataset.profilePetChoice || "");
         return;
       }
 
@@ -1575,7 +2949,11 @@ function bindEvents() {
     });
 
     profileEditPanel.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && event.target instanceof HTMLInputElement && event.target.id === "profile-name-input-dynamic") {
+      if (
+        event.key === "Enter"
+        && event.target instanceof HTMLInputElement
+        && (event.target.id === "profile-name-input-dynamic" || event.target.id === "profile-name-input-repeat")
+      ) {
         event.preventDefault();
         saveProfileDetails();
       }
@@ -1594,9 +2972,80 @@ function bindEvents() {
     });
   }
 
+  if (firstCreateChoiceButton) {
+    firstCreateChoiceButton.addEventListener("click", () => {
+      openFirstGameAuthMode("create");
+    });
+  }
+
+  if (firstLoginChoiceButton) {
+    firstLoginChoiceButton.addEventListener("click", () => {
+      openFirstGameAuthMode("login");
+    });
+  }
+
+  if (firstAuthBackButton) {
+    firstAuthBackButton.addEventListener("click", () => {
+      openFirstGameAuthMode("choice");
+    });
+  }
+
+  if (firstLoginNameInput) {
+    firstLoginNameInput.addEventListener("input", () => {
+      firstLoginNameInput.value = sanitizePlayerNickname(firstLoginNameInput.value);
+      syncFirstGameLoginNote();
+    });
+  }
+
+  if (firstLoginPasswordInput) {
+    firstLoginPasswordInput.addEventListener("input", syncFirstGameLoginNote);
+  }
+
+  if (firstPasswordToggle) {
+    firstPasswordToggle.addEventListener("click", toggleFirstGamePasswordPreview);
+  }
+
+  if (firstLoginSaveButton) {
+    firstLoginSaveButton.addEventListener("click", createFirstGameAccountAndStart);
+  }
+
+  if (firstLoginButton) {
+    firstLoginButton.addEventListener("click", loginFromFirstGameGuide);
+  }
+
   if (friendsCopyIdButton) {
     friendsCopyIdButton.addEventListener("click", () => {
       copyOwnProfileId();
+    });
+  }
+
+  if (friendsIdTipButton) {
+    friendsIdTipButton.addEventListener("click", showFriendsIdTooltip);
+  }
+
+  if (friendsAddIdButton) {
+    friendsAddIdButton.addEventListener("click", showFriendsAddIdTooltip);
+    friendsAddIdButton.addEventListener("mouseleave", () => {
+      window.setTimeout(() => {
+        if (!friendsAddIdTooltip?.matches(":hover") && document.activeElement !== friendsAddIdInput) {
+          hideFriendsAddIdTooltip();
+        }
+      }, 180);
+    });
+  }
+
+  if (friendsAddIdTooltip) {
+    friendsAddIdTooltip.addEventListener("mouseleave", () => {
+      hideFriendsAddIdTooltip();
+    });
+  }
+
+  if (friendsAddIdInput) {
+    friendsAddIdInput.addEventListener("input", () => {
+      friendsAddIdInput.value = sanitizePublicPlayerId(friendsAddIdInput.value);
+      if (friendsAddIdInput.value.length >= 5) {
+        submitFriendsAddIdTooltip();
+      }
     });
   }
 
@@ -1621,6 +3070,20 @@ function bindEvents() {
 
   if (friendsContent) {
     friendsContent.addEventListener("click", (event) => {
+      const showSuggestedButton = event.target.closest("[data-friends-show-suggested]");
+      if (showSuggestedButton) {
+        ui.friendsTab = "suggested";
+        renderFriendsView();
+        syncTabs();
+        return;
+      }
+
+      const openFriendProfileButton = event.target.closest("[data-open-friend-profile]");
+      if (openFriendProfileButton) {
+        void openFriendProfileFromFriends(openFriendProfileButton.dataset.openFriendProfile || "");
+        return;
+      }
+
       const inviteProfileButton = event.target.closest("[data-friend-invite-profile]");
       if (inviteProfileButton) {
         sendFriendInviteToResolvedProfileId(inviteProfileButton.dataset.friendInviteProfile || "");
@@ -1670,310 +3133,8 @@ function bindEvents() {
     });
   }
 
-  if (bookContent) {
-    bookContent.addEventListener("click", (event) => {
-      const bookTabButton = event.target.closest("[data-book-tab]");
-      if (bookTabButton) {
-        ui.bookTab = bookTabButton.dataset.bookTab === "missions" ? "missions" : "book";
-        renderBookView();
-        return;
-      }
-
-      const missionClaimButton = event.target.closest("[data-book-mission-claim]");
-      if (missionClaimButton) {
-        void claimBookMission(missionClaimButton.dataset.bookMissionClaim || "");
-        return;
-      }
-
-      const grandRewardButton = event.target.closest("[data-book-grand-reward]");
-      if (grandRewardButton) {
-        openBookGrandRewardModal(grandRewardButton.dataset.bookGrandReward || "");
-        return;
-      }
-
-      const petButton = event.target.closest("[data-book-pet]");
-      if (!petButton) {
-        return;
-      }
-
-      openBookPetPurchaseModal(petButton.dataset.bookPet || "");
-    });
-  }
-
-  [settingsNewPassword, settingsLoginNickname, settingsLoginPassword].forEach((field) => {
-    if (!field) {
-      return;
-    }
-
-    field.addEventListener("keydown", (event) => {
-      if (event.key !== "Enter") {
-        return;
-      }
-
-      event.preventDefault();
-      if (field === settingsNewPassword) {
-        setCurrentAccountPassword();
-      } else {
-        loginToExistingAccount();
-      }
-    });
-  });
-
-  if (nicknameSaveButton) {
-    nicknameSaveButton.addEventListener("click", () => {
-      submitNicknamePrompt();
-    });
-  }
-
-  if (nicknameInput) {
-    nicknameInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        submitNicknamePrompt();
-      }
-    });
-  }
-
-  if (nicknameBackdrop) {
-    nicknameBackdrop.addEventListener("click", (event) => {
-      if (event.target === nicknameBackdrop && state.nicknamePromptSeen) {
-        closeNicknamePrompt();
-      }
-    });
-  }
-
-  if (multiplayerCloseButton) {
-    multiplayerCloseButton.addEventListener("click", () => {
-      closeMultiplayerLobby();
-    });
-  }
-
-  if (multiplayerBackdrop) {
-    multiplayerBackdrop.addEventListener("click", (event) => {
-      if (event.target === multiplayerBackdrop) {
-        closeMultiplayerLobby();
-      }
-    });
-  }
-
-  if (playRobotsButton) {
-    playRobotsButton.addEventListener("click", () => {
-      if (!canUseMultiplayerChooserButton()) {
-        return;
-      }
-
-      closeMultiplayerLobby({ cancelWaiting: false });
-      ui.nextGameMode = "solo";
-      showView("game");
-    });
-  }
-
-  if (playPlayersButton) {
-    playPlayersButton.addEventListener("click", () => {
-      if (!canUseMultiplayerChooserButton()) {
-        return;
-      }
-
-      if (!hasPlayerNickname()) {
-        openNicknamePrompt(() => {
-          startMultiplayerAction("queue");
-        });
-        return;
-      }
-
-      startMultiplayerAction("queue");
-    });
-  }
-
-  if (multiplayerEditNickButton) {
-    multiplayerEditNickButton.addEventListener("click", () => {
-      const reopenLobby = !multiplayerBackdrop?.hidden;
-      closeMultiplayerLobby({ cancelWaiting: false });
-      openNicknamePrompt(() => {
-        if (reopenLobby) {
-          if (multiplayer.waiting && !multiplayer.matchActive) {
-            startMultiplayerAction("queue");
-          } else {
-            openMultiplayerLobby();
-          }
-        }
-      });
-    });
-  }
-
-  if (multiplayerCancelButton) {
-    multiplayerCancelButton.addEventListener("click", () => {
-      cancelMultiplayerWaitingRoom();
-    });
-  }
-
-  if (phoneModeToggle) {
-    phoneModeToggle.addEventListener("click", () => {
-      togglePhoneMode();
-    });
-  }
-
-  gameResultButton.addEventListener("click", async () => {
-    await returnToLobbyFromResult();
-  });
-
-  if (superAlleyButton) {
-    superAlleyButton.addEventListener("click", () => {
-      openSuperAlleyOffer();
-    });
-  }
-
-  if (superAlleyCoinsButton) {
-    superAlleyCoinsButton.addEventListener("click", async () => {
-      await activateSuperAlley("coins");
-    });
-  }
-
-  if (superAlleyCashButton) {
-    superAlleyCashButton.addEventListener("click", async () => {
-      await activateSuperAlley("cash");
-    });
-  }
-
-  if (worldHeaderMachineButton) {
-    worldHeaderMachineButton.addEventListener("click", () => {
-      openMagicMachine();
-    });
-  }
-
-  if (magicMachineArt) {
-    magicMachineArt.addEventListener("click", async () => {
-      await handleMagicMachineAction();
-    });
-
-    magicMachineArt.addEventListener("keydown", async (event) => {
-      if (event.key !== "Enter" && event.key !== " ") {
-        return;
-      }
-
-      event.preventDefault();
-      await handleMagicMachineAction();
-    });
-  }
-
-  if (winterBundleConfirmButton) {
-    winterBundleConfirmButton.addEventListener("click", async () => {
-      await confirmWinterBundlePurchase();
-    });
-  }
-
-  if (storeCharacterPurchaseConfirmButton) {
-    storeCharacterPurchaseConfirmButton.addEventListener("click", async () => {
-      await confirmStoreCharacterPurchase();
-    });
-  }
-
-  modalConfirm.addEventListener("click", async () => {
-    if (typeof modalAction === "function") {
-      await modalAction();
-    }
-  });
-
-  chestOpenButton.addEventListener("click", async () => {
-    await revealChestReward();
-  });
-
-  chestRewardCard.addEventListener("click", async () => {
-    await revealChestReward();
-  });
-
-  chestCloseButton.addEventListener("click", () => {
-    closeChestScene();
-  });
-
-  if (alleyRewardBackdrop) {
-    alleyRewardBackdrop.addEventListener("click", (event) => {
-      if (event.target === alleyRewardBackdrop && alleyRewardInteractionMode !== "manual") {
-        closeAlleyRewardScene();
-      }
-    });
-  }
-
-  if (superAlleyBackdrop) {
-    superAlleyBackdrop.addEventListener("click", (event) => {
-      if (event.target === superAlleyBackdrop && !superAlleyBusy) {
-        closeSuperAlleyBackdrop();
-      }
-    });
-  }
-
-  if (winterBundleBackdrop) {
-    winterBundleBackdrop.addEventListener("click", (event) => {
-      if (event.target === winterBundleBackdrop && !winterBundleBusy && winterBundleStage === "offer") {
-        closeWinterBundlePurchase();
-      }
-    });
-  }
-
-  if (storeCharacterPurchaseBackdrop) {
-    storeCharacterPurchaseBackdrop.addEventListener("click", (event) => {
-      if (event.target === storeCharacterPurchaseBackdrop && !storeCharacterPurchaseBusy) {
-        closeStoreCharacterPurchase();
-      }
-    });
-  }
-
-  if (magicMachineBackdrop) {
-    magicMachineBackdrop.addEventListener("click", (event) => {
-      if (event.target === magicMachineBackdrop && canCloseMagicMachineBackdrop()) {
-        closeMagicMachineBackdrop();
-      }
-    });
-  }
-
-  if (magicMachineScene) {
-    magicMachineScene.addEventListener("click", (event) => {
-      if (!canCloseMagicMachineBackdrop()) {
-        return;
-      }
-
-      const target = event.target instanceof Element ? event.target : null;
-      if (!target || target.closest("#magic-machine-art")) {
-        return;
-      }
-
-      closeMagicMachineBackdrop();
-    });
-  }
-
-  if (magicMachineCloseButton) {
-    magicMachineCloseButton.addEventListener("click", () => {
-      closeMagicMachineBackdrop();
-    });
-  }
-
-  if (bundleUnlockBackdrop) {
-    bundleUnlockBackdrop.addEventListener("click", (event) => {
-      if (event.target === bundleUnlockBackdrop) {
-        closeBundleUnlockScene();
-      }
-    });
-  }
-
-  if (alleyRewardCard) {
-    alleyRewardCard.addEventListener("click", async () => {
-      await handleAlleyRewardInteraction();
-    });
-  }
-
-  modalBackdrop.addEventListener("click", (event) => {
-    if (event.target === modalBackdrop && modalDismissible) {
-      closeModal();
-    }
-  });
-
-  if (settingsBackdrop) {
-    settingsBackdrop.addEventListener("click", (event) => {
-      if (event.target === settingsBackdrop) {
-        closeSettingsPanel();
-      }
-    });
-  }
+  document.addEventListener("keydown", (event) => handleGameKey(event, true));
+  document.addEventListener("keyup", (event) => handleGameKey(event, false));
 
   if (touchJoystick) {
     touchJoystick.addEventListener("pointerdown", handleTouchJoystickStart);
@@ -1988,552 +3149,233 @@ function bindEvents() {
     touchFireButton.addEventListener("pointercancel", handleTouchFireEnd);
   }
 
-  window.addEventListener("keydown", (event) => {
-    handleGameKey(event, true);
-
-    if (
-      event.key === "Escape" &&
-      alleyRewardBackdrop &&
-      !alleyRewardBackdrop.hidden &&
-      alleyRewardInteractionMode !== "manual"
-    ) {
-      closeAlleyRewardScene();
-      return;
-    }
-
-    if (
-      (event.key === "Enter" || event.key === " ") &&
-      alleyRewardBackdrop &&
-      !alleyRewardBackdrop.hidden &&
-      alleyRewardInteractionMode === "manual"
-    ) {
-      event.preventDefault();
-      void handleAlleyRewardInteraction();
-      return;
-    }
-
-    if (
-      event.key === "Escape" &&
-      superAlleyBackdrop &&
-      !superAlleyBackdrop.hidden &&
-      !superAlleyBusy
-    ) {
-      closeSuperAlleyBackdrop();
-      return;
-    }
-
-    if (
-      event.key === "Escape" &&
-      magicMachineBackdrop &&
-      !magicMachineBackdrop.hidden &&
-      canCloseMagicMachineBackdrop()
-    ) {
-      closeMagicMachineBackdrop();
-      return;
-    }
-
-    if (
-      event.key === "Escape" &&
-      winterBundleBackdrop &&
-      !winterBundleBackdrop.hidden &&
-      !winterBundleBusy &&
-      winterBundleStage === "offer"
-    ) {
-      closeWinterBundlePurchase();
-      return;
-    }
-
-    if (
-      event.key === "Escape" &&
-      storeCharacterPurchaseBackdrop &&
-      !storeCharacterPurchaseBackdrop.hidden &&
-      !storeCharacterPurchaseBusy
-    ) {
-      closeStoreCharacterPurchase();
-      return;
-    }
-
-    if (event.key === "Escape" && bundleUnlockBackdrop && !bundleUnlockBackdrop.hidden) {
-      closeBundleUnlockScene();
-      return;
-    }
-
-    if (
-      (event.key === "Enter" || event.key === " ") &&
-      winterBundleBackdrop &&
-      !winterBundleBackdrop.hidden &&
-      winterBundleStage === "offer" &&
-      !winterBundleBusy
-    ) {
-      event.preventDefault();
-      void confirmWinterBundlePurchase();
-      return;
-    }
-
-    if (
-      (event.key === "Enter" || event.key === " ") &&
-      storeCharacterPurchaseBackdrop &&
-      !storeCharacterPurchaseBackdrop.hidden &&
-      !storeCharacterPurchaseBusy &&
-      storeCharacterPurchaseActions &&
-      !storeCharacterPurchaseActions.hidden
-    ) {
-      event.preventDefault();
-      void confirmStoreCharacterPurchase();
-      return;
-    }
-
-    if (
-      (event.key === "Enter" || event.key === " ") &&
-      magicMachineBackdrop &&
-      !magicMachineBackdrop.hidden &&
-      !magicMachineBusy
-    ) {
-      event.preventDefault();
-      void handleMagicMachineAction();
-      return;
-    }
-
-    if (event.key === "Escape" && settingsBackdrop && !settingsBackdrop.hidden) {
-      closeSettingsPanel();
-      return;
-    }
-
-    if (event.key === "Escape" && !modalBackdrop.hidden && modalDismissible) {
-      closeModal();
-    }
-  });
-
-  window.addEventListener("keyup", (event) => {
-    handleGameKey(event, false);
-  });
-
-  window.addEventListener("resize", () => {
-    syncOrientationLock();
-    if (game.active) {
-      updateGameBounds();
-      clampGameEntities();
-      renderGameScene();
-    }
-  });
-  window.addEventListener("orientationchange", syncOrientationLock);
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener("resize", syncOrientationLock);
+  if (treeCanopyLayer) {
+    treeCanopyLayer.addEventListener("click", handleTreeAppleClick);
   }
 
-  window.addEventListener("pointerdown", syncBackgroundMusic, { passive: true });
-  window.addEventListener("keydown", syncBackgroundMusic);
-  window.addEventListener("blur", () => {
-    resetGameKeys();
-    resetTouchControls();
-    scheduleRemoteProfileSync(true);
-  });
-
-  window.addEventListener("focus", () => {
-    scheduleRemoteProfileSync(true);
-  });
-
-  if (typeof document !== "undefined") {
-    document.addEventListener("visibilitychange", () => {
-      scheduleRemoteProfileSync(true);
+  if (modalConfirm) {
+    modalConfirm.addEventListener("click", () => {
+      if (typeof modalAction === "function") {
+        modalAction();
+      } else {
+        closeModal();
+      }
     });
   }
 
-  window.setInterval(() => {
-    if (ui.currentView === "store") {
-      refreshStoreViewTick();
-    }
-  }, 1000);
-}
-
-function buildLoadingPoints(totalTime) {
-  const points = [];
-  let elapsed = 0;
-  let percent = 0;
-
-  while (elapsed < totalTime) {
-    const remainingTime = totalTime - elapsed;
-    const remainingPercent = 100 - percent;
-
-    if (remainingTime <= STEP_INTERVAL_MAX || remainingPercent <= 8) {
-      points.push({ delay: remainingTime, value: 100 });
-      break;
-    }
-
-    const nextDelay = randomBetween(
-      STEP_INTERVAL_MIN,
-      Math.min(STEP_INTERVAL_MAX, remainingTime - STEP_INTERVAL_MIN)
-    );
-    const maxJump = Math.min(18, remainingPercent - 1);
-    const minJump = Math.min(4, maxJump);
-    const jump = randomBetween(minJump, maxJump);
-
-    elapsed += nextDelay;
-    percent += jump;
-    points.push({ delay: nextDelay, value: Math.min(percent, 99) });
-  }
-
-  return points;
-}
-
-function shouldUseLoadingScreen() {
-  return Boolean(
-    loadingScreen &&
-    !loadingScreen.hidden &&
-    loadingScreen.classList.contains("active")
-  );
-}
-
-function bootApp() {
-  if (!shouldUseLoadingScreen()) {
-    updateProgress(100);
-    showApp();
-    return;
-  }
-
-  loadingScreen.hidden = false;
-  loadingScreen.setAttribute("aria-hidden", "false");
-  appScreen.classList.remove("active");
-  appScreen.setAttribute("aria-hidden", "true");
-  updateProgress(0);
-  startLoadingSequence();
-}
-
-function startLoadingSequence() {
-  let accumulatedDelay = 0;
-
-  loadingPoints.forEach((point, index) => {
-    accumulatedDelay += point.delay;
-
-    window.setTimeout(() => {
-      updateProgress(point.value);
-
-      if (index === loadingPoints.length - 1) {
-        window.setTimeout(showApp, 320);
+  if (modalBackdrop) {
+    modalBackdrop.addEventListener("click", (event) => {
+      if (event.target === modalBackdrop && modalDismissible) {
+        closeModal();
       }
-    }, accumulatedDelay);
+    });
+  }
+
+  if (petDetailCloseButton) {
+    petDetailCloseButton.addEventListener("click", closePetDetailPanel);
+  }
+
+  if (petDetailBackdrop) {
+    petDetailBackdrop.addEventListener("click", (event) => {
+      const skinButton = event.target.closest("[data-pet-skin]");
+      if (skinButton) {
+        selectPetSkinFromDetail(skinButton.dataset.petSkin || "");
+        return;
+      }
+
+      if (event.target === petDetailBackdrop) {
+        closePetDetailPanel();
+      }
+    });
+  }
+
+  if (petDetailEquipButton) {
+    petDetailEquipButton.addEventListener("click", equipPetFromDetail);
+  }
+
+  if (petDetailUpgradeButton) {
+    petDetailUpgradeButton.addEventListener("click", handlePetUpgradeButton);
+  }
+
+  if (petDetailTipButton) {
+    petDetailTipButton.addEventListener("mouseenter", showPetDetailTipBubble);
+    petDetailTipButton.addEventListener("click", showPetDetailTipBubble);
+  }
+
+  if (characterDetailCloseButton) {
+    characterDetailCloseButton.addEventListener("click", closeCharacterDetailPanel);
+  }
+
+  if (characterDetailBackdrop) {
+    characterDetailBackdrop.addEventListener("click", (event) => {
+      if (event.target === characterDetailBackdrop) {
+        closeCharacterDetailPanel();
+      }
+    });
+  }
+
+  if (characterDetailEquipButton) {
+    characterDetailEquipButton.addEventListener("click", equipCharacterFromDetail);
+  }
+
+  if (characterDetailHangerButton) {
+    characterDetailHangerButton.addEventListener("click", toggleCharacterSkinTray);
+  }
+
+  if (characterSkinTrayCloseButton) {
+    characterSkinTrayCloseButton.addEventListener("click", closeCharacterSkinTray);
+  }
+
+  if (characterSkinList) {
+    characterSkinList.addEventListener("click", (event) => {
+      const skinButton = event.target.closest("[data-character-skin]");
+      if (skinButton) {
+        selectCharacterSkin(skinButton.dataset.characterSkin || "");
+      }
+    });
+  }
+
+  if (petRankRewardClose) {
+    petRankRewardClose.addEventListener("click", closePetRankRewardRoad);
+  }
+
+  if (petRankRewardBackdrop) {
+    petRankRewardBackdrop.addEventListener("click", (event) => {
+      if (event.target === petRankRewardBackdrop) {
+        closePetRankRewardRoad();
+      }
+    });
+  }
+
+  if (petRankRewardTrack) {
+    petRankRewardTrack.addEventListener("click", (event) => {
+      const claimButton = event.target.closest("[data-pet-rank-claim]");
+      if (claimButton) {
+        const [petId, rewardId] = String(claimButton.dataset.petRankClaim || "").split(":");
+        void claimPetRankReward(petId || activePetRankRewardPetId, rewardId || "");
+      }
+    });
+  }
+
+  petMiniAlleyShell?.addEventListener("click", handlePetMiniAlleyClick);
+
+  document.addEventListener("click", (event) => {
+    const rankWidget = event.target.closest("[data-pet-rank-open]");
+    if (rankWidget) {
+      const petId = rankWidget.dataset.petRankOpen || "";
+      if (isPetMiniAlleyPetId(petId)) {
+        setActivePetMiniAlleyPetId(petId);
+        showView("pet-ranks");
+        return;
+      }
+
+      openPetRankRewardRoad(petId);
+    }
   });
-}
 
-function shouldBlockPortraitMobileView() {
-  const hasCoarsePointer = window.matchMedia("(pointer: coarse)").matches || Number(navigator.maxTouchPoints || 0) > 0;
-  const handheldViewport = Math.max(window.innerWidth || 0, window.innerHeight || 0) <= 1100;
-  const isPortrait = (window.innerHeight || 0) > (window.innerWidth || 0);
-
-  return hasCoarsePointer && handheldViewport && isPortrait;
-}
-
-function syncOrientationLock() {
-  const shouldBlock = shouldBlockPortraitMobileView();
-
-  if (document.body) {
-    document.body.classList.toggle("mobile-portrait-blocked", shouldBlock);
+  if (chestOpenButton) {
+    chestOpenButton.addEventListener("click", () => {
+      void revealChestReward();
+    });
   }
 
-  if (orientationLockOverlay) {
-    orientationLockOverlay.hidden = !shouldBlock;
-    orientationLockOverlay.setAttribute("aria-hidden", shouldBlock ? "false" : "true");
-  }
-}
-
-function shouldPlayBackgroundMusic() {
-  return (
-    backgroundMusicReady &&
-    appScreen.classList.contains("active") &&
-    (!alleyIntroBackdrop || alleyIntroBackdrop.hidden) &&
-    (!superAlleyBackdrop || superAlleyBackdrop.hidden) &&
-    (!magicMachineBackdrop || magicMachineBackdrop.hidden) &&
-    (!winterBundleBackdrop || winterBundleBackdrop.hidden) &&
-    (!bundleUnlockBackdrop || bundleUnlockBackdrop.hidden)
-  );
-}
-
-function isWaveBannerAnnouncementActive() {
-  if (ui.currentView !== "game") {
-    return false;
+  if (chestRewardCard) {
+    chestRewardCard.addEventListener("click", () => {
+      void revealChestReward();
+    });
   }
 
-  const multiplayerCountdownActive = game.mode === "multiplayer" && game.multiplayerStartCountdownMs > 0;
-  const pauseResumeCountdownActive = game.mode !== "multiplayer" && game.pauseResumeCountdownMs > 0;
-
-  return multiplayerCountdownActive || pauseResumeCountdownActive || game.waveIntroMs > 0;
-}
-
-function getBackgroundMusicTargetVolume() {
-  return isWaveBannerAnnouncementActive()
-    ? BACKGROUND_MUSIC_DUCKED_VOLUME
-    : BACKGROUND_MUSIC_DEFAULT_VOLUME;
-}
-
-function syncBackgroundMusicVolume(smoothing = 1) {
-  const targetVolume = getBackgroundMusicTargetVolume();
-
-  if (smoothing >= 1) {
-    backgroundMusic.volume = targetVolume;
-    return;
+  if (chestCloseButton) {
+    chestCloseButton.addEventListener("click", closeChestScene);
   }
 
-  const currentVolume = Number.isFinite(backgroundMusic.volume)
-    ? backgroundMusic.volume
-    : BACKGROUND_MUSIC_DEFAULT_VOLUME;
-  const nextVolume = currentVolume + ((targetVolume - currentVolume) * smoothing);
+  if (superAlleyCloseButton) {
+    superAlleyCloseButton.addEventListener("click", () => closeSuperAlleyBackdrop());
+  }
 
-  backgroundMusic.volume = Math.abs(targetVolume - nextVolume) <= 0.01
-    ? targetVolume
-    : nextVolume;
-}
+  if (superAlleyCoinsButton) {
+    superAlleyCoinsButton.addEventListener("click", () => {
+      void activateSuperAlley("diamonds");
+    });
+  }
 
-function syncBackgroundMusic() {
-  const preferredSource = getAvailableBackgroundMusicSource();
+  if (superAlleyCashButton) {
+    superAlleyCashButton.addEventListener("click", () => {
+      void activateSuperAlley("cash");
+    });
+  }
 
-  if (preferredSource && backgroundMusic.dataset.currentSource !== preferredSource) {
-    const wasPlaying = !backgroundMusic.paused;
-    backgroundMusic.src = preferredSource;
-    backgroundMusic.dataset.currentSource = preferredSource;
-    backgroundMusic.load();
+  if (winterBundleConfirmButton) {
+    winterBundleConfirmButton.addEventListener("click", () => {
+      void confirmWinterBundlePurchase();
+    });
+  }
 
-    if (wasPlaying && shouldPlayBackgroundMusic()) {
-      syncBackgroundMusicVolume(ui.currentView === "game" ? 0.18 : 1);
-      const replayAttempt = backgroundMusic.play();
-      if (replayAttempt && typeof replayAttempt.catch === "function") {
-        replayAttempt.catch(() => {});
+  if (storeCharacterPurchaseConfirmButton) {
+    storeCharacterPurchaseConfirmButton.addEventListener("click", () => {
+      void confirmStorePurchase();
+    });
+  }
+
+  if (storeCharacterPurchaseCloseButton) {
+    storeCharacterPurchaseCloseButton.addEventListener("click", () => {
+      closeStoreCharacterPurchase();
+    });
+  }
+
+  if (storeCharacterPurchaseBackdrop) {
+    storeCharacterPurchaseBackdrop.addEventListener("click", (event) => {
+      if (event.target === storeCharacterPurchaseBackdrop) {
+        closeStoreCharacterPurchase();
       }
-      return;
-    }
+    });
   }
 
-  if (shouldPlayBackgroundMusic()) {
-    syncBackgroundMusicVolume(ui.currentView === "game" ? 0.18 : 1);
-    const playAttempt = backgroundMusic.play();
-    if (playAttempt && typeof playAttempt.catch === "function") {
-      playAttempt.catch(() => {});
-    }
-    return;
+  if (magicMachineCloseButton) {
+    magicMachineCloseButton.addEventListener("click", () => closeMagicMachineBackdrop());
   }
 
-  backgroundMusic.pause();
-}
-
-function getAvailableBackgroundMusicSource() {
-  if (ui.currentView === "game") {
-    return GAMEPLAY_BACKGROUND_MUSIC_SOURCES.find((entry) => entry && !unavailableSoundSources.has(entry))
-      || GAMEPLAY_BACKGROUND_MUSIC_SOURCES[GAMEPLAY_BACKGROUND_MUSIC_SOURCES.length - 1];
+  if (magicMachineArt) {
+    magicMachineArt.addEventListener("click", () => {
+      void handleMagicMachineAction();
+    });
   }
 
-  const worldId = state.activeTrophyWorld === "tower"
-    ? "tower"
-    : state.activeTrophyWorld === "winter"
-      ? "winter"
-      : "alley";
-  const sources = BACKGROUND_MUSIC_SOURCES[worldId] || BACKGROUND_MUSIC_SOURCES.alley;
-  return sources.find((entry) => entry && !unavailableSoundSources.has(entry)) || BACKGROUND_MUSIC_SOURCES.alley[0];
-}
-
-function getAvailableSoundSource(effectName) {
-  const sources = SOUND_EFFECT_SOURCES[effectName] || [];
-  return sources.find((entry) => entry && !unavailableSoundSources.has(entry)) || null;
-}
-
-function getSoundEffectsAudioContext() {
-  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-
-  if (!AudioContextClass) {
-    return null;
-  }
-
-  if (!soundEffectsAudioContext) {
-    soundEffectsAudioContext = new AudioContextClass();
-  }
-
-  return soundEffectsAudioContext;
-}
-
-function ensureBoostedMediaElement(audio, gainValue = 1) {
-  if (!audio) {
-    return null;
-  }
-
-  const context = getSoundEffectsAudioContext();
-
-  if (!context) {
-    return null;
-  }
-
-  let entry = audioBoostMap.get(audio);
-
-  if (!entry) {
-    const sourceNode = context.createMediaElementSource(audio);
-    const gainNode = context.createGain();
-    sourceNode.connect(gainNode);
-    gainNode.connect(context.destination);
-    entry = { gainNode };
-    audioBoostMap.set(audio, entry);
-  }
-
-  entry.gainNode.gain.value = gainValue;
-  return context;
-}
-
-function playOneShotSound(effectName, volume = 0.74, gainBoost = 1) {
-  const source = getAvailableSoundSource(effectName);
-
-  if (!source) {
-    return;
-  }
-
-  const audio = new Audio(source);
-  audio.preload = "auto";
-  audio.volume = volume;
-  if (gainBoost > 1) {
-    const context = ensureBoostedMediaElement(audio, gainBoost);
-    if (context && context.state === "suspended") {
-      void context.resume().catch(() => {});
-    }
-  }
-  audio.addEventListener("error", () => {
-    unavailableSoundSources.add(source);
-  }, { once: true });
-  const playAttempt = audio.play();
-
-  if (playAttempt && typeof playAttempt.catch === "function") {
-    playAttempt.catch(() => {});
-  }
-}
-
-function startWalkingLoop() {
-  stopWalkingLoop();
-}
-
-function getBoostedAttackSoundVolume(baseVolume) {
-  return Math.min(1, Math.max(0, baseVolume * ATTACK_SOUND_VOLUME_MULTIPLIER));
-}
-
-function stopWalkingLoop() {
-  if (!walkingLoopAudio) {
-    return;
-  }
-
-  walkingLoopAudio.pause();
-  walkingLoopAudio.currentTime = 0;
-}
-
-function hasMovementInput() {
-  if (isFirstRobotTutorialPaused()) {
-    return false;
-  }
-
-  if (isOwlShieldActive()) {
-    return false;
-  }
-
-  return Boolean(
-    game.keys.up
-    || game.keys.down
-    || game.keys.left
-    || game.keys.right
-    || Math.abs(game.touch.moveX) > 0.05
-    || Math.abs(game.touch.moveY) > 0.05
-  );
-}
-
-function syncWalkingLoop() {
-  const shouldPlay = ui.currentView === "game" && game.active && hasMovementInput();
-
-  if (shouldPlay) {
-    startWalkingLoop();
-    return;
-  }
-
-  stopWalkingLoop();
-}
-
-function isFireInputActive() {
-  if (isFirstRobotTutorialPaused() || isFirstRobotTutorialPending()) {
-    return false;
-  }
-
-  return Boolean(game.keys.fire || game.touch.firePressed);
-}
-
-function updateTouchJoystickVisual(offsetX = 0, offsetY = 0) {
-  if (!touchJoystickThumb) {
-    return;
-  }
-
-  touchJoystickThumb.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`;
-}
-
-function resetTouchControls() {
-  const movePointerId = game.touch.movePointerId;
-  const firePointerId = game.touch.firePointerId;
-
-  if (touchJoystick && movePointerId !== null) {
-    try {
-      if (touchJoystick.hasPointerCapture(movePointerId)) {
-        touchJoystick.releasePointerCapture(movePointerId);
+  if (magicMachineBackdrop) {
+    magicMachineBackdrop.addEventListener("click", (event) => {
+      if (event.target === magicMachineBackdrop && canCloseMagicMachineBackdrop()) {
+        closeMagicMachineBackdrop();
       }
-    } catch (error) {}
+    });
   }
 
-  if (touchFireButton && firePointerId !== null) {
-    try {
-      if (touchFireButton.hasPointerCapture(firePointerId)) {
-        touchFireButton.releasePointerCapture(firePointerId);
+  if (worldHeaderMachineButton) {
+    worldHeaderMachineButton.addEventListener("click", openMagicMachine);
+  }
+
+  if (alleyRewardClaimButton) {
+    alleyRewardClaimButton.addEventListener("click", () => {
+      void handleAlleyRewardInteraction();
+    });
+  }
+
+  if (alleyRewardCard) {
+    alleyRewardCard.addEventListener("click", () => {
+      if (alleyRewardManualTrigger === "button") {
+        return;
       }
-    } catch (error) {}
+
+      void handleAlleyRewardInteraction();
+    });
   }
 
-  game.touch.moveX = 0;
-  game.touch.moveY = 0;
-  game.touch.movePointerId = null;
-  game.touch.firePressed = false;
-  game.touch.firePointerId = null;
-
-  if (touchFireButton) {
-    touchFireButton.classList.remove("pressed");
+  if (alleyRewardBackdrop) {
+    alleyRewardBackdrop.addEventListener("click", (event) => {
+      if (event.target === alleyRewardBackdrop && alleyRewardInteractionMode !== "manual") {
+        closeAlleyRewardScene();
+      }
+    });
   }
-
-  updateTouchJoystickVisual(0, 0);
-  syncWalkingLoop();
-}
-
-function syncTouchControlsVisibility() {
-  const shouldShow = Boolean(touchControls) && ui.currentView === "game" && game.active && state.phoneModeEnabled;
-
-  if (touchControls) {
-    touchControls.hidden = !shouldShow;
-  }
-
-  if (gameStage) {
-    gameStage.classList.toggle("phone-mode-active", shouldShow);
-  }
-
-  if (!shouldShow) {
-    resetTouchControls();
-  }
-}
-
-function updateTouchMovementFromPointer(clientX, clientY) {
-  if (!touchJoystick) {
-    return;
-  }
-
-  const rect = touchJoystick.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top + rect.height / 2;
-  const maxDistance = Math.max(30, rect.width * 0.26);
-  const rawX = clientX - centerX;
-  const rawY = clientY - centerY;
-  const distance = Math.hypot(rawX, rawY);
-  const limitedDistance = Math.min(distance, maxDistance);
-  const ratio = distance > 0 ? limitedDistance / distance : 0;
-  const offsetX = rawX * ratio;
-  const offsetY = rawY * ratio;
-
-  game.touch.moveX = clamp(offsetX / maxDistance, -1, 1);
-  game.touch.moveY = clamp(offsetY / maxDistance, -1, 1);
-  updateTouchJoystickVisual(offsetX, offsetY);
-  syncWalkingLoop();
 }
 
 function handleTouchJoystickStart(event) {
@@ -2580,6 +3422,66 @@ function handleTouchJoystickEnd(event) {
   syncWalkingLoop();
 }
 
+function updateTouchJoystickVisual(x = 0, y = 0) {
+  if (!touchJoystickThumb) {
+    return;
+  }
+
+  const maxOffset = 38;
+  touchJoystickThumb.style.transform = `translate(${x * maxOffset}px, ${y * maxOffset}px)`;
+}
+
+function updateTouchMovementFromPointer(clientX, clientY) {
+  if (!touchJoystick) {
+    return;
+  }
+
+  const rect = touchJoystick.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const maxDistance = Math.max(1, Math.min(rect.width, rect.height) * 0.42);
+  const dx = clamp((clientX - centerX) / maxDistance, -1, 1);
+  const dy = clamp((clientY - centerY) / maxDistance, -1, 1);
+  const length = Math.hypot(dx, dy);
+  const scale = length > 1 ? 1 / length : 1;
+
+  game.touch.moveX = dx * scale;
+  game.touch.moveY = dy * scale;
+  updateTouchJoystickVisual(game.touch.moveX, game.touch.moveY);
+  syncWalkingLoop();
+}
+
+function resetTouchControls() {
+  if (!game?.touch) {
+    return;
+  }
+
+  game.touch.moveX = 0;
+  game.touch.moveY = 0;
+  game.touch.movePointerId = null;
+  game.touch.firePressed = false;
+  game.touch.firePointerId = null;
+  updateTouchJoystickVisual(0, 0);
+
+  if (touchFireButton) {
+    touchFireButton.classList.remove("pressed");
+  }
+}
+
+function syncTouchControlsVisibility() {
+  if (!touchControls) {
+    return;
+  }
+
+  const shouldShow = Boolean(state.phoneModeEnabled && ui.currentView === "game" && game.active);
+  touchControls.hidden = !shouldShow;
+  touchControls.setAttribute("aria-hidden", String(!shouldShow));
+
+  if (!shouldShow) {
+    resetTouchControls();
+  }
+}
+
 function handleTouchFireStart(event) {
   if (!state.phoneModeEnabled || ui.currentView !== "game" || !game.active) {
     return;
@@ -2621,19 +3523,17 @@ function handleTouchFireEnd(event) {
 }
 
 function getPetVoiceEffect(petId) {
-  if (petId === "pies-magik") {
+  const basePetId = getPetBaseId(petId);
+
+  if (basePetId === "pies-magik") {
     return "dogVoice";
   }
 
-  if (petId === "niedzwiedz-polarny") {
+  if (basePetId === "niedzwiedz-polarny") {
     return "bearVoice";
   }
 
   if (petId === "papuga-manipulantka") {
-    return "parrotVoice";
-  }
-
-  if (petId === "papuga-dzungli") {
     return "parrotVoice";
   }
 
@@ -2669,11 +3569,76 @@ function getPetVoiceEffect(petId) {
     return "monkeyVoice";
   }
 
-  if (petId === "malpa-dzungli") {
-    return "monkeyVoice";
+  return null;
+}
+
+function getCharacterVoiceEffect(characterId) {
+  if (characterId === "magik-millo") {
+    return "voiceMagikMillo";
+  }
+
+  if (characterId === "elfie") {
+    return "voiceElfie";
+  }
+
+  if (characterId === "mycelia" || characterId === "lazurowa-mycelia") {
+    return "voiceMycelia";
+  }
+
+  if (characterId === "grifos") {
+    return "voiceGrifos";
+  }
+
+  if (characterId === "nerissa") {
+    return "voiceNerissa";
+  }
+
+  if (characterId === "linda") {
+    return "voiceLinda";
+  }
+
+  if (characterId === "hookcrab") {
+    return "voiceHookcrab";
+  }
+
+  if (characterId === "thalia") {
+    return "voiceThalia";
+  }
+
+  if (characterId === "sylas" || characterId === "elegancki-sylias") {
+    return "voiceSylias";
+  }
+
+  if (characterId === "shulla") {
+    return "voiceShulla";
   }
 
   return null;
+}
+
+function playCharacterVoice(characterId, volume = 0.72) {
+  const soundEffect = getCharacterVoiceEffect(characterId);
+
+  if (!soundEffect) {
+    return false;
+  }
+
+  playOneShotSound(soundEffect, volume);
+  return true;
+}
+
+function playEquippedCharacterVoice(volume = 0.72) {
+  return playCharacterVoice(getEquippedCharacter()?.id, volume);
+}
+
+function queueCharacterVoice(characterId, delayMs = 0, volume = 0.72) {
+  if (!getCharacterVoiceEffect(characterId)) {
+    return;
+  }
+
+  window.setTimeout(() => {
+    playCharacterVoice(characterId, volume);
+  }, Math.max(0, Number(delayMs || 0)));
 }
 
 function getGameResultSoundEffect(status) {
@@ -2713,6 +3678,294 @@ function updatePetVoiceAmbient(deltaMs) {
   }
 }
 
+function updateCharacterVoiceAmbient(deltaMs) {
+  const soundEffect = getCharacterVoiceEffect(getEquippedCharacter()?.id);
+
+  if (!soundEffect) {
+    game.characterVoiceTimerMs = 0;
+    return;
+  }
+
+  game.characterVoiceTimerMs += deltaMs;
+
+  while (game.characterVoiceTimerMs >= CHARACTER_VOICE_INTERVAL_MS) {
+    game.characterVoiceTimerMs -= CHARACTER_VOICE_INTERVAL_MS;
+    playOneShotSound(soundEffect, 0.68);
+  }
+}
+
+function getFirstAvailableAudioSource(sources = []) {
+  return sources.find((source) => source && !unavailableSoundSources.has(source)) || sources[0] || "";
+}
+
+function getRandomAvailableAudioSource(sources = [], soundName = "") {
+  const availableSources = sources.filter((source) => source && !unavailableSoundSources.has(source));
+  const pool = availableSources.length > 0 ? availableSources : sources.filter(Boolean);
+
+  if (pool.length === 0) {
+    return "";
+  }
+
+  const lastSource = lastRandomizedSoundSourceByName.get(soundName);
+  const rollPool = pool.length > 1
+    ? pool.filter((source) => source !== lastSource)
+    : pool;
+  const source = rollPool[Math.floor(Math.random() * rollPool.length)] || pool[0] || "";
+
+  if (source && soundName) {
+    lastRandomizedSoundSourceByName.set(soundName, source);
+  }
+
+  return source;
+}
+
+function shouldRandomizeSoundSource(soundName) {
+  return String(soundName || "").startsWith("voice");
+}
+
+function getBackgroundMusicBaseVolume() {
+  return ui.currentView === "game" ? BACKGROUND_MUSIC_DUCKED_VOLUME : BACKGROUND_MUSIC_DEFAULT_VOLUME;
+}
+
+function syncBackgroundMusicVolume(volume = BACKGROUND_MUSIC_DEFAULT_VOLUME) {
+  const duckFactor = backgroundMusicEffectDuckCount > 0 ? BACKGROUND_MUSIC_EFFECT_DUCK_FACTOR : 1;
+  backgroundMusic.volume = clamp(Number(volume || 0) * duckFactor, 0, 1) * getMusicVolumeFactor();
+}
+
+function isLobbyMusicKey(musicKey = "") {
+  return String(musicKey || "").startsWith("lobby:");
+}
+
+function getBackgroundMusicConfig() {
+  const worldId = getGlobalVisualWorldTheme();
+
+  if (
+    ui.currentView === "ranking" ||
+    (ui.currentView === "store" && ui.storeOfferTab === STORE_OFFER_TAB_PIRATE)
+  ) {
+    return {
+      key: "ranking",
+      sources: BACKGROUND_MUSIC_SOURCES.ranking,
+    };
+  }
+
+  if (ui.currentView === "tower-challenge") {
+    return {
+      key: "tower-challenge",
+      sources: BACKGROUND_MUSIC_SOURCES.tower,
+    };
+  }
+
+  return {
+    key: `lobby:${worldId}`,
+    sources: BACKGROUND_MUSIC_SOURCES[worldId] || BACKGROUND_MUSIC_SOURCES.alley,
+  };
+}
+
+function rememberLobbyMusicPosition(source, musicKey) {
+  if (!source || !isLobbyMusicKey(musicKey) || !Number.isFinite(backgroundMusic.currentTime)) {
+    return;
+  }
+
+  lobbyMusicPositionsBySource.set(source, backgroundMusic.currentTime);
+}
+
+function restoreLobbyMusicPosition(source) {
+  const savedTime = lobbyMusicPositionsBySource.get(source);
+
+  if (!Number.isFinite(savedTime) || savedTime <= 0) {
+    return;
+  }
+
+  try {
+    const duration = Number(backgroundMusic.duration || 0);
+    const safeTime = duration > 0 ? Math.min(savedTime, Math.max(0, duration - 0.5)) : savedTime;
+    backgroundMusic.currentTime = safeTime;
+  } catch (error) {
+    backgroundMusic.addEventListener("loadedmetadata", () => {
+      try {
+        const duration = Number(backgroundMusic.duration || 0);
+        const safeTime = duration > 0 ? Math.min(savedTime, Math.max(0, duration - 0.5)) : savedTime;
+        backgroundMusic.currentTime = safeTime;
+      } catch (metadataError) {
+        // Audio bez metadanych może chwilowo blokować przewinięcie.
+      }
+    }, { once: true });
+  }
+}
+
+function syncBackgroundMusic() {
+  if (!backgroundMusicReady) {
+    return;
+  }
+
+  const musicConfig = getBackgroundMusicConfig();
+  const musicSources = musicConfig.sources;
+  const nextSource = getFirstAvailableAudioSource(musicSources);
+  const nextMusicKey = musicConfig.key;
+  const previousSource = backgroundMusic.dataset.currentSource || "";
+  const previousMusicKey = backgroundMusic.dataset.currentMusicKey || "";
+  const sourceChanged = Boolean(nextSource && previousSource !== nextSource);
+  const musicKeyChanged = Boolean(nextMusicKey && previousMusicKey !== nextMusicKey);
+
+  if ((sourceChanged || musicKeyChanged) && previousSource) {
+    rememberLobbyMusicPosition(previousSource, previousMusicKey);
+  }
+
+  if (nextSource && (sourceChanged || musicKeyChanged)) {
+    if (sourceChanged) {
+      backgroundMusic.pause();
+      backgroundMusic.src = nextSource;
+      backgroundMusic.dataset.currentSource = nextSource;
+    }
+    backgroundMusic.dataset.currentMusicKey = nextMusicKey;
+
+    if (isLobbyMusicKey(nextMusicKey)) {
+      restoreLobbyMusicPosition(nextSource);
+    } else {
+      try {
+        backgroundMusic.currentTime = 0;
+      } catch (error) {
+        // Audio bez metadanych może chwilowo blokować przewinięcie.
+      }
+    }
+  }
+
+  const offlineBlocking = Boolean(ui.offlineModalVisible && offlineBackdrop && !offlineBackdrop.hidden);
+  const shouldPlay = Boolean(nextSource && appScreen?.classList.contains("active") && !offlineBlocking);
+  syncBackgroundMusicVolume(getBackgroundMusicBaseVolume());
+
+  if (shouldPlay) {
+    backgroundMusic.play().catch(() => {});
+  } else {
+    backgroundMusic.pause();
+  }
+}
+
+function syncWalkingLoop() {
+  const shouldPlay = Boolean(ui.currentView === "game" && game.active && !game.paused && (
+    game.keys.up ||
+    game.keys.down ||
+    game.keys.left ||
+    game.keys.right ||
+    Math.abs(game.touch.moveX || 0) > 0.05 ||
+    Math.abs(game.touch.moveY || 0) > 0.05
+  ));
+
+  if (!shouldPlay) {
+    if (walkingLoopAudio) {
+      walkingLoopAudio.pause();
+      walkingLoopAudio.currentTime = 0;
+    }
+    return;
+  }
+
+  if (!walkingLoopAudio) {
+    const source = getFirstAvailableAudioSource(SOUND_EFFECT_SOURCES.walkingLoop || []);
+    if (!source) {
+      return;
+    }
+    walkingLoopAudio = new Audio(source);
+    walkingLoopAudio.loop = true;
+    walkingLoopAudio.preload = "auto";
+    walkingLoopAudio.addEventListener("error", () => unavailableSoundSources.add(source), { once: true });
+  }
+
+  walkingLoopAudio.volume = 0.45 * getSoundVolumeFactor();
+  walkingLoopAudio.play().catch(() => {});
+}
+
+function getBoostedAttackSoundVolume(volume = 0.76) {
+  return clamp(Number(volume || 0) * ATTACK_SOUND_VOLUME_MULTIPLIER, 0, 1);
+}
+
+function playOneShotSound(soundName, volume = 0.8, playbackRate = 1, maxDurationMs = 0) {
+  const sources = SOUND_EFFECT_SOURCES[soundName];
+  const sourceList = Array.isArray(sources) ? sources : [];
+  const source = shouldRandomizeSoundSource(soundName)
+    ? getRandomAvailableAudioSource(sourceList, soundName)
+    : getFirstAvailableAudioSource(sourceList);
+
+  if (!source) {
+    return null;
+  }
+
+  const audio = new Audio(source);
+  audio.preload = "auto";
+  audio.volume = clamp(Number(volume || 0), 0, 1) * getSoundVolumeFactor();
+  audio.playbackRate = Math.max(0.25, Number(playbackRate || 1));
+  audio.addEventListener("error", () => {
+    unavailableSoundSources.add(source);
+  }, { once: true });
+  audioBoostMap.set(audio, { volume: audio.volume, playbackRate: audio.playbackRate });
+  audio.play().catch(() => {});
+
+  if (maxDurationMs > 0) {
+    const durationMs = Math.max(1, Number(maxDurationMs || 0));
+    const fadeMs = Math.min(400, Math.max(0, durationMs - 20));
+    const stopAudio = () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+
+    if (fadeMs > 0) {
+      const fadeStartMs = Math.max(0, durationMs - fadeMs);
+      window.setTimeout(() => {
+        const startVolume = audio.volume;
+        const startTime = performance.now();
+        const fadeTick = (now) => {
+          const progress = clamp((now - startTime) / fadeMs, 0, 1);
+          audio.volume = startVolume * (1 - progress);
+          if (progress < 1 && !audio.paused) {
+            window.requestAnimationFrame(fadeTick);
+            return;
+          }
+          stopAudio();
+        };
+        window.requestAnimationFrame(fadeTick);
+      }, fadeStartMs);
+    } else {
+      window.setTimeout(stopAudio, durationMs);
+    }
+  }
+
+  return audio;
+}
+
+function duckBackgroundMusicForAudio(audio, fallbackMs = 3600) {
+  if (!audio) {
+    return;
+  }
+
+  backgroundMusicEffectDuckCount += 1;
+  syncBackgroundMusicVolume(getBackgroundMusicBaseVolume());
+
+  let released = false;
+  const releaseDuck = () => {
+    if (released) {
+      return;
+    }
+
+    released = true;
+    backgroundMusicEffectDuckCount = Math.max(0, backgroundMusicEffectDuckCount - 1);
+    syncBackgroundMusicVolume(getBackgroundMusicBaseVolume());
+  };
+
+  audio.addEventListener("ended", releaseDuck, { once: true });
+  audio.addEventListener("error", releaseDuck, { once: true });
+  window.setTimeout(releaseDuck, Math.max(600, Number(fallbackMs || 3600)));
+}
+
+function playOneShotSoundWithMusicDuck(soundName, volume = 0.8, playbackRate = 1, maxDurationMs = 0, fallbackMs = 3600) {
+  const audio = playOneShotSound(soundName, volume, playbackRate, maxDurationMs);
+  duckBackgroundMusicForAudio(audio, fallbackMs);
+  return audio;
+}
+
+function isFireInputActive() {
+  return Boolean(game.keys.fire || game.touch.firePressed);
+}
+
 function updateProgress(value) {
   if (loadingFillText) {
     loadingFillText.textContent = `Ladowanie... ${value}%`;
@@ -2727,6 +3980,43 @@ function updateProgress(value) {
   }
 }
 
+function buildLoadingPoints(totalDurationMs = TOTAL_LOADING_TIME) {
+  const duration = Math.max(1, Number(totalDurationMs || TOTAL_LOADING_TIME));
+  const points = [];
+
+  for (let percent = 0; percent <= 100; percent += 1) {
+    points.push({
+      value: percent,
+      at: Math.round((duration * percent) / 100),
+    });
+  }
+
+  return points;
+}
+
+function bootApp() {
+  const startedAt = performance.now();
+  const points = Array.isArray(loadingPoints) && loadingPoints.length > 0
+    ? loadingPoints
+    : buildLoadingPoints(TOTAL_LOADING_TIME);
+
+  const tick = () => {
+    const elapsed = performance.now() - startedAt;
+    const point = points.findLast((entry) => elapsed >= entry.at) || points[0];
+    updateProgress(clamp(point?.value || 0, 0, 100));
+
+    if (elapsed >= TOTAL_LOADING_TIME) {
+      updateProgress(100);
+      showApp();
+      return;
+    }
+
+    window.requestAnimationFrame(tick);
+  };
+
+  tick();
+}
+
 function showApp() {
   if (loadingScreen) {
     loadingScreen.classList.remove("active");
@@ -2738,14 +4028,19 @@ function showApp() {
   appScreen.setAttribute("aria-hidden", "false");
   backgroundMusicReady = true;
   showView("lobby");
-  initSocialProfileSync();
+  maybeAutoInitSocialProfile();
   maybeRunIntro();
+  scheduleDailyGiftMidnightTimer();
+  scheduleDailyGiftLobbyCheck();
 }
 
 function updateBalanceDisplays() {
   const coinsText = String(state.coins);
   const trophiesText = String(state.trophies);
   const diamondsText = String(state.diamonds);
+  const elixirsText = String(Number(state.elixirs || 0));
+  const silverText = String(Number(state.silver || 0));
+  const showSilver = shouldShowSilverCurrency();
 
   if (coinBalance) {
     coinBalance.textContent = coinsText;
@@ -2771,8 +4066,1504 @@ function updateBalanceDisplays() {
     lobbyDiamondBalance.textContent = diamondsText;
   }
 
+  if (lobbyElixirBalance) {
+    lobbyElixirBalance.textContent = elixirsText;
+  }
+
+  if (lobbySilverBalance) {
+    lobbySilverBalance.textContent = silverText;
+  }
+
+  if (lobbySilverChip) {
+    lobbySilverChip.hidden = !showSilver;
+  }
+
+  if (lobbySilverDivider) {
+    lobbySilverDivider.hidden = !showSilver;
+  }
+
   if (storeDiamondBalance) {
     storeDiamondBalance.textContent = diamondsText;
+  }
+}
+
+function getTrophyStreakBonus(streakValue) {
+  const streak = Math.max(0, Number(streakValue || 0));
+
+  if (streak <= 1) {
+    return 0;
+  }
+
+  if (streak <= 5) {
+    return streak - 1;
+  }
+
+  return 5;
+}
+
+function updateStreakDisplays() {
+  const streak = Math.max(0, Number(state.trophyStreak || 0));
+
+  if (lobbyStreakBadge) {
+    lobbyStreakBadge.hidden = streak < 1;
+  }
+
+  if (lobbyStreakCount) {
+    lobbyStreakCount.textContent = String(Math.max(1, streak));
+  }
+
+  if (gameResultStreak && gameResultStreakCount && gameResultStreakBonus) {
+    const resultStreak = Math.max(0, Number(game.streakReachedRun || 0));
+    const resultBonus = Math.max(0, Number(game.streakBonusEarnedRun || 0));
+    gameResultStreak.hidden = resultStreak < 1;
+    gameResultStreakCount.textContent = String(Math.max(1, resultStreak));
+    gameResultStreakBonus.textContent = `+${resultBonus}`;
+  }
+}
+
+function getPetRankTheme(pet) {
+  if (!pet) {
+    return "";
+  }
+
+  if (pet.unlockWorld === "winter") {
+    return "winter";
+  }
+
+  if (pet.unlockWorld === "alley" || pet.categoryId === "magicy") {
+    return "magicians";
+  }
+
+  return "";
+}
+
+function getPetRankImagePath(theme, rankLevel) {
+  const safeRank = clamp(Math.round(rankLevel || 1), 1, PET_RANK_MAX_LEVEL);
+
+  if (theme === "winter") {
+    return `./zimowy${safeRank}.png`;
+  }
+
+  if (theme === "magicians") {
+    return `./magik${safeRank}.png`;
+  }
+
+  return "";
+}
+
+function getPetRankTrophies(petId) {
+  return Math.max(0, Number(state.petTrophies?.[getPetBaseId(petId)] || 0));
+}
+
+function getPetRankInfo(pet) {
+  const theme = getPetRankTheme(pet);
+
+  if (!pet || !theme) {
+    return null;
+  }
+
+  const trophies = getPetRankTrophies(pet.id);
+  const rankLevel = clamp(
+    Math.floor(trophies / PET_RANK_STEP_TROPHIES) + 1,
+    1,
+    PET_RANK_MAX_LEVEL
+  );
+  const rankStart = (rankLevel - 1) * PET_RANK_STEP_TROPHIES;
+  const rankProgress = rankLevel >= PET_RANK_MAX_LEVEL
+    ? 100
+    : clamp(((trophies - rankStart) / PET_RANK_STEP_TROPHIES) * 100, 0, 100);
+
+  return {
+    theme,
+    trophies,
+    rankLevel,
+    rankProgress,
+    image: getPetRankImagePath(theme, rankLevel),
+  };
+}
+
+function buildPetRankBadgeMarkup(pet, className = "") {
+  const rankInfo = getPetRankInfo(pet);
+
+  if (!rankInfo) {
+    return "";
+  }
+
+  return `
+    <img
+      class="pet-rank-card-emblem asset-image ${className}"
+      src="${rankInfo.image}"
+      alt="Ranga PlatoYA ${rankInfo.rankLevel}"
+      data-fallback-text=""
+      data-pet-rank-theme="${rankInfo.theme}"
+    />
+  `;
+}
+
+function addPetRankTrophies(petId, amount) {
+  const trophyAmount = Math.max(0, Number(amount || 0));
+  const normalizedPetId = getPetBaseId(petId);
+  const pet = CATALOG.pets.find((item) => item.id === normalizedPetId);
+
+  if (!pet || trophyAmount <= 0) {
+    return;
+  }
+
+  if (!state.petTrophies || typeof state.petTrophies !== "object") {
+    state.petTrophies = {};
+  }
+
+  state.petTrophies[normalizedPetId] = getPetRankTrophies(normalizedPetId) + trophyAmount;
+}
+
+function getPetRankRewardById(rewardId) {
+  return PET_RANK_REWARDS.find((reward) => reward.id === rewardId) || null;
+}
+
+function getClaimedPetRankRewards(petId) {
+  const normalizedPetId = getPetBaseId(petId);
+  const claimed = state.claimedPetRankRewards?.[normalizedPetId];
+  return Array.isArray(claimed) ? claimed : [];
+}
+
+function isPetRankRewardClaimed(petId, rewardId) {
+  return getClaimedPetRankRewards(petId).includes(rewardId);
+}
+
+function getPetRankKeyTheme(pet) {
+  return getPetRankTheme(pet) === "winter" ? "winter" : "magicians";
+}
+
+function getPetRankRewardVisual(reward, pet) {
+  if (reward.type === "coins") {
+    return { image: COIN_REWARD_IMAGE, fallbackText: "MONETY", alt: reward.title };
+  }
+
+  if (reward.type === "diamonds") {
+    return { image: DIAMOND_REWARD_IMAGE, fallbackText: "DIA", alt: reward.title };
+  }
+
+  if (reward.type === "elixir") {
+    return { image: ELIXIR_REWARD_IMAGE, fallbackText: "ELIKSIR", alt: reward.title };
+  }
+
+  if (reward.type === "crate") {
+    const crate = CATALOG.crates.find((entry) => entry.id === reward.crateId);
+    return {
+      image: crate?.image || "./assets/shop/skrzynia_1.png",
+      fallbackText: crate?.fallbackText || "SKRZYNIA",
+      alt: crate?.name || reward.title,
+    };
+  }
+
+  if (reward.type === "plato-keys") {
+    const keyTheme = getPetRankKeyTheme(pet);
+    return {
+      image: getPlatoKeyImageForTheme(keyTheme),
+      fallbackText: "KLUCZ",
+      alt: keyTheme === "winter" ? "Klucz PlatoYA Zimy" : "Klucz PlatoYA Magików",
+    };
+  }
+
+  return { image: "", fallbackText: "NAGRODA", alt: reward.title };
+}
+
+function getPetRankRewardState(pet, reward) {
+  const rankInfo = getPetRankInfo(pet);
+  const claimed = isPetRankRewardClaimed(pet?.id, reward.id);
+  const unlocked = Boolean(rankInfo && rankInfo.rankLevel >= reward.rank);
+
+  if (claimed) {
+    return "claimed";
+  }
+
+  return unlocked ? "claimable" : "locked";
+}
+
+function buildPetRankRewardCardMarkup(pet, reward) {
+  const visual = getPetRankRewardVisual(reward, pet);
+  const stateId = getPetRankRewardState(pet, reward);
+  const disabled = stateId !== "claimable";
+
+  return `
+    <button
+      class="pet-rank-reward-node"
+      data-pet-rank-state="${stateId}"
+      data-pet-rank-claim="${pet.id}:${reward.id}"
+      type="button"
+      ${disabled ? "disabled" : ""}
+    >
+      <span class="pet-rank-reward-rank">RANGA ${reward.rank}</span>
+      <span class="pet-rank-reward-art">
+        <img class="pet-rank-reward-image asset-image" src="${visual.image}" alt="${escapeHtml(visual.alt)}" data-fallback-text="${escapeHtml(visual.fallbackText)}" />
+        <span class="asset-fallback">${escapeHtml(visual.fallbackText)}</span>
+      </span>
+      <span class="pet-rank-reward-amount">${escapeHtml(reward.label)}</span>
+      <span class="pet-rank-reward-name">${escapeHtml(reward.title)}</span>
+      ${stateId === "claimed" ? `<span class="pet-rank-reward-check">✓</span>` : ""}
+      ${stateId === "locked" ? `<span class="pet-rank-reward-lock">LOCK</span>` : ""}
+    </button>
+  `;
+}
+
+function renderPetRankRewardRoad() {
+  const pet = getOwnedItem("pets", activePetRankRewardPetId);
+  const rankInfo = getPetRankInfo(pet);
+
+  if (!petRankRewardBackdrop || !petRankRewardPanel || !petRankRewardTrack || !pet || !rankInfo) {
+    return;
+  }
+
+  petRankRewardPanel.dataset.petRankTheme = rankInfo.theme;
+  petRankRewardTitle.textContent = `RANGI: ${pet.name}`;
+  petRankRewardSubtitle.textContent = `Masz ${rankInfo.trophies} pucharów na tej PlatoYA. Aktualna ranga: ${rankInfo.rankLevel}.`;
+  petRankRewardTrack.innerHTML = PET_RANK_REWARDS.map((reward) => buildPetRankRewardCardMarkup(pet, reward)).join("");
+  syncBrokenAssets(petRankRewardPanel);
+}
+
+function openPetRankRewardRoad(petId) {
+  const pet = getOwnedItem("pets", sanitizeStoredId(petId));
+
+  if (!pet || !getPetRankInfo(pet) || !petRankRewardBackdrop) {
+    return;
+  }
+
+  activePetRankRewardPetId = pet.id;
+  renderPetRankRewardRoad();
+  petRankRewardBackdrop.hidden = false;
+  window.requestAnimationFrame(() => {
+    petRankRewardBackdrop.classList.add("show");
+  });
+}
+
+function closePetRankRewardRoad() {
+  if (!petRankRewardBackdrop) {
+    return;
+  }
+
+  petRankRewardBackdrop.classList.remove("show");
+  window.setTimeout(() => {
+    petRankRewardBackdrop.hidden = true;
+    activePetRankRewardPetId = "";
+  }, 180);
+}
+
+async function claimPetRankReward(petId, rewardId) {
+  const pet = getOwnedItem("pets", sanitizeStoredId(petId));
+  const reward = getPetRankRewardById(rewardId);
+
+  if (!pet || !reward || petRankRewardBusy || getPetRankRewardState(pet, reward) !== "claimable") {
+    return;
+  }
+
+  petRankRewardBusy = true;
+
+  if (!state.claimedPetRankRewards || typeof state.claimedPetRankRewards !== "object") {
+    state.claimedPetRankRewards = {};
+  }
+
+  const basePetId = getPetBaseId(pet.id);
+
+  if (!Array.isArray(state.claimedPetRankRewards[basePetId])) {
+    state.claimedPetRankRewards[basePetId] = [];
+  }
+
+  state.claimedPetRankRewards[basePetId].push(reward.id);
+
+  if (reward.type === "coins") {
+    state.coins += reward.amount;
+  } else if (reward.type === "diamonds") {
+    state.diamonds += reward.amount;
+  } else if (reward.type === "elixir") {
+    state.elixirs += reward.amount;
+  } else if (reward.type === "plato-keys") {
+    state.platoKeys += reward.amount;
+  } else if (reward.type === "crate") {
+    addCrateToInventory(reward.crateId, reward.amount || 1);
+  }
+
+  saveState();
+  renderAll();
+  renderPetRankRewardRoad();
+
+  try {
+    if (reward.type === "coins") {
+      await showCoinRewardScene(reward.amount, { title: "Nagroda rangi PlatoYA", autoCloseMs: 2100 });
+      await animateCoinsToBalance();
+    } else if (reward.type === "diamonds") {
+      await showDiamondRewardScene(reward.amount, { title: "Nagroda rangi PlatoYA", autoCloseMs: 2100 });
+    } else if (reward.type === "elixir") {
+      await showElixirRewardScene(reward.amount, { title: "Nagroda rangi PlatoYA", autoCloseMs: 2100 });
+    } else if (reward.type === "plato-keys") {
+      await showPlatoKeyRewardScene(reward.amount, {
+        title: "Nagroda rangi PlatoYA",
+        autoCloseMs: 2100,
+        keyTheme: getPetRankKeyTheme(pet),
+      });
+    } else if (reward.type === "crate") {
+      const crate = CATALOG.crates.find((entry) => entry.id === reward.crateId);
+      if (crate) {
+        await showRewardShowcase({
+          image: crate.image,
+          name: crate.name,
+          countLabel: `+${reward.amount || 1}`,
+          mode: "crate",
+          autoCloseMs: 2100,
+          soundEffectName: "crateAward",
+        });
+      }
+    }
+  } finally {
+    petRankRewardBusy = false;
+    renderPetRankRewardRoad();
+  }
+}
+
+function getPetMiniAlleyConfig(petId = activePetMiniAlleyPetId) {
+  const basePetId = getPetBaseId(petId);
+  return PET_MINI_ALLEY_CONFIGS[basePetId] || null;
+}
+
+function getActivePetMiniAlleyPetId() {
+  return getPetMiniAlleyConfig(activePetMiniAlleyPetId)?.petId || PET_MINI_ALLEY_PET_ID;
+}
+
+function setActivePetMiniAlleyPetId(petId) {
+  const config = getPetMiniAlleyConfig(petId);
+  activePetMiniAlleyPetId = config?.petId || PET_MINI_ALLEY_PET_ID;
+}
+
+function isPetMiniAlleyPetId(petId) {
+  return Boolean(getPetMiniAlleyConfig(petId));
+}
+
+function getDefaultPetMiniAlleyState() {
+  return Object.fromEntries(
+    Object.entries(PET_MINI_ALLEY_CONFIGS).map(([petId, config]) => [petId, {
+      points: 0,
+      secretPointsReadyAt: 0,
+      claimedRanks: [],
+      missions: Object.fromEntries(
+        config.missions.map((mission) => [
+          mission.id,
+          {
+            stage: 1,
+            progress: 0,
+          },
+        ])
+      ),
+    }])
+  );
+}
+
+function sanitizePetMiniAlleyState(savedState) {
+  const defaults = getDefaultPetMiniAlleyState();
+
+  if (!savedState || typeof savedState !== "object") {
+    return defaults;
+  }
+
+  return Object.fromEntries(
+    Object.entries(PET_MINI_ALLEY_CONFIGS).map(([petId, config]) => {
+      const savedAlley = savedState?.[petId];
+
+      if (!savedAlley || typeof savedAlley !== "object") {
+        return [petId, defaults[petId]];
+      }
+
+      const missions = { ...defaults[petId].missions };
+      config.missions.forEach((definition) => {
+        const savedMission = savedAlley.missions?.[definition.id];
+        const savedStage = Math.max(1, Math.floor(Number(savedMission?.stage || 1)));
+        const missionTarget = getPetMiniMissionTarget(definition, { stage: savedStage }, petId);
+        missions[definition.id] = {
+          stage: savedStage,
+          progress: clamp(Math.floor(Number(savedMission?.progress || 0)), 0, missionTarget),
+        };
+      });
+
+      return [petId, {
+        points: Math.max(0, Math.floor(Number(savedAlley.points || 0))),
+        secretPointsReadyAt: Math.max(0, Math.floor(Number(savedAlley.secretPointsReadyAt || 0))),
+        claimedRanks: Array.isArray(savedAlley.claimedRanks)
+          ? savedAlley.claimedRanks
+              .map((rankId) => sanitizeStoredId(rankId))
+              .filter((rankId, index, ids) => config.ranks.some((rank) => rank.id === rankId) && ids.indexOf(rankId) === index)
+          : [],
+        missions,
+      }];
+    })
+  );
+}
+
+function syncPetMiniAlleyClaimedRanksFromOwnedPets(petId, alleyState) {
+  const config = getPetMiniAlleyConfig(petId);
+
+  if (!config || !alleyState) {
+    return alleyState;
+  }
+
+  config.ranks.forEach((rank) => {
+    if (state.ownedPets.includes(rank.rewardPetId) && !alleyState.claimedRanks.includes(rank.id)) {
+      alleyState.claimedRanks.push(rank.id);
+    }
+  });
+
+  return alleyState;
+}
+
+function getPetMiniAlleyState(petId = getActivePetMiniAlleyPetId()) {
+  const basePetId = getPetBaseId(petId);
+  const config = getPetMiniAlleyConfig(basePetId);
+  const statePetId = config?.petId || PET_MINI_ALLEY_PET_ID;
+
+  if (!state.petMiniAlleys || typeof state.petMiniAlleys !== "object") {
+    state.petMiniAlleys = getDefaultPetMiniAlleyState();
+  }
+
+  if (!state.petMiniAlleys[statePetId]) {
+    state.petMiniAlleys[statePetId] = getDefaultPetMiniAlleyState()[statePetId] || getDefaultPetMiniAlleyState()[PET_MINI_ALLEY_PET_ID];
+  }
+
+  state.petMiniAlleys = sanitizePetMiniAlleyState(state.petMiniAlleys);
+  return syncPetMiniAlleyClaimedRanksFromOwnedPets(statePetId, state.petMiniAlleys[statePetId] || state.petMiniAlleys[PET_MINI_ALLEY_PET_ID]);
+}
+
+function isPetMiniAlleyUnlocked(petId = getActivePetMiniAlleyPetId()) {
+  const config = getPetMiniAlleyConfig(petId);
+  return Boolean(config) && getPetRankTrophies(config.petId) >= PET_MINI_ALLEY_UNLOCK_TROPHIES;
+}
+
+function getPetMiniAlleyPoints(petId = getActivePetMiniAlleyPetId()) {
+  return Math.max(0, Number(getPetMiniAlleyState(petId).points || 0));
+}
+
+function addPetMiniAlleyPoints(amount, options = {}) {
+  const petId = options.petId || getActivePetMiniAlleyPetId();
+  const alleyState = getPetMiniAlleyState(petId);
+  const pointsToAdd = Math.max(0, Math.floor(Number(amount || 0)));
+
+  if (pointsToAdd <= 0) {
+    return getPetMiniAlleyPoints(petId);
+  }
+
+  alleyState.points = Math.max(0, Math.floor(Number(alleyState.points || 0))) + pointsToAdd;
+
+  if (options.secretCooldown) {
+    alleyState.secretPointsReadyAt = Date.now() + PET_MINI_SECRET_POINTS_COOLDOWN_MS;
+  }
+
+  saveState();
+  return alleyState.points;
+}
+
+function getPetMiniSecretPointsCooldownMs() {
+  const readyAt = Math.max(0, Number(getPetMiniAlleyState().secretPointsReadyAt || 0));
+  return Math.max(0, readyAt - Date.now());
+}
+
+function formatPetMiniSecretCooldown(ms) {
+  const cooldownMs = Math.max(0, Number(ms || 0));
+
+  if (cooldownMs <= 0) {
+    return "";
+  }
+
+  const totalMinutes = Math.ceil(cooldownMs / (60 * 1000));
+
+  if (totalMinutes >= 60) {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return minutes > 0 ? `${hours}H ${minutes}MIN` : `${hours}H`;
+  }
+
+  if (totalMinutes > 1) {
+    return `${totalMinutes}MIN`;
+  }
+
+  return `${Math.max(1, Math.ceil(cooldownMs / 1000))}S`;
+}
+
+function syncPetMiniSecretCooldownTimer() {
+  if (petMiniSecretCooldownRenderTimer) {
+    window.clearTimeout(petMiniSecretCooldownRenderTimer);
+    petMiniSecretCooldownRenderTimer = null;
+  }
+
+  if (ui.currentView !== "pet-ranks") {
+    return;
+  }
+
+  const cooldownMs = getPetMiniSecretPointsCooldownMs();
+
+  if (cooldownMs <= 0) {
+    return;
+  }
+
+  const delay = cooldownMs <= 60 * 1000 ? 1000 : 30 * 1000;
+  petMiniSecretCooldownRenderTimer = window.setTimeout(() => {
+    petMiniSecretCooldownRenderTimer = null;
+    renderPetMiniAlley();
+  }, delay);
+}
+
+function getPetMiniAlleyProgressPercent(petId = getActivePetMiniAlleyPetId()) {
+  return getPetMiniAlleyProgressPercentForPoints(getPetMiniAlleyPoints(petId), petId);
+}
+
+function getPetMiniAlleyProgressPercentForPoints(points, petId = getActivePetMiniAlleyPetId()) {
+  const activeRank = getActivePetMiniAlleyRank(petId);
+  const stageStart = getPetMiniAlleyStageStartPoints(activeRank, petId);
+  const stageEnd = activeRank?.points || PET_MINI_ALLEY_RANK_POINTS;
+  return clamp(((Math.max(0, Number(points || 0)) - stageStart) / Math.max(1, stageEnd - stageStart)) * 100, 0, 100);
+}
+
+function getPetMiniAlleyProgressLabel(petId = getActivePetMiniAlleyPetId()) {
+  const activeRank = getActivePetMiniAlleyRank(petId);
+  const stageEnd = activeRank?.points || PET_MINI_ALLEY_RANK_POINTS;
+  return `${Math.min(getPetMiniAlleyPoints(petId), stageEnd)}/${stageEnd}`;
+}
+
+function getPetMiniAlleyRankState(rank, petId = getActivePetMiniAlleyPetId()) {
+  const alleyState = getPetMiniAlleyState(petId);
+
+  if (alleyState.claimedRanks.includes(rank.id)) {
+    return "claimed";
+  }
+
+  return getPetMiniAlleyPoints(petId) >= rank.points ? "claimable" : "locked";
+}
+
+function getActivePetMiniAlleyRank(petId = getActivePetMiniAlleyPetId()) {
+  const config = getPetMiniAlleyConfig(petId);
+  const alleyState = getPetMiniAlleyState(petId);
+  const ranks = config?.ranks || PET_MINI_ALLEY_RANKS;
+  return ranks.find((rank) => !alleyState.claimedRanks.includes(rank.id))
+    || ranks[ranks.length - 1];
+}
+
+function getPetMiniAlleyStageStartPoints(rank = getActivePetMiniAlleyRank(), petId = getActivePetMiniAlleyPetId()) {
+  const ranks = getPetMiniAlleyConfig(petId)?.ranks || PET_MINI_ALLEY_RANKS;
+  const rankIndex = ranks.findIndex((entry) => entry.id === rank?.id);
+  return rankIndex <= 0 ? 0 : ranks[rankIndex - 1].points;
+}
+
+function getPetMiniMissionStage(mission) {
+  return Math.max(1, Math.floor(Number(mission?.stage || 1)));
+}
+
+function getPetMiniMissionTarget(definition, mission) {
+  const baseTarget = Math.max(1, Number(definition?.target || 1));
+
+  if (definition?.id === "trophies") {
+    const step = Math.max(0, Number(definition.targetStep || 0));
+    return baseTarget + (getPetMiniMissionStage(mission) - 1) * step;
+  }
+
+  return baseTarget;
+}
+
+function getPetMiniMissionProgress(definition, mission, petId = getActivePetMiniAlleyPetId()) {
+  const config = getPetMiniAlleyConfig(petId);
+  const target = getPetMiniMissionTarget(definition, mission);
+
+  if (definition?.id === "upgrade") {
+    const completedUpgradeStages = Math.max(0, getPetPowerLevel(config?.petId || PET_MINI_ALLEY_PET_ID) - 1);
+    return completedUpgradeStages >= getPetMiniMissionStage(mission) ? target : 0;
+  }
+
+  if (definition?.id === "trophies") {
+    return clamp(getPetRankTrophies(config?.petId || PET_MINI_ALLEY_PET_ID), 0, target);
+  }
+
+  return clamp(Math.floor(Number(mission?.progress || 0)), 0, target);
+}
+
+function getPetMiniMissionStageStart(definition, mission) {
+  if (definition?.id !== "trophies") {
+    return 0;
+  }
+
+  const baseTarget = Math.max(1, Number(definition.target || 1));
+  const step = Math.max(1, Number(definition.targetStep || 1));
+  const stage = getPetMiniMissionStage(mission);
+  return stage <= 1 ? 0 : baseTarget + (stage - 2) * step;
+}
+
+function getPetMiniMissionProgressPercent(definition, mission, progress, target) {
+  const stageStart = getPetMiniMissionStageStart(definition, mission);
+  const stageSpan = Math.max(1, Number(target || 1) - stageStart);
+  return clamp(((Number(progress || 0) - stageStart) / stageSpan) * 100, 0, 100);
+}
+
+function getPetMiniMissionMaxStage(definition, petId = getActivePetMiniAlleyPetId()) {
+  const config = getPetMiniAlleyConfig(petId);
+  const configuredMaxStage = Math.max(0, Number(definition?.maxStage || 0));
+
+  if (definition?.id === "upgrade") {
+    const availableUpgradeStages = Math.max(0, getPetPowerLevels(config?.petId || PET_MINI_ALLEY_PET_ID).length - 1);
+    return configuredMaxStage > 0
+      ? Math.min(configuredMaxStage, availableUpgradeStages)
+      : availableUpgradeStages;
+  }
+
+  return configuredMaxStage;
+}
+
+function isPetMiniMissionFinished(definition, mission, petId = getActivePetMiniAlleyPetId()) {
+  const maxStage = getPetMiniMissionMaxStage(definition, petId);
+  return maxStage > 0 && getPetMiniMissionStage(mission) > maxStage;
+}
+
+function isPetMiniMissionComplete(definition, mission, petId = getActivePetMiniAlleyPetId()) {
+  if (isPetMiniMissionFinished(definition, mission, petId)) {
+    return false;
+  }
+
+  return getPetMiniMissionProgress(definition, mission, petId) >= getPetMiniMissionTarget(definition, mission);
+}
+
+function buildPetMiniAlleyRankMarkup(rank, petId = getActivePetMiniAlleyPetId()) {
+  const config = getPetMiniAlleyConfig(petId) || PET_MINI_ALLEY_CONFIGS[PET_MINI_ALLEY_PET_ID];
+  const stateId = getPetMiniAlleyRankState(rank, petId);
+  const isClaimable = stateId === "claimable";
+  const rankTitle = rank.title.replace(/^Klasa\s+/i, "").toUpperCase();
+  const statusLabel = stateId === "claimed"
+    ? "ODBLOKOWANO"
+    : isClaimable
+      ? "ODBIERZ"
+      : "ZABLOKOWANE";
+  const statusIcon = stateId === "claimed" ? "OK" : isClaimable ? "!" : "";
+  const statusIconMarkup = stateId === "locked"
+    ? `<img class="asset-image" src="${PET_MINI_ALLEY_LOCK_IMAGE}" alt="" data-fallback-text="LOCK" />`
+    : `<span>${statusIcon}</span>`;
+  const rewardScale = getPetAssetVisualScale(rank.rewardPetId);
+  const rewardScaleClass = rewardScale !== 1 ? " pet-asset-scaled" : "";
+  const rewardScaleStyle = rewardScale !== 1
+    ? ` style="--pet-asset-scale:${rewardScale.toFixed(3)};"`
+    : "";
+
+  return `
+    <article
+      class="pet-mini-rank-tile ${isClaimable ? "claimable" : ""}"
+      data-rank-state="${stateId}"
+      data-rank-tone="${rank.id}"
+      data-pet-mini-claim-rank="${rank.id}"
+      style="--pet-mini-rank-image: url('${rank.rewardImage}')"
+      role="button"
+      tabindex="0"
+      aria-label="${escapeHtml(rank.rewardName)}"
+    >
+      <div class="pet-mini-rank-cost">
+        <span>${rank.points}</span>
+        <img class="asset-image" src="${config.pointIcon}" alt="" data-fallback-text="PKT" />
+      </div>
+      <div class="pet-mini-rank-card-title">
+        <span>KLASA</span>
+        <strong>${escapeHtml(rankTitle)}</strong>
+      </div>
+      <div class="pet-mini-rank-art">
+        <img class="item-image asset-image pet-mini-rank-image${rewardScaleClass}" src="${rank.rewardImage}" alt="${escapeHtml(rank.rewardName)}" data-fallback-text="${escapeHtml(rank.rewardName)}"${rewardScaleStyle} />
+        <span class="pet-mini-skin-star star-1" aria-hidden="true"></span>
+        <span class="pet-mini-skin-star star-2" aria-hidden="true"></span>
+        <span class="pet-mini-skin-star star-3" aria-hidden="true"></span>
+        <span class="pet-mini-skin-star star-4" aria-hidden="true"></span>
+        <span class="pet-mini-skin-star star-5" aria-hidden="true"></span>
+        <span class="pet-mini-skin-star star-6" aria-hidden="true"></span>
+        <span class="pet-mini-skin-star star-7" aria-hidden="true"></span>
+        <span class="pet-mini-skin-star star-8" aria-hidden="true"></span>
+        <span class="pet-mini-skin-star star-9" aria-hidden="true"></span>
+        <div class="asset-fallback">${escapeHtml(rank.rewardName)}</div>
+      </div>
+      <button class="pet-mini-rank-status" type="button" ${isClaimable ? "" : "disabled"}>
+        ${statusIconMarkup}
+        ${statusLabel}
+      </button>
+    </article>
+  `;
+}
+
+function buildPetMiniAlleyMissionMarkup(definition, petId = getActivePetMiniAlleyPetId()) {
+  const config = getPetMiniAlleyConfig(petId) || PET_MINI_ALLEY_CONFIGS[PET_MINI_ALLEY_PET_ID];
+  const mission = getPetMiniAlleyState(petId).missions?.[definition.id] || { stage: 1, progress: 0 };
+  const target = getPetMiniMissionTarget(definition, mission);
+  const finished = isPetMiniMissionFinished(definition, mission, petId);
+  const progress = finished ? target : getPetMiniMissionProgress(definition, mission, petId);
+  const progressPercent = getPetMiniMissionProgressPercent(definition, mission, progress, target);
+  const complete = !finished && isPetMiniMissionComplete(definition, mission, petId);
+
+  return `
+    <article class="pet-mini-mission-card" data-mission-state="${finished ? "finished" : complete ? "claimable" : "active"}">
+      <div class="pet-mini-mission-copy">
+        <p class="pet-mini-mission-title">Etap ${getPetMiniMissionStage(mission)}. ${escapeHtml(definition.title)}</p>
+        <div class="pet-mini-mission-progress" aria-label="${progress} z ${target}">
+          <span style="width:${progressPercent.toFixed(2)}%"></span>
+        </div>
+        <p class="pet-mini-mission-count">${progress}/${target}</p>
+      </div>
+      <div class="pet-mini-mission-reward">
+        <img class="asset-image" src="${config.pointIcon}" alt="" data-fallback-text="PKT" />
+        <span>+${definition.rewardPoints} pkt</span>
+      </div>
+      <button class="pet-mini-mission-claim" data-pet-mini-claim-mission="${definition.id}" type="button" ${complete ? "" : "disabled"}>
+        ${finished ? "UKOŃCZONE" : "ODBIERZ"}
+      </button>
+    </article>
+  `;
+}
+
+function renderPetMiniAlley() {
+  if (!petMiniAlleyShell) {
+    return;
+  }
+
+  if (ui.currentView !== "pet-ranks") {
+    petMiniAlleyShell.innerHTML = "";
+    return;
+  }
+
+  const activePetId = getActivePetMiniAlleyPetId();
+  const config = getPetMiniAlleyConfig(activePetId) || PET_MINI_ALLEY_CONFIGS[PET_MINI_ALLEY_PET_ID];
+  const unlocked = isPetMiniAlleyUnlocked(activePetId);
+  const progressLabel = getPetMiniAlleyProgressLabel(activePetId);
+  const secretCooldownMs = getPetMiniSecretPointsCooldownMs();
+  const secretOnCooldown = secretCooldownMs > 0;
+  const secretCooldownLabel = formatPetMiniSecretCooldown(secretCooldownMs);
+
+  petMiniAlleyShell.dataset.petMiniAlleyPet = activePetId;
+  petMiniAlleyShell.dataset.locked = String(!unlocked);
+  petMiniAlleyShell.innerHTML = `
+    <header class="pet-mini-alley-header">
+      <div class="trophy-road-title-badge pet-mini-title-badge" data-world-theme="alley" aria-label="Klasa ${escapeHtml(config.petNameGenitive)}">
+        <span class="trophy-road-title-badge-text">${escapeHtml(config.title || "KLASA PLATOYI")}</span>
+        ${unlocked ? "" : `
+          <span class="pet-mini-title-lock" data-pet-mini-lock-notice aria-hidden="true">
+            <img class="asset-image" src="${PET_MINI_ALLEY_LOCK_IMAGE}" alt="" data-fallback-text="LOCK" />
+          </span>
+        `}
+      </div>
+    </header>
+
+    <section class="pet-mini-dashboard">
+      <section class="pet-mini-left-column">
+        <section class="pet-mini-points-card" aria-label="Punkty pupila">
+          <div class="pet-mini-points-main">
+            <p class="pet-mini-points-heading">
+              <img class="asset-image" src="./atakkk.png" alt="" data-fallback-text="PKT" />
+              <span>PUNKTY PUPILA</span>
+            </p>
+            <div class="pet-mini-progress-track">
+              <span class="pet-mini-progress-fill" style="width:${getPetMiniAlleyProgressPercent(activePetId).toFixed(2)}%"></span>
+              <span class="pet-mini-progress-value">
+                ${progressLabel}
+                <img class="asset-image" src="${config.pointIcon}" alt="" data-fallback-text="PKT" />
+              </span>
+            </div>
+          </div>
+          <div class="pet-mini-points-icon-box${secretOnCooldown ? " on-cooldown" : ""}" data-pet-mini-secret-points role="button" tabindex="0" aria-label="${escapeHtml(config.petPointsName)}">
+            <img class="asset-image" src="${secretOnCooldown ? "./zegar.png" : config.pointIcon}" alt="" data-fallback-text="${secretOnCooldown ? "CZAS" : "PKT"}" />
+            ${secretOnCooldown ? `<span class="pet-mini-secret-cooldown">${escapeHtml(secretCooldownLabel || "ZA 24H")}</span>` : ""}
+          </div>
+        </section>
+
+        <section class="pet-mini-tip-card">
+          <span>Zbieraj</span>
+          <img class="asset-image" src="${config.pointIcon}" alt="" data-fallback-text="PKT" />
+          <span>aby odblokować wyższą klasę i przebrania dla ${escapeHtml(config.petNameGenitive)}!</span>
+        </section>
+
+        <section class="pet-mini-ranks-row" aria-label="Klasy ${escapeHtml(config.petNameGenitive)}">
+          ${config.ranks.map((rank) => buildPetMiniAlleyRankMarkup(rank, activePetId)).join("")}
+        </section>
+      </section>
+
+      <aside class="pet-mini-missions-panel" aria-label="Misje ${escapeHtml(config.petNameGenitive)}">
+        <div class="pet-mini-missions-title">MISJE</div>
+        <div class="pet-mini-missions-list">
+          ${config.missions.map((mission) => buildPetMiniAlleyMissionMarkup(mission, activePetId)).join("")}
+        </div>
+      </aside>
+    </section>
+  `;
+
+  syncBrokenAssets(petMiniAlleyShell);
+  syncPetMiniSecretCooldownTimer();
+}
+
+function handlePetMiniAlleyClick(event) {
+  const secretPointsButton = event.target.closest("[data-pet-mini-secret-points]");
+
+  if (secretPointsButton) {
+    void handlePetMiniSecretPointsClick(secretPointsButton);
+    return;
+  }
+
+  if (!isPetMiniAlleyUnlocked()) {
+    const config = getPetMiniAlleyConfig();
+    showTrophyNotice(`WYMAGANE 500 PUCHARÓW NA ${config?.petNameGenitive?.toUpperCase?.() || "PLATOYI"}`);
+    return;
+  }
+
+  const missionButton = event.target.closest("[data-pet-mini-claim-mission]");
+
+  if (missionButton) {
+    void claimPetMiniAlleyMission(missionButton.dataset.petMiniClaimMission || "", missionButton);
+    return;
+  }
+
+  const rankButton = event.target.closest("[data-pet-mini-claim-rank]");
+
+  if (rankButton) {
+    claimPetMiniAlleyRank(rankButton.dataset.petMiniClaimRank || "");
+  }
+}
+
+function waitPetMiniAnimation(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, Math.max(0, Number(ms || 0)));
+  });
+}
+
+async function animatePetMiniMissionClaim(sourceButton, oldPercent, newPercent, rewardPoints) {
+  if (!petMiniAlleyShell || ui.currentView !== "pet-ranks") {
+    return;
+  }
+
+  const missionCard = sourceButton?.closest?.(".pet-mini-mission-card");
+  const config = getPetMiniAlleyConfig() || PET_MINI_ALLEY_CONFIGS[PET_MINI_ALLEY_PET_ID];
+  const progressTrack = petMiniAlleyShell.querySelector(".pet-mini-progress-track");
+  const progressFill = petMiniAlleyShell.querySelector(".pet-mini-progress-fill");
+  const missionReward = missionCard?.querySelector?.(".pet-mini-mission-reward") || sourceButton;
+
+  if (!progressTrack || !progressFill || !missionReward) {
+    return;
+  }
+
+  if (missionCard) {
+    missionCard.classList.add("pet-mini-mission-card-claiming");
+  }
+
+  if ("disabled" in sourceButton) {
+    sourceButton.disabled = true;
+  }
+
+  playOneShotSound("petMiniPoints", 0.78);
+
+  progressFill.style.transition = "none";
+  progressFill.style.width = `${oldPercent.toFixed(2)}%`;
+  void progressFill.offsetWidth;
+  progressFill.style.transition = "width 1550ms cubic-bezier(0.16, 0.86, 0.2, 1)";
+  progressFill.style.width = `${newPercent.toFixed(2)}%`;
+
+  const startRect = missionReward.getBoundingClientRect();
+  const targetRect = progressTrack.getBoundingClientRect();
+  const startX = startRect.left + startRect.width / 2;
+  const startY = startRect.top + startRect.height / 2;
+  const targetX = targetRect.left + targetRect.width / 2;
+  const targetY = targetRect.top + targetRect.height / 2;
+  const flyerCount = clamp(Math.round(Number(rewardPoints || 50) / 10), 4, 10);
+  const flyers = [];
+
+  for (let index = 0; index < flyerCount; index += 1) {
+    const flyer = document.createElement("img");
+    flyer.className = "pet-mini-point-flyer";
+    flyer.src = config.pointIcon;
+    flyer.alt = "";
+    flyer.style.left = `${startX}px`;
+    flyer.style.top = `${startY}px`;
+    const flyX = targetX - startX + randomBetween(-18, 18);
+    const flyY = targetY - startY + randomBetween(-14, 14);
+    flyer.style.setProperty("--pet-mini-fly-x", `${flyX}px`);
+    flyer.style.setProperty("--pet-mini-fly-y", `${flyY}px`);
+    flyer.style.setProperty("--pet-mini-fly-mid-x", `${flyX * 0.48}px`);
+    flyer.style.setProperty("--pet-mini-fly-mid-y", `${flyY * 0.42}px`);
+    flyer.style.setProperty("--pet-mini-fly-arc-x", `${randomBetween(-90, 90)}px`);
+    flyer.style.setProperty("--pet-mini-fly-arc-y", `${randomBetween(-118, -54)}px`);
+    flyer.style.setProperty("--pet-mini-fly-delay", `${index * 95}ms`);
+    document.body.appendChild(flyer);
+    flyers.push(flyer);
+  }
+
+  await waitPetMiniAnimation(2500);
+  flyers.forEach((flyer) => flyer.remove());
+}
+
+async function handlePetMiniSecretPointsClick(sourceElement) {
+  if (!sourceElement || sourceElement.dataset.petMiniSecretAwarding === "true") {
+    return;
+  }
+
+  const cooldownMs = getPetMiniSecretPointsCooldownMs();
+
+  if (cooldownMs > 0) {
+    showTrophyNotice(`DOSTĘPNE ZA ${formatPetMiniSecretCooldown(cooldownMs)}`);
+    return;
+  }
+
+  petMiniSecretClickCount += 1;
+  sourceElement.dataset.petMiniSecretClicks = String(petMiniSecretClickCount);
+  sourceElement.classList.add("pet-mini-points-icon-clicked");
+
+  if (petMiniSecretClickTimer) {
+    window.clearTimeout(petMiniSecretClickTimer);
+  }
+
+  petMiniSecretClickTimer = window.setTimeout(() => {
+    petMiniSecretClickCount = 0;
+    sourceElement.dataset.petMiniSecretClicks = "0";
+    sourceElement.classList.remove("pet-mini-points-icon-clicked");
+    petMiniSecretClickTimer = null;
+  }, 1800);
+
+  if (petMiniSecretClickCount < PET_MINI_SECRET_POINTS_CLICKS) {
+    return;
+  }
+
+  petMiniSecretClickCount = 0;
+  sourceElement.dataset.petMiniSecretClicks = "0";
+  sourceElement.dataset.petMiniSecretAwarding = "true";
+
+  if (petMiniSecretClickTimer) {
+    window.clearTimeout(petMiniSecretClickTimer);
+    petMiniSecretClickTimer = null;
+  }
+
+  const petId = getActivePetMiniAlleyPetId();
+  const config = getPetMiniAlleyConfig(petId) || PET_MINI_ALLEY_CONFIGS[PET_MINI_ALLEY_PET_ID];
+  const alleyState = getPetMiniAlleyState(petId);
+  const oldPercent = getPetMiniAlleyProgressPercent(petId);
+  const nextPoints = Math.max(0, Number(alleyState.points || 0)) + PET_MINI_SECRET_POINTS_REWARD;
+  const newPercent = getPetMiniAlleyProgressPercentForPoints(nextPoints, petId);
+  addPetMiniAlleyPoints(PET_MINI_SECRET_POINTS_REWARD, { secretCooldown: true, petId });
+
+  sourceElement.classList.add("pet-mini-points-icon-awarding");
+
+  try {
+    await animatePetMiniMissionClaim(sourceElement, oldPercent, newPercent, PET_MINI_SECRET_POINTS_REWARD);
+  } finally {
+    sourceElement.classList.remove("pet-mini-points-icon-awarding", "pet-mini-points-icon-clicked");
+    delete sourceElement.dataset.petMiniSecretAwarding;
+    showTrophyNotice(config.petPointsStatus || `+${PET_MINI_SECRET_POINTS_REWARD} PUNKTÓW`);
+    renderAll();
+  }
+}
+
+async function claimPetMiniAlleyMission(missionId, sourceButton = null) {
+  if (sourceButton?.dataset?.petMiniClaiming === "true") {
+    return;
+  }
+
+  const petId = getActivePetMiniAlleyPetId();
+  const config = getPetMiniAlleyConfig(petId) || PET_MINI_ALLEY_CONFIGS[PET_MINI_ALLEY_PET_ID];
+  const definition = config.missions.find((mission) => mission.id === sanitizeStoredId(missionId));
+  const alleyState = getPetMiniAlleyState(petId);
+  const mission = alleyState.missions?.[definition?.id || ""];
+
+  if (!definition || !mission || !isPetMiniMissionComplete(definition, mission, petId)) {
+    return;
+  }
+
+  const oldPercent = getPetMiniAlleyProgressPercent(petId);
+  const nextPoints = Math.max(0, Number(alleyState.points || 0)) + definition.rewardPoints;
+  const newPercent = getPetMiniAlleyProgressPercentForPoints(nextPoints, petId);
+
+  if (sourceButton?.dataset) {
+    sourceButton.dataset.petMiniClaiming = "true";
+  }
+
+  try {
+    if (sourceButton) {
+      await animatePetMiniMissionClaim(sourceButton, oldPercent, newPercent, definition.rewardPoints);
+    }
+  } finally {
+    const freshAlleyState = getPetMiniAlleyState(petId);
+    const freshMission = freshAlleyState.missions?.[definition.id];
+
+    if (freshMission && isPetMiniMissionComplete(definition, freshMission, petId)) {
+      freshAlleyState.points = Math.max(0, Number(freshAlleyState.points || 0)) + definition.rewardPoints;
+      freshMission.stage = Math.max(1, Math.floor(Number(freshMission.stage || 1))) + 1;
+      freshMission.progress = 0;
+      saveState();
+    }
+
+    if (sourceButton?.dataset) {
+      delete sourceButton.dataset.petMiniClaiming;
+    }
+
+    renderAll();
+  }
+}
+
+function claimPetMiniAlleyRank(rankId) {
+  const petId = getActivePetMiniAlleyPetId();
+  const config = getPetMiniAlleyConfig(petId) || PET_MINI_ALLEY_CONFIGS[PET_MINI_ALLEY_PET_ID];
+  const rank = config.ranks.find((entry) => entry.id === sanitizeStoredId(rankId));
+  const alleyState = getPetMiniAlleyState(petId);
+
+  if (!rank || getPetMiniAlleyRankState(rank, petId) !== "claimable") {
+    return;
+  }
+
+  if (!alleyState.claimedRanks.includes(rank.id)) {
+    alleyState.claimedRanks.push(rank.id);
+  }
+
+  if (!state.ownedPets.includes(rank.rewardPetId)) {
+    state.ownedPets.push(rank.rewardPetId);
+  }
+
+  saveState();
+  renderAll();
+  showTrophyNotice(`${rank.rewardName} ODEBRANY`);
+}
+
+function updatePetMiniAlleyMissionProgress(missionId, amount, petId = getActivePetMiniAlleyPetId()) {
+  const config = getPetMiniAlleyConfig(petId);
+
+  if (!config || !isPetMiniAlleyUnlocked(config.petId)) {
+    return false;
+  }
+
+  const definition = config.missions.find((mission) => mission.id === sanitizeStoredId(missionId));
+
+  if (!definition) {
+    return false;
+  }
+
+  const alleyState = getPetMiniAlleyState(config.petId);
+  const mission = alleyState.missions?.[definition.id];
+  const target = getPetMiniMissionTarget(definition, mission);
+
+  if (!mission || definition.id === "upgrade" || definition.id === "trophies" || Number(mission.progress || 0) >= target) {
+    return false;
+  }
+
+  const previousProgress = Number(mission.progress || 0);
+  mission.progress = clamp(previousProgress + Math.max(0, Number(amount || 0)), 0, target);
+  return mission.progress !== previousProgress;
+}
+
+function getPetPowerLevels(petId) {
+  return PET_POWER_UPGRADES[getPetBaseId(petId)] || [];
+}
+
+function getPetPowerLevel(petId) {
+  const levels = getPetPowerLevels(petId);
+
+  if (!levels.length) {
+    return 1;
+  }
+
+  const savedLevel = Math.floor(Number(state.petPowerLevels?.[getPetBaseId(petId)] || 1));
+  return clamp(savedLevel, 1, levels.length);
+}
+
+function getPetPowerInfo(petId, level = getPetPowerLevel(petId)) {
+  const levels = getPetPowerLevels(petId);
+
+  if (!levels.length) {
+    return null;
+  }
+
+  const safeLevel = clamp(Math.floor(Number(level || 1)), 1, levels.length);
+  return levels[safeLevel - 1] || null;
+}
+
+function getPetUpgradeCost(powerInfo) {
+  const cost = powerInfo?.cost || { coins: 0, elixirs: 0 };
+
+  return {
+    ...cost,
+    coins: Math.max(0, Math.round(Number(cost.coins || 0) * PET_UPGRADE_COIN_MULTIPLIER)),
+    elixirs: Math.max(0, Number(cost.elixirs || 0)),
+  };
+}
+
+function getNextPetPowerInfo(petId) {
+  const levels = getPetPowerLevels(petId);
+  const currentLevel = getPetPowerLevel(petId);
+
+  if (!levels.length || currentLevel >= levels.length) {
+    return null;
+  }
+
+  return levels[currentLevel];
+}
+
+function isPetPowerMaxed(petId) {
+  const levels = getPetPowerLevels(petId);
+  return levels.length > 0 && getPetPowerLevel(petId) >= levels.length;
+}
+
+function formatPetPowerLevelLabel(petId) {
+  const info = getPetPowerInfo(petId);
+
+  if (!info) {
+    return "POZIOM MOCY 1";
+  }
+
+  return info.maxLabel ? "POZIOM MOCY MAKSYMALNY" : `POZIOM MOCY ${info.level}`;
+}
+
+function getDogPowerStats() {
+  return getPetPowerInfo("pies-magik") || PET_POWER_UPGRADES["pies-magik"][0];
+}
+
+function getParrotPowerStats() {
+  return getPetPowerInfo("papuga-manipulantka") || PET_POWER_UPGRADES["papuga-manipulantka"][0];
+}
+
+function getParrotCastIntervalMs(powerInfo = getParrotPowerStats()) {
+  return Math.round(Number(powerInfo?.castIntervalSeconds || 8) * 1000);
+}
+
+function getParrotManipulateDurationMs(powerInfo = getParrotPowerStats()) {
+  return Math.round(Number(powerInfo?.manipulateSeconds || 4) * 1000);
+}
+
+function getLpsotkaPowerStats() {
+  return getPetPowerInfo("l-psotka") || PET_POWER_UPGRADES["l-psotka"][0];
+}
+
+function getOzzyPowerStats() {
+  return getPetPowerInfo("el-kruk") || PET_POWER_UPGRADES["el-kruk"][0];
+}
+
+function getMonkeyMagePowerStats() {
+  return getPetPowerInfo("malpka-jasnoksieznik") || PET_POWER_UPGRADES["malpka-jasnoksieznik"][0];
+}
+
+function getPlutoPowerStats() {
+  return getPetPowerInfo("pluto") || PET_POWER_UPGRADES.pluto[0];
+}
+
+function getPolarBearPowerStats() {
+  return getPetPowerInfo("niedzwiedz-polarny") || PET_POWER_UPGRADES["niedzwiedz-polarny"][0];
+}
+
+function getSnowflakePowerStats() {
+  return getPetPowerInfo("sniezynka") || PET_POWER_UPGRADES.sniezynka[0];
+}
+
+function getOwlPowerStats() {
+  return getPetPowerInfo("sowa") || PET_POWER_UPGRADES.sowa[0];
+}
+
+function getCoralPowerStats() {
+  return getPetPowerInfo("coral") || PET_POWER_UPGRADES.coral?.[0] || CORAL_PET_STATS;
+}
+
+function getFlaroPowerStats() {
+  return getPetPowerInfo(HIGH_TOWER_FLARO_ID) || PET_POWER_UPGRADES.flaro?.[0] || { hp: 1000, burnSeconds: 2, respawnSeconds: 15 };
+}
+
+function isMortalPetId(petId) {
+  const basePetId = getPetBaseId(petId);
+  return basePetId === "pies-magik" || basePetId === "el-kruk" || basePetId === "malpka-jasnoksieznik" || basePetId === "niedzwiedz-polarny" || basePetId === "coral" || basePetId === HIGH_TOWER_FLARO_ID;
+}
+
+function getLpsotkaBubbleDurationMs(powerInfo = getLpsotkaPowerStats()) {
+  return Math.round(Number(powerInfo?.bubbleSeconds || 2) * 1000);
+}
+
+function getLpsotkaMaxBubbleDurationMs() {
+  const levels = getPetPowerLevels("l-psotka");
+  return levels.reduce((maxDuration, level) => Math.max(maxDuration, getLpsotkaBubbleDurationMs(level)), 0);
+}
+
+function resetRunPetVitals() {
+  const pet = getEquippedPet();
+
+  game.pet.maxHp = 0;
+  game.pet.hp = 0;
+  game.pet.alive = true;
+  game.pet.respawnTimerMs = 0;
+  game.pet.respawnX = 0;
+  game.pet.respawnY = 0;
+
+  if (isMortalPetId(pet?.id)) {
+    const basePetId = getPetBaseId(pet.id);
+    const petStats = basePetId === "pies-magik"
+      ? getDogPowerStats()
+      : basePetId === "el-kruk"
+        ? getOzzyPowerStats()
+        : basePetId === "malpka-jasnoksieznik"
+          ? getMonkeyMagePowerStats()
+          : basePetId === "coral"
+            ? getCoralPowerStats()
+            : basePetId === HIGH_TOWER_FLARO_ID
+              ? getFlaroPowerStats()
+              : getPolarBearPowerStats();
+    game.pet.maxHp = petStats.hp;
+    game.pet.hp = petStats.hp;
+  }
+
+  if (pet?.id === "el-kruk") {
+    game.pet.ozzyRoamAngle = Math.random() * Math.PI * 2;
+  }
+}
+
+function getCurrentLocalDateKey(date = new Date()) {
+  const currentDate = date instanceof Date ? date : new Date(date);
+  const year = currentDate.getFullYear();
+  const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+  const day = String(currentDate.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getCurrentDailyGiftCycleKey(date = new Date()) {
+  const currentDate = date instanceof Date ? new Date(date) : new Date(date);
+  const cycleDate = new Date(currentDate);
+  cycleDate.setHours(9, 0, 0, 0);
+
+  if (currentDate < cycleDate) {
+    cycleDate.setDate(cycleDate.getDate() - 1);
+  }
+
+  return getCurrentLocalDateKey(cycleDate);
+}
+
+function sanitizeDateKey(value) {
+  const normalizedValue = String(value || "").trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(normalizedValue) ? normalizedValue : "";
+}
+
+function isDailyGiftUnlocked() {
+  return Math.max(0, Number(state.completedGamesTotal || 0)) > 0;
+}
+
+function hasUnclaimedDailyGiftToday() {
+  return isDailyGiftUnlocked() && sanitizeDateKey(state.dailyGiftClaimedDateKey) !== getCurrentDailyGiftCycleKey();
+}
+
+function isOverlayVisible(element) {
+  return Boolean(element && !element.hidden);
+}
+
+function canAutoShowDailyGiftNow() {
+  if (ui.currentView !== "lobby" || resultReturnBusy || introSequenceRunning || dailyGiftAutoClaimBusy) {
+    return false;
+  }
+
+  if (!appScreen?.classList.contains("active") || !viewNodes.lobby?.classList.contains("active")) {
+    return false;
+  }
+
+  return ![
+    loadingScreen,
+    modalBackdrop,
+    settingsBackdrop,
+    profileBackdrop,
+    alleyIntroBackdrop,
+    alleyRewardBackdrop,
+    superAlleyBackdrop,
+    winterBundleBackdrop,
+    storeCharacterPurchaseBackdrop,
+    magicMachineBackdrop,
+    bundleUnlockBackdrop,
+    gameLaunchBackdrop,
+    gameResultOverlay,
+    offlineBackdrop,
+  ].some(isOverlayVisible);
+}
+
+function clearDailyGiftCheckTimer() {
+  if (!dailyGiftCheckTimer) {
+    return;
+  }
+
+  window.clearTimeout(dailyGiftCheckTimer);
+  dailyGiftCheckTimer = 0;
+}
+
+function scheduleDailyGiftLobbyCheck(delayMs = DAILY_GIFT_CHECK_DELAY_MS) {
+  clearDailyGiftCheckTimer();
+}
+
+function scheduleDailyGiftMidnightTimer() {
+  if (dailyGiftMidnightTimer) {
+    window.clearTimeout(dailyGiftMidnightTimer);
+    dailyGiftMidnightTimer = 0;
+  }
+
+  const now = new Date();
+  const nextMidnight = new Date(now);
+  nextMidnight.setHours(24, 0, 0, 220);
+
+  dailyGiftMidnightTimer = window.setTimeout(() => {
+    dailyGiftMidnightTimer = 0;
+    scheduleDailyGiftMidnightTimer();
+    scheduleDailyGiftLobbyCheck(40);
+  }, Math.max(1000, nextMidnight.getTime() - now.getTime()));
+}
+
+function rollDailyGiftReward(worldId = getActiveTrophyWorldId()) {
+  const normalizedWorldId = normalizeTrophyWorldId(worldId);
+  const weights = DAILY_GIFT_CATEGORY_WEIGHTS[normalizedWorldId] || DAILY_GIFT_CATEGORY_WEIGHTS.alley;
+  const weightTotal = Math.max(0, Number(weights.coins || 0))
+    + Math.max(0, Number(weights.diamonds || 0))
+    + Math.max(0, Number(weights.platoKeys || 0));
+
+  if (weightTotal <= 0) {
+    return null;
+  }
+
+  const roll = randomBetween(1, weightTotal);
+  const coinThreshold = Math.max(0, Number(weights.coins || 0));
+  const diamondThreshold = coinThreshold + Math.max(0, Number(weights.diamonds || 0));
+
+  if (roll <= coinThreshold) {
+    return {
+      type: "coins",
+      amount: randomBetween(100, 2000),
+      title: "Monety",
+      superTheme: normalizedWorldId,
+    };
+  }
+
+  if (roll <= diamondThreshold) {
+    return {
+      type: "diamonds",
+      amount: randomBetween(1, 10),
+      title: "Diamenty",
+      superTheme: normalizedWorldId,
+    };
+  }
+
+  const keyTheme = getPlatoKeyThemeForWorld(normalizedWorldId);
+  return {
+    type: "plato-keys",
+    amount: 1,
+    title: keyTheme === "winter" ? "Klucz PlatoYI Zimy" : "Klucz PlatoYI Magikow",
+    keyTheme,
+    superTheme: normalizedWorldId,
+  };
+}
+
+function applyDailyGiftReward(reward) {
+  if (!reward) {
+    return;
+  }
+
+  changeCurrencyBalance(reward.type, reward.amount);
+  state.dailyGiftClaimedDateKey = getCurrentDailyGiftCycleKey();
+  updatePortalMissionProgressForEvent("daily-gift", 1);
+  saveState();
+  renderAll();
+}
+
+async function maybeShowDailyGift() {
+  if (!DAILY_GIFT_AUTO_POPUP_ENABLED || !hasUnclaimedDailyGiftToday() || !canAutoShowDailyGiftNow()) {
+    return false;
+  }
+
+  dailyGiftAutoClaimBusy = true;
+
+  try {
+    const reward = rollDailyGiftReward(getActiveTrophyWorldId());
+
+    if (!reward) {
+      return false;
+    }
+
+    applyDailyGiftReward(reward);
+
+    if (reward.type === "coins") {
+      await showCoinRewardScene(reward.amount, {
+        title: reward.title,
+        kicker: "CODZIENNY PREZENT",
+        claimButtonText: "ODBIERZ",
+        interactionMode: "manual",
+        manualTrigger: "button",
+        superTheme: reward.superTheme,
+      });
+      await animateCoinsToBalance();
+      return true;
+    }
+
+    if (reward.type === "diamonds") {
+      await showDiamondRewardScene(reward.amount, {
+        title: reward.title,
+        kicker: "CODZIENNY PREZENT",
+        claimButtonText: "ODBIERZ",
+        interactionMode: "manual",
+        manualTrigger: "button",
+        superTheme: reward.superTheme,
+      });
+      return true;
+    }
+
+    await showPlatoKeyRewardScene(reward.amount, {
+      title: reward.title,
+      kicker: "CODZIENNY PREZENT",
+      claimButtonText: "ODBIERZ",
+      interactionMode: "manual",
+      manualTrigger: "button",
+      superTheme: reward.superTheme,
+      keyTheme: reward.keyTheme,
+    });
+    return true;
+  } finally {
+    dailyGiftAutoClaimBusy = false;
+  }
+}
+
+async function claimDailyGiftFromStore() {
+  if (dailyGiftAutoClaimBusy || !hasUnclaimedDailyGiftToday()) {
+    return false;
+  }
+
+  dailyGiftAutoClaimBusy = true;
+
+  try {
+    const reward = rollDailyGiftReward(getActiveTrophyWorldId());
+
+    if (!reward) {
+      return false;
+    }
+
+    applyDailyGiftReward(reward);
+
+    if (reward.type === "coins") {
+      await showCoinRewardScene(reward.amount, {
+        title: reward.title,
+        kicker: "CODZIENNY PREZENT",
+        claimButtonText: "ODBIERZ",
+        interactionMode: "manual",
+        manualTrigger: "button",
+        superTheme: reward.superTheme,
+      });
+      await animateCoinsToBalance();
+      renderAll();
+      return true;
+    }
+
+    if (reward.type === "diamonds") {
+      await showDiamondRewardScene(reward.amount, {
+        title: reward.title,
+        kicker: "CODZIENNY PREZENT",
+        claimButtonText: "ODBIERZ",
+        interactionMode: "manual",
+        manualTrigger: "button",
+        superTheme: reward.superTheme,
+      });
+      renderAll();
+      return true;
+    }
+
+    await showPlatoKeyRewardScene(reward.amount, {
+      title: reward.title,
+      kicker: "CODZIENNY PREZENT",
+      claimButtonText: "ODBIERZ",
+      interactionMode: "manual",
+      manualTrigger: "button",
+      superTheme: reward.superTheme,
+      keyTheme: reward.keyTheme,
+    });
+    renderAll();
+    return true;
+  } finally {
+    dailyGiftAutoClaimBusy = false;
   }
 }
 
@@ -2788,8 +5579,39 @@ function getCoinFlyTargetElement() {
   return balanceTarget;
 }
 
+function showViewWithLobbyTransition(viewName) {
+  const nextView = String(viewName || "");
+
+  if (ui.currentView !== "lobby" || nextView === "lobby" || !viewNodes.lobby) {
+    showView(nextView);
+    return;
+  }
+
+  if (lobbyViewTransitionTimer) {
+    window.clearTimeout(lobbyViewTransitionTimer);
+    lobbyViewTransitionTimer = 0;
+  }
+
+  viewNodes.lobby.classList.add("lobby-view-exiting");
+  lobbyViewTransitionTimer = window.setTimeout(() => {
+    lobbyViewTransitionTimer = 0;
+    viewNodes.lobby?.classList.remove("lobby-view-exiting");
+    showView(nextView);
+  }, 230);
+}
+
 function showView(viewName) {
   const previousView = ui.currentView;
+
+  if (viewName === "game" && !ensureInternetForGame()) {
+    return;
+  }
+
+  if (lobbyViewTransitionTimer) {
+    window.clearTimeout(lobbyViewTransitionTimer);
+    lobbyViewTransitionTimer = 0;
+    viewNodes.lobby?.classList.remove("lobby-view-exiting");
+  }
 
   if (viewName !== "game" && gameLaunchTransitionBusy) {
     cancelGameLaunchTransition();
@@ -2804,6 +5626,14 @@ function showView(viewName) {
     closeMagicMachineBackdrop(false);
   }
 
+  if (viewName !== "store") {
+    stopStorePremiumOfferRotation();
+  }
+
+  if (viewName !== "tower-challenge" && viewName !== "lobby") {
+    stopHighTowerCountdown();
+  }
+
   if (viewName !== "lobby") {
     closeSettingsPanel();
     closeProfilePanel();
@@ -2816,6 +5646,7 @@ function showView(viewName) {
   if (viewName === "game" && !state.playedFirstGame) {
     state.playedFirstGame = true;
     saveState();
+    maybeAutoInitSocialProfile();
   }
 
   Object.entries(viewNodes).forEach(([name, node]) => {
@@ -2825,7 +5656,7 @@ function showView(viewName) {
   });
 
   syncFirstGameGuide();
-  syncJungleBookGuidePrompt();
+  syncTrophyRoadGuide();
   schedulePartyMemberSync(true);
 
   if (viewName === "game") {
@@ -2838,7 +5669,7 @@ function showView(viewName) {
 
   if (viewName === "store") {
     ui.storeScrollLeft = 0;
-    renderStore();
+    renderStore({ suppressEntranceAnimation: false });
     const storePanel = viewNodes.store?.querySelector(".section-panel");
     if (storePanel) {
       window.requestAnimationFrame(() => {
@@ -2865,8 +5696,40 @@ function showView(viewName) {
     return;
   }
 
-  if (viewName === "book") {
-    renderBookView();
+  if (viewName === "rarity") {
+    renderRarityShop();
+    syncTouchControlsVisibility();
+    syncBackgroundMusic();
+    scheduleRemoteProfileSync(true);
+    return;
+  }
+
+  if (viewName === "ranking") {
+    if (!isRankingAlleyUnlocked()) {
+      triggerRankingLockFeedback(rankingAlleyEntry);
+      showTrophyNotice("WYMAGANE 500 PUCHARÓW");
+      return;
+    }
+
+    renderRankingAlley({ resetScroll: true, suppressEntranceAnimation: false });
+    syncTouchControlsVisibility();
+    syncBackgroundMusic();
+    scheduleRemoteProfileSync(true);
+    return;
+  }
+
+  if (viewName === "tower-challenge") {
+    renderHighTowerChallenge();
+    startHighTowerCountdown();
+    maybeShowHighTowerStoryIntro();
+    syncTouchControlsVisibility();
+    syncBackgroundMusic();
+    scheduleRemoteProfileSync(true);
+    return;
+  }
+
+  if (viewName === "pet-ranks") {
+    renderPetMiniAlley();
     syncTouchControlsVisibility();
     syncBackgroundMusic();
     scheduleRemoteProfileSync(true);
@@ -2874,7 +5737,7 @@ function showView(viewName) {
   }
 
   if (viewName === "trophies") {
-    renderTrophyRoad();
+    renderTrophyRoad({ resetScroll: true, suppressEntranceAnimation: false });
     syncTouchControlsVisibility();
     syncBackgroundMusic();
     openTrophyRoadIntro();
@@ -2885,18 +5748,32 @@ function showView(viewName) {
   syncTouchControlsVisibility();
   syncBackgroundMusic();
   scheduleRemoteProfileSync(true);
+
+  if (viewName === "lobby") {
+    renderLobby();
+    startHighTowerCountdown();
+    scheduleDailyGiftLobbyCheck();
+  }
 }
 
-function renderAll() {
+function renderAll(options = {}) {
+  const suppressStoreEntrance = options.suppressStoreEntrance ?? ui.currentView === "store";
+  const suppressTrophyRoadEntrance = options.suppressTrophyRoadEntrance ?? ui.currentView === "trophies";
+  const suppressRankingEntrance = options.suppressRankingEntrance ?? ui.currentView === "ranking";
+
   syncCurrentViewChrome();
   syncGlobalVisualTheme();
   updateBalanceDisplays();
+  updateStreakDisplays();
   renderLobby();
-  renderStore();
+  renderStore({ suppressEntranceAnimation: suppressStoreEntrance });
+  renderRarityShop();
   renderInventory();
   renderFriendsView();
-  renderBookView();
-  renderTrophyRoad();
+  renderTrophyRoad({ suppressEntranceAnimation: suppressTrophyRoadEntrance });
+  renderRankingAlley({ suppressEntranceAnimation: suppressRankingEntrance });
+  renderHighTowerChallenge();
+  renderPetMiniAlley();
   renderGameLoadout();
   renderSettingsPanel();
   renderProfilePanel();
@@ -2905,26 +5782,51 @@ function renderAll() {
   syncBrokenAssets(document);
   syncAnimatedAssets(document);
   syncFirstGameGuide();
-  syncJungleBookGuidePrompt();
+  syncTrophyRoadGuide();
   syncBackgroundMusic();
+  syncOfflineAccessState();
 }
 
 function syncCurrentViewChrome() {
+  const isLobbyView = ui.currentView === "lobby";
   const isGameView = ui.currentView === "game";
   const isStoreView = ui.currentView === "store";
+  const isTrophiesView = ui.currentView === "trophies";
+  const isRankingView = ui.currentView === "ranking";
+  const isTowerChallengeView = ui.currentView === "tower-challenge";
+  const isPetRanksView = ui.currentView === "pet-ranks";
+  const isRarityView = ui.currentView === "rarity";
+  const isInventoryView = ui.currentView === "inventory";
+  const isFriendsView = ui.currentView === "friends";
 
   if (appScreen) {
     appScreen.dataset.currentView = ui.currentView;
   }
 
   if (document.body) {
+    document.body.classList.toggle("lobby-view-active", isLobbyView);
     document.body.classList.toggle("game-view-active", isGameView);
     document.body.classList.toggle("store-view-active", isStoreView);
+    document.body.classList.toggle("trophies-view-active", isTrophiesView);
+    document.body.classList.toggle("ranking-view-active", isRankingView);
+    document.body.classList.toggle("tower-challenge-view-active", isTowerChallengeView);
+    document.body.classList.toggle("pet-ranks-view-active", isPetRanksView);
+    document.body.classList.toggle("rarity-view-active", isRarityView);
+    document.body.classList.toggle("inventory-view-active", isInventoryView);
+    document.body.classList.toggle("friends-view-active", isFriendsView);
   }
 
   if (appShell) {
+    appShell.classList.toggle("lobby-view-active", isLobbyView);
     appShell.classList.toggle("game-view-active", isGameView);
     appShell.classList.toggle("store-view-active", isStoreView);
+    appShell.classList.toggle("trophies-view-active", isTrophiesView);
+    appShell.classList.toggle("ranking-view-active", isRankingView);
+    appShell.classList.toggle("tower-challenge-view-active", isTowerChallengeView);
+    appShell.classList.toggle("pet-ranks-view-active", isPetRanksView);
+    appShell.classList.toggle("rarity-view-active", isRarityView);
+    appShell.classList.toggle("inventory-view-active", isInventoryView);
+    appShell.classList.toggle("friends-view-active", isFriendsView);
   }
 }
 
@@ -2939,6 +5841,135 @@ function shouldShowFirstGameGuide() {
   );
 }
 
+function syncFirstGameAccountFields() {
+  if (!firstLoginNameInput || !firstLoginPasswordInput) {
+    return;
+  }
+
+  if (document.activeElement !== firstLoginPasswordInput && state.accountPasswordSet) {
+    firstLoginPasswordInput.placeholder = "Hasło ustawione";
+  }
+}
+
+function setFirstGameAuthNote(message = "", tone = "") {
+  if (!firstLoginNote) {
+    return;
+  }
+
+  firstLoginNote.textContent = message;
+  firstLoginNote.dataset.tone = tone;
+}
+
+function syncFirstGameLoginNote() {
+  if (!firstLoginNote) {
+    return;
+  }
+
+  const password = String(firstLoginPasswordInput?.value || "").trim();
+
+  if (ui.firstGameAuthMode === "create") {
+    if (password && password.length < 4) {
+      setFirstGameAuthNote("Hasło musi mieć co najmniej 4 znaki.", "error");
+    } else {
+      setFirstGameAuthNote("");
+    }
+    return;
+  }
+
+  if (ui.firstGameAuthMode === "login") {
+    setFirstGameAuthNote("");
+    return;
+  }
+
+  setFirstGameAuthNote("");
+}
+
+function toggleFirstGamePasswordPreview() {
+  if (!firstLoginPasswordInput || !firstPasswordToggle) {
+    return;
+  }
+
+  const shouldShow = firstLoginPasswordInput.type === "password";
+  firstLoginPasswordInput.type = shouldShow ? "text" : "password";
+  firstPasswordToggle.classList.toggle("is-active", shouldShow);
+  firstPasswordToggle.setAttribute("aria-label", shouldShow ? "Ukryj hasło" : "Pokaż hasło");
+  firstLoginPasswordInput.focus();
+}
+
+function syncFirstGameAuthMode() {
+  const mode = ["choice", "create", "login"].includes(ui.firstGameAuthMode)
+    ? ui.firstGameAuthMode
+    : "choice";
+
+  ui.firstGameAuthMode = mode;
+
+  if (firstGameGuide) {
+    firstGameGuide.dataset.authMode = mode;
+  }
+
+  if (firstAuthTitle) {
+    firstAuthTitle.textContent = mode === "login" ? "ZALOGUJ SIĘ" : "STWÓRZ KONTO";
+  }
+
+  if (firstLoginPasswordInput) {
+    firstLoginPasswordInput.type = "password";
+    firstLoginPasswordInput.autocomplete = mode === "login" ? "current-password" : "new-password";
+    firstLoginPasswordInput.placeholder = mode === "login" ? "Hasło konta" : "Stwórz hasło";
+  }
+
+  if (firstPasswordToggle) {
+    firstPasswordToggle.classList.remove("is-active");
+    firstPasswordToggle.setAttribute("aria-label", "Pokaż hasło");
+  }
+
+  if (firstLoginSaveButton) {
+    firstLoginSaveButton.hidden = mode !== "create";
+    firstLoginSaveButton.disabled = false;
+  }
+
+  if (firstLoginButton) {
+    firstLoginButton.hidden = mode !== "login";
+    firstLoginButton.disabled = false;
+    firstLoginButton.textContent = "ZALOGUJ SIĘ";
+  }
+
+  syncFirstGameLoginNote();
+}
+
+function openFirstGameAuthMode(mode) {
+  const nextMode = ["choice", "create", "login"].includes(mode) ? mode : "choice";
+
+  if (ui.firstGameAuthMode === nextMode && firstGameGuide?.dataset.authMode === nextMode) {
+    return;
+  }
+
+  if (!firstGameGuideCard) {
+    ui.firstGameAuthMode = nextMode;
+    syncFirstGameAuthMode();
+    return;
+  }
+
+  firstGameGuideCard.classList.remove("first-game-card-enter");
+  firstGameGuideCard.classList.add("first-game-card-exit");
+
+  window.setTimeout(() => {
+    ui.firstGameAuthMode = nextMode;
+    if (firstLoginPasswordInput) {
+      firstLoginPasswordInput.value = "";
+    }
+    syncFirstGameAccountFields();
+    syncFirstGameAuthMode();
+    firstGameGuideCard.classList.remove("first-game-card-exit");
+    firstGameGuideCard.classList.add("first-game-card-enter");
+    if (nextMode !== "choice" && firstLoginNameInput) {
+      window.setTimeout(() => {
+        firstLoginNameInput.focus();
+        firstLoginNameInput.select();
+      }, 120);
+    }
+  }, 210);
+}
+
 function syncFirstGameGuide() {
   const shouldShow = shouldShowFirstGameGuide();
 
@@ -2946,155 +5977,243 @@ function syncFirstGameGuide() {
     firstGameGuide.hidden = !shouldShow;
   }
 
+  if (shouldShow) {
+    syncFirstGameAuthMode();
+    syncFirstGameAccountFields();
+    syncFirstGameLoginNote();
+  } else {
+    ui.firstGameAuthMode = "choice";
+  }
+
   if (lobbyPlayButton) {
     lobbyPlayButton.classList.toggle("first-game-guide-target", shouldShow);
   }
 }
 
-function shouldShowJungleBookGuidePrompt() {
+function showContentCreatorWelcomeScene() {
+  return showRewardShowcase({
+    image: DIAMOND_REWARD_IMAGE,
+    name: "WITAJ CONTENT CREATORZE!",
+    countLabel: `+${CONTENT_CREATOR_DIAMOND_REWARD} DIAMENTÓW`,
+    superTheme: "content-creator",
+    mode: "diamond",
+    autoCloseMs: 2600,
+    soundEffectName: "diamondShine",
+  });
+}
+
+async function completeContentCreatorAccountStart() {
+  state.isContentCreator = true;
+  state.playedFirstGame = true;
+  state.seenFirstRobotTutorial = true;
+  state.completedGamesTotal = Math.max(1, Number(state.completedGamesTotal || 0));
+  state.seenTrophyRoadIntro = false;
+  saveState();
+  renderAll();
+  showView("lobby");
+
+  if (!state.contentCreatorWelcomeClaimed) {
+    await wait(140);
+    await showContentCreatorWelcomeScene();
+    state.diamonds = Math.max(0, Number(state.diamonds || 0)) + CONTENT_CREATOR_DIAMOND_REWARD;
+    state.contentCreatorWelcomeClaimed = true;
+    saveState();
+    renderAll();
+    await syncRemoteProfileNow();
+  }
+
+  syncTrophyRoadGuide();
+}
+
+async function createFirstGameAccountAndStart() {
+  const nickname = sanitizePlayerNickname(firstLoginNameInput?.value);
+  const password = String(firstLoginPasswordInput?.value || "").trim();
+  const previousNickname = state.playerNickname;
+  const previousContentCreator = Boolean(state.isContentCreator);
+  let shouldRefreshNote = true;
+
+  if (!nickname) {
+    setFirstGameAuthNote("Wpisz nazwę gracza.", "error");
+    firstLoginNameInput?.focus();
+    return;
+  }
+
+  if (password.length < 4) {
+    setFirstGameAuthNote("Hasło musi mieć co najmniej 4 znaki.", "error");
+    firstLoginPasswordInput?.focus();
+    return;
+  }
+
+  if (firstLoginSaveButton) {
+    firstLoginSaveButton.disabled = true;
+    firstLoginSaveButton.textContent = "TWORZENIE...";
+  }
+
+  try {
+    state.playerNickname = nickname;
+    state.nicknamePromptSeen = true;
+    state.isContentCreator = previousContentCreator || isContentCreatorNickname(nickname);
+    saveState();
+    await createCloudAccountForCurrentProfile(password);
+    if (firstLoginPasswordInput) {
+      firstLoginPasswordInput.value = "";
+    }
+    ui.pendingMultiplayerLaunch = null;
+    ui.nextGameMode = "solo";
+    if (isContentCreatorNickname(nickname)) {
+      await completeContentCreatorAccountStart();
+      return;
+    }
+    renderAll();
+    await startGameLaunchTransition();
+  } catch (error) {
+    shouldRefreshNote = false;
+    state.playerNickname = previousNickname;
+    state.isContentCreator = previousContentCreator;
+    saveState();
+    let message = "Nie udało się stworzyć konta.";
+
+    if (error?.message === "no-db") {
+      message = "Nie udało się połączyć z chmurą. Spróbuj jeszcze raz za chwilę.";
+    } else if (error?.message === "nickname-taken") {
+      message = "Ta nazwa jest już zajęta. Wybierz inną.";
+    }
+
+    setFirstGameAuthNote(message, "error");
+  } finally {
+    if (firstLoginSaveButton) {
+      firstLoginSaveButton.disabled = false;
+      firstLoginSaveButton.textContent = "ROZEGRAJ PIERWSZĄ GRĘ";
+    }
+    if (shouldRefreshNote) {
+      syncFirstGameLoginNote();
+    }
+  }
+}
+
+async function loginFromFirstGameGuide() {
+  const nickname = sanitizePlayerNickname(firstLoginNameInput?.value);
+  const password = String(firstLoginPasswordInput?.value || "").trim();
+
+  if (!nickname) {
+    setFirstGameAuthNote("Błędny nick.", "error");
+    firstLoginNameInput?.focus();
+    return;
+  }
+
+  if (!password) {
+    setFirstGameAuthNote("Błędne hasło.", "error");
+    firstLoginPasswordInput?.focus();
+    return;
+  }
+
+  if (firstLoginButton) {
+    firstLoginButton.disabled = true;
+    firstLoginButton.textContent = "LOGOWANIE...";
+  }
+
+  try {
+    const result = await withFirstGameLoginTimeout(loadRemoteAccountStateByLogin(nickname, password));
+    if (firstLoginNameInput) {
+      firstLoginNameInput.value = "";
+    }
+    if (firstLoginPasswordInput) {
+      firstLoginPasswordInput.value = "";
+    }
+    applyHydratedState(result.hydrated);
+  } catch (error) {
+    let message = "Nie udało się zalogować.";
+
+    if (error?.message === "missing-account" || error?.message === "missing-nickname") {
+      message = "Błędny nick.";
+    } else if (error?.message === "wrong-password" || error?.message === "missing-login-password") {
+      message = "Błędne hasło.";
+    } else if (error?.message === "login-timeout" || error?.message === "no-db") {
+      message = "Nie udało się połączyć z chmurą.";
+    } else if (error?.message === "missing-password") {
+      message = "To konto nie ma ustawionego hasła.";
+    } else if (error?.message === "missing-save") {
+      message = "To konto nie ma jeszcze zapisu w chmurze.";
+    }
+
+    setFirstGameAuthNote(message, "error");
+  } finally {
+    if (firstLoginButton) {
+      firstLoginButton.disabled = false;
+      firstLoginButton.textContent = "ZALOGUJ SIĘ";
+    }
+  }
+}
+
+function shouldShowTrophyRoadGuide() {
   return Boolean(
-    bookGuidePrompt &&
-    lobbyBookButton &&
-    isTowerWorldUnlocked() &&
+    trophyRoadGuide &&
+    lobbyTrophyButton &&
+    state.seenIntro &&
+    state.playedFirstGame &&
+    Number(state.completedGamesTotal || 0) === 1 &&
+    !state.seenTrophyRoadIntro &&
     ui.currentView === "lobby" &&
-    !state.seenJungleBookGuide &&
     !introSequenceRunning &&
-    !bookGuideSequenceRunning
+    !resultReturnBusy
   );
 }
 
-function syncJungleBookGuidePrompt() {
-  const shouldShow = shouldShowJungleBookGuidePrompt();
-
-  if (bookGuidePrompt) {
-    bookGuidePrompt.hidden = !shouldShow;
+function updateTrophyRoadGuideBubblePosition() {
+  if (!trophyRoadGuide || !lobbyTrophyButton || trophyRoadGuide.hidden) {
+    return;
   }
 
-  if (lobbyBookButton) {
-    lobbyBookButton.classList.toggle("book-guide-target", shouldShow);
-  }
+  const buttonRect = lobbyTrophyButton.getBoundingClientRect();
+  const viewportWidth = Math.max(1, window.innerWidth || document.documentElement.clientWidth || 1);
+  const minX = Math.min(150, viewportWidth / 2);
+  const maxX = Math.max(minX, viewportWidth - minX);
+  const x = clamp(buttonRect.left + buttonRect.width / 2 + 76, minX, maxX);
+  const y = Math.min(
+    Math.max(16, window.innerHeight - 132),
+    buttonRect.bottom + 18
+  );
+
+  trophyRoadGuide.style.setProperty("--trophy-guide-x", `${Math.round(x)}px`);
+  trophyRoadGuide.style.setProperty("--trophy-guide-y", `${Math.round(y)}px`);
+  trophyRoadGuide.dataset.placement = "bottom-right";
 }
 
-function closeJungleBookGuideBackdrop() {
-  if (!bookGuideBackdrop || !bookGuideCard) {
+function handleTrophyRoadGuideClickCapture(event) {
+  if (!shouldShowTrophyRoadGuide()) {
     return;
   }
 
-  bookGuideBackdrop.hidden = true;
-  bookGuideCard.classList.remove("show");
+  if (lobbyTrophyButton?.contains(event.target)) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
 }
 
-function showJungleBookGuideStage({ item, title, copy, buttonLabel }) {
-  if (
-    !bookGuideBackdrop ||
-    !bookGuideCard ||
-    !bookGuideArtFrame ||
-    !bookGuideTitle ||
-    !bookGuideCopy ||
-    !bookGuideConfirmButton
-  ) {
-    return Promise.resolve();
+function syncTrophyRoadGuide() {
+  const shouldShow = shouldShowTrophyRoadGuide();
+
+  if (trophyRoadGuide) {
+    trophyRoadGuide.hidden = !shouldShow;
   }
 
-  renderPreviewAssetIntoFrame(bookGuideArtFrame, item, {
-    elementId: "book-guide-image",
-    imageClass: "modal-image asset-image",
-    videoClass: "modal-image asset-video",
-    fallbackText: item?.name || title,
-    alt: item?.name || title,
-  });
-
-  bookGuideTitle.textContent = title;
-  bookGuideCopy.textContent = copy;
-  bookGuideConfirmButton.textContent = buttonLabel;
-
-  bookGuideBackdrop.hidden = false;
-  bookGuideCard.classList.remove("show");
-  void bookGuideCard.offsetWidth;
-  bookGuideCard.classList.add("show");
-  syncBrokenAssets(bookGuideBackdrop);
-  syncAnimatedAssets(bookGuideBackdrop);
-
-  return new Promise((resolve) => {
-    bookGuideStageResolve = resolve;
-  });
-}
-
-function advanceJungleBookGuideStage() {
-  if (typeof bookGuideStageResolve !== "function") {
-    return;
+  if (lobbyTrophyButton) {
+    lobbyTrophyButton.classList.toggle("trophy-road-guide-target", shouldShow);
   }
 
-  const resolve = bookGuideStageResolve;
-  bookGuideStageResolve = null;
-  closeJungleBookGuideBackdrop();
-  resolve();
-}
-
-async function startJungleBookGuideFlow() {
-  if (bookGuideSequenceRunning) {
-    return;
-  }
-
-  if (state.seenJungleBookGuide) {
-    showView("book");
-    return;
-  }
-
-  const rewardCharacter = getBookGrandRewardCharacter();
-  const animalsTotal = getBookAnimals().length;
-
-  if (
-    !bookGuideBackdrop ||
-    !bookGuideCard ||
-    !bookGuideArtFrame ||
-    !bookGuideTitle ||
-    !bookGuideCopy ||
-    !bookGuideConfirmButton ||
-    !rewardCharacter
-  ) {
-    state.seenJungleBookGuide = true;
-    saveState();
-    renderAll();
-    showView("book");
-    return;
-  }
-
-  bookGuideSequenceRunning = true;
-  syncJungleBookGuidePrompt();
-
-  try {
-    if (ui.currentView !== "book") {
-      showView("book");
-      await wait(80);
-    }
-
-    await showJungleBookGuideStage({
-      item: { name: "Księga Dżungli", image: "./assets/alley/księga.jpeg" },
-      title: "Księga Dżungli",
-      copy: `ZBIERZ WSZYSTKIE ${animalsTotal} ZWIERZĄT, KUPUJĄC JE LUB TRAFIAJĄC Z DŻUNGLOWEJ SKRZYNI, ABY...`,
-      buttonLabel: "KONTYNUUJ",
-    });
-
-    await showJungleBookGuideStage({
-      item: rewardCharacter,
-      title: "Coco N'Kosi",
-      copy: "...ODBLOKOWAĆ ZA DARMO COCO N'KOSI",
-      buttonLabel: "DO DZIEŁA",
-    });
-
-    state.seenJungleBookGuide = true;
-    saveState();
-    renderAll();
-    showView("book");
-  } finally {
-    bookGuideSequenceRunning = false;
-    closeJungleBookGuideBackdrop();
-    syncJungleBookGuidePrompt();
+  if (shouldShow) {
+    updateTrophyRoadGuideBubblePosition();
+    window.requestAnimationFrame(updateTrophyRoadGuideBubblePosition);
   }
 }
 
 function isFirstRobotTutorialPaused() {
+  return false;
+}
+
+function shouldShowFirstRobotTutorialPrompt() {
   return Boolean(game.firstRobotTutorialActive && !state.seenFirstRobotTutorial);
 }
 
@@ -3150,8 +6269,6 @@ function activateFirstRobotTutorial(robot) {
 
   game.firstRobotTutorialRobotId = robot.id;
   game.firstRobotTutorialActive = true;
-  resetGameKeys();
-  resetTouchControls();
   syncWalkingLoop();
 }
 
@@ -3253,26 +6370,26 @@ function getTrophyWorldById(worldId) {
 }
 
 function hasClaimedWinterUnlockReward() {
-  return state.activeTrophyWorld === "winter" || state.activeTrophyWorld === "tower";
+  return state.activeTrophyWorld === "winter";
 }
 
-function hasClaimedTowerUnlockReward() {
-  return state.activeTrophyWorld === "tower";
+function hasReachedMagiciansSilverGate() {
+  return Number(state.trophies || 0) >= MAGICIANS_SILVER_GATE_TROPHIES;
+}
+
+function isMagiciansSilverBridgeActive() {
+  return hasReachedMagiciansSilverGate() && !hasClaimedWinterUnlockReward();
+}
+
+function shouldShowSilverCurrency() {
+  return isMagiciansSilverBridgeActive();
 }
 
 function isWinterWorldUnlocked() {
   return hasClaimedWinterUnlockReward();
 }
 
-function isTowerWorldUnlocked() {
-  return hasClaimedTowerUnlockReward();
-}
-
 function isTrophyWorldUnlocked(worldId) {
-  if (worldId === "tower") {
-    return isTowerWorldUnlocked();
-  }
-
   if (worldId === "winter") {
     return isWinterWorldUnlocked();
   }
@@ -3281,10 +6398,6 @@ function isTrophyWorldUnlocked(worldId) {
 }
 
 function getHighestUnlockedTrophyWorldId() {
-  if (isTowerWorldUnlocked()) {
-    return "tower";
-  }
-
   if (isWinterWorldUnlocked()) {
     return "winter";
   }
@@ -3296,12 +6409,225 @@ function getGlobalVisualWorldTheme() {
   return getActiveTrophyWorldId();
 }
 
-function syncGlobalVisualTheme() {
-  if (!appScreen) {
+function getGameMapInlineBackground(worldId = getGlobalVisualWorldTheme()) {
+  const normalizedWorldId = normalizeTrophyWorldId(worldId);
+
+  if (normalizedWorldId === "winter") {
+    return {
+      background:
+        'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 18%, rgba(0, 0, 0, 0.14) 100%), url("./assets/backgrounds/tło_2.png") center / cover no-repeat, #dceef7',
+      boxShadow: "none",
+    };
+  }
+
+  return {
+    background:
+      'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 16%, rgba(0, 0, 0, 0.14) 100%), url("./mapa.jpg") center / cover no-repeat, url("./assets/backgrounds/tło_1.png") center / cover no-repeat, #21482a',
+    boxShadow: "inset 0 16px 0 rgba(255, 255, 255, 0.05), inset 0 -24px 0 rgba(0, 0, 0, 0.14)",
+  };
+}
+
+function syncGameSurfaceLayout() {
+  const gameView = viewNodes.game;
+  const gamePanel = gameView?.querySelector(".game-panel");
+
+  if (!gameView || !gamePanel || !gameStage || !gameMap) {
     return;
   }
 
-  appScreen.dataset.visualWorld = getGlobalVisualWorldTheme();
+  const surfaceStyle = getGameMapInlineBackground();
+
+  gameView.style.position = "absolute";
+  gameView.style.inset = "0";
+  gameView.style.width = "100%";
+  gameView.style.height = "100%";
+  gameView.style.minHeight = "0";
+  gameView.style.background = "#21482a";
+
+  gamePanel.style.position = "absolute";
+  gamePanel.style.inset = "0";
+  gamePanel.style.width = "100%";
+  gamePanel.style.height = "100%";
+  gamePanel.style.minHeight = "0";
+  gamePanel.style.padding = "0";
+  gamePanel.style.border = "0";
+  gamePanel.style.boxShadow = "none";
+  gamePanel.style.background = "transparent";
+  gamePanel.style.backgroundColor = "transparent";
+
+  gameStage.style.position = "absolute";
+  gameStage.style.inset = "0";
+  gameStage.style.width = "100%";
+  gameStage.style.height = "100%";
+  gameStage.style.minHeight = "0";
+  gameStage.style.overflow = "hidden";
+
+  gameMap.style.position = "absolute";
+  gameMap.style.inset = "0";
+  gameMap.style.width = "100%";
+  gameMap.style.height = "100%";
+  gameMap.style.minHeight = "0";
+  gameMap.style.border = "0";
+  gameMap.style.overflow = "hidden";
+  gameMap.style.background = surfaceStyle.background;
+  gameMap.style.boxShadow = surfaceStyle.boxShadow;
+}
+
+function syncGlobalVisualTheme() {
+  const worldTheme = getGlobalVisualWorldTheme();
+
+  if (appScreen) {
+    appScreen.dataset.visualWorld = worldTheme;
+  }
+
+  if (document.body) {
+    document.body.dataset.visualWorld = worldTheme;
+  }
+}
+
+function isInternetConnectionAvailable() {
+  return typeof navigator === "undefined" || navigator.onLine !== false;
+}
+
+function getOfflineModalWorldTheme() {
+  return normalizeTrophyWorldId(getGlobalVisualWorldTheme());
+}
+
+function syncOfflineModalTheme() {
+  const worldTheme = getOfflineModalWorldTheme();
+
+  if (offlineBackdrop) {
+    offlineBackdrop.dataset.worldTheme = worldTheme;
+  }
+
+  if (offlinePanel) {
+    offlinePanel.dataset.worldTheme = worldTheme;
+  }
+}
+
+function pauseGameForOffline() {
+  if (!game.active) {
+    ui.offlinePausedGame = false;
+    return;
+  }
+
+  if (!game.paused) {
+    ui.offlinePausedGame = true;
+  }
+
+  game.paused = true;
+  resetGameKeys();
+  resetTouchControls();
+  syncWalkingLoop();
+  renderGameScene();
+}
+
+function resumeGameAfterOfflineIfNeeded() {
+  if (!ui.offlinePausedGame) {
+    return;
+  }
+
+  ui.offlinePausedGame = false;
+
+  if (game.active && ui.currentView === "game") {
+    resumeGameFromPause();
+  }
+}
+
+function restartOfflineModalAnimation() {
+  if (!offlinePanel) {
+    return;
+  }
+
+  const animatedNodes = [
+    offlinePanel,
+    offlinePanel.querySelector(".offline-title-frame"),
+    offlinePanel.querySelector(".offline-copy"),
+    offlineRefreshButton,
+  ].filter(Boolean);
+
+  animatedNodes.forEach((node) => {
+    node.style.animation = "none";
+  });
+
+  void offlinePanel.offsetWidth;
+
+  animatedNodes.forEach((node) => {
+    node.style.animation = "";
+  });
+}
+
+function showOfflineModal() {
+  syncOfflineModalTheme();
+  pauseGameForOffline();
+  const alreadyVisible = Boolean(ui.offlineModalVisible && offlineBackdrop && !offlineBackdrop.hidden);
+  ui.offlineModalVisible = true;
+
+  if (!offlineBackdrop) {
+    return;
+  }
+
+  if (alreadyVisible) {
+    offlineBackdrop.classList.add("show");
+    syncBackgroundMusic();
+    return;
+  }
+
+  offlineBackdrop.hidden = false;
+  offlineBackdrop.classList.remove("show");
+  void offlineBackdrop.offsetWidth;
+  offlineBackdrop.classList.add("show");
+  syncBackgroundMusic();
+}
+
+function hideOfflineModal() {
+  ui.offlineModalVisible = false;
+
+  if (!offlineBackdrop) {
+    resumeGameAfterOfflineIfNeeded();
+    return;
+  }
+
+  offlineBackdrop.classList.remove("show");
+  window.setTimeout(() => {
+    if (!ui.offlineModalVisible && offlineBackdrop) {
+      offlineBackdrop.hidden = true;
+    }
+  }, 190);
+  resumeGameAfterOfflineIfNeeded();
+  syncBackgroundMusic();
+}
+
+function refreshOfflineConnection() {
+  if (!isInternetConnectionAvailable()) {
+    showOfflineModal();
+    restartOfflineModalAnimation();
+    return;
+  }
+
+  hideOfflineModal();
+  initSocialProfileSync().catch(() => {});
+  renderAll();
+}
+
+function syncOfflineAccessState() {
+  if (!isInternetConnectionAvailable()) {
+    showOfflineModal();
+    return;
+  }
+
+  if (ui.offlineModalVisible) {
+    hideOfflineModal();
+  }
+}
+
+function ensureInternetForGame() {
+  if (isInternetConnectionAvailable()) {
+    return true;
+  }
+
+  showOfflineModal();
+  return false;
 }
 
 function getActiveTrophyWorldId() {
@@ -3353,7 +6679,8 @@ function getTrophyRoadPeekWidth(mode = "locked") {
   }
 
   if (mode === "completed") {
-    const twoRewardPeek = (TROPHY_NODE_WIDTH * 2) + TROPHY_NODE_GAP + 80;
+    const metrics = getTrophyNodeMetrics(getActiveTrophyWorld());
+    const twoRewardPeek = (metrics.width * 2) + metrics.gap + 80;
     return clamp(Math.min(twoRewardPeek, trophyGrid.clientWidth - 44), 360, 620);
   }
 
@@ -3385,13 +6712,49 @@ function syncTrophyRoadThemeFromScroll() {
   setActiveTrophyWorld(getTrophyRoadThemeFromScroll());
 }
 
+function handleTrophyRoadScroll() {
+  if (!trophyGrid) {
+    return;
+  }
+
+  const previousScrollLeft = trophyRoadLastScrollLeft;
+  clampTrophyRoadScrollPosition();
+  syncTrophyRoadThemeFromScroll();
+
+  const currentScrollLeft = trophyGrid.scrollLeft;
+  const delta = currentScrollLeft - previousScrollLeft;
+  trophyRoadLastScrollLeft = currentScrollLeft;
+
+  if (!isMagiciansStyleTrophyWorld(getTrophyWorldById(trophyGrid.dataset.roadTheme))) {
+    trophyGrid.classList.remove("is-road-scrolling");
+    trophyGrid.style.removeProperty("--trophy-scroll-tilt");
+    trophyGrid.style.removeProperty("--trophy-scroll-shift");
+    return;
+  }
+
+  const scrollPower = clamp(delta / 30, -1, 1);
+  trophyGrid.style.setProperty("--trophy-scroll-tilt", `${(scrollPower * 2.4).toFixed(2)}deg`);
+  trophyGrid.style.setProperty("--trophy-scroll-shift", `${(scrollPower * 4).toFixed(2)}px`);
+  trophyGrid.classList.add("is-road-scrolling");
+
+  if (trophyRoadScrollTimer) {
+    window.clearTimeout(trophyRoadScrollTimer);
+  }
+
+  trophyRoadScrollTimer = window.setTimeout(() => {
+    if (!trophyGrid) {
+      return;
+    }
+    trophyGrid.classList.remove("is-road-scrolling");
+    trophyGrid.style.setProperty("--trophy-scroll-tilt", "0deg");
+    trophyGrid.style.setProperty("--trophy-scroll-shift", "0px");
+    trophyRoadScrollTimer = null;
+  }, 140);
+}
+
 function isSuperAlleyActiveForWorld(worldId = getActiveTrophyWorldId()) {
   if (worldId === "winter") {
     return Boolean(state.superAlleyWinterActive);
-  }
-
-  if (worldId === "tower") {
-    return Boolean(state.superAlleyTowerActive);
   }
 
   return Boolean(state.superAlleyActive);
@@ -3403,42 +6766,22 @@ function setSuperAlleyActiveForWorld(worldId, isActive) {
     return;
   }
 
-  if (worldId === "tower") {
-    state.superAlleyTowerActive = Boolean(isActive);
-    return;
-  }
-
   state.superAlleyActive = Boolean(isActive);
 }
 
 function getSuperAlleyOfferCopy(worldId) {
-  if (worldId === "tower") {
-    return `Wybierz aktywację za ${SUPER_ALLEY_DIAMOND_PRICE} klejnotow lub ${SUPER_ALLEY_CASH_PRICE_LABEL} i odblokuj zielone nagrody premium Świata Dżungli.`;
-  }
-
   return worldId === "winter"
     ? `Wybierz aktywację za ${SUPER_ALLEY_DIAMOND_PRICE} klejnotow lub ${SUPER_ALLEY_CASH_PRICE_LABEL} i odblokuj jasnoniebieskie nagrody premium.`
     : `Wybierz aktywację za ${SUPER_ALLEY_DIAMOND_PRICE} klejnotow lub ${SUPER_ALLEY_CASH_PRICE_LABEL} i odblokuj różowe nagrody premium.`;
 }
 
 function getSuperAlleyUnlockedCopy(worldId) {
-  if (worldId === "tower") {
-    return "Nagrody Super w Świecie Dżungli są już odblokowane.";
-  }
-
   return worldId === "winter"
     ? "Nagrody Super w Świecie Zimowym są już odblokowane."
     : "Nagrody Super w Alei Pucharów są już odblokowane.";
 }
 
 function getSuperAlleySceneVisual(worldId) {
-  if (worldId === "tower") {
-    return {
-      image: "./assets/alley/jungle.jpeg",
-      fallbackText: "DZUNGLA",
-    };
-  }
-
   return worldId === "winter"
     ? {
         image: "./assets/backgrounds/ładowanie_2.png",
@@ -3451,34 +6794,17 @@ function getSuperAlleySceneVisual(worldId) {
 }
 
 function getSuperAlleyBlockedContent(worldId) {
-  if (worldId === "tower" && !isTowerWorldUnlocked()) {
-    return {
-      title: "Najpierw ukoncz Swiat Zimowy",
-      copy: "Po odebraniu Leo odblokujesz Aleje Super Świata Dżungli i jego zielone nagrody premium.",
-    };
-  }
-
   if (worldId === "winter" && !isWinterWorldUnlocked()) {
     return {
       title: "Najpierw ukoncz Swiat Magikow",
-      copy: "Po odebraniu Millo jako Elfie odblokujesz zimowa Aleje Super i jej jasnoniebieskie nagrody premium.",
-    };
-  }
-
-  if (worldId === "winter" && isTowerWorldUnlocked()) {
-    return {
-      title: "Ukończyles juz Swiat Zimowy, nie mozesz go aktywowac",
-      copy: "Po odebraniu Leo mozesz aktywowac juz tylko Aleje Super Świata Dżungli.",
+      copy: "Po ukończeniu Świata Magików odblokujesz zimową Aleję Super i jej jasnoniebieskie nagrody premium.",
     };
   }
 
   if (worldId === "alley" && isWinterWorldUnlocked()) {
-    const highestUnlockedWorldId = getHighestUnlockedTrophyWorldId();
     return {
       title: "Ukończyles juz Swiat Magikow, nie mozesz go aktywowac",
-      copy: highestUnlockedWorldId === "tower"
-        ? "Po odebraniu Leo mozesz aktywowac juz tylko Aleje Super Świata Dżungli."
-        : "Po odebraniu Millo jako Elfie mozesz aktywowac juz tylko zimowa Aleje Super.",
+      copy: "Po ukończeniu Świata Magików mozesz aktywowac juz tylko zimowa Aleje Super.",
     };
   }
 
@@ -3490,8 +6816,17 @@ function openSettingsPanel() {
     return;
   }
 
+  if (settingsCloseTimer) {
+    window.clearTimeout(settingsCloseTimer);
+    settingsCloseTimer = null;
+  }
+
   renderSettingsPanel();
   settingsBackdrop.hidden = false;
+  settingsBackdrop.classList.remove("show");
+  settingsPanel?.classList.remove("is-closing");
+  void settingsBackdrop.offsetWidth;
+  settingsBackdrop.classList.add("show");
 }
 
 function closeSettingsPanel() {
@@ -3499,7 +6834,23 @@ function closeSettingsPanel() {
     return;
   }
 
-  settingsBackdrop.hidden = true;
+  if (settingsBackdrop.hidden) {
+    return;
+  }
+
+  settingsBackdrop.classList.remove("show");
+  settingsPanel?.classList.add("is-closing");
+
+  if (settingsCloseTimer) {
+    window.clearTimeout(settingsCloseTimer);
+  }
+
+  settingsCloseTimer = window.setTimeout(() => {
+    settingsCloseTimer = null;
+    settingsBackdrop.hidden = true;
+    settingsPanel?.classList.remove("is-closing");
+  }, 230);
+  scheduleDailyGiftLobbyCheck();
 }
 
 function openProfilePanel(tab = "me") {
@@ -3507,7 +6858,15 @@ function openProfilePanel(tab = "me") {
     return;
   }
 
-  ui.profileTab = "me";
+  if (profileCloseTimer) {
+    window.clearTimeout(profileCloseTimer);
+    profileCloseTimer = null;
+  }
+
+  ui.profileTab = tab === "friend" ? "friend" : "me";
+  if (ui.profileTab !== "friend") {
+    ui.profileReadonlyProfileId = "";
+  }
   ui.profileEditMode = false;
   ui.profileEditSection = "";
   if (!socialProfile.ready) {
@@ -3515,6 +6874,10 @@ function openProfilePanel(tab = "me") {
   }
   renderProfilePanel();
   profileBackdrop.hidden = false;
+  profileBackdrop.classList.remove("show");
+  profilePanel?.classList.remove("is-closing");
+  void profileBackdrop.offsetWidth;
+  profileBackdrop.classList.add("show");
 }
 
 function closeProfilePanel() {
@@ -3522,9 +6885,34 @@ function closeProfilePanel() {
     return;
   }
 
+  if (profileBackdrop.hidden) {
+    return;
+  }
+
   ui.profileEditMode = false;
   ui.profileEditSection = "";
-  profileBackdrop.hidden = true;
+  ui.profileReadonlyProfileId = "";
+  if (profileWorldTipTimer) {
+    window.clearTimeout(profileWorldTipTimer);
+    profileWorldTipTimer = null;
+  }
+  profileWorldTipBubble?.classList.remove("show");
+  if (profileWorldTipBubble) {
+    profileWorldTipBubble.hidden = true;
+  }
+  profileBackdrop.classList.remove("show");
+  profilePanel?.classList.add("is-closing");
+
+  if (profileCloseTimer) {
+    window.clearTimeout(profileCloseTimer);
+  }
+
+  profileCloseTimer = window.setTimeout(() => {
+    profileCloseTimer = null;
+    profileBackdrop.hidden = true;
+    profilePanel?.classList.remove("is-closing");
+  }, 230);
+  scheduleDailyGiftLobbyCheck();
 }
 
 function openProfileEditSection(section = "") {
@@ -3553,6 +6941,110 @@ function closeProfileEditSection() {
   renderProfilePanel();
 }
 
+function getPublicProfileVisualItem(profile) {
+  const profilePhoto = profile?.profilePhotoId
+    ? CATALOG.profilePhotos.find((item) => item.id === profile.profilePhotoId) || null
+    : null;
+  const favoriteCharacterId = profile?.equippedCharacterId || profile?.favoriteCharacterId;
+  const favoriteCharacter = favoriteCharacterId
+    ? CATALOG.characters.find((item) => item.id === favoriteCharacterId) || null
+    : null;
+  const favoritePetId = profile?.equippedPetId || profile?.favoritePetId;
+  const favoritePet = favoritePetId
+    ? CATALOG.pets.find((item) => item.id === favoritePetId) || null
+    : null;
+
+  return profilePhoto || (profile?.profileVisualKind === "pet" ? favoritePet : favoriteCharacter) || favoriteCharacter || favoritePet;
+}
+
+function getActiveReadonlyProfile() {
+  if (ui.profileTab !== "friend") {
+    return null;
+  }
+
+  return getCachedSocialProfile(ui.profileReadonlyProfileId);
+}
+
+async function openFriendProfileFromFriends(profileId) {
+  const normalizedId = sanitizeProfileId(profileId);
+
+  if (!normalizedId) {
+    return;
+  }
+
+  let profile = getCachedSocialProfile(normalizedId);
+  if (!profile) {
+    const fetchedProfiles = await fetchPublicProfilesById([normalizedId]).catch(() => []);
+    profile = fetchedProfiles[0] || getCachedSocialProfile(normalizedId);
+  }
+
+  if (!profile) {
+    return;
+  }
+
+  socialProfile.selectedProfileId = normalizedId;
+  ui.profileReadonlyProfileId = normalizedId;
+  openProfilePanel("friend");
+}
+
+function getProfileWorldProgressDetails(trophies = Number(state.trophies || 0)) {
+  const currentTrophies = Math.max(0, Number(trophies || 0));
+  const isWinterWorld = currentTrophies >= MAGICIANS_WORLD_END_TROPHIES;
+  const worldEnd = isWinterWorld ? 4000 : MAGICIANS_WORLD_END_TROPHIES;
+
+  return {
+    currentTrophies,
+    worldName: isWinterWorld ? "Świecie Zimowym" : "Świecie Magików",
+    remainingTrophies: Math.max(0, worldEnd - currentTrophies),
+  };
+}
+
+function showProfileWorldTipBubble() {
+  if (!profileWorldTipBubble || !profileWorldTipText || !profileWorldTipCount) {
+    return;
+  }
+
+  const readonlyProfile = getActiveReadonlyProfile();
+  const progressDetails = getProfileWorldProgressDetails(readonlyProfile ? readonlyProfile.trophies : state.trophies);
+  profileWorldTipText.textContent = `Ten gracz znajduje się w ${progressDetails.worldName} i do ukończenia go brakuje mu`;
+  profileWorldTipCount.textContent = String(progressDetails.remainingTrophies);
+
+  if (profileWorldTipTimer) {
+    window.clearTimeout(profileWorldTipTimer);
+    profileWorldTipTimer = null;
+  }
+
+  profileWorldTipBubble.hidden = false;
+  profileWorldTipBubble.classList.remove("show");
+  void profileWorldTipBubble.offsetWidth;
+  profileWorldTipBubble.classList.add("show");
+  profileWorldTipTimer = window.setTimeout(() => {
+    profileWorldTipBubble.classList.remove("show");
+    profileWorldTipTimer = window.setTimeout(() => {
+      profileWorldTipBubble.hidden = true;
+      profileWorldTipTimer = null;
+    }, 180);
+  }, 3000);
+}
+
+function syncProfileContentCreatorBadge(visible) {
+  if (!profileNameButton) {
+    return;
+  }
+
+  profileNameButton.classList.toggle("profile-content-creator", visible);
+  let badge = profileNameButton.querySelector(".profile-content-creator-badge");
+
+  if (visible && !badge) {
+    badge = document.createElement("span");
+    badge.className = "profile-content-creator-badge";
+    badge.textContent = "CONTENT CREATOR";
+    profileNameButton.insertBefore(badge, profileNameButton.firstChild);
+  } else if (!visible && badge) {
+    badge.remove();
+  }
+}
+
 function getUnlockedProfileThemeWorldIds() {
   return TROPHY_WORLDS
     .map((world) => world.id)
@@ -3571,23 +7063,15 @@ function getNicknameChangePrice(changeCount = Number(state.nicknameChangeCount |
   }
 
   if (changeCount === 1) {
-    return 5000;
+    return 49;
   }
 
-  if (changeCount === 2) {
-    return 10000;
-  }
-
-  if (changeCount === 3) {
-    return 15000;
-  }
-
-  return 20000;
+  return 89;
 }
 
 function getNicknameChangePriceLabel(changeCount = Number(state.nicknameChangeCount || 0)) {
   const price = getNicknameChangePrice(changeCount);
-  return price <= 0 ? "za darmo" : `${price} monet`;
+  return price <= 0 ? "za darmo" : `${price} klejnotów`;
 }
 
 function buildProfileThemeChoiceMarkup(worldId, activeWorldId) {
@@ -3608,13 +7092,60 @@ function buildProfileThemeChoiceMarkup(worldId, activeWorldId) {
   `;
 }
 
+function buildProfileEditTabs(activeSection) {
+  return `
+    <div class="profile-picture-tab-row">
+      <button class="profile-picture-tab${activeSection === "character" ? " active" : ""}" data-profile-edit-mode="character" type="button">
+        <span>POSTACIE</span>
+      </button>
+      <button class="profile-picture-tab${activeSection === "pet" ? " active" : ""}" data-profile-edit-mode="pet" type="button">
+        <span>PLATOYE</span>
+      </button>
+      <button class="profile-picture-tab${activeSection === "photo" ? " active" : ""}" data-profile-edit-mode="photo" type="button">
+        <span>ZDJĘCIA</span>
+      </button>
+    </div>
+  `;
+}
+
+function buildProfilePictureChoice(item, kind, isActive) {
+  if (!item) {
+    return "";
+  }
+
+  return `
+    <button
+      class="profile-character-choice profile-picture-choice${isActive ? " active" : ""}"
+      data-profile-${kind}-choice="${item.id}"
+      type="button"
+      aria-label="Ustaw ${escapeHtml(item.name)}"
+    >
+      ${buildPreviewAssetMarkup(item, {
+        fallbackText: item.name,
+        alt: item.name,
+        imageClass: "avatar-image asset-image",
+        videoClass: "avatar-image asset-video",
+        usePoster: false,
+      })}
+    </button>
+  `;
+}
+
 function renderProfileEditPanel() {
   if (!profileEditPanel || !profileEditCard) {
     return;
   }
 
+  if (ui.profileTab === "friend") {
+    ui.profileEditMode = false;
+    ui.profileEditSection = "";
+    profileEditCard.hidden = true;
+    profileEditPanel.innerHTML = "";
+    return;
+  }
+
   const favoriteCharacter = getProfileFavoriteCharacter();
-  const selectedProfilePhoto = getSelectedProfilePhoto();
+  const favoritePet = getProfileFavoritePet();
   const activeThemeWorldId = getSelectedProfileThemeWorldId();
   profileEditCard.hidden = !ui.profileEditMode;
 
@@ -3625,54 +7156,37 @@ function renderProfileEditPanel() {
 
   if (profileEditKicker) {
     profileEditKicker.textContent = ui.profileEditSection === "character"
-      ? "Ulubiona postać"
+      ? "Zdjęcie profilu"
+      : ui.profileEditSection === "pet"
+        ? "Zdjęcie profilu"
+      : ui.profileEditSection === "photo"
+        ? "Zdjęcie profilu"
       : ui.profileEditSection === "theme"
         ? "Kolor profilu"
         : "Zmień nazwę";
   }
 
-  if (ui.profileEditSection === "character") {
+  if (ui.profileEditSection === "character" || ui.profileEditSection === "pet" || ui.profileEditSection === "photo") {
+    const isPetTab = ui.profileEditSection === "pet";
+    const isPhotoTab = ui.profileEditSection === "photo";
+    const items = isPhotoTab
+      ? getOwnedItems("profilePhotos")
+      : isPetTab
+        ? getOwnedMainPetItems()
+        : getOwnedItems("characters");
+    const activeId = isPhotoTab
+      ? state.selectedProfilePhotoId
+      : isPetTab
+        ? getPetBaseId(favoritePet?.id)
+        : favoriteCharacter?.id;
+    const activeKind = isPhotoTab ? "photo" : isPetTab ? "pet" : "character";
+
     profileEditPanel.innerHTML = `
-      <p class="profile-edit-section-title">Zdjęcia profilowe</p>
-      <div class="profile-character-choice-grid profile-photo-choice-grid">
-        ${getOwnedItems("profilePhotos").map((item) => `
-          <button
-            class="profile-character-choice profile-photo-choice${item.id === selectedProfilePhoto?.id ? " active" : ""}"
-            data-profile-photo-choice="${item.id}"
-            type="button"
-            aria-label="Ustaw ${escapeHtml(item.name)}"
-          >
-            ${buildPreviewAssetMarkup(item, {
-              fallbackText: item.name,
-              alt: item.name,
-              imageClass: "avatar-image asset-image",
-              videoClass: "avatar-image asset-video",
-            })}
-          </button>
-        `).join("")}
-      </div>
-      <p class="profile-edit-section-title">Postacie</p>
-      <div class="profile-character-choice-grid">
-        ${getOwnedItems("characters").map((item) => `
-          <button
-            class="profile-character-choice${item.id === favoriteCharacter?.id ? " active" : ""}"
-            data-profile-character-choice="${item.id}"
-            type="button"
-            aria-label="Ustaw ${escapeHtml(item.name)}"
-          >
-            ${buildPreviewAssetMarkup(item, {
-              fallbackText: item.name,
-              alt: item.name,
-              imageClass: "avatar-image asset-image",
-              videoClass: "avatar-image asset-video",
-              usePoster: false,
-            })}
-          </button>
-        `).join("")}
-      </div>
-      <p class="profile-edit-note">Naciśnij zdjęcie lub filmik, aby ustawić ulubioną postać.</p>
-      <div class="profile-edit-actions profile-edit-actions-simple">
-        <button class="pixel-button small-button subtle-button" data-profile-edit-cancel type="button">ZAMKNIJ</button>
+      ${buildProfileEditTabs(ui.profileEditSection)}
+      <div class="profile-character-choice-grid profile-picture-choice-grid">
+        ${items.length
+          ? items.map((item) => buildProfilePictureChoice(item, activeKind, item.id === activeId && (isPhotoTab || getProfileVisualKind() === activeKind))).join("")
+          : `<p class="profile-edit-empty">${isPhotoTab ? "NIE MASZ ZDJĘĆ PROFILU" : isPetTab ? "NIE MASZ JESZCZE PLATOYI" : "NIE MASZ POSTACI"}</p>`}
       </div>
     `;
     syncBrokenAssets(profileEditPanel);
@@ -3694,28 +7208,63 @@ function renderProfileEditPanel() {
   }
 
   const renamePrice = getNicknameChangePrice();
+  const previousNameInput = document.getElementById("profile-name-input-dynamic");
+  const previousRepeatInput = document.getElementById("profile-name-input-repeat");
+  const focusedProfileInputId = document.activeElement?.id || "";
+  const previousSelectionStart = typeof document.activeElement?.selectionStart === "number"
+    ? document.activeElement.selectionStart
+    : null;
+  const existingNameValue = previousNameInput?.value || "";
+  const existingRepeatValue = previousRepeatInput?.value || "";
+  const confirmMarkup = renamePrice <= 0
+    ? `<img class="profile-name-confirm-icon asset-image" src="./haczyk.png" alt="Zmień" data-fallback-text="OK" /><span class="asset-fallback">OK</span>`
+    : buildCurrencyAmountMarkup(renamePrice, "diamonds");
   profileEditPanel.innerHTML = `
-    <label class="settings-field profile-name-edit-field" for="profile-name-input-dynamic">
-      <span class="settings-field-label">Twoja nazwa</span>
+    <div class="profile-name-edit-title-frame">
+      <span>ZMIEŃ NAZWĘ</span>
+    </div>
+    <div class="profile-name-edit-fields">
       <input
-        class="settings-input"
+        class="settings-input profile-name-edit-input"
         id="profile-name-input-dynamic"
         type="text"
         maxlength="18"
-        placeholder="Gracz1234"
-        value="${escapeHtml(getPlayerNickname())}"
+        placeholder="Nowa nazwa"
       />
-    </label>
-    <p class="profile-edit-note">
-      ${renamePrice <= 0 ? "Pierwsza zmiana nazwy jest darmowa." : `Ta zmiana kosztuje ${getNicknameChangePriceLabel()}.`}
-    </p>
-    <div class="profile-edit-actions">
-      <button class="pixel-button small-button settings-action-button" data-profile-name-save type="button">
-        ${renamePrice <= 0 ? "ZMIEŃ ZA DARMO" : `ZMIEŃ ZA ${renamePrice}`}
+      <input
+        class="settings-input profile-name-edit-input"
+        id="profile-name-input-repeat"
+        type="text"
+        maxlength="18"
+        placeholder="Powtórz nazwę"
+      />
+    </div>
+    <div class="profile-edit-actions profile-name-edit-actions">
+      <button class="profile-name-save-button" data-profile-name-save type="button" aria-label="Zapisz nazwę">
+        ${confirmMarkup}
       </button>
-      <button class="pixel-button small-button subtle-button" data-profile-edit-cancel type="button">ANULUJ</button>
     </div>
   `;
+  const dynamicNameInput = document.getElementById("profile-name-input-dynamic");
+  const repeatNameInput = document.getElementById("profile-name-input-repeat");
+  if (dynamicNameInput) {
+    dynamicNameInput.value = existingNameValue;
+  }
+  if (repeatNameInput) {
+    repeatNameInput.value = existingRepeatValue;
+  }
+  const nextFocusedInput = focusedProfileInputId === "profile-name-input-repeat" ? repeatNameInput : dynamicNameInput;
+  if (
+    nextFocusedInput
+    && (focusedProfileInputId === "profile-name-input-dynamic" || focusedProfileInputId === "profile-name-input-repeat")
+  ) {
+    nextFocusedInput.focus();
+    if (previousSelectionStart !== null && typeof nextFocusedInput.setSelectionRange === "function") {
+      const safeCaretPosition = Math.min(previousSelectionStart, nextFocusedInput.value.length);
+      nextFocusedInput.setSelectionRange(safeCaretPosition, safeCaretPosition);
+    }
+  }
+  syncBrokenAssets(profileEditPanel);
 }
 
 function applyProfileFavoriteCharacterChange(characterId) {
@@ -3725,10 +7274,28 @@ function applyProfileFavoriteCharacterChange(characterId) {
   }
 
   state.selectedProfilePhotoId = "";
+  state.profileVisualKind = "character";
   state.favoriteCharacterId = nextCharacterId;
   saveState();
   closeProfileEditSection();
-  renderAll();
+  renderLobby();
+  renderFriendsView();
+  scheduleRemoteProfileSync(true);
+}
+
+function applyProfileFavoritePetChange(petId) {
+  const nextPetId = sanitizeStoredId(petId);
+  if (!nextPetId || !state.ownedPets.includes(nextPetId)) {
+    return;
+  }
+
+  state.selectedProfilePhotoId = "";
+  state.profileVisualKind = "pet";
+  state.favoritePetId = nextPetId;
+  saveState();
+  closeProfileEditSection();
+  renderLobby();
+  renderFriendsView();
   scheduleRemoteProfileSync(true);
 }
 
@@ -3739,9 +7306,11 @@ function applyProfilePhotoChange(photoId) {
   }
 
   state.selectedProfilePhotoId = nextPhotoId;
+  state.profileVisualKind = "character";
   saveState();
   closeProfileEditSection();
-  renderAll();
+  renderLobby();
+  renderFriendsView();
   scheduleRemoteProfileSync(true);
 }
 
@@ -3754,7 +7323,8 @@ function applyProfileThemeChange(worldId) {
   state.profileThemeWorldId = nextThemeWorldId;
   saveState();
   closeProfileEditSection();
-  renderAll();
+  renderLobby();
+  renderFriendsView();
   scheduleRemoteProfileSync(true);
 }
 
@@ -3770,45 +7340,80 @@ function togglePhoneMode() {
   setPhoneModeEnabled(!state.phoneModeEnabled);
 }
 
+function normalizeSettingsVolumePercent(value, fallback = SETTINGS_VOLUME_MAX) {
+  const numericValue = Number(value);
+  const safeValue = Number.isFinite(numericValue) ? numericValue : fallback;
+  return clamp(Math.round(safeValue), SETTINGS_VOLUME_MIN, SETTINGS_VOLUME_MAX);
+}
+
+function getMusicVolumeFactor() {
+  return normalizeSettingsVolumePercent(state.musicVolumePercent, SETTINGS_VOLUME_MAX) / SETTINGS_VOLUME_MAX;
+}
+
+function getSoundVolumeFactor() {
+  return normalizeSettingsVolumePercent(state.soundVolumePercent, SETTINGS_VOLUME_MAX) / SETTINGS_VOLUME_MAX;
+}
+
+function setMusicVolumePercent(value) {
+  state.musicVolumePercent = normalizeSettingsVolumePercent(value);
+  saveState();
+  renderSettingsPanel();
+  syncBackgroundMusic();
+}
+
+function setSoundVolumePercent(value) {
+  state.soundVolumePercent = normalizeSettingsVolumePercent(value);
+  saveState();
+  renderSettingsPanel();
+
+  if (walkingLoopAudio) {
+    walkingLoopAudio.volume = 0.45 * getSoundVolumeFactor();
+  }
+}
+
 function renderSettingsPanel() {
-  if (!phoneModeToggle || !settingsPhoneStatus) {
-    return;
+  const musicPercent = normalizeSettingsVolumePercent(state.musicVolumePercent, SETTINGS_VOLUME_MAX);
+  const soundPercent = normalizeSettingsVolumePercent(state.soundVolumePercent, SETTINGS_VOLUME_MAX);
+  const worldTheme = getGlobalVisualWorldTheme();
+
+  if (settingsPanel) {
+    settingsPanel.dataset.worldTheme = worldTheme;
   }
 
-  const isEnabled = Boolean(state.phoneModeEnabled);
-  phoneModeToggle.textContent = isEnabled ? "WYLACZ" : "WLACZ";
-  phoneModeToggle.classList.toggle("active", isEnabled);
-  settingsPhoneStatus.textContent = isEnabled
-    ? "Wlaczony. W grze po lewej pojawi sie joystick, a po prawej przycisk strzalu."
-    : "Wylaczony. Sterowanie zostaje na strzalkach i spacji.";
-
-  if (settingsAccountStatus) {
-    if (!socialProfile.ready) {
-      settingsAccountStatus.textContent = navigator.onLine === false
-        ? "Konto online nie działa bez internetu."
-        : socialProfile.lastError || "Profil online jest chwilowo niedostępny.";
-    } else if (socialProfile.lastError) {
-      settingsAccountStatus.textContent = socialProfile.lastError;
-    } else {
-      settingsAccountStatus.textContent = state.accountPasswordSet
-        ? "Konto jest połączone z chmurą. Możesz logować się nickiem i hasłem."
-        : "Profil jest już widoczny dla innych graczy. Ustaw hasło, aby logować się na innych urządzeniach.";
-    }
+  if (settingsBackdrop) {
+    settingsBackdrop.dataset.worldTheme = worldTheme;
   }
 
-  if (settingsSetPasswordButton) {
-    settingsSetPasswordButton.textContent = state.accountPasswordSet ? "HASŁO USTAWIONE" : "USTAW HASŁO";
-    settingsSetPasswordButton.disabled = state.accountPasswordSet;
+  if (settingsMusicRange) {
+    settingsMusicRange.value = String(musicPercent);
+    settingsMusicRange.style.setProperty("--settings-range-value", `${musicPercent}%`);
   }
 
-  if (settingsNewPassword) {
-    settingsNewPassword.disabled = state.accountPasswordSet;
-    settingsNewPassword.placeholder = state.accountPasswordSet ? "Hasło już ustawione" : "Wpisz hasło";
+  if (settingsMusicValue) {
+    settingsMusicValue.textContent = `${musicPercent}%`;
   }
 
-  if (settingsLoginButton) {
-    settingsLoginButton.disabled = false;
+  if (settingsSoundRange) {
+    settingsSoundRange.value = String(soundPercent);
+    settingsSoundRange.style.setProperty("--settings-range-value", `${soundPercent}%`);
   }
+
+  if (settingsSoundValue) {
+    settingsSoundValue.textContent = `${soundPercent}%`;
+  }
+}
+
+function formatProfileCreatedDate(timestamp) {
+  const numericTimestamp = Number(timestamp || 0);
+  const date = Number.isFinite(numericTimestamp) && numericTimestamp > 0
+    ? new Date(numericTimestamp)
+    : new Date();
+
+  return new Intl.DateTimeFormat("pl-PL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
 }
 
 function renderProfilePanel() {
@@ -3816,8 +7421,34 @@ function renderProfilePanel() {
     return;
   }
 
-  const profileVisualItem = getProfileVisualItem();
-  const profileThemeWorldId = getSelectedProfileThemeWorldId();
+  const readonlyProfile = getActiveReadonlyProfile();
+  const isReadonlyProfile = Boolean(readonlyProfile);
+  const profileVisualItem = isReadonlyProfile ? getPublicProfileVisualItem(readonlyProfile) : getProfileVisualItem();
+  const panelWorldTheme = isReadonlyProfile ? getProfileThemeWorldId(readonlyProfile) : getGlobalVisualWorldTheme();
+  const currentTrophies = Math.max(0, Number(isReadonlyProfile ? readonlyProfile.trophies : state.trophies || 0));
+  const progressWorldTheme = currentTrophies >= MAGICIANS_WORLD_END_TROPHIES ? "winter" : "alley";
+  const progressStart = progressWorldTheme === "winter" ? MAGICIANS_WORLD_END_TROPHIES : 0;
+  const progressEnd = progressWorldTheme === "winter" ? 4000 : MAGICIANS_WORLD_END_TROPHIES;
+  const progressPercent = clamp((currentTrophies - progressStart) / Math.max(1, progressEnd - progressStart), 0, 1) * 100;
+  const profileCreatedAt = isReadonlyProfile ? readonlyProfile.createdAt : state.profileCreatedAt;
+  const ownedCharactersCount = isReadonlyProfile
+    ? Number(readonlyProfile.ownedCharactersCount || 0)
+    : state.ownedCharacters.length;
+  const ownedPetsCount = isReadonlyProfile
+    ? Number(readonlyProfile.ownedPetsCount || 0)
+    : getOwnedMainPetItems().length;
+  const profileIsContentCreator = isReadonlyProfile
+    ? isContentCreatorAccount(readonlyProfile)
+    : isContentCreatorAccount();
+
+  if (profilePanel) {
+    profilePanel.classList.toggle("profile-readonly-mode", isReadonlyProfile);
+    profilePanel.dataset.worldTheme = panelWorldTheme;
+  }
+
+  if (profileBackdrop) {
+    profileBackdrop.dataset.worldTheme = panelWorldTheme;
+  }
 
   profileTabPanelMe.hidden = false;
   if (profileTabPanelUsers) {
@@ -3825,18 +7456,34 @@ function renderProfilePanel() {
   }
 
   if (profileNameHeading) {
-    profileNameHeading.textContent = getPlayerNickname();
+    profileNameHeading.textContent = isReadonlyProfile ? (readonlyProfile.nickname || "Gracz") : getPlayerNickname();
   }
 
+  if (profileCharacterButton) {
+    profileCharacterButton.disabled = isReadonlyProfile;
+    profileCharacterButton.setAttribute("aria-label", isReadonlyProfile ? "Zdjęcie profilowe gracza" : "Zmień zdjęcie profilowe");
+  }
+
+  if (profileNameButton) {
+    profileNameButton.disabled = isReadonlyProfile;
+    profileNameButton.setAttribute("aria-label", isReadonlyProfile ? "Nazwa gracza" : "Zmień nazwę profilu");
+  }
+  syncProfileContentCreatorBadge(profileIsContentCreator);
+
   if (profileWorldBar) {
-    profileWorldBar.dataset.worldTheme = profileThemeWorldId;
+    profileWorldBar.dataset.worldTheme = progressWorldTheme;
+    profileWorldBar.setAttribute("aria-label", `${currentTrophies} pucharów, postęp świata ${Math.round(progressPercent)}%`);
+  }
+
+  if (profileWorldBarFill) {
+    profileWorldBarFill.style.width = `${progressPercent.toFixed(2)}%`;
   }
 
   if (profileMainCard) {
-    profileMainCard.dataset.worldTheme = profileThemeWorldId;
+    profileMainCard.dataset.worldTheme = progressWorldTheme;
   }
 
-  renderPreviewAssetIntoFrame(profileCharacterButton || profileFavoriteCharacterFrame, profileVisualItem, {
+  renderPreviewAssetIntoFrame(profileFavoriteCharacterFrame || profileCharacterButton, profileVisualItem, {
     elementId: "profile-favorite-character-image",
     imageClass: "avatar-image asset-image",
     videoClass: "avatar-image asset-video",
@@ -3846,7 +7493,19 @@ function renderProfilePanel() {
   });
 
   if (profileStatTrophies) {
-    profileStatTrophies.textContent = String(state.trophies);
+    profileStatTrophies.textContent = String(currentTrophies);
+  }
+
+  if (profileStatCreated) {
+    profileStatCreated.textContent = formatProfileCreatedDate(profileCreatedAt);
+  }
+
+  if (profileStatCharactersOwned) {
+    profileStatCharactersOwned.textContent = String(Math.max(0, ownedCharactersCount));
+  }
+
+  if (profileStatPetsOwned) {
+    profileStatPetsOwned.textContent = String(Math.max(0, ownedPetsCount));
   }
 
   if (profileThemePicker) {
@@ -3885,30 +7544,35 @@ function renderLobby() {
     lobbyPet.src = equippedPet.image;
     lobbyPet.alt = equippedPet.name;
     lobbyPet.classList.remove("broken");
+    syncPetSkinSparkles(lobbyPet.closest(".pet-frame"), equippedPet.id);
   } else {
     petWrapper.hidden = true;
     lobbyPet.src = "";
     lobbyPet.alt = "PlatoYa";
     lobbyPet.classList.add("broken");
+    syncPetSkinSparkles(lobbyPet.closest(".pet-frame"), "");
   }
+
+  renderLobbyPetRank(equippedPet);
 
   if (lobbySelfReadyBadge) {
     lobbySelfReadyBadge.hidden = !isPartyActive() || !isLocalPartyReady();
   }
 
   if (lobbyPlayButton) {
-    lobbyPlayButton.textContent = isPartyActive() && !isPartyGameActive() && isLocalPartyReady()
+    const playLabel = isPartyActive() && !isPartyGameActive() && isLocalPartyReady()
       ? "ANULUJ GOTOWOŚĆ"
       : "GRAJ";
+    if (lobbyPlayLabel) {
+      lobbyPlayLabel.textContent = playLabel;
+    } else {
+      lobbyPlayButton.textContent = playLabel;
+    }
   }
 
-  if (lobbyBookButton) {
-    lobbyBookButton.hidden = !isTowerWorldUnlocked();
-  }
-
-  if (lobbyLayout) {
-    lobbyLayout.classList.toggle("book-unlocked", !lobbyBookButton?.hidden);
-  }
+  renderLobbyAlleyProgress();
+  renderHighTowerEntry();
+  updateStreakDisplays();
 
   if (partyTeammateShowcase) {
     partyTeammateShowcase.hidden = !otherMemberProfile;
@@ -3946,6 +7610,709 @@ function renderLobby() {
 
   if (partyLeaveButton) {
     partyLeaveButton.hidden = !otherMemberProfile;
+  }
+
+  if (petWrapper) {
+    syncBrokenAssets(petWrapper);
+  }
+}
+
+function getLobbyNextBaseTrophyReward() {
+  const world = getActiveTrophyWorld();
+  const rewards = getTrophyWorldBaseRewards(world);
+
+  if (!world || rewards.length === 0) {
+    return null;
+  }
+
+  const nextReward = rewards.find((reward) => state.trophies < reward.trophies) || rewards[rewards.length - 1];
+  const rewardIndex = Math.max(0, rewards.indexOf(nextReward));
+  const previousThreshold = rewardIndex <= 0
+    ? Number(world.threshold || 0)
+    : Number(rewards[rewardIndex - 1].trophies || world.threshold || 0);
+  const nextThreshold = Number(nextReward.trophies || previousThreshold || 1);
+  const progress = clamp(
+    (Number(state.trophies || 0) - previousThreshold) / Math.max(1, nextThreshold - previousThreshold),
+    0,
+    1
+  );
+
+  return {
+    world,
+    reward: nextReward,
+    progress,
+    nextThreshold,
+  };
+}
+
+function renderLobbyAlleyProgress() {
+  const progressInfo = getLobbyNextBaseTrophyReward();
+
+  if (!progressInfo) {
+    return;
+  }
+
+  const rewardImage = getTrophyRewardImage(progressInfo.reward);
+  const currentTrophies = Math.max(0, Number(state.trophies || 0));
+
+  if (lobbyAlleyProgressFill) {
+    lobbyAlleyProgressFill.style.width = `${(progressInfo.progress * 100).toFixed(2)}%`;
+  }
+
+  if (lobbyAlleyRewardImage) {
+    lobbyAlleyRewardImage.src = rewardImage.src;
+    lobbyAlleyRewardImage.alt = progressInfo.reward.label || "Nagroda z Alei";
+    lobbyAlleyRewardImage.dataset.fallbackText = rewardImage.fallbackText || "NAGRODA";
+    lobbyAlleyRewardImage.classList.remove("broken");
+  }
+
+  if (lobbyAlleyRewardFallback) {
+    lobbyAlleyRewardFallback.textContent = rewardImage.fallbackText || "NAG";
+  }
+
+  if (lobbyAlleyProgressValue) {
+    lobbyAlleyProgressValue.textContent = `${currentTrophies} / ${progressInfo.nextThreshold}`;
+  }
+}
+
+function getPortalMissionDefinition(templateId) {
+  return PORTAL_MISSION_DEFINITIONS.find((definition) => definition.id === templateId) || null;
+}
+
+function getDefaultPortalMissionState() {
+  return {
+    unlockedAt: 0,
+    lastCycleKey: "",
+    dailyBonusClaimedCycleKey: "",
+    missions: [],
+  };
+}
+
+function sanitizePortalMissionState(rawState) {
+  const safeState = getDefaultPortalMissionState();
+  const missionDefinitions = PORTAL_MISSION_DEFINITIONS;
+  const missionByTemplateId = new Map();
+
+  if (!rawState || typeof rawState !== "object") {
+    return safeState;
+  }
+
+  safeState.unlockedAt = Math.max(0, Number(rawState.unlockedAt || 0));
+  safeState.lastCycleKey = "fixed";
+  safeState.dailyBonusClaimedCycleKey = sanitizeDateKey(rawState.dailyBonusClaimedCycleKey);
+  if (Array.isArray(rawState.missions)) {
+    rawState.missions
+      .forEach((mission) => {
+        const templateId = sanitizeStoredId(mission?.templateId);
+        const definition = getPortalMissionDefinition(templateId);
+
+        if (!definition) {
+          return;
+        }
+
+        const target = Math.max(1, Number(definition.target || 1));
+        const existingMission = missionByTemplateId.get(templateId);
+        const safeMission = {
+          id: `portal-fixed-${templateId}`,
+          templateId,
+          cycleKey: "fixed",
+          createdAt: Math.max(0, Number(mission?.createdAt || 0)),
+          premium: false,
+          color: PORTAL_MISSION_COLORS[missionDefinitions.findIndex((entry) => entry.id === templateId) % PORTAL_MISSION_COLORS.length] || "blue",
+          progress: clamp(Number(mission?.progress || 0), 0, target),
+          claimed: Boolean(mission?.claimed),
+          completedAt: Math.max(0, Number(mission?.completedAt || 0)),
+          claimedAt: Math.max(0, Number(mission?.claimedAt || 0)),
+        };
+
+        if (!existingMission || safeMission.progress > Number(existingMission.progress || 0)) {
+          missionByTemplateId.set(templateId, safeMission);
+        }
+      });
+  }
+
+  safeState.missions = missionDefinitions.map((definition, index) => {
+    const savedMission = missionByTemplateId.get(definition.id);
+
+    if (savedMission) {
+      return {
+        ...savedMission,
+        color: PORTAL_MISSION_COLORS[index % PORTAL_MISSION_COLORS.length],
+      };
+    }
+
+    return {
+      id: `portal-fixed-${definition.id}`,
+      templateId: definition.id,
+      cycleKey: "fixed",
+      createdAt: Date.now() + index,
+      premium: false,
+      color: PORTAL_MISSION_COLORS[index % PORTAL_MISSION_COLORS.length],
+      progress: 0,
+      claimed: false,
+      completedAt: 0,
+      claimedAt: 0,
+    };
+  });
+
+  return safeState;
+}
+
+function getPortalMissionState() {
+  if (!state.portalMissions || typeof state.portalMissions !== "object") {
+    state.portalMissions = getDefaultPortalMissionState();
+  }
+
+  state.portalMissions = sanitizePortalMissionState(state.portalMissions);
+  return state.portalMissions;
+}
+
+function createPortalMissionId(cycleKey, slotIndex, premium = false) {
+  return [
+    "portal",
+    cycleKey || getCurrentDailyGiftCycleKey(),
+    premium ? "premium" : "base",
+    slotIndex,
+    Date.now().toString(36),
+    Math.random().toString(36).slice(2, 8),
+  ].join("-");
+}
+
+function getNextPortalMissionCycleKey(cycleKey) {
+  const safeKey = sanitizeDateKey(cycleKey) || getCurrentDailyGiftCycleKey();
+  const date = new Date(`${safeKey}T12:00:00`);
+  date.setDate(date.getDate() + 1);
+  return getCurrentLocalDateKey(date);
+}
+
+function getNextPortalMissionCycleTimestamp(now = new Date()) {
+  const currentDate = now instanceof Date ? new Date(now) : new Date(now);
+  const nextCycle = new Date(currentDate);
+  nextCycle.setHours(9, 0, 0, 120);
+
+  if (currentDate >= nextCycle) {
+    nextCycle.setDate(nextCycle.getDate() + 1);
+  }
+
+  return nextCycle.getTime();
+}
+
+function pickPortalMissionDefinition() {
+  return PORTAL_MISSION_DEFINITIONS[randomBetween(0, PORTAL_MISSION_DEFINITIONS.length - 1)];
+}
+
+function addPortalMissionsForCycle(cycleKey) {
+  const missionState = getPortalMissionState();
+  let changed = false;
+
+  PORTAL_MISSION_DEFINITIONS.forEach((definition, index) => {
+    if (missionState.missions.some((mission) => mission.templateId === definition.id)) {
+      return;
+    }
+
+    missionState.missions.push({
+      id: `portal-fixed-${definition.id}`,
+      templateId: definition.id,
+      cycleKey: "fixed",
+      createdAt: Date.now() + index,
+      premium: false,
+      color: PORTAL_MISSION_COLORS[index % PORTAL_MISSION_COLORS.length],
+      progress: 0,
+      claimed: false,
+      completedAt: 0,
+      claimedAt: 0,
+    });
+    changed = true;
+  });
+
+  return changed;
+}
+
+function ensurePortalMissionsCurrent() {
+  if (!hasReachedMagiciansSilverGate()) {
+    return false;
+  }
+
+  const missionState = getPortalMissionState();
+  let changed = false;
+
+  if (!missionState.unlockedAt) {
+    missionState.unlockedAt = Date.now();
+    missionState.lastCycleKey = "fixed";
+    changed = true;
+    changed = addPortalMissionsForCycle("fixed") || changed;
+    clearPortalMissionDailyTimer();
+    return changed;
+  }
+
+  changed = addPortalMissionsForCycle("fixed") || changed;
+  missionState.lastCycleKey = "fixed";
+  clearPortalMissionDailyTimer();
+  return changed;
+}
+
+function clearPortalMissionDailyTimer() {
+  if (!portalMissionDailyTimer) {
+    return;
+  }
+
+  window.clearTimeout(portalMissionDailyTimer);
+  portalMissionDailyTimer = 0;
+}
+
+function schedulePortalMissionDailyTimer() {
+  clearPortalMissionDailyTimer();
+}
+
+function schedulePortalMissionAutosave() {
+  if (portalMissionSaveTimer) {
+    return;
+  }
+
+  portalMissionSaveTimer = window.setTimeout(() => {
+    portalMissionSaveTimer = 0;
+    saveState();
+  }, 850);
+}
+
+function isPortalMissionLocked(mission) {
+  return Boolean(mission?.premium) && !isSuperAlleyActiveForWorld("alley");
+}
+
+function isPortalMissionComplete(mission) {
+  const definition = getPortalMissionDefinition(mission?.templateId);
+  return Boolean(definition) && Number(mission?.progress || 0) >= Number(definition.target || 1);
+}
+
+function getPortalMissionProgressPercent(mission) {
+  const definition = getPortalMissionDefinition(mission?.templateId);
+  const target = Math.max(1, Number(definition?.target || 1));
+  return clamp((Number(mission?.progress || 0) / target) * 100, 0, 100);
+}
+
+function getPortalMissionProgressLabel(mission) {
+  const definition = getPortalMissionDefinition(mission?.templateId);
+  const target = Math.max(1, Number(definition?.target || 1));
+  const progress = clamp(Math.floor(Number(mission?.progress || 0)), 0, target);
+  return `${progress}/${target}`;
+}
+
+function formatPortalMissionRefreshLabel() {
+  const remainingMs = Math.max(0, getNextPortalMissionCycleTimestamp() - Date.now());
+  const totalMinutes = Math.max(0, Math.ceil(remainingMs / 60000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours}H ${minutes}MIN`;
+}
+
+function buildPortalMissionCard(mission, index = 0) {
+  const definition = getPortalMissionDefinition(mission.templateId);
+
+  if (!definition) {
+    return "";
+  }
+
+  const locked = isPortalMissionLocked(mission);
+  const complete = isPortalMissionComplete(mission);
+  const claimed = Boolean(mission.claimed);
+  const progressPercent = getPortalMissionProgressPercent(mission);
+  const color = PORTAL_MISSION_COLORS.includes(mission.color)
+    ? mission.color
+    : PORTAL_MISSION_COLORS[index % PORTAL_MISSION_COLORS.length];
+  const actionMarkup = claimed
+    ? `<button class="portal-mission-claim claimed" type="button" disabled>ODEBRANO</button>`
+    : complete && !locked
+      ? `<button class="portal-mission-claim" type="button" data-portal-mission-claim="${escapeHtml(mission.id)}">ODBIERZ</button>`
+      : locked
+        ? `<span class="portal-mission-claim locked" aria-hidden="true">PREMIUM</span>`
+      : `<button class="portal-mission-claim inactive" type="button" disabled>ODBIERZ</button>`;
+  const premiumMarker = mission.premium
+    ? `
+      <span class="portal-mission-premium-lock">
+        <img class="asset-image" src="${MAGICIANS_PREMIUM_LOCK_IMAGE}" alt="Premium" data-fallback-text="LOCK" />
+        <span class="asset-fallback">LOCK</span>
+      </span>
+    `
+    : `<span class="portal-mission-premium-lock portal-mission-premium-placeholder" aria-hidden="true"></span>`;
+  const missionImage = definition.image || "./zagraj.png";
+
+  return `
+    <article class="portal-mission-card" data-portal-mission-color="${color}" data-portal-mission-state="${claimed ? "claimed" : locked ? "locked" : complete ? "ready" : "active"}">
+      <span class="portal-mission-image-frame">
+        <img class="portal-mission-image asset-image" src="${missionImage}" alt="" data-fallback-text="MISJA" />
+      </span>
+      <div class="portal-mission-content">
+        <span class="portal-mission-title">${escapeHtml(definition.title)}</span>
+        <div class="portal-mission-progress">
+          <span class="portal-mission-progress-fill" style="width:${progressPercent}%;"></span>
+          <span class="portal-mission-progress-value">${getPortalMissionProgressLabel(mission)}</span>
+        </div>
+      </div>
+      ${premiumMarker}
+      <span class="portal-mission-reward">
+        <span>+${definition.reward}</span>
+        <img class="portal-mission-reward-icon asset-image" src="${SILVER_REWARD_IMAGE}" alt="Esencja" data-fallback-text="E" />
+      </span>
+      ${actionMarkup}
+    </article>
+  `;
+}
+
+function getCurrentPortalDailyBonusCycleKey() {
+  return getCurrentDailyGiftCycleKey();
+}
+
+function getPortalDailyBonusCompletedCount() {
+  const cycleKey = getCurrentPortalDailyBonusCycleKey();
+  const missionState = getPortalMissionState();
+
+  return missionState.missions.filter((mission) => {
+    if (mission.cycleKey !== cycleKey || isPortalMissionLocked(mission)) {
+      return false;
+    }
+
+    return isPortalMissionComplete(mission);
+  }).length;
+}
+
+function isPortalDailyBonusClaimed() {
+  return getPortalMissionState().dailyBonusClaimedCycleKey === getCurrentPortalDailyBonusCycleKey();
+}
+
+function buildPortalDailyBonusMarkup() {
+  const completedCount = clamp(getPortalDailyBonusCompletedCount(), 0, PORTAL_DAILY_BONUS_TARGET);
+  const progressPercent = clamp((completedCount / PORTAL_DAILY_BONUS_TARGET) * 100, 0, 100);
+  const claimed = isPortalDailyBonusClaimed();
+  const ready = completedCount >= PORTAL_DAILY_BONUS_TARGET && !claimed;
+  const actionMarkup = claimed
+    ? `<button class="portal-bonus-claim claimed" type="button" disabled>ODEBRANO</button>`
+    : `<button class="portal-bonus-claim" type="button" data-portal-daily-bonus ${ready ? "" : "disabled"}>ODBIERZ</button>`;
+
+  return `
+    <section class="portal-daily-bonus-card">
+      <span class="portal-daily-bonus-image-frame">
+        <img class="portal-daily-bonus-image asset-image" src="${PORTAL_DAILY_BONUS_IMAGE}" alt="" data-fallback-text="BONUS" />
+      </span>
+      <div class="portal-daily-bonus-content">
+        <span class="portal-daily-bonus-kicker">BONUS DZIENNY</span>
+        <span class="portal-daily-bonus-title">Ukończ 3 misje dzienne</span>
+        <div class="portal-mission-progress portal-daily-bonus-progress">
+          <span class="portal-mission-progress-fill" style="width:${progressPercent}%;"></span>
+          <span class="portal-mission-progress-value">${completedCount}/${PORTAL_DAILY_BONUS_TARGET}</span>
+        </div>
+      </div>
+      <span class="portal-daily-bonus-reward">
+        <span>+${PORTAL_DAILY_BONUS_ESSENCE_REWARD}</span>
+        <img class="portal-mission-reward-icon asset-image" src="${SILVER_REWARD_IMAGE}" alt="Esencja" data-fallback-text="E" />
+        <span>+${PORTAL_DAILY_BONUS_COIN_REWARD}</span>
+        <img class="portal-mission-reward-icon asset-image" src="${COIN_REWARD_IMAGE}" alt="Monety" data-fallback-text="M" />
+      </span>
+      ${actionMarkup}
+    </section>
+  `;
+}
+
+function getPortalLunellaCharacter() {
+  return CATALOG.characters.find((item) => item.id === PORTAL_LUNELLA_CHARACTER_ID) || null;
+}
+
+function isPortalLunellaRewardClaimed() {
+  return state.ownedCharacters.includes(PORTAL_LUNELLA_CHARACTER_ID);
+}
+
+function canClaimPortalLunellaReward() {
+  return false;
+}
+
+function buildPortalRewardTabMarkup() {
+  const character = getPortalLunellaCharacter();
+  const essenceAmount = clamp(Math.floor(Number(state.silver || 0)), 0, WINTER_WORLD_SILVER_REQUIREMENT);
+  const essencePercent = clamp((essenceAmount / WINTER_WORLD_SILVER_REQUIREMENT) * 100, 0, 100);
+  const claimed = isPortalLunellaRewardClaimed();
+  const ready = canClaimPortalLunellaReward();
+  const characterImage = character?.image || "./lunella.png";
+  const characterName = character?.name || "Lunella";
+  const claimText = claimed ? "ODEBRANO" : "ODBIERZ";
+
+  return `
+    <button class="portal-reward-back pixel-3d-button" type="button" data-portal-missions-tab>WRÓĆ</button>
+    <section class="portal-lunella-reward-panel">
+      <div class="portal-lunella-title"><span>${escapeHtml(characterName)}</span></div>
+      <div class="portal-lunella-card">
+        <span class="portal-lunella-glow" aria-hidden="true"></span>
+        <img class="portal-lunella-image asset-image" src="${characterImage}" alt="${escapeHtml(characterName)}" data-fallback-text="LUNELLA" />
+        <div class="asset-fallback">LUNELLA</div>
+        <p class="portal-lunella-name">POSTAĆ PORTALU</p>
+        <div class="portal-lunella-essence">
+          <span>${essenceAmount}/${WINTER_WORLD_SILVER_REQUIREMENT}</span>
+          <img class="portal-essence-icon asset-image" src="${SILVER_REWARD_IMAGE}" alt="Esencja" data-fallback-text="E" />
+        </div>
+        <div class="portal-essence-track portal-lunella-track" aria-hidden="true">
+          <span class="portal-essence-fill" style="width:${essencePercent}%;"></span>
+        </div>
+        <button class="portal-lunella-claim" type="button" data-portal-lunella-claim ${ready ? "" : "disabled"}>${claimText}</button>
+      </div>
+    </section>
+  `;
+}
+
+function buildPortalMissionsMarkup() {
+  const missionState = getPortalMissionState();
+  const missions = missionState.missions
+    .slice()
+    .sort((first, second) => Number(first.createdAt || 0) - Number(second.createdAt || 0));
+  const essenceAmount = clamp(Math.floor(Number(state.silver || 0)), 0, WINTER_WORLD_SILVER_REQUIREMENT);
+  const essencePercent = clamp((essenceAmount / WINTER_WORLD_SILVER_REQUIREMENT) * 100, 0, 100);
+  const canTransition = essenceAmount >= WINTER_WORLD_SILVER_REQUIREMENT;
+
+  return `
+    <div class="portal-missions-header">
+      <span>MISJE PORTALU</span>
+    </div>
+    <div class="portal-missions-list">
+      ${missions.length
+        ? missions.map((mission, index) => buildPortalMissionCard(mission, index)).join("")
+        : `<div class="portal-missions-empty">UKOŃCZ ŚWIAT MAGIKÓW, ABY ODBLOKOWAĆ MISJE</div>`}
+    </div>
+    <div class="portal-essence-footer">
+      <div class="portal-essence-label">
+        <span>ESENCJA DO ŚWIATA ZIMOWEGO</span>
+        <strong>${essenceAmount}/${WINTER_WORLD_SILVER_REQUIREMENT}</strong>
+        <img class="portal-essence-icon asset-image" src="${SILVER_REWARD_IMAGE}" alt="Esencja" data-fallback-text="E" />
+      </div>
+      <div class="portal-essence-track" aria-hidden="true">
+        <span class="portal-essence-fill" style="width:${essencePercent}%;"></span>
+      </div>
+      ${canTransition
+        ? `<button class="portal-transition-button" type="button" data-portal-transition="winter">PRZEJDŹ DO ŚWIATA ZIMOWEGO</button>`
+        : ""}
+    </div>
+  `;
+}
+
+function renderRarityShop() {
+  const shell = document.getElementById("portal-missions-shell");
+
+  if (!viewNodes.rarity || !shell) {
+    return;
+  }
+
+  if (!hasReachedMagiciansSilverGate()) {
+    shell.innerHTML = `
+      <div class="rarity-coming-banner">
+        <span>WKRÓTCE...</span>
+      </div>
+    `;
+    syncBrokenAssets(viewNodes.rarity);
+    return;
+  }
+
+  const missionState = getPortalMissionState();
+
+  if (!missionState.unlockedAt && ui.currentView !== "rarity") {
+    shell.innerHTML = "";
+    syncBrokenAssets(viewNodes.rarity);
+    return;
+  }
+
+  if (ensurePortalMissionsCurrent()) {
+    saveState();
+  }
+
+  ui.rarityMode = "missions";
+  shell.innerHTML = buildPortalMissionsMarkup();
+  syncBrokenAssets(viewNodes.rarity);
+  syncAnimatedAssets(viewNodes.rarity);
+}
+
+function handleRarityClick(event) {
+  const claimButton = event.target.closest("[data-portal-mission-claim]");
+
+  if (claimButton) {
+    claimPortalMissionReward(claimButton.dataset.portalMissionClaim);
+    return;
+  }
+
+  const transitionButton = event.target.closest("[data-portal-transition]");
+
+  if (transitionButton) {
+    if (transitionButton.disabled || Number(state.silver || 0) < WINTER_WORLD_SILVER_REQUIREMENT) {
+      return;
+    }
+
+    void transitionToTrophyWorld(transitionButton.dataset.portalTransition || "winter");
+  }
+}
+
+function claimPortalLunellaReward() {
+  const character = getPortalLunellaCharacter();
+
+  if (!character || !canClaimPortalLunellaReward()) {
+    return;
+  }
+
+  if (!state.ownedCharacters.includes(character.id)) {
+    state.ownedCharacters.push(character.id);
+  }
+
+  state.favoriteCharacterId = character.id;
+  saveState();
+  updateBalanceDisplays();
+  renderAll();
+  void showRewardShowcase({
+    image: character.image,
+    name: character.name,
+    countLabel: "Darmowa postać za esencję",
+    mode: "character",
+    autoCloseMs: 2600,
+    soundEffectName: "characterUnlock",
+  });
+}
+
+function claimPortalMissionReward(missionId) {
+  const missionState = getPortalMissionState();
+  const mission = missionState.missions.find((entry) => entry.id === missionId);
+  const definition = getPortalMissionDefinition(mission?.templateId);
+
+  if (!mission || !definition || mission.claimed || isPortalMissionLocked(mission) || !isPortalMissionComplete(mission)) {
+    return;
+  }
+
+  mission.claimed = true;
+  mission.claimedAt = Date.now();
+  state.silver = Math.max(0, Number(state.silver || 0) + Number(definition.reward || 0));
+  updateBalanceDisplays();
+  saveState();
+  renderAll();
+  void showRewardShowcase({
+    image: SILVER_REWARD_IMAGE,
+    name: "Esencja",
+    countLabel: `+${definition.reward} esencji`,
+    autoCloseMs: 1900,
+    soundEffectName: "elixirReward",
+  });
+}
+
+function claimPortalDailyBonus() {
+  const missionState = getPortalMissionState();
+  const cycleKey = getCurrentPortalDailyBonusCycleKey();
+
+  if (
+    missionState.dailyBonusClaimedCycleKey === cycleKey ||
+    getPortalDailyBonusCompletedCount() < PORTAL_DAILY_BONUS_TARGET
+  ) {
+    return;
+  }
+
+  missionState.dailyBonusClaimedCycleKey = cycleKey;
+  state.silver = Math.max(0, Number(state.silver || 0) + PORTAL_DAILY_BONUS_ESSENCE_REWARD);
+  state.coins = Math.max(0, Number(state.coins || 0) + PORTAL_DAILY_BONUS_COIN_REWARD);
+  updateBalanceDisplays();
+  saveState();
+  renderAll();
+  void showRewardShowcase({
+    image: PORTAL_DAILY_BONUS_IMAGE,
+    name: "Bonus dzienny",
+    countLabel: `+${PORTAL_DAILY_BONUS_ESSENCE_REWARD} esencji, +${PORTAL_DAILY_BONUS_COIN_REWARD} monet`,
+    autoCloseMs: 2100,
+    soundEffectName: "coins",
+  });
+}
+
+function updatePortalMissionProgressForEvent(eventName, amount = 1) {
+  if (!state.portalMissions?.unlockedAt) {
+    return false;
+  }
+
+  const generatedDailyMissions = ensurePortalMissionsCurrent();
+
+  const missionState = getPortalMissionState();
+  const amountValue = Number(amount || 0);
+
+  if (!Number.isFinite(amountValue) || amountValue <= 0) {
+    return false;
+  }
+
+  let changed = generatedDailyMissions;
+
+  missionState.missions
+    .slice()
+    .sort((first, second) => Number(first.createdAt || 0) - Number(second.createdAt || 0))
+    .forEach((mission) => {
+      const definition = getPortalMissionDefinition(mission.templateId);
+
+      if (
+        !definition ||
+        definition.event !== eventName ||
+        mission.claimed ||
+        isPortalMissionComplete(mission)
+      ) {
+        return;
+      }
+
+      const target = Math.max(1, Number(definition.target || 1));
+      const previousProgress = Number(mission.progress || 0);
+      const nextProgress = definition.progressMode === "max"
+        ? Math.max(previousProgress, amountValue)
+        : previousProgress + amountValue;
+      mission.progress = clamp(nextProgress, 0, target);
+
+      if (mission.progress !== previousProgress) {
+        changed = true;
+      }
+
+      if (mission.progress >= target && !mission.completedAt) {
+        mission.completedAt = Date.now();
+        changed = true;
+      }
+    });
+
+  if (changed) {
+    schedulePortalMissionAutosave();
+
+    if (ui.currentView === "rarity") {
+      renderRarityShop();
+    }
+  }
+
+  return changed;
+}
+
+function renderLobbyPetRank(pet) {
+  const rankInfo = getPetRankInfo(pet);
+
+  if (!lobbyPetRank) {
+    return;
+  }
+
+  lobbyPetRank.hidden = !rankInfo;
+  lobbyPetRank.dataset.petRankOpen = pet?.id || "";
+  lobbyPetRank.setAttribute("role", "button");
+  lobbyPetRank.setAttribute("tabindex", rankInfo ? "0" : "-1");
+  lobbyPetRank.setAttribute("aria-label", rankInfo ? `Nagrody rangi PlatoYA ${pet.name}` : "Nagrody rangi PlatoYA");
+
+  if (!rankInfo) {
+    return;
+  }
+
+  lobbyPetRank.dataset.petRankTheme = rankInfo.theme;
+
+  if (lobbyPetRankTrack) {
+    lobbyPetRankTrack.dataset.petRankTheme = rankInfo.theme;
+  }
+
+  if (lobbyPetRankImage) {
+    lobbyPetRankImage.src = rankInfo.image;
+    lobbyPetRankImage.alt = `Ranga PlatoYA ${rankInfo.rankLevel}`;
+    lobbyPetRankImage.classList.remove("broken");
+  }
+
+  if (lobbyPetRankFill) {
+    lobbyPetRankFill.style.width = `${rankInfo.rankProgress.toFixed(2)}%`;
+  }
+
+  if (lobbyPetRankValue) {
+    lobbyPetRankValue.textContent = String(rankInfo.trophies);
   }
 }
 
@@ -4051,7 +8418,7 @@ function renderOtherUserPreview(profile) {
   }
 
   if (profileOtherPets) {
-    profileOtherPets.textContent = `${Number(profile?.ownedPetsCount || 0)} / ${CATALOG.pets.length}`;
+    profileOtherPets.textContent = `${Number(profile?.ownedPetsCount || 0)} / ${CATALOG.pets.filter((pet) => !isPetSkinId(pet.id)).length}`;
   }
 }
 
@@ -4060,7 +8427,7 @@ function getProfileThemeWorldId(profile) {
     return profile.worldId;
   }
 
-  return "alley";
+  return Number(profile?.trophies || 0) >= MAGICIANS_WORLD_END_TROPHIES ? "winter" : "alley";
 }
 
 function mergeSocialProfilesIntoCache(entries = []) {
@@ -4282,21 +8649,15 @@ function getSuggestedFriendProfiles() {
 
 function buildFriendsProfileCard(profile, options = {}) {
   const themeId = getProfileThemeWorldId(profile);
-  const profilePhoto = profile?.profilePhotoId
-    ? CATALOG.profilePhotos.find((item) => item.id === profile.profilePhotoId) || null
-    : null;
-  const favoriteCharacterId = profile?.equippedCharacterId || profile?.favoriteCharacterId;
-  const favoriteCharacter = favoriteCharacterId
-    ? CATALOG.characters.find((item) => item.id === favoriteCharacterId) || null
-    : null;
-  const profileVisual = profilePhoto || favoriteCharacter;
+  const profileVisual = getPublicProfileVisualItem(profile);
   const title = escapeHtml(profile?.nickname || "Gracz");
   const actions = Array.isArray(options.actions) ? options.actions.join("") : "";
   const presence = getProfilePresenceMeta(profile);
+  const profileId = sanitizeProfileId(profile?.profileId);
 
   return `
     <article class="friends-profile-card" data-world-theme="${themeId}">
-      <div class="friends-profile-visual">
+      <button class="friends-profile-visual" data-open-friend-profile="${profileId}" type="button" aria-label="Pokaż profil gracza">
         <div class="avatar-frame profile-preview-frame friends-profile-frame">
           ${buildPreviewAssetMarkup(profileVisual, {
             imageClass: "avatar-image asset-image",
@@ -4306,18 +8667,16 @@ function buildFriendsProfileCard(profile, options = {}) {
             usePreviewVideo: false,
           })}
         </div>
-      </div>
+      </button>
       <div class="friends-profile-main">
-        <div class="friends-profile-bar-shell">
-          <div class="profile-world-bar friends-profile-world-bar" data-world-theme="${themeId}" aria-hidden="true"></div>
-        </div>
         <h4 class="friends-profile-name">${title}</h4>
-        <p class="friends-profile-presence" data-presence-state="${presence.state}">${presence.label}</p>
         <div class="profile-trophy-line profile-trophy-line-plain friends-profile-trophy-line">
           <img class="profile-trophy-icon profile-trophy-icon-plain" src="./assets/currencies/monety_2.png" alt="Pucharki" />
           <p class="profile-trophy-value profile-trophy-value-small friends-profile-trophy-value">${Number(profile?.trophies || 0)}</p>
         </div>
-        ${actions ? `<div class="friends-profile-actions">${actions}</div>` : ""}
+        ${actions
+          ? `<div class="friends-profile-actions">${actions}</div>`
+          : `<p class="friends-profile-presence" data-presence-state="${presence.state}">${presence.label}</p>`}
       </div>
     </article>
   `;
@@ -4410,6 +8769,10 @@ function renderFriendsView() {
     friendsSelfId.textContent = state.publicId || "-";
   }
 
+  if (friendsIdTooltipValue) {
+    friendsIdTooltipValue.textContent = state.publicId || "-";
+  }
+
   if (!socialProfile.ready) {
     friendsContent.innerHTML = `
       <div class="profile-users-empty">
@@ -4429,7 +8792,7 @@ function renderFriendsView() {
       ? `<div class="friends-card-grid">${friendProfiles.map((profile) => buildFriendsProfileCard(profile, {
         actions: buildPartyInviteActions(profile),
       })).join("")}</div>`
-      : `<div class="profile-users-empty">Nie masz jeszcze znajomych.</div>`;
+      : buildFriendsFindEmptyState("Nie masz jeszcze znajomych.");
   } else if (ui.friendsTab === "suggested") {
     const suggestedProfiles = getSuggestedFriendProfiles();
 
@@ -4506,451 +8869,370 @@ function renderFriendsView() {
 
     friendsContent.innerHTML = sections.length
       ? sections.join("")
-      : `<div class="profile-users-empty">Nie masz nowych zaproszeń.</div>`;
+      : buildFriendsFindEmptyState("Nie masz nowych zaproszeń.");
   }
 
-  syncBrokenAssets(friendsContent);
+  syncBrokenAssets(viewNodes.friends || friendsContent);
   syncAnimatedAssets(friendsContent);
 }
 
-function getBookAnimals() {
-  return CATALOG.pets.filter((item) => item.unlockWorld === "tower");
-}
-
-function getBookGrandRewardCharacter() {
-  return CATALOG.characters.find((item) => item.id === "coco-nkosi") || null;
-}
-
-function getBookAnimalsOwnedCount() {
-  return getBookAnimals().filter((pet) => state.ownedPets.includes(pet.id)).length;
-}
-
-function getBookMissionProgressState() {
-  if (!state.bookMissionProgress || typeof state.bookMissionProgress !== "object") {
-    state.bookMissionProgress = {
-      totalRobotDamage: 0,
-      fullClearStreak: 0,
-      currentRunRobots: 0,
-      junglePetRoundsPlayed: 0,
-      robotsDefeatedSinceMissions: 0,
-      trophiesEarnedSinceMissions: 0,
-    };
-  }
-
-  state.bookMissionProgress.totalRobotDamage = Math.max(0, Number(state.bookMissionProgress.totalRobotDamage || 0));
-  state.bookMissionProgress.fullClearStreak = Math.max(0, Number(state.bookMissionProgress.fullClearStreak || 0));
-  state.bookMissionProgress.currentRunRobots = Math.max(0, Number(state.bookMissionProgress.currentRunRobots || 0));
-  state.bookMissionProgress.junglePetRoundsPlayed = Math.max(0, Number(state.bookMissionProgress.junglePetRoundsPlayed || 0));
-  state.bookMissionProgress.robotsDefeatedSinceMissions = Math.max(0, Number(state.bookMissionProgress.robotsDefeatedSinceMissions || 0));
-  state.bookMissionProgress.trophiesEarnedSinceMissions = Math.max(0, Number(state.bookMissionProgress.trophiesEarnedSinceMissions || 0));
-
-  if (!Array.isArray(state.claimedBookMissionIds)) {
-    state.claimedBookMissionIds = [];
-  }
-
-  return state.bookMissionProgress;
-}
-
-function isJungleBookPetId(petId) {
-  return CATALOG.pets.some((pet) => pet.id === petId && pet.unlockWorld === "tower");
-}
-
-function getBookMissionDefinitions() {
-  const progress = getBookMissionProgressState();
-
-  return [
-    {
-      id: "tower-mission-robots-180",
-      title: "Misja 1",
-      description: "Pokonaj 180 Robotów",
-      progress: progress.robotsDefeatedSinceMissions,
-      goal: 180,
-      rewardLabel: "Skrzynia Dżungli",
-      rewardCrateId: "dzunglowa-skrzynia",
-      image: "./assets/robots/robot_wieza.jpeg",
-      fallbackText: "ROBOT",
-    },
-    {
-      id: "tower-mission-perfect-streak",
-      title: "Misja 2",
-      description: "Przetrwaj 5 fal 4 razy z rzędu",
-      progress: progress.fullClearStreak,
-      goal: 4,
-      rewardLabel: "Skrzynia Dżungli",
-      rewardCrateId: "dzunglowa-skrzynia",
-      image: "./assets/shop/skrzyniadzungla.jpeg",
-      fallbackText: "SKRZYNIA",
-    },
-    {
-      id: "tower-mission-trophies-200",
-      title: "Misja 3",
-      description: "Zdobądź 200 pucharów",
-      progress: progress.trophiesEarnedSinceMissions,
-      goal: 200,
-      rewardLabel: "Skrzynia Dżungli",
-      rewardCrateId: "dzunglowa-skrzynia",
-      image: TROPHY_ICON_IMAGE,
-      fallbackText: "PUCH",
-    },
-    {
-      id: "tower-mission-damage-12000",
-      title: "Misja 4",
-      description: "Zadaj robotom łącznie 12000 obrażeń",
-      progress: progress.totalRobotDamage,
-      goal: 12000,
-      rewardLabel: "Skrzynia Dżungli",
-      rewardCrateId: "dzunglowa-skrzynia",
-      image: "./assets/robots/robot_wieza.jpeg",
-      fallbackText: "ROBOT",
-    },
-    {
-      id: "tower-mission-one-run-35",
-      title: "Misja 5",
-      description: "Pokonaj w jednej grze 35 robotów",
-      progress: progress.currentRunRobots,
-      goal: 35,
-      rewardLabel: "Skrzynia Dżungli",
-      rewardCrateId: "dzunglowa-skrzynia",
-      image: "./assets/robots/robot_wieza.jpeg",
-      fallbackText: "ROBOT",
-    },
-    {
-      id: "tower-mission-jungle-rounds-3",
-      title: "Misja 6",
-      description: "Zagraj trzy rundy z dowolnym dżunglowym PlatoYA",
-      progress: progress.junglePetRoundsPlayed,
-      goal: 3,
-      rewardLabel: "Skrzynia Dżungli",
-      rewardCrateId: "dzunglowa-skrzynia",
-      image: "./assets/alley/księga.jpeg",
-      fallbackText: "KSIĘGA",
-    },
-  ];
-}
-
-function isBookMissionClaimed(missionId) {
-  return Array.isArray(state.claimedBookMissionIds) && state.claimedBookMissionIds.includes(missionId);
-}
-
-function buildBookTabs() {
+function buildFriendsFindEmptyState(message) {
   return `
-    <div class="book-tabs" role="tablist" aria-label="Zakładki Księgi Dżungli">
-      <button
-        class="book-tab-button${ui.bookTab === "book" ? " active" : ""}"
-        data-book-tab="book"
-        type="button"
-        role="tab"
-        aria-selected="${ui.bookTab === "book"}"
-      >
-        KSIĘGA
-      </button>
-      <button
-        class="book-tab-button${ui.bookTab === "missions" ? " active" : ""}"
-        data-book-tab="missions"
-        type="button"
-        role="tab"
-        aria-selected="${ui.bookTab === "missions"}"
-      >
-        MISJE
+    <div class="friends-empty-stack">
+      <div class="profile-users-empty friends-empty-callout">${escapeHtml(message)}</div>
+      <button class="pixel-button friends-find-button" data-friends-show-suggested type="button">
+        <span>ZNAJDŹ ZNAJOMYCH</span>
       </button>
     </div>
   `;
 }
 
-function buildBookPetCard(pet) {
-  const owned = state.ownedPets.includes(pet.id);
-  const stateLabel = owned ? "POSIADASZ" : "NIE POSIADASZ";
-  const clickAttrs = owned ? 'disabled aria-disabled="true"' : `data-book-pet="${pet.id}"`;
-
-  return `
-    <button
-      class="book-pet-card${owned ? " owned" : ""}"
-      data-world-theme="tower"
-      ${clickAttrs}
-      type="button"
-    >
-      <div class="book-pet-art">
-        <img
-          class="item-image asset-image"
-          src="${pet.image}"
-          alt="${pet.name}"
-          data-fallback-text="${pet.name}"
-        />
-        <div class="asset-fallback">${pet.name}</div>
-      </div>
-      <p class="book-pet-title">${pet.name}</p>
-      <p class="book-pet-state">${stateLabel}</p>
-    </button>
-  `;
-}
-
-function buildBookGrandRewardCard(character, ownedCount, totalCount) {
-  const isOwned = state.ownedCharacters.includes(character.id);
-  const missingCount = Math.max(0, totalCount - ownedCount);
-  const note = isOwned
-    ? "COCO N'KOSI JEST JUŻ TWOJA."
-    : missingCount === 0
-      ? "NACIŚNIJ ABY ODEBRAĆ COCO N'KOSI"
-      : missingCount === 1
-        ? "BRAKUJE CI JESZCZE JEDNEGO ZWIERZĘTA"
-        : `BRAKUJE CI JESZCZE ${missingCount} ZWIERZĄT`;
-
-  return `
-    <button
-      class="book-grand-reward-card${isOwned ? " owned" : ""}"
-      data-book-grand-reward="${character.id}"
-      type="button"
-    >
-      <div class="book-grand-reward-art item-art" data-world-theme="tower">
-        ${buildPreviewAssetMarkup(character, {
-          fallbackText: "COCO",
-          alt: character.name,
-          imageClass: "item-image asset-image",
-          videoClass: "item-image asset-video",
-          usePoster: false,
-        })}
-      </div>
-      <p class="book-grand-reward-note">${note}</p>
-    </button>
-  `;
-}
-
-function buildBookMissionCard(mission) {
-  const claimed = isBookMissionClaimed(mission.id);
-  const completed = mission.progress >= mission.goal;
-  const clampedProgress = Math.min(mission.goal, Math.max(0, Number(mission.progress || 0)));
-
-  return `
-    <article class="book-mission-card${claimed ? " claimed" : ""}${completed && !claimed ? " completed" : ""}" data-world-theme="tower">
-      <div class="book-mission-art">
-        <img
-          class="item-image asset-image"
-          src="${mission.image}"
-          alt="${mission.title}"
-          data-fallback-text="${mission.fallbackText}"
-        />
-        <div class="asset-fallback">${mission.fallbackText}</div>
-      </div>
-      <p class="book-mission-title">${mission.title}</p>
-      <p class="book-mission-description">${mission.description}</p>
-      <p class="book-mission-progress">${clampedProgress}/${mission.goal}</p>
-      <p class="book-mission-reward">Nagroda: ${mission.rewardLabel}</p>
-      <button
-        class="pixel-button small-button book-mission-claim"
-        data-book-mission-claim="${mission.id}"
-        type="button"
-        ${claimed || !completed ? "disabled" : ""}
-      >
-        ${claimed ? "ODEBRANA" : completed ? "ODBIERZ" : "W TRAKCIE"}
-      </button>
-    </article>
-  `;
-}
-
-function buildBookMissionsView() {
-  return `
-    <div class="book-mission-strip">
-      <div class="book-missions-grid">
-        ${getBookMissionDefinitions().map((mission) => buildBookMissionCard(mission)).join("")}
-      </div>
-    </div>
-  `;
-}
-
-function renderBookView() {
-  if (!bookContent) {
+function showFriendsIdTooltip() {
+  if (!friendsIdTooltip) {
     return;
   }
 
-  if (!isTowerWorldUnlocked()) {
-    bookContent.innerHTML = `
-      ${buildBookTabs()}
-      <div class="profile-users-empty">Księga Dżungli odblokuje się po wejściu do Świata Dżungli.</div>
-    `;
-    return;
+  if (friendsIdTooltipValue) {
+    friendsIdTooltipValue.textContent = state.publicId || "-";
   }
 
-  const junglePets = getBookAnimals();
-  const ownedCount = getBookAnimalsOwnedCount();
-  const grandRewardCharacter = getBookGrandRewardCharacter();
-  const rightPaneContent = ui.bookTab === "missions"
-    ? buildBookMissionsView()
-    : `
-      <div class="book-pet-strip">
-        <div class="book-pet-grid">
-          ${junglePets.map((pet) => buildBookPetCard(pet)).join("")}
-        </div>
-      </div>
-    `;
+  if (friendsIdTooltipTimer) {
+    window.clearTimeout(friendsIdTooltipTimer);
+  }
 
-  bookContent.innerHTML = `
-    ${buildBookTabs()}
-    <div class="book-layout">
-      <aside class="book-hero-card" data-world-theme="tower">
-        <div class="book-hero-visual">
-          <div class="book-hero-stage">
-            <div class="book-hero-glow" aria-hidden="true"></div>
-            <div class="book-hero-art item-art" data-world-theme="tower">
-              <img
-                class="item-image asset-image book-hero-image"
-                src="./assets/alley/księga.jpeg"
-                alt="Księga Dżungli"
-                data-fallback-text="KSIEGA"
-              />
-              <div class="asset-fallback">KSIEGA</div>
-            </div>
-          </div>
-        </div>
-        <p class="book-hero-title">Księga Dżungli</p>
-        <p class="book-hero-count">${ownedCount} / ${junglePets.length} zwierząt</p>
-        ${grandRewardCharacter ? buildBookGrandRewardCard(grandRewardCharacter, ownedCount, junglePets.length) : ""}
-      </aside>
-
-      <div class="book-main-column">
-        ${rightPaneContent}
-      </div>
-    </div>
-  `;
-
-  syncBrokenAssets(bookContent);
-  syncAnimatedAssets(bookContent);
+  friendsIdTooltip.hidden = false;
+  friendsIdTooltip.classList.remove("show");
+  void friendsIdTooltip.offsetWidth;
+  friendsIdTooltip.classList.add("show");
+  friendsIdTooltipTimer = window.setTimeout(() => {
+    friendsIdTooltip.hidden = true;
+    friendsIdTooltip.classList.remove("show");
+    friendsIdTooltipTimer = null;
+  }, 3000);
 }
 
-async function claimBookGrandReward(characterId) {
-  const character = CATALOG.characters.find((item) => item.id === characterId);
-
-  if (!character || state.ownedCharacters.includes(character.id)) {
+function showFriendsAddIdTooltip() {
+  if (!friendsAddIdTooltip) {
     return;
   }
 
-  const totalCount = getBookAnimals().length;
-  const ownedCount = getBookAnimalsOwnedCount();
+  if (friendsAddIdTooltipTimer) {
+    window.clearTimeout(friendsAddIdTooltipTimer);
+  }
 
-  if (ownedCount < totalCount) {
+  friendsAddIdSubmitting = false;
+  friendsAddIdTooltip.hidden = false;
+  friendsAddIdTooltip.classList.remove("show");
+  if (friendsAddIdInput) {
+    friendsAddIdInput.value = "";
+    window.setTimeout(() => friendsAddIdInput.focus(), 0);
+  }
+  if (friendsAddIdStatus) {
+    friendsAddIdStatus.textContent = "";
+    friendsAddIdStatus.dataset.state = "";
+  }
+  void friendsAddIdTooltip.offsetWidth;
+  friendsAddIdTooltip.classList.add("show");
+  friendsAddIdTooltipTimer = window.setTimeout(hideFriendsAddIdTooltip, 14000);
+}
+
+function hideFriendsAddIdTooltip() {
+  if (friendsAddIdTooltipTimer) {
+    window.clearTimeout(friendsAddIdTooltipTimer);
+    friendsAddIdTooltipTimer = null;
+  }
+
+  if (!friendsAddIdTooltip) {
     return;
   }
 
-  state.ownedCharacters.push(character.id);
+  friendsAddIdTooltip.hidden = true;
+  friendsAddIdTooltip.classList.remove("show");
+  friendsAddIdSubmitting = false;
+}
+
+async function submitFriendsAddIdTooltip() {
+  if (!friendsAddIdInput || friendsAddIdSubmitting) {
+    return;
+  }
+
+  const playerId = sanitizePublicPlayerId(friendsAddIdInput.value);
+  if (playerId.length < 5) {
+    return;
+  }
+
+  if (playerId === "12121") {
+    await redeemFriendsDiamondCode();
+    return;
+  }
+
+  if (playerId === "PUCHA") {
+    await redeemFriendsTrophyCode();
+    return;
+  }
+
+  if (playerId === "RANKI") {
+    await redeemFriendsRankingCode();
+    return;
+  }
+
+  if (playerId === "TALIA") {
+    await redeemFriendsCardDeckCode();
+    return;
+  }
+
+  if (playerId === "BILET") {
+    await redeemFriendsTicketCode();
+    return;
+  }
+
+  if (playerId === "PIESM") {
+    await redeemFriendsDogPointsCode();
+    return;
+  }
+
+  if (playerId === "FLARO") {
+    await redeemFriendsFlaroCode();
+    return;
+  }
+
+  friendsAddIdSubmitting = true;
+  if (friendsAddIdStatus) {
+    friendsAddIdStatus.textContent = "SZUKAM...";
+    friendsAddIdStatus.dataset.state = "pending";
+  }
+
+  const result = await sendFriendInviteByProfileId(playerId, { quiet: true });
+  if (friendsAddIdStatus) {
+    friendsAddIdStatus.textContent = result?.message || (result?.ok ? "WYSŁANO" : "NIE ZNALEZIONO");
+    friendsAddIdStatus.dataset.state = result?.ok ? "success" : "error";
+  }
+
+  window.setTimeout(() => {
+    hideFriendsAddIdTooltip();
+    renderFriendsView();
+    syncTabs();
+  }, 1100);
+}
+
+async function redeemFriendsDiamondCode() {
+  if (friendsAddIdSubmitting) {
+    return;
+  }
+
+  friendsAddIdSubmitting = true;
+  state.diamonds = Number(state.diamonds || 0) + 212;
+  updateBalanceDisplays();
   saveState();
-  renderAll();
+
+  if (friendsAddIdStatus) {
+    friendsAddIdStatus.textContent = "+212 KLEJNOTÓW";
+    friendsAddIdStatus.dataset.state = "success";
+  }
+
+  window.setTimeout(() => {
+    hideFriendsAddIdTooltip();
+    renderFriendsView();
+    syncTabs();
+  }, 450);
+
+  await showDiamondRewardScene(212, {
+    title: "Kod znajomych",
+    countLabel: "+212 klejnotów",
+    autoCloseMs: 2200,
+  });
+}
+
+async function redeemFriendsTrophyCode() {
+  if (friendsAddIdSubmitting) {
+    return;
+  }
+
+  friendsAddIdSubmitting = true;
+  state.trophies = !hasClaimedWinterUnlockReward()
+    ? Math.min(MAGICIANS_SILVER_GATE_TROPHIES, Math.max(0, Number(state.trophies || 0) + 500))
+    : Math.max(0, Number(state.trophies || 0) + 500);
+  updateBalanceDisplays();
+  renderLobby();
+  renderTrophyRoad();
+  renderProfilePanel();
+  renderFriendsView();
+  saveState();
+  scheduleRemoteProfileSync(true);
+
+  if (friendsAddIdStatus) {
+    friendsAddIdStatus.textContent = "+500 PUCHARÓW";
+    friendsAddIdStatus.dataset.state = "success";
+  }
+
+  window.setTimeout(() => {
+    hideFriendsAddIdTooltip();
+    renderFriendsView();
+    syncTabs();
+  }, 450);
+
+  await showTrophyRewardScene(500, {
+    title: "Kod znajomych",
+    autoCloseMs: 2200,
+  });
+}
+
+async function redeemFriendsRankingCode() {
+  if (friendsAddIdSubmitting) {
+    return;
+  }
+
+  friendsAddIdSubmitting = true;
+  state.rankingPoints = Math.max(0, Number(state.rankingPoints || 0) + 250);
+  updateBalanceDisplays();
+  renderLobby();
+  renderRankingAlley();
+  renderFriendsView();
+  saveState();
+
+  if (friendsAddIdStatus) {
+    friendsAddIdStatus.textContent = "+250 PUNKTÓW RANKINGU";
+    friendsAddIdStatus.dataset.state = "success";
+  }
+
+  window.setTimeout(() => {
+    hideFriendsAddIdTooltip();
+    renderFriendsView();
+    syncTabs();
+  }, 450);
 
   await showRewardShowcase({
-    image: character.image,
-    previewVideo: character.previewVideo || "",
-    name: character.name,
-    superTheme: "tower",
-    soundEffectName: "characterUnlock",
+    image: RANKING_ALLEY_POINT_ICON,
+    name: "Punkty Rankingu",
+    countLabel: "+250",
+    mode: "default",
+    autoCloseMs: 2200,
+    soundEffectName: "diamondShine",
   });
 }
 
-async function claimBookMission(missionId) {
-  const mission = getBookMissionDefinitions().find((entry) => entry.id === missionId);
-
-  if (!mission || isBookMissionClaimed(mission.id) || mission.progress < mission.goal) {
+async function redeemFriendsCardDeckCode() {
+  if (friendsAddIdSubmitting) {
     return;
   }
 
-  if (!Array.isArray(state.claimedBookMissionIds)) {
-    state.claimedBookMissionIds = [];
+  friendsAddIdSubmitting = true;
+
+  if (friendsAddIdStatus) {
+    friendsAddIdStatus.textContent = "KARTY";
+    friendsAddIdStatus.dataset.state = "success";
   }
 
-  state.claimedBookMissionIds.push(mission.id);
+  window.setTimeout(() => {
+    hideFriendsAddIdTooltip();
+    renderFriendsView();
+    syncTabs();
+  }, 450);
+
+  await showRankingCardDeckScene();
+}
+
+async function redeemFriendsTicketCode() {
+  if (friendsAddIdSubmitting) {
+    return;
+  }
+
+  friendsAddIdSubmitting = true;
+  state.rankingTickets = getRankingTickets() + 1;
+  renderRankingAlley();
+  renderFriendsView();
   saveState();
-  renderAll();
 
-  const crate = CATALOG.crates.find((item) => item.id === mission.rewardCrateId);
-  if (!crate) {
-    return;
+  if (friendsAddIdStatus) {
+    friendsAddIdStatus.textContent = "+1 BILET";
+    friendsAddIdStatus.dataset.state = "success";
   }
 
-  const preparedSession = createChestSession(crate);
-  await showCrateRewardScene(crate, preparedSession.rewards, {
-    superTheme: getCrateRewardTheme(crate),
+  window.setTimeout(() => {
+    hideFriendsAddIdTooltip();
+    renderFriendsView();
+    syncTabs();
+  }, 450);
+
+  await showRewardShowcase({
+    image: RANKING_GAME_TICKET_IMAGE,
+    name: "Bilet Rankingowy",
+    countLabel: "+1",
+    mode: "default",
+    autoCloseMs: 1900,
+    soundEffectName: "diamondShine",
   });
 }
 
-async function buyBookPet(petId) {
-  const pet = CATALOG.pets.find((item) => item.id === petId && item.unlockWorld === "tower");
-
-  if (!pet || state.ownedPets.includes(pet.id)) {
+async function redeemFriendsDogPointsCode() {
+  if (friendsAddIdSubmitting) {
     return;
   }
 
-  if (state.diamonds < Number(pet.price || 0)) {
-    openModal({
-      title: "Za mało diamentów",
-      message: `Brakuje ci ${Math.max(0, Number(pet.price || 0) - state.diamonds)} diamentów.`,
-      buttonText: "OK",
-      dismissible: true,
-      onConfirm: closeModal,
+  friendsAddIdSubmitting = true;
+  addPetMiniAlleyPoints(100, { petId: PET_MINI_ALLEY_PET_ID });
+  renderPetMiniAlley();
+  renderFriendsView();
+
+  if (friendsAddIdStatus) {
+    friendsAddIdStatus.textContent = "+100 PUNKTÓW PSA MAGIKA";
+    friendsAddIdStatus.dataset.state = "success";
+  }
+
+  window.setTimeout(() => {
+    hideFriendsAddIdTooltip();
+    renderFriendsView();
+    syncTabs();
+  }, 450);
+
+  await showRewardShowcase({
+    image: PET_MINI_ALLEY_POINT_ICON,
+    name: "Punkty Psa Magika",
+    countLabel: "+100",
+    mode: "default",
+    autoCloseMs: 2200,
+    soundEffectName: "diamondShine",
+  });
+}
+
+async function redeemFriendsFlaroCode() {
+  if (friendsAddIdSubmitting) {
+    return;
+  }
+
+  friendsAddIdSubmitting = true;
+  const flaro = getPetById(HIGH_TOWER_FLARO_ID);
+
+  if (flaro && !state.ownedPets.includes(flaro.id)) {
+    state.ownedPets.push(flaro.id);
+    state.equippedPet = flaro.id;
+    state.favoritePetId = flaro.id;
+    saveState();
+    renderAll();
+  }
+
+  if (friendsAddIdStatus) {
+    friendsAddIdStatus.textContent = flaro ? "FLARO" : "BRAK FLARO";
+    friendsAddIdStatus.dataset.state = flaro ? "success" : "error";
+  }
+
+  window.setTimeout(() => {
+    hideFriendsAddIdTooltip();
+    renderFriendsView();
+    syncTabs();
+  }, 450);
+
+  if (flaro) {
+    await showRewardShowcase({
+      image: flaro.image,
+      name: flaro.name,
+      countLabel: "LIMITOWANA PLATOYA",
+      mode: "character",
+      superTheme: "high-tower",
+      autoCloseMs: 2300,
+      soundEffectName: "characterUnlock",
     });
-    return;
   }
-
-  state.diamonds -= Number(pet.price || 0);
-  state.ownedPets.push(pet.id);
-  saveState();
-  renderAll();
-
-  await showRewardShowcase({
-    image: pet.image,
-    name: pet.name,
-    superTheme: "tower",
-    soundEffectName: getPetVoiceEffect(pet.id),
-  });
-}
-
-function openBookPetPurchaseModal(petId) {
-  const pet = CATALOG.pets.find((item) => item.id === petId && item.unlockWorld === "tower");
-
-  if (!pet || state.ownedPets.includes(pet.id)) {
-    return;
-  }
-
-  openStoreCharacterPurchase({
-    ...pet,
-    kind: "book-pet",
-    worldTheme: "tower",
-    price: Number(pet.price || 0),
-    currency: "diamonds",
-    purchaseCopy: pet.description || "Dżunglowy PlatoYa z własną mocą.",
-    missingCopy: (missing) => `Brakuje ci ${missing} diamentów.`,
-    confirmLabel: "Kup za 100 diamentów",
-  });
-}
-
-function openBookGrandRewardModal(characterId) {
-  const character = CATALOG.characters.find((item) => item.id === characterId);
-
-  if (!character) {
-    return;
-  }
-
-  const totalCount = getBookAnimals().length;
-  const ownedCount = getBookAnimalsOwnedCount();
-  const missingAnimals = Math.max(0, totalCount - ownedCount);
-  const alreadyOwned = state.ownedCharacters.includes(character.id);
-
-  openStoreCharacterPurchase({
-    ...character,
-    kind: "book-grand-reward",
-    worldTheme: "tower",
-    price: 0,
-    usePoster: false,
-    currency: "progress",
-    progressCurrent: ownedCount,
-    progressTotal: totalCount,
-    alreadyOwned,
-    purchaseCopy: alreadyOwned
-      ? "Masz już tę darmową animowaną postać z Księgi Dżungli."
-      : missingAnimals === 0
-        ? "Masz wszystkie zwierzęta. Odbierz darmową animowaną postać."
-        : "Odblokuj wszystkie zwierzęta, aby otrzymać darmową animowaną postać.",
-    missingCopy: (missing, total) => alreadyOwned
-      ? "Masz już tę postać."
-      : `Brakuje Ci ${missing}/${total} zwierząt.`,
-    confirmLabel: "Odbierz Coco N'Kosi",
-  });
 }
 
 async function copyOwnProfileId() {
@@ -4986,10 +9268,15 @@ function sendFriendInviteFromInput() {
   sendFriendInviteByProfileId(friendsInviteIdInput?.value || "");
 }
 
-async function sendFriendInviteToResolvedProfileId(targetProfileId, fallbackProfile = null) {
+async function sendFriendInviteToResolvedProfileId(targetProfileId, fallbackProfile = null, options = {}) {
   const normalizedProfileId = sanitizeProfileId(targetProfileId);
+  const quiet = Boolean(options.quiet);
 
   if (!(await ensureSocialProfileReady())) {
+    if (quiet) {
+      return { ok: false, message: "BRAK INTERNETU" };
+    }
+
     openModal({
       title: "Brak internetu",
       message: "Znajomi działają tylko z internetem.",
@@ -5000,6 +9287,10 @@ async function sendFriendInviteToResolvedProfileId(targetProfileId, fallbackProf
   }
 
   if (!normalizedProfileId) {
+    if (quiet) {
+      return { ok: false, message: "NIE ZNALEZIONO" };
+    }
+
     openModal({
       title: "Brak gracza",
       message: "Nie udało się znaleźć tego gracza.",
@@ -5010,6 +9301,10 @@ async function sendFriendInviteToResolvedProfileId(targetProfileId, fallbackProf
   }
 
   if (normalizedProfileId === state.profileId) {
+    if (quiet) {
+      return { ok: false, message: "TO TWOJE ID" };
+    }
+
     openModal({
       title: "To Twój profil",
       message: "Nie możesz zaprosić samego siebie.",
@@ -5021,7 +9316,7 @@ async function sendFriendInviteToResolvedProfileId(targetProfileId, fallbackProf
 
   const db = getFirebaseSocialDatabase();
   if (!db) {
-    return;
+    return quiet ? { ok: false, message: "BRAK INTERNETU" } : undefined;
   }
 
   friendsInviteIdButton && (friendsInviteIdButton.disabled = true);
@@ -5071,6 +9366,10 @@ async function sendFriendInviteToResolvedProfileId(targetProfileId, fallbackProf
       friendsInviteIdInput.value = "";
     }
 
+    if (quiet) {
+      return { ok: true, message: "WYSŁANO" };
+    }
+
     openModal({
       title: "Zaproszenie wysłane",
       message: `Zaprosiłeś gracza ${targetProfile.nickname || "Gracz"}.`,
@@ -5078,6 +9377,22 @@ async function sendFriendInviteToResolvedProfileId(targetProfileId, fallbackProf
       onConfirm: closeModal,
     });
   } catch (error) {
+    if (quiet) {
+      return {
+        ok: false,
+        message:
+          error?.message === "missing-profile"
+            ? "NIE ZNALEZIONO"
+            : error?.message === "already-friend"
+              ? "JUŻ W ZNAJOMYCH"
+              : error?.message === "already-sent"
+                ? "JUŻ WYSŁANO"
+                : error?.message === "already-received"
+                  ? "MASZ ZAPROSZENIE"
+                  : "NIE UDAŁO SIĘ",
+      };
+    }
+
     openModal({
       title: "Nie udało się",
       message:
@@ -5096,12 +9411,19 @@ async function sendFriendInviteToResolvedProfileId(targetProfileId, fallbackProf
   } finally {
     friendsInviteIdButton && (friendsInviteIdButton.disabled = false);
   }
+
+  return { ok: true, message: "WYSŁANO" };
 }
 
-async function sendFriendInviteByProfileId(rawProfileId) {
+async function sendFriendInviteByProfileId(rawProfileId, options = {}) {
   const targetPublicId = sanitizePublicPlayerId(rawProfileId);
+  const quiet = Boolean(options.quiet);
 
   if (!(await ensureSocialProfileReady())) {
+    if (quiet) {
+      return { ok: false, message: "BRAK INTERNETU" };
+    }
+
     openModal({
       title: "Brak internetu",
       message: "Znajomi działają tylko z internetem.",
@@ -5112,6 +9434,10 @@ async function sendFriendInviteByProfileId(rawProfileId) {
   }
 
   if (!targetPublicId) {
+    if (quiet) {
+      return { ok: false, message: "WPISZ ID" };
+    }
+
     openModal({
       title: "Brak ID",
       message: "Wpisz ID gracza.",
@@ -5122,6 +9448,10 @@ async function sendFriendInviteByProfileId(rawProfileId) {
   }
 
   if (targetPublicId === state.publicId) {
+    if (quiet) {
+      return { ok: false, message: "TO TWOJE ID" };
+    }
+
     openModal({
       title: "To Twoje ID",
       message: "Nie możesz zaprosić samego siebie.",
@@ -5133,7 +9463,7 @@ async function sendFriendInviteByProfileId(rawProfileId) {
 
   const db = getFirebaseSocialDatabase();
   if (!db) {
-    return;
+    return quiet ? { ok: false, message: "BRAK INTERNETU" } : undefined;
   }
 
   friendsInviteIdButton && (friendsInviteIdButton.disabled = true);
@@ -5156,11 +9486,15 @@ async function sendFriendInviteByProfileId(rawProfileId) {
     const targetProfile = getCachedSocialProfile(targetProfileId)
       || (await fetchPublicProfilesById([targetProfileId]))[0]
       || null;
-    await sendFriendInviteToResolvedProfileId(targetProfileId, targetProfile);
+    return await sendFriendInviteToResolvedProfileId(targetProfileId, targetProfile, options);
   } catch (error) {
     friendsInviteIdButton && (friendsInviteIdButton.disabled = false);
 
     if (error?.message === "missing-profile") {
+      if (quiet) {
+        return { ok: false, message: "NIE ZNALEZIONO" };
+      }
+
       openModal({
         title: "Nie udało się",
         message: "Nie ma gracza o takim ID.",
@@ -5170,6 +9504,10 @@ async function sendFriendInviteByProfileId(rawProfileId) {
       return;
     }
 
+    if (quiet) {
+      return { ok: false, message: "NIE UDAŁO SIĘ" };
+    }
+
     openModal({
       title: "Nie udało się",
       message: "Nie udało się wysłać zaproszenia.",
@@ -5177,6 +9515,8 @@ async function sendFriendInviteByProfileId(rawProfileId) {
       onConfirm: closeModal,
     });
   }
+
+  return { ok: true, message: "WYSŁANO" };
 }
 
 async function acceptFriendInvite(rawProfileId) {
@@ -5824,6 +10164,10 @@ function schedulePartyMemberSync(immediate = false, overrides = {}) {
 }
 
 async function togglePartyReady() {
+  if (!ensureInternetForGame()) {
+    return;
+  }
+
   if (!isPartyActive()) {
     ui.pendingPartyLaunch = null;
     await startGameLaunchTransition();
@@ -5888,6 +10232,10 @@ function cancelGameLaunchTransition() {
 }
 
 async function startGameLaunchTransition() {
+  if (!ensureInternetForGame()) {
+    return;
+  }
+
   showView("game");
 }
 
@@ -5935,7 +10283,7 @@ async function maybeStartPartyGameSession() {
         hostProfileId: state.profileId,
         currentWave: 0,
         pendingWave: 1,
-        waveIntroMs: 3000,
+        waveIntroMs: WAVE_INTRO_FULL_MS,
         pauseResumeCountdownMs: 0,
         pauseResumeRobotsLeft: 0,
         robotsKilledTotal: 0,
@@ -5991,7 +10339,19 @@ function getSelectedProfilePhoto() {
   return getOwnedItem("profilePhotos", state.selectedProfilePhotoId) || null;
 }
 
+function getProfileVisualKind() {
+  if (state.profileVisualKind === "pet" && getProfileFavoritePet()) {
+    return "pet";
+  }
+
+  return "character";
+}
+
 function getProfileVisualItem() {
+  if (getProfileVisualKind() === "pet") {
+    return getProfileFavoritePet();
+  }
+
   return getSelectedProfilePhoto() || getProfileFavoriteCharacter();
 }
 
@@ -6010,6 +10370,22 @@ function escapeHtml(value) {
 
 function normalizePublicNickname(nickname) {
   return sanitizePlayerNickname(nickname).toLowerCase();
+}
+
+function normalizeContentCreatorNickname(nickname) {
+  return normalizePublicNickname(nickname);
+}
+
+function isContentCreatorNickname(nickname) {
+  return CONTENT_CREATOR_NICKNAMES.has(normalizeContentCreatorNickname(nickname));
+}
+
+function isContentCreatorAccount(profile = null) {
+  if (profile) {
+    return Boolean(profile.isContentCreator || isContentCreatorNickname(profile.nickname));
+  }
+
+  return Boolean(state.isContentCreator);
 }
 
 function withRemoteProfileSyncSuspended(callback) {
@@ -6160,6 +10536,20 @@ async function initSocialProfileSync() {
   }
 }
 
+function shouldAutoInitSocialProfile() {
+  return Boolean(
+    state.playedFirstGame ||
+    Number(state.completedGamesTotal || 0) > 0 ||
+    state.accountPasswordSet
+  );
+}
+
+function maybeAutoInitSocialProfile() {
+  if (shouldAutoInitSocialProfile()) {
+    initSocialProfileSync().catch(() => {});
+  }
+}
+
 async function ensureSocialProfileReady() {
   if (socialProfile.ready) {
     return true;
@@ -6240,13 +10630,15 @@ function buildPublicProfilePayload() {
     publicId: state.publicId,
     nickname: getPlayerNickname(),
     nicknameNormalized: normalizePublicNickname(getPlayerNickname()),
+    isContentCreator: isContentCreatorAccount(),
     trophies: Number(state.trophies || 0),
     worldId,
     completedGamesTotal: Number(state.completedGamesTotal || 0),
     robotsDefeatedTotal: Number(state.robotsDefeatedTotal || 0),
     ownedCharactersCount: state.ownedCharacters.length,
-    ownedPetsCount: state.ownedPets.length,
+    ownedPetsCount: getOwnedMainPetItems().length,
     profilePhotoId: sanitizeStoredId(state.selectedProfilePhotoId),
+    profileVisualKind: getProfileVisualKind(),
     favoriteCharacterId: favoriteCharacter?.id || "",
     favoritePetId: favoritePet?.id || "",
     equippedCharacterId: sanitizeStoredId(state.equippedCharacter),
@@ -6414,12 +10806,14 @@ async function syncRemoteSaveBlob() {
 
 async function saveProfileDetails() {
   const dynamicNameInput = document.getElementById("profile-name-input-dynamic");
+  const repeatNameInput = document.getElementById("profile-name-input-repeat");
 
   if (!dynamicNameInput) {
     return;
   }
 
   const nextNickname = sanitizePlayerNickname(dynamicNameInput.value);
+  const repeatedNickname = sanitizePlayerNickname(repeatNameInput?.value || "");
   const currentNickname = getPlayerNickname();
   const renamePrice = getNicknameChangePrice();
   const saveButton = profileEditPanel?.querySelector("[data-profile-name-save]") || profileSaveNameButton;
@@ -6434,15 +10828,25 @@ async function saveProfileDetails() {
     return;
   }
 
+  if (repeatNameInput && nextNickname !== repeatedNickname) {
+    openModal({
+      title: "Nazwy są różne",
+      message: "Wpisz tę samą nazwę w obu polach.",
+      buttonText: "OK",
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
   if (nextNickname === currentNickname) {
     closeProfileEditSection();
     return;
   }
 
-  if (renamePrice > state.coins) {
+  if (renamePrice > state.diamonds) {
     openModal({
-      title: "Brakuje monet",
-      message: `Brakuje Ci ${renamePrice - state.coins} monet do zmiany nazwy.`,
+      title: "Brakuje klejnotów",
+      message: `Brakuje Ci ${renamePrice - state.diamonds} klejnotów do zmiany nazwy.`,
       buttonText: "OK",
       onConfirm: closeModal,
     });
@@ -6468,7 +10872,7 @@ async function saveProfileDetails() {
     }
 
     if (renamePrice > 0) {
-      state.coins = Math.max(0, state.coins - renamePrice);
+      state.diamonds = Math.max(0, state.diamonds - renamePrice);
     }
 
     state.playerNickname = nextNickname;
@@ -6476,7 +10880,10 @@ async function saveProfileDetails() {
     state.nicknameChangeCount = Math.max(0, Number(state.nicknameChangeCount || 0)) + 1;
     saveState();
     closeProfileEditSection();
-    renderAll();
+    updateBalanceDisplays();
+    renderProfilePanel();
+    renderLobby();
+    renderFriendsView();
     scheduleRemoteProfileSync(true);
   } finally {
     if (saveButton) {
@@ -6563,6 +10970,124 @@ async function setCurrentAccountPassword() {
     settingsSetPasswordButton.disabled = false;
     renderSettingsPanel();
   }
+}
+
+async function createCloudAccountForCurrentProfile(password) {
+  const db = getFirebaseSocialDatabase();
+
+  if (!db) {
+    throw new Error("no-db");
+  }
+
+  const nicknameClaimed = await tryClaimRemoteNickname(getPlayerNickname());
+  if (!nicknameClaimed) {
+    throw new Error("nickname-taken");
+  }
+
+  await ensureRemotePublicIdReservation();
+
+  const salt = generateRandomBase64(16);
+  const passwordHash = await createPasswordHash(password, salt);
+  const saveSecret = generateRandomBase64(32);
+  const wrappedSecret = await encryptTextWithPassword(saveSecret, password, salt);
+
+  await db.ref(`accounts/${state.profileId}`).set({
+    profileId: state.profileId,
+    nicknameNormalized: normalizePublicNickname(getPlayerNickname()),
+    passwordHash,
+    salt,
+    saveSecretCiphertext: wrappedSecret.ciphertext,
+    saveSecretIv: wrappedSecret.iv,
+    updatedAt: Date.now(),
+    createdAt: Number(state.profileCreatedAt || Date.now()),
+  });
+
+  state.accountPasswordSet = true;
+  state.accountPasswordHash = passwordHash;
+  state.accountPasswordSalt = salt;
+  state.accountSaveSecret = saveSecret;
+  saveState();
+  socialProfile.ready = true;
+  await syncRemoteProfileNow();
+}
+
+async function loadRemoteAccountStateByLogin(nickname, password) {
+  const db = getFirebaseSocialDatabase();
+  if (!db) {
+    throw new Error("no-db");
+  }
+
+  const normalizedNickname = sanitizePlayerNickname(nickname);
+  const normalizedPassword = String(password || "").trim();
+
+  if (!normalizedNickname) {
+    throw new Error("missing-nickname");
+  }
+
+  if (!normalizedPassword) {
+    throw new Error("missing-login-password");
+  }
+
+  const nicknameSnapshot = await db.ref(`nicknames/${normalizePublicNickname(normalizedNickname)}`).once("value");
+  const nicknameData = nicknameSnapshot.val();
+
+  if (!nicknameData?.profileId) {
+    throw new Error("missing-account");
+  }
+
+  const profileId = sanitizeProfileId(nicknameData.profileId);
+  const accountSnapshot = await db.ref(`accounts/${profileId}`).once("value");
+  const accountData = accountSnapshot.val();
+
+  if (!accountData?.passwordHash || !accountData?.salt || !accountData?.saveSecretCiphertext || !accountData?.saveSecretIv) {
+    throw new Error("missing-password");
+  }
+
+  const passwordHash = await createPasswordHash(normalizedPassword, accountData.salt);
+  if (passwordHash !== accountData.passwordHash) {
+    throw new Error("wrong-password");
+  }
+
+  const saveSecret = await decryptTextWithPassword(
+    accountData.saveSecretCiphertext,
+    accountData.saveSecretIv,
+    normalizedPassword,
+    accountData.salt
+  );
+  const saveSnapshot = await db.ref(`saveBlobs/${profileId}`).once("value");
+  const saveData = saveSnapshot.val();
+
+  if (!saveData?.ciphertext || !saveData?.iv) {
+    throw new Error("missing-save");
+  }
+
+  const decryptedSave = await decryptTextWithSecret(saveData.ciphertext, saveData.iv, saveSecret);
+  const parsedSave = JSON.parse(decryptedSave);
+  const hydrated = hydrateSavedState(parsedSave);
+  hydrated.profileId = profileId;
+  hydrated.accountPasswordSet = true;
+  hydrated.accountPasswordHash = accountData.passwordHash;
+  hydrated.accountPasswordSalt = accountData.salt;
+  hydrated.accountSaveSecret = saveSecret;
+  hydrated.nicknamePromptSeen = true;
+
+  return {
+    hydrated,
+    displayName: hydrateSavedState(parsedSave).playerNickname,
+  };
+}
+
+function withFirstGameLoginTimeout(promise, timeoutMs = 12000) {
+  let timeoutId = 0;
+  const timeoutPromise = new Promise((resolve, reject) => {
+    timeoutId = window.setTimeout(() => reject(new Error("login-timeout")), timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+    }
+  });
 }
 
 async function loginToExistingAccount() {
@@ -6825,16 +11350,76 @@ async function decryptTextWithSecret(ciphertext, ivBase64, secretBase64) {
   return new TextDecoder().decode(plainBuffer);
 }
 
-function renderStore() {
+function isHighTowerStoreTabAvailable(now = Date.now()) {
+  return Number(now || 0) < HIGH_TOWER_DEADLINE_AT;
+}
+
+function normalizeStoreOfferTab(tab = STORE_OFFER_TAB_MAGIC) {
+  const requestedTab = String(tab || STORE_OFFER_TAB_MAGIC);
+
+  if (requestedTab === STORE_OFFER_TAB_HIGH_TOWER && isHighTowerStoreTabAvailable()) {
+    return STORE_OFFER_TAB_HIGH_TOWER;
+  }
+
+  if (requestedTab === STORE_OFFER_TAB_PIRATE) {
+    return STORE_OFFER_TAB_PIRATE;
+  }
+
+  return STORE_OFFER_TAB_MAGIC;
+}
+
+function renderStore(options = {}) {
+  const suppressEntranceAnimation = options.suppressEntranceAnimation ?? ui.currentView === "store";
+  const activeOfferTab = normalizeStoreOfferTab(ui.storeOfferTab);
+  ui.storeOfferTab = activeOfferTab;
+
   ensureStoreOffersCurrent();
   storeGrid.className = "store-main";
+  storeGrid.dataset.storeRender = suppressEntranceAnimation ? "quiet" : "enter";
   if (viewNodes.store) {
     viewNodes.store.dataset.storeMode = ui.storeMode;
+    viewNodes.store.dataset.storeWorld = getActiveStoreWorldId();
+    viewNodes.store.dataset.storeOfferTab = activeOfferTab;
+  }
+  if (appScreen) {
+    appScreen.dataset.storeOfferTab = activeOfferTab;
+  }
+  storeOfferTabButtons.forEach((button) => {
+    const tab = button.dataset.storeOfferTab;
+    const isPirateTab = tab === STORE_OFFER_TAB_PIRATE;
+    const isHighTowerTab = tab === STORE_OFFER_TAB_HIGH_TOWER;
+    const locked = isPirateTab && !isRankingAlleyUnlocked();
+    button.hidden = isHighTowerTab && !isHighTowerStoreTabAvailable();
+    button.classList.toggle("active", tab === activeOfferTab);
+    button.classList.toggle("locked", locked);
+    button.setAttribute("aria-disabled", locked ? "true" : "false");
+
+    if (locked && !button.querySelector(".store-offer-tab-lock")) {
+      button.insertAdjacentHTML("beforeend", `
+        <span class="store-offer-tab-lock" aria-hidden="true">
+          <img class="asset-image" src="./klodka.png" alt="" data-fallback-text="KŁÓDKA" />
+        </span>
+      `);
+      syncBrokenAssets(button);
+    } else if (!locked) {
+      button.querySelector(".store-offer-tab-lock")?.remove();
+    }
+  });
+  if (storeTitle) {
+    storeTitle.textContent =
+      activeOfferTab === STORE_OFFER_TAB_PIRATE
+        ? "PIRACKI RYSZTUNEK"
+        : activeOfferTab === STORE_OFFER_TAB_HIGH_TOWER
+          ? "OFERTY Z WYSOKIEJ WIEŻY"
+          : getActiveStoreWorldId() === "winter"
+            ? "SKLEP ZIMOWY"
+            : "SKLEP MAGIKÓW";
   }
   if (ui.storeMode === MAGICIANS_PET_STORE_MODE) {
     storeGrid.innerHTML = buildMagiciansPetKeyBooth();
     syncBrokenAssets(storeGrid);
     syncAnimatedAssets(storeGrid);
+    stopStorePremiumOfferRotation();
 
     if (ui.currentView === "store") {
       queueStoreViewportSync();
@@ -6849,6 +11434,7 @@ function renderStore() {
     ].filter(Boolean).join("");
     syncBrokenAssets(storeGrid);
     syncAnimatedAssets(storeGrid);
+    stopStorePremiumOfferRotation();
 
     if (ui.currentView === "store") {
       queueStoreViewportSync();
@@ -6856,28 +11442,33 @@ function renderStore() {
     return;
   }
 
-  const woodenCrate = CATALOG.crates.find((entry) => entry.id === "drewniana-skrzynia") || CATALOG.crates[0];
-  const jungleCrate = CATALOG.crates.find((entry) => entry.id === "dzunglowa-skrzynia") || null;
-  const winterBundle = CATALOG.bundles[0];
-  const dailyCharacters = getCurrentStoreOfferItems("characters");
+  const booths = activeOfferTab === STORE_OFFER_TAB_PIRATE
+    ? [
+      buildDailyCharacterBooth(getCurrentStoreOfferItems("characters")),
+      buildRankingCardDeckStoreBooth(),
+      buildPetSkinOfferBooths(STORE_OFFER_TAB_PIRATE),
+    ]
+    : activeOfferTab === STORE_OFFER_TAB_HIGH_TOWER
+      ? buildHighTowerStoreOfferBooths()
+    : [
+      buildContentCreatorMachineBooth(),
+      buildStarterPackBooth(),
+      buildMaxPlatoyaBooth(),
+      buildLunellaMagicBooth(),
+      buildPetSkinOfferBooths(STORE_OFFER_TAB_MAGIC),
+      buildDailyGiftStoreBooth(null, null),
+      buildCreatorSupportBooth(),
+    ];
 
-  const booths = [
-    buildDailyCharacterBooth(dailyCharacters),
-    buildCrateShopBooth(woodenCrate),
-    buildCoinBooth(),
-    buildDiamondBooth(),
-    buildTrophyBooth(),
-    buildJungleCrateShopBooth(jungleCrate),
-    buildWinterBundleBooth(winterBundle),
-    buildStoreCatalogBooth(),
-  ].filter(Boolean);
-
-  storeGrid.innerHTML = booths.join("");
+  storeGrid.innerHTML = booths.filter(Boolean).join("");
   syncBrokenAssets(storeGrid);
   syncAnimatedAssets(storeGrid);
 
   if (ui.currentView === "store") {
+    startStorePremiumOfferRotation();
     queueStoreViewportSync();
+  } else {
+    stopStorePremiumOfferRotation();
   }
 }
 
@@ -6906,8 +11497,20 @@ function getStoreOffersSignature() {
   const characterIds = Array.isArray(state.storeOffers?.characterIds)
     ? state.storeOffers.characterIds.join("|")
     : "";
+  const specialCurrencyOfferId = sanitizeStoredId(state.storeOffers?.specialCurrencyOfferId);
+  const specialCurrencyPurchasedId = sanitizeStoredId(state.storeOffers?.specialCurrencyPurchasedId);
+  const platoKeyOfferId = sanitizeStoredId(state.storeOffers?.platoKeyOfferId);
+  const platoKeyPurchasedId = sanitizeStoredId(state.storeOffers?.platoKeyPurchasedId);
+  const premiumAlleyOfferId = sanitizeStoredId(state.storeOffers?.premiumAlleyOfferId);
+  const petSkinMagicIds = Array.isArray(state.storeOffers?.petSkinOfferIds?.[STORE_OFFER_TAB_MAGIC])
+    ? state.storeOffers.petSkinOfferIds[STORE_OFFER_TAB_MAGIC].join("|")
+    : "";
+  const petSkinPirateIds = Array.isArray(state.storeOffers?.petSkinOfferIds?.[STORE_OFFER_TAB_PIRATE])
+    ? state.storeOffers.petSkinOfferIds[STORE_OFFER_TAB_PIRATE].join("|")
+    : "";
   const nextRefreshAt = Number(state.storeOffers?.nextRefreshAt || 0);
-  return `${characterIds}@${nextRefreshAt}`;
+  const nextPetSkinRefreshAt = Number(state.storeOffers?.nextPetSkinRefreshAt || 0);
+  return `${characterIds}:${specialCurrencyOfferId}:${specialCurrencyPurchasedId}:${platoKeyOfferId}:${platoKeyPurchasedId}:${premiumAlleyOfferId}:${petSkinMagicIds}:${petSkinPirateIds}@${nextRefreshAt}:${nextPetSkinRefreshAt}`;
 }
 
 function updateStoreRefreshNote() {
@@ -6915,13 +11518,9 @@ function updateStoreRefreshNote() {
     return;
   }
 
-  const refreshNote = storeGrid.querySelector(".store-refresh-note");
-
-  if (!refreshNote) {
-    return;
-  }
-
-  refreshNote.textContent = `ZA ${formatStoreRefreshCountdown(getStoreRefreshRemainingMs())}`;
+  storeGrid.querySelectorAll(".store-refresh-note").forEach((refreshNote) => {
+    refreshNote.textContent = formatStoreRefreshShortCountdown(getStoreRefreshRemainingMs());
+  });
 }
 
 function refreshStoreViewTick() {
@@ -6949,8 +11548,16 @@ function getCurrencyBalance(currency = "coins") {
     return Number(state.diamonds || 0);
   }
 
+  if (currency === "elixirs") {
+    return Number(state.elixirs || 0);
+  }
+
   if (currency === "plato-keys") {
     return Math.max(0, Number(state.platoKeys || 0));
+  }
+
+  if (currency === "silver") {
+    return Math.max(0, Number(state.silver || 0));
   }
 
   return Number(state.coins || 0);
@@ -6961,8 +11568,16 @@ function getCurrencyDisplayName(currency = "coins", amount = 0) {
     return Math.abs(Number(amount || 0)) === 1 ? "diamentu" : "diamentow";
   }
 
+  if (currency === "elixirs") {
+    return Math.abs(Number(amount || 0)) === 1 ? "eliksiru" : "eliksirow";
+  }
+
   if (currency === "plato-keys") {
     return formatPolishCountdownUnit(amount, "klucza PlatoYI", "kluczy PlatoYI", "kluczy PlatoYI");
+  }
+
+  if (currency === "silver") {
+    return "srebra";
   }
 
   return Math.abs(Number(amount || 0)) === 1 ? "monety" : "monet";
@@ -6990,12 +11605,12 @@ function getRewardSceneWorldThemeFromPet(item) {
     return "";
   }
 
-  if (item.unlockWorld === "winter") {
-    return "winter";
+  if (HIGH_TOWER_REWARD_IDS.has(item.id)) {
+    return "high-tower";
   }
 
-  if (item.unlockWorld === "tower") {
-    return "tower";
+  if (item.unlockWorld === "winter") {
+    return "winter";
   }
 
   if (item.unlockWorld === "alley" || item.categoryId === "magicy") {
@@ -7026,8 +11641,16 @@ function getCurrencyIconSrc(currency = "coins", options = {}) {
     return TROPHY_DIAMOND_IMAGE;
   }
 
+  if (currency === "elixirs") {
+    return ELIXIR_REWARD_IMAGE;
+  }
+
   if (currency === "plato-keys") {
     return getPlatoKeyImageForTheme(options.keyTheme || getStorePlatoKeyTheme());
+  }
+
+  if (currency === "silver") {
+    return SILVER_REWARD_IMAGE;
   }
 
   return "./assets/currencies/monety_1.png";
@@ -7038,8 +11661,16 @@ function getCurrencyIconAlt(currency = "coins") {
     return "Diamenty";
   }
 
+  if (currency === "elixirs") {
+    return "Eliksiry";
+  }
+
   if (currency === "plato-keys") {
     return "Klucze PlatoYI";
+  }
+
+  if (currency === "silver") {
+    return "Esencja";
   }
 
   return "Monety";
@@ -7067,7 +11698,7 @@ function buildCurrencyPriceChipMarkup(amount, currency = "coins", options = {}) 
 }
 
 function getMagiciansPetShopItems() {
-  return CATALOG.pets.filter((item) => item.categoryId === "magicy");
+  return CATALOG.pets.filter((item) => item.categoryId === "magicy" && !isPetExcludedFromRandomUnlocks(item.id));
 }
 
 function getWinterPetShopItems() {
@@ -7100,8 +11731,18 @@ function changeCurrencyBalance(currency = "coins", amount = 0) {
     return;
   }
 
+  if (currency === "elixirs") {
+    state.elixirs = Math.max(0, Number(state.elixirs || 0) + normalizedAmount);
+    return;
+  }
+
   if (currency === "plato-keys") {
     state.platoKeys = Math.max(0, Number(state.platoKeys || 0) + normalizedAmount);
+    return;
+  }
+
+  if (currency === "silver") {
+    state.silver = Math.max(0, Number(state.silver || 0) + normalizedAmount);
     return;
   }
 
@@ -7129,14 +11770,20 @@ function buildPreviewAssetMarkup(item, options = {}) {
   const previewVideo = options.usePreviewVideo === false ? "" : item?.previewVideo || "";
   const usePoster = options.usePoster !== false && item?.previewPoster !== false;
   const elementId = options.elementId ? ` id="${options.elementId}"` : "";
+  const petAssetScale = options.usePetAssetScale === false ? 1 : getPetAssetVisualScale(item?.id);
+  const assetScaleStyle = petAssetScale !== 1
+    ? ` style="--pet-asset-scale:${petAssetScale.toFixed(3)};"`
+    : "";
+  const scaledClass = petAssetScale !== 1 ? " pet-asset-scaled" : "";
 
   if (previewVideo) {
     return `
       <video
         ${elementId}
-        class="${videoClass}"
+        class="${videoClass}${scaledClass}"
         src="${previewVideo}"
         ${usePoster && imageSrc ? `poster="${imageSrc}"` : ""}
+        ${assetScaleStyle}
         autoplay
         muted
         loop
@@ -7151,10 +11798,11 @@ function buildPreviewAssetMarkup(item, options = {}) {
   return `
     <img
       ${elementId}
-      class="${imageClass}"
+      class="${imageClass}${scaledClass}"
       src="${imageSrc}"
       alt="${alt}"
       data-fallback-text="${fallbackText}"
+      ${assetScaleStyle}
     />
     <div class="asset-fallback">${fallbackText}</div>
   `;
@@ -7208,7 +11856,7 @@ function buildStoreOfferCard(kind, item, options = {}) {
   const note =
     Object.prototype.hasOwnProperty.call(options, "note")
       ? options.note
-      : item.storeNote || item.description || "";
+      : item.storeNote || (kind === "pets" ? getPetAbilityDescriptionText(item) : item.description) || "";
   const badge = options.badge
     ? `<p class="item-note store-offer-badge">${options.badge}</p>`
     : "";
@@ -7279,15 +11927,16 @@ function getBundleRewardCharacters(bundle) {
 function getStoreCharacterWorldTheme(item) {
   const worldId = item?.storeWorld || item?.worldTheme || item?.unlockWorld;
 
-  if (worldId === "tower") {
-    return { id: "tower", label: "SWIAT DŻUNGLI" };
-  }
-
   if (worldId === "winter") {
     return { id: "winter", label: "SWIAT ZIMOWY" };
   }
 
   return { id: "magicians", label: "SWIAT MAGIKOW" };
+}
+
+function isPirateStoreCharacterId(characterId) {
+  const itemId = sanitizeStoredId(characterId);
+  return itemId === "nerissa" || itemId === "hookcrab";
 }
 
 function buildWinterBundleBooth(bundle) {
@@ -7334,42 +11983,944 @@ function buildWinterBundleBooth(bundle) {
 }
 
 function buildDailyCharacterBooth(items = []) {
-  if (items.length === 0 && getActiveStoreWorldId() === "tower") {
+  const refreshIn = formatStoreRefreshShortCountdown(getStoreRefreshRemainingMs());
+  const item = items[0];
+
+  if (!item) {
+    return `
+      <section class="store-daily-offer-section">
+        <article class="store-daily-empty-card">
+          <p>WSZYSTKIE DZIENNE POSTACIE SĄ JUŻ W TWOJEJ SZAFIE</p>
+        </article>
+      </section>
+    `;
+  }
+
+  const priceMarkup = buildCurrencyAmountMarkup(STORE_DAILY_CHARACTER_PRICE, "diamonds");
+  const pirateOffer = ui.storeOfferTab === STORE_OFFER_TAB_PIRATE && isPirateStoreCharacterId(item.id);
+
+  return `
+    <section class="store-daily-offer-section">
+      <article
+        class="store-daily-offer-card store-daily-character-offer${pirateOffer ? " store-daily-pirate-character-offer" : ""}"
+        data-store-preview-character="${item.id}"
+        data-offer-tab="${pirateOffer ? STORE_OFFER_TAB_PIRATE : STORE_OFFER_TAB_MAGIC}"
+        role="button"
+        tabindex="0"
+        aria-label="Oferta ${escapeHtml(item.name)}"
+      >
+        <span class="store-daily-offer-badge"><span>DZIENNA OFERTA</span></span>
+        <span class="store-daily-timer-control" aria-live="polite">
+          <span class="store-daily-timer-icon" data-store-refresh-tip role="button" tabindex="0" aria-label="Czas do zmiany oferty">
+            <img class="store-daily-timer-image asset-image" src="./zegar.png" alt="" data-fallback-text="CZAS" />
+          </span>
+          <span class="store-daily-timer-bubble store-refresh-note">${refreshIn}</span>
+        </span>
+        ${buildStoreCharacterNameImageMarkup(item, "store-daily-character-name")}
+        <span class="store-daily-character-art">
+          ${buildPreviewAssetMarkup(item, {
+            imageClass: "store-daily-character-image asset-image",
+            videoClass: "store-daily-character-image asset-video",
+            fallbackText: item.name,
+            alt: item.name,
+            usePreviewVideo: false,
+          })}
+        </span>
+        <span class="store-daily-price">${priceMarkup}</span>
+      </article>
+    </section>
+  `;
+}
+
+function buildLunellaMagicBooth() {
+  const item = CATALOG.characters.find((entry) => entry.id === "lunella");
+
+  if (!item || state.ownedCharacters.includes(item.id)) {
     return "";
   }
 
-  const refreshTheme = getActiveStoreWorldId();
-  const refreshIn = formatStoreRefreshCountdown(getStoreRefreshRemainingMs());
-  const cards = items.length > 0
-    ? items
-      .slice(0, 2)
-      .map((item) => buildStoreOfferCard("characters", item, {
-        price: item.price,
-        note: "",
-        allowInsufficientPreview: true,
-        buttonAttributes: 'data-store-offer-source="daily-characters"',
-      }))
-      .join("")
-    : `
-      <article class="item-card store-empty-card">
-        <p class="item-title">Brak dzisiejszych ofert</p>
-        <p class="item-note">Wszystkie sklepowe postacie sa juz u ciebie albo czekamy na kolejne odswiezenie.</p>
-      </article>
-    `;
+  const priceMarkup = buildCurrencyAmountMarkup(STORE_DAILY_CHARACTER_PRICE, "diamonds");
 
   return `
-    <section class="store-booth store-character-booth">
-      <div class="store-booth-copy">
-        <p class="item-title">2 dzisiejsze postacie sklepu</p>
-        <div class="store-refresh-frame" data-store-world="${refreshTheme}">
-          <p class="store-refresh-kicker">ODŚWIEŻENIE OFERT</p>
-          <p class="item-note store-refresh-note">ZA ${refreshIn}</p>
-        </div>
-      </div>
-      <div class="store-booth-grid">
-        ${cards}
-      </div>
+    <section class="store-daily-offer-section store-magic-offer-section">
+      <article
+        class="store-daily-offer-card store-daily-character-offer store-magic-lunella-offer"
+        data-store-preview-character="${item.id}"
+        data-store-offer-source="magic-lunella"
+        data-store-character-kicker="MAGICZNA OFERTA"
+        role="button"
+        tabindex="0"
+        aria-label="Oferta ${escapeHtml(item.name)}"
+      >
+        <span class="store-daily-offer-badge store-magic-offer-badge"><span>MAGICZNA OFERTA</span></span>
+        <span class="store-daily-character-name store-daily-currency-name">
+          <span class="store-daily-character-name-fallback-only">${escapeHtml(item.name)}</span>
+        </span>
+        <span class="store-daily-character-art">
+          ${buildPreviewAssetMarkup(item, {
+            imageClass: "store-daily-character-image asset-image",
+            videoClass: "store-daily-character-image asset-video",
+            fallbackText: item.name,
+            alt: item.name,
+            usePreviewVideo: false,
+          })}
+        </span>
+        <span class="store-daily-price">${priceMarkup}</span>
+      </article>
     </section>
+  `;
+}
+
+function isStarterPackAvailable() {
+  if (state.storeStarterPackPurchased) {
+    return false;
+  }
+
+  const createdAt = Number(state.profileCreatedAt || Date.now());
+  return Date.now() - createdAt <= STORE_STARTER_PACK_ACTIVE_MS;
+}
+
+function getStoreDailyPurchaseCycleKey() {
+  return getCurrentDailyGiftCycleKey();
+}
+
+function isMaxPlatoyaOfferPurchasedToday() {
+  return sanitizeDateKey(state.storeOffers?.maxPlatoyaPurchasedCycleKey) === getStoreDailyPurchaseCycleKey();
+}
+
+function isRankingCardDeckOfferPurchasedToday() {
+  return sanitizeDateKey(state.storeOffers?.cardDeckPurchasedCycleKey) === getStoreDailyPurchaseCycleKey();
+}
+
+function getNextStorePetSkinRefreshAt(now = Date.now()) {
+  const interval = STORE_PET_SKIN_REFRESH_INTERVAL_MS;
+  return Math.ceil((Number(now) + 1) / interval) * interval;
+}
+
+function getStorePetSkinRefreshRemainingMs() {
+  ensureStoreOffersCurrent();
+  return Math.max(0, Number(state.storeOffers?.nextPetSkinRefreshAt || 0) - Date.now());
+}
+
+function buildStoreBundleItemMarkup({ image, amount, label, className = "" }) {
+  return `
+    <span class="store-bundle-item ${className}">
+      <span class="store-bundle-item-art">
+        <img class="asset-image" src="${image}" alt="${escapeHtml(label)}" data-fallback-text="${escapeHtml(label)}" />
+        <span class="asset-fallback">${escapeHtml(label)}</span>
+      </span>
+      <span class="store-bundle-item-count"><span>${escapeHtml(amount)}</span></span>
+    </span>
+  `;
+}
+
+function buildStoreCardDeckSalePriceMarkup() {
+  return `
+    <span class="store-sale-price" aria-label="Przecena z ${STORE_RANKING_CARD_DECK_OFFER.oldPrice} na ${STORE_RANKING_CARD_DECK_OFFER.price} diamentów">
+      <span class="store-sale-old">${STORE_RANKING_CARD_DECK_OFFER.oldPrice}</span>
+      <span class="store-sale-new">
+        ${buildCurrencyAmountMarkup(STORE_RANKING_CARD_DECK_OFFER.price, "diamonds")}
+      </span>
+    </span>
+  `;
+}
+
+function buildStoreDiamondSalePriceMarkup(oldPrice, price) {
+  return `
+    <span class="store-sale-price" aria-label="Przecena z ${oldPrice} na ${price} diamentów">
+      <span class="store-sale-old">${oldPrice}</span>
+      <span class="store-sale-new">
+        ${buildCurrencyAmountMarkup(price, "diamonds")}
+      </span>
+    </span>
+  `;
+}
+
+function buildStoreOfferModalItemsMarkup(items = [], className = "") {
+  return `
+    <div class="store-offer-modal-items ${className}">
+      ${items.map((item) => {
+        const scale = Number(item.scale || 1);
+        const style = Number.isFinite(scale) && scale !== 1
+          ? ` style="--store-offer-modal-item-scale:${scale.toFixed(3)};"`
+          : "";
+
+        return `
+        <span class="store-offer-modal-item ${item.className || ""}"${style}>
+          <span class="store-offer-modal-item-art">
+            <img class="asset-image" src="${item.image}" alt="${escapeHtml(item.label)}" data-fallback-text="${escapeHtml(item.label)}" />
+            <span class="asset-fallback">${escapeHtml(item.label)}</span>
+          </span>
+          ${item.amount ? `<span class="store-offer-modal-item-count">${escapeHtml(item.amount)}</span>` : ""}
+        </span>
+      `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function getStorePetSkinOfferById(offerId) {
+  const itemId = sanitizeStoredId(offerId);
+  return STORE_PET_SKIN_OFFERS.find((offer) => offer.id === itemId) || null;
+}
+
+function decorateStorePetSkinOffer(offer, slotIndex = 0) {
+  if (!offer) {
+    return null;
+  }
+
+  const normalizedSlot = Math.max(0, Math.floor(Number(slotIndex || 0)));
+  const slotBundlePrice = STORE_PET_SKIN_SLOT_BUNDLE_PRICES[normalizedSlot] || STORE_PET_SKIN_SLOT_BUNDLE_PRICES[0] || offer.bundlePrice;
+
+  return {
+    ...offer,
+    slotIndex: normalizedSlot,
+    slotBundlePrice,
+  };
+}
+
+function getStorePetSkinOfferSlot(offerId, tab = null) {
+  const offerTab = tab || getStorePetSkinOfferTab(getStorePetSkinOfferById(offerId));
+  const selectedIds = Array.isArray(state.storeOffers?.petSkinOfferIds?.[offerTab])
+    ? state.storeOffers.petSkinOfferIds[offerTab]
+    : [];
+
+  return selectedIds.findIndex((itemId) => sanitizeStoredId(itemId) === sanitizeStoredId(offerId));
+}
+
+function getCurrentStorePetSkinOfferById(offerId) {
+  const offer = getStorePetSkinOfferById(offerId);
+
+  if (!offer) {
+    return null;
+  }
+
+  const slotIndex = getStorePetSkinOfferSlot(offer.id, getStorePetSkinOfferTab(offer));
+  return decorateStorePetSkinOffer(offer, slotIndex >= 0 ? slotIndex : 0);
+}
+
+function getStorePetSkinOfferPool(tab = STORE_OFFER_TAB_MAGIC, options = {}) {
+  const includeOwned = Boolean(options.includeOwned);
+
+  return STORE_PET_SKIN_OFFERS.filter((offer) => (
+    getStorePetSkinOfferTab(offer) === tab &&
+    getPetById(offer.basePetId) &&
+    getPetById(offer.skinPetId) &&
+    (includeOwned || !hasStorePetSkin(offer))
+  ));
+}
+
+function getCurrentStorePetSkinOffers(tab = STORE_OFFER_TAB_MAGIC) {
+  ensureStoreOffersCurrent();
+  const selectedIds = Array.isArray(state.storeOffers?.petSkinOfferIds?.[tab])
+    ? state.storeOffers.petSkinOfferIds[tab]
+    : [];
+
+  return selectedIds
+    .map((offerId, slotIndex) => decorateStorePetSkinOffer(getStorePetSkinOfferById(offerId), slotIndex))
+    .filter((offer) => offer && getStorePetSkinOfferTab(offer) === tab);
+}
+
+function hasStorePetSkinBasePet(offer) {
+  return Boolean(offer?.basePetId && state.ownedPets.includes(offer.basePetId));
+}
+
+function hasStorePetSkin(offer) {
+  return Boolean(offer?.skinPetId && state.ownedPets.includes(offer.skinPetId));
+}
+
+function getStorePetSkinOfferMode(offer) {
+  return hasStorePetSkinBasePet(offer) ? "skin" : "bundle";
+}
+
+function getStorePetSkinOfferPrice(offer) {
+  return getStorePetSkinOfferMode(offer) === "skin"
+    ? Number(offer?.skinPrice ?? STORE_PET_SKIN_OFFER_DEFAULTS.skinPrice)
+    : Number(offer?.slotBundlePrice ?? offer?.bundlePrice ?? STORE_PET_SKIN_OFFER_DEFAULTS.bundlePrice);
+}
+
+function getStorePetSkinOfferOldPrice(offer) {
+  return Number(offer?.bundleOldPrice ?? STORE_PET_SKIN_OFFER_DEFAULTS.bundleOldPrice);
+}
+
+function getStorePetSkinOfferTab(offer) {
+  return offer?.tab === "pirate" ? STORE_OFFER_TAB_PIRATE : STORE_OFFER_TAB_MAGIC;
+}
+
+function getStorePetSkinOfferTitle(offer, basePet, skinPet) {
+  const skinName = offer?.skinName || skinPet?.name || "Przebranie";
+  return getStorePetSkinOfferMode(offer) === "bundle"
+    ? `${basePet?.name || "PlatoYA"} + ${skinName}`
+    : skinName;
+}
+
+function buildStorePetSkinBubbleMarkup(label, className = "") {
+  if (!label) {
+    return "";
+  }
+  const words = String(label)
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  const longestWordLength = words.reduce((longest, word) => Math.max(longest, Array.from(word).length), 0);
+  const wordSize =
+    longestWordLength >= 14 ? "tiny" :
+      longestWordLength >= 12 ? "small" :
+        longestWordLength >= 10 ? "compact" :
+          "";
+  const sizeAttr = wordSize ? ` data-word-size="${wordSize}"` : "";
+  const labelMarkup = words.length > 0
+    ? words.map((word) => `<span class="store-pet-skin-bubble-word">${escapeHtml(word)}</span>`).join("")
+    : escapeHtml(label);
+
+  return `
+    <span class="store-pet-skin-bubble ${className}" aria-label="${escapeHtml(label)}"${sizeAttr}>
+      <span class="store-pet-skin-bubble-inner">${labelMarkup}</span>
+    </span>
+  `;
+}
+
+function buildPetSkinOfferArtMarkup(item, className = "", options = {}) {
+  if (!item) {
+    return "";
+  }
+
+  const scale = Number(options.scale || 1);
+  const style = Number.isFinite(scale) && scale !== 1
+    ? ` style="--store-pet-skin-scale:${scale.toFixed(3)};"`
+    : "";
+  const bubbleMarkup = options.bubbleLabel
+    ? buildStorePetSkinBubbleMarkup(options.bubbleLabel, options.bubbleClass || "")
+    : "";
+
+  return `
+    <span class="store-pet-skin-art ${className}"${style}>
+      ${buildPreviewAssetMarkup(item, {
+        imageClass: "store-pet-skin-image asset-image",
+        videoClass: "store-pet-skin-image asset-video",
+        fallbackText: item.name,
+        alt: item.name,
+        usePreviewVideo: false,
+        usePetAssetScale: false,
+      })}
+      ${bubbleMarkup}
+    </span>
+  `;
+}
+
+function buildPetSkinOfferBooth(offer) {
+  if (!offer || hasStorePetSkin(offer)) {
+    return "";
+  }
+
+  const basePet = getPetById(offer.basePetId);
+  const skinPet = getPetById(offer.skinPetId);
+
+  if (!basePet || !skinPet) {
+    return "";
+  }
+
+  const mode = getStorePetSkinOfferMode(offer);
+  const offerTab = getStorePetSkinOfferTab(offer);
+  const offerTitle = getStorePetSkinOfferTitle(offer, basePet, skinPet);
+  const skinName = offer?.skinName || skinPet.name;
+  const refreshIn = formatStoreRefreshShortCountdown(getStorePetSkinRefreshRemainingMs());
+  const priceMarkup = mode === "bundle"
+    ? buildStoreDiamondSalePriceMarkup(getStorePetSkinOfferOldPrice(offer), getStorePetSkinOfferPrice(offer))
+    : buildCurrencyAmountMarkup(getStorePetSkinOfferPrice(offer), "diamonds");
+  const badgeClass = offerTab === STORE_OFFER_TAB_PIRATE ? "store-special-offer-badge" : "store-magic-offer-badge";
+
+  return `
+    <section class="store-daily-offer-section store-pet-skin-section">
+      <article
+        class="store-daily-offer-card store-daily-character-offer store-magic-pack-offer store-pet-skin-offer"
+        data-store-pet-skin-offer="${offer.id}"
+        data-offer-tab="${offerTab}"
+        data-offer-mode="${mode}"
+        data-offer-slot="${Math.max(0, Number(offer.slotIndex || 0))}"
+        role="button"
+        tabindex="0"
+        aria-label="Oferta przebrania ${escapeHtml(offerTitle)}"
+      >
+        <span class="store-daily-offer-badge ${badgeClass}"><span>${escapeHtml(offer.title || STORE_PET_SKIN_OFFER_DEFAULTS.title)}</span></span>
+        ${buildDailyOfferTimerMarkup(refreshIn)}
+        <span class="store-pet-skin-stack" data-offer-mode="${mode}">
+          ${mode === "bundle" ? buildPetSkinOfferArtMarkup(basePet, "store-pet-skin-base-art", {
+            scale: offer.baseScale || 1,
+            bubbleLabel: basePet.name,
+            bubbleClass: "store-pet-skin-bubble-base",
+          }) : ""}
+          ${buildPetSkinOfferArtMarkup(skinPet, "store-pet-skin-skin-art", {
+            scale: mode === "skin"
+              ? offer.singleScale || 1.14
+              : offer.skinScale || 1,
+            bubbleLabel: skinName,
+            bubbleClass: mode === "skin"
+              ? "store-pet-skin-bubble-single store-pet-skin-bubble-skin"
+              : "store-pet-skin-bubble-skin",
+          })}
+        </span>
+        <span class="store-daily-price store-daily-diamond-price">${priceMarkup}</span>
+      </article>
+    </section>
+  `;
+}
+
+function buildPetSkinOfferBooths(tab = STORE_OFFER_TAB_MAGIC) {
+  return getCurrentStorePetSkinOffers(tab)
+    .map((offer) => buildPetSkinOfferBooth(offer))
+    .filter(Boolean)
+    .join("");
+}
+
+function isContentCreatorMachineOfferAvailable() {
+  return Boolean(isContentCreatorAccount() && !state.contentCreatorMachineClaimed);
+}
+
+function buildContentCreatorMachineBooth() {
+  if (!isContentCreatorMachineOfferAvailable()) {
+    return "";
+  }
+
+  return `
+    <section class="store-daily-offer-section store-magic-pack-section store-content-creator-offer-section">
+      <article
+        class="store-daily-offer-card store-daily-character-offer store-magic-pack-offer store-content-creator-offer"
+        data-store-content-creator-offer="${CONTENT_CREATOR_MACHINE_OFFER_ID}"
+        role="button"
+        tabindex="0"
+        aria-label="Content Creator Oferta"
+      >
+        <span class="store-daily-offer-badge store-content-creator-offer-badge"><span>CONTENT CREATOR OFERTA</span></span>
+        <span class="store-pack-items store-content-creator-pack-items">
+          ${buildStoreBundleItemMarkup({
+            image: MAGIC_MACHINE_IMAGE,
+            amount: "x1",
+            label: "Maszyna PlatoYI",
+            className: "store-bundle-machine",
+          })}
+        </span>
+        <span class="store-daily-price store-daily-free-price">ZA DARMO</span>
+      </article>
+    </section>
+  `;
+}
+
+function buildStarterPackBooth() {
+  if (!isStarterPackAvailable()) {
+    return "";
+  }
+
+  return `
+    <section class="store-daily-offer-section store-magic-pack-section">
+      <article
+        class="store-daily-offer-card store-daily-character-offer store-magic-pack-offer store-starter-pack-offer"
+        data-store-starter-pack-offer="${STORE_STARTER_PACK_OFFER.id}"
+        role="button"
+        tabindex="0"
+        aria-label="Oferta Starter Pack"
+      >
+        <span class="store-daily-offer-badge store-magic-offer-badge"><span>STARTER PACK</span></span>
+        <span class="store-pack-items">
+          ${buildStoreBundleItemMarkup({
+            image: MAGIC_MACHINE_IMAGE,
+            amount: "x1",
+            label: "Maszyna Platoi",
+            className: "store-bundle-machine",
+          })}
+          <span class="store-pack-row">
+            ${buildStoreBundleItemMarkup({
+              image: COIN_REWARD_IMAGE,
+              amount: `x${STORE_STARTER_PACK_OFFER.coins}`,
+              label: "Monety",
+            })}
+            ${buildStoreBundleItemMarkup({
+              image: ELIXIR_REWARD_IMAGE,
+              amount: `x${STORE_STARTER_PACK_OFFER.elixirs}`,
+              label: "Eliksir",
+            })}
+          </span>
+        </span>
+        <span class="store-daily-price store-daily-cash-price">${escapeHtml(STORE_STARTER_PACK_OFFER.priceLabel)}</span>
+      </article>
+    </section>
+  `;
+}
+
+function buildMaxPlatoyaBooth() {
+  if (isMaxPlatoyaOfferPurchasedToday()) {
+    return "";
+  }
+
+  return `
+    <section class="store-daily-offer-section store-magic-pack-section">
+      <article
+        class="store-daily-offer-card store-daily-character-offer store-magic-pack-offer store-max-platoya-offer"
+        data-store-max-platoya-offer="${STORE_MAX_PLATOYA_OFFER.id}"
+        role="button"
+        tabindex="0"
+        aria-label="Oferta Wymaksuj PlatoYĘ"
+      >
+        <span class="store-daily-offer-badge store-magic-offer-badge"><span>WYMAKSUJ PLATOYĘ!</span></span>
+        <span class="store-pack-items store-pack-items-stack">
+          ${buildStoreBundleItemMarkup({
+            image: COIN_REWARD_IMAGE,
+            amount: `x${STORE_MAX_PLATOYA_OFFER.coins}`,
+            label: "Monety",
+            className: "store-bundle-coins",
+          })}
+          ${buildStoreBundleItemMarkup({
+            image: ELIXIR_REWARD_IMAGE,
+            amount: `x${STORE_MAX_PLATOYA_OFFER.elixirs}`,
+            label: "Eliksiry",
+            className: "store-bundle-elixirs",
+          })}
+        </span>
+        <span class="store-daily-price store-daily-cash-price">${escapeHtml(STORE_MAX_PLATOYA_OFFER.priceLabel)}</span>
+      </article>
+    </section>
+  `;
+}
+
+function buildRankingCardDeckStoreBooth() {
+  if (isRankingCardDeckOfferPurchasedToday()) {
+    return "";
+  }
+
+  const priceMarkup = buildStoreCardDeckSalePriceMarkup();
+
+  return `
+    <section class="store-daily-offer-section store-pirate-card-deck-section">
+      <article
+        class="store-daily-offer-card store-daily-character-offer store-pirate-card-deck-offer"
+        data-store-card-deck-offer="${STORE_RANKING_CARD_DECK_OFFER.id}"
+        role="button"
+        tabindex="0"
+        aria-label="Kup Talię Kart"
+      >
+        <span class="store-daily-offer-badge store-special-offer-badge"><span>TALIA KART</span></span>
+        <span class="store-daily-character-art store-pirate-card-deck-art">
+          <img class="store-daily-character-image asset-image" src="${RANKING_CARD_DECK_IMAGE}" alt="Talia Kart" data-fallback-text="KARTY" />
+          <span class="asset-fallback">KARTY</span>
+          <span class="store-card-deck-count"><span>x2</span></span>
+        </span>
+        <span class="store-daily-price store-daily-diamond-price">${priceMarkup}</span>
+      </article>
+    </section>
+  `;
+}
+
+function getStoreHighTowerOfferById(offerId) {
+  const id = sanitizeStoredId(offerId);
+  return STORE_HIGH_TOWER_OFFERS.find((offer) => offer.id === id) || null;
+}
+
+function isHighTowerStoreOfferPurchasedToday(offer) {
+  if (!offer?.dailyPurchaseKey) {
+    return false;
+  }
+
+  return sanitizeDateKey(state.storeOffers?.[offer.dailyPurchaseKey]) === getStoreDailyPurchaseCycleKey();
+}
+
+function isHighTowerStoreOfferVisible(offer) {
+  if (!offer || !isHighTowerStoreTabAvailable()) {
+    return false;
+  }
+
+  if (offer.flaro && isFlaroOwned()) {
+    return false;
+  }
+
+  if (offer.oneTimePurchaseKey && Boolean(state.storeOffers?.[offer.oneTimePurchaseKey])) {
+    return false;
+  }
+
+  return !isHighTowerStoreOfferPurchasedToday(offer);
+}
+
+function buildHighTowerStoreOfferPriceMarkup(offer) {
+  if (!offer) {
+    return "";
+  }
+
+  if (offer.priceCurrency === "diamonds") {
+    return Number(offer.oldPrice || 0) > Number(offer.price || 0)
+      ? buildStoreDiamondSalePriceMarkup(offer.oldPrice, offer.price)
+      : buildCurrencyAmountMarkup(offer.price, "diamonds");
+  }
+
+  if (offer.priceCurrency === "coins") {
+    return buildCurrencyAmountMarkup(offer.price, "coins");
+  }
+
+  return escapeHtml(offer.priceLabel || "KUP");
+}
+
+function buildHighTowerStoreOfferArtMarkup(offer) {
+  if (!offer) {
+    return "";
+  }
+
+  if (offer.flaro) {
+    const flaro = getPetById(HIGH_TOWER_FLARO_ID);
+    if (!flaro) {
+      return "";
+    }
+
+    return `
+      <span class="store-daily-character-art store-high-tower-flaro-art">
+        ${buildPreviewAssetMarkup(flaro, {
+          imageClass: "store-daily-character-image asset-image",
+          videoClass: "store-daily-character-image asset-video",
+          fallbackText: flaro.name,
+          alt: flaro.name,
+          usePreviewVideo: false,
+          usePetAssetScale: false,
+        })}
+      </span>
+    `;
+  }
+
+  const items = [];
+
+  if (Number(offer.chestCount || 0) > 0) {
+    items.push(buildStoreBundleItemMarkup({
+      image: HIGH_TOWER_CHEST_IMAGE,
+      amount: `x${Number(offer.chestCount || 0)}`,
+      label: "Skrzynia Wysokiej Wieży",
+      className: "store-bundle-high-tower-chest",
+    }));
+  }
+
+  if (Number(offer.sparkles || 0) > 0) {
+    items.push(buildStoreBundleItemMarkup({
+      image: HIGH_TOWER_SPARKLES_REWARD_IMAGE,
+      amount: `x${Number(offer.sparkles || 0)}`,
+      label: "Błyskotki",
+      className: "store-bundle-high-tower-sparkles",
+    }));
+  }
+
+  return `
+    <span class="store-pack-items store-pack-items-stack store-high-tower-pack-items">
+      ${items.join("")}
+    </span>
+  `;
+}
+
+function buildHighTowerStoreOfferBooth(offer) {
+  if (!isHighTowerStoreOfferVisible(offer)) {
+    return "";
+  }
+
+  return `
+    <section class="store-daily-offer-section store-high-tower-offer-section">
+      <article
+        class="store-daily-offer-card store-daily-character-offer store-high-tower-offer"
+        data-store-high-tower-offer="${offer.id}"
+        role="button"
+        tabindex="0"
+        aria-label="${escapeHtml(offer.title)}"
+      >
+        <span class="store-daily-offer-badge store-high-tower-offer-badge"><span>${escapeHtml(offer.title)}</span></span>
+        ${offer.dailyPurchaseKey ? buildDailyOfferTimerMarkup() : ""}
+        ${buildHighTowerStoreOfferArtMarkup(offer)}
+        <span class="store-daily-price ${offer.priceCurrency === "cash" ? "store-daily-cash-price" : offer.priceCurrency === "coins" ? "store-daily-coin-price" : "store-daily-diamond-price"}">
+          ${buildHighTowerStoreOfferPriceMarkup(offer)}
+        </span>
+      </article>
+    </section>
+  `;
+}
+
+function buildHighTowerStoreOfferBooths() {
+  return STORE_HIGH_TOWER_OFFERS
+    .map((offer) => buildHighTowerStoreOfferBooth(offer))
+    .filter(Boolean);
+}
+
+function buildCreatorSupportBooth() {
+  const activeCreator = sanitizeStoredId(state.supportedCreatorCode).toUpperCase();
+  const isNatixActive = activeCreator === "NATIX";
+
+  return `
+    <section class="store-daily-offer-section store-creator-support-section">
+      <article class="store-creator-support-card" aria-label="Wesprzyj ulubionego content creatora">
+        <span class="store-creator-support-title">WESPRZYJ ULUBIONEGO CONTENT CREATORA!</span>
+        <input
+          class="store-creator-support-input"
+          data-creator-code-input
+          type="text"
+          value="${isNatixActive ? "NATIX" : ""}"
+          placeholder="WPISZ KOD"
+          autocomplete="off"
+          spellcheck="false"
+          ${isNatixActive ? "readonly" : ""}
+        />
+        ${isNatixActive ? `
+          <div class="store-creator-support-active">
+            <span>NATIX OTRZYMUJE TWOJE WSPARCIE!</span>
+            <button class="store-creator-support-clear" data-creator-support-clear type="button">PRZERWIJ</button>
+          </div>
+        ` : ""}
+      </article>
+    </section>
+  `;
+}
+
+function buildDailyOfferTimerMarkup(refreshIn = formatStoreRefreshShortCountdown(getStoreRefreshRemainingMs())) {
+  return `
+    <span class="store-daily-timer-control" aria-live="polite">
+      <span class="store-daily-timer-icon" data-store-refresh-tip role="button" tabindex="0" aria-label="Czas do zmiany oferty">
+        <img class="store-daily-timer-image asset-image" src="./zegar.png" alt="" data-fallback-text="CZAS" />
+      </span>
+      <span class="store-daily-timer-bubble store-refresh-note">${refreshIn}</span>
+    </span>
+  `;
+}
+
+function buildSpecialCurrencyBooth(offer) {
+  if (!offer) {
+    return "";
+  }
+
+  const refreshIn = formatStoreRefreshShortCountdown(getStoreRefreshRemainingMs());
+  const amountLabel = `${offer.amount} x`;
+  const iconSrc = offer.icon || getCurrencyIconSrc(offer.type);
+  const badgeLabel = getActiveStoreWorldId() === "winter" ? "ZIMOWY DEAL" : "OFERTA PIRACKA";
+
+  return `
+    <section class="store-daily-offer-section">
+      <article
+        class="store-daily-offer-card store-daily-character-offer store-daily-currency-offer"
+        data-store-special-currency="${offer.id}"
+        role="button"
+        tabindex="0"
+        aria-label="Oferta specjalna ${escapeHtml(offer.name)}"
+      >
+        <span class="store-daily-offer-badge store-special-offer-badge"><span>${badgeLabel}</span></span>
+        ${buildDailyOfferTimerMarkup(refreshIn)}
+        <span class="store-daily-character-name store-daily-currency-name">
+          <span class="store-daily-character-name-fallback-only">${escapeHtml(offer.title)}</span>
+        </span>
+        <span class="store-daily-character-art store-daily-currency-art">
+          <img
+            class="store-daily-character-image store-daily-currency-image asset-image"
+            src="${offer.image}"
+            alt="${escapeHtml(offer.name)}"
+            data-fallback-text="${escapeHtml(offer.title)}"
+          />
+          <span class="asset-fallback">${escapeHtml(offer.title)}</span>
+        </span>
+        <span class="store-daily-currency-amount" aria-label="${escapeHtml(amountLabel)}">
+          <span class="store-daily-currency-amount-text">${escapeHtml(amountLabel)}</span>
+          <img
+            class="store-daily-currency-amount-icon asset-image"
+            src="${iconSrc}"
+            alt=""
+            data-fallback-text="X"
+          />
+        </span>
+        <span class="store-daily-price store-daily-cash-price">${escapeHtml(offer.priceLabel)}</span>
+      </article>
+    </section>
+  `;
+}
+
+function buildPlatoMachineDailyBooth(offer) {
+  if (!offer) {
+    return "";
+  }
+
+  const refreshIn = formatStoreRefreshShortCountdown(getStoreRefreshRemainingMs());
+  const machineImage = offer.image || MAGIC_MACHINE_IMAGE;
+  const priceMarkup = buildCurrencyAmountMarkup(offer.price, "diamonds");
+
+  return `
+    <section class="store-daily-offer-section">
+      <article
+        class="store-daily-offer-card store-daily-character-offer store-daily-currency-offer store-daily-plato-machine-offer"
+        data-store-plato-machine-offer="${offer.id}"
+        role="button"
+        tabindex="0"
+        aria-label="Platoistyczna oferta ${escapeHtml(offer.name)}"
+      >
+        <span class="store-daily-offer-badge store-special-offer-badge store-plato-machine-offer-badge"><span>PLATOISTYCZNA OFERTA!</span></span>
+        ${buildDailyOfferTimerMarkup(refreshIn)}
+        <span class="store-daily-character-name store-daily-currency-name">
+          <span class="store-daily-character-name-fallback-only">${escapeHtml(offer.title)}</span>
+        </span>
+        <span class="store-daily-character-art store-daily-currency-art">
+          <img
+            class="store-daily-character-image store-daily-currency-image store-daily-machine-image asset-image"
+            src="${machineImage}"
+            alt="${escapeHtml(offer.name)}"
+            data-fallback-text="MASZYNA"
+          />
+          <span class="asset-fallback">MASZYNA</span>
+        </span>
+        <span class="store-daily-price store-daily-diamond-price">${priceMarkup}</span>
+      </article>
+    </section>
+  `;
+}
+
+function buildDailyGiftStoreBooth(
+  premiumAlleyOffer = getCurrentStorePremiumAlleyOffer(),
+  premiumBoostOffer = getCurrentStorePremiumBoostOffer()
+) {
+  if (!isDailyGiftUnlocked()) {
+    return "";
+  }
+
+  const claimed = !hasUnclaimedDailyGiftToday();
+  const image = claimed ? "./prezentotwarty.png" : "./prezent.png";
+  const label = claimed ? formatStoreRefreshShortCountdown(getStoreRefreshRemainingMs()) : "ZA DARMO";
+  const actionAttr = claimed ? "" : " data-store-daily-gift";
+  const premiumMarkup = premiumAlleyOffer ? buildStorePremiumAlleyMiniOffer(premiumAlleyOffer) : "";
+  const premiumBoostMarkup = premiumBoostOffer ? buildStorePremiumBoostMiniOffer(premiumBoostOffer) : "";
+
+  return `
+    <section class="store-daily-offer-section store-daily-gift-section">
+      <article
+        class="store-daily-offer-card store-daily-character-offer store-daily-gift-offer${claimed ? " claimed" : ""}"
+        ${actionAttr}
+        role="button"
+        tabindex="0"
+        aria-label="${claimed ? "Prezent odebrany" : "Darmowy prezent"}"
+      >
+        <span class="store-daily-gift-art">
+          <img
+            class="store-daily-gift-image asset-image"
+            src="${image}"
+            alt="${claimed ? "Otwarty prezent" : "Prezent"}"
+            data-fallback-text="PREZENT"
+          />
+          <span class="asset-fallback">PREZENT</span>
+        </span>
+        <span class="store-daily-gift-label${claimed ? " store-refresh-note" : ""}">${label}</span>
+      </article>
+      ${premiumMarkup}
+      ${premiumBoostMarkup}
+    </section>
+  `;
+}
+
+function getStorePremiumAlleyWorldId() {
+  return getActiveStoreWorldId() === "winter" ? "winter" : "alley";
+}
+
+function buildStorePremiumAlleyPriceMarkup(offer) {
+  if (!offer) {
+    return "";
+  }
+
+  if (offer.type === "cash") {
+    return `<span class="store-premium-price-cash">${escapeHtml(offer.priceLabel || SUPER_ALLEY_CASH_PRICE_LABEL)}</span>`;
+  }
+
+  return buildCurrencyAmountMarkup(offer.price, offer.type);
+}
+
+function buildStorePremiumAlleyMiniOffer(offer) {
+  const worldId = getStorePremiumAlleyWorldId();
+  const visual = getRandomMagiciansPremiumLeadVisual(worldId);
+  const priceMarkup = buildStorePremiumAlleyPriceMarkup(offer);
+
+  return `
+    <article
+      class="store-daily-offer-card store-daily-character-offer store-premium-alley-offer"
+      data-store-premium-alley-offer="${offer.id}"
+      data-world-theme="${worldId}"
+      role="button"
+      tabindex="0"
+      aria-label="Kup Aleję Premium"
+    >
+      <span class="store-premium-lead-visual">
+        <img
+          class="item-image asset-image trophy-node-magicians-lead-random-image store-premium-lead-random-image"
+          src="${visual.image}"
+          alt="${visual.alt}"
+          data-fallback-text="${visual.fallbackText}"
+        />
+        <span class="asset-fallback">${visual.fallbackText}</span>
+      </span>
+      <span class="store-premium-lead-title">PREMIUM</span>
+      <span class="store-premium-lead-copy">ODBLOKUJ WSZYSTKIE NAGRODY PREMIUM</span>
+      <span class="store-daily-price store-premium-lead-price">${priceMarkup}</span>
+    </article>
+  `;
+}
+
+function getCurrentStorePremiumBoostOffer() {
+  if (getActiveStoreWorldId() !== "winter" || isSuperAlleyActiveForWorld("winter")) {
+    return null;
+  }
+
+  return STORE_WINTER_PREMIUM_BOOST_OFFER;
+}
+
+function buildStorePremiumBoostMiniOffer(offer) {
+  if (!offer) {
+    return "";
+  }
+
+  return `
+    <article
+      class="store-daily-offer-card store-daily-character-offer store-premium-alley-offer store-premium-boost-offer"
+      data-store-premium-boost-offer="${offer.id}"
+      data-world-theme="winter"
+      role="button"
+      tabindex="0"
+      aria-label="Aleja Premium i ${escapeHtml(offer.copy)}"
+    >
+      <span class="store-premium-lead-visual">
+        <img
+          class="item-image asset-image store-premium-lead-ticket-image"
+          src="${offer.image}"
+          alt="Bilet Alei Premium"
+          data-fallback-text="BILET"
+        />
+        <span class="asset-fallback">BILET</span>
+      </span>
+      <span class="store-premium-lead-title">PREMIUM</span>
+      <span class="store-premium-lead-copy">${escapeHtml(offer.copy)}</span>
+      <span class="store-daily-price store-premium-lead-price">${escapeHtml(offer.priceLabel)}</span>
+    </article>
+  `;
+}
+
+function getStoreCharacterNameImageSrc(itemId) {
+  if (itemId === "hookcrab") {
+    return "./sklep_1.png";
+  }
+
+  if (itemId === "nerissa") {
+    return "./sklep_2.png";
+  }
+
+  return "";
+}
+
+function buildStoreCharacterNameImageMarkup(item, className) {
+  const imageSrc = getStoreCharacterNameImageSrc(item?.id);
+  const safeName = escapeHtml(item?.name || "Postać");
+
+  if (!imageSrc) {
+    return `<span class="${className} ${className}-fallback-only">${safeName}</span>`;
+  }
+
+  return `
+    <span class="${className}" aria-label="${safeName}">
+      <img
+        class="${className}-image asset-image"
+        src="${imageSrc}"
+        alt="${safeName}"
+        data-fallback-text="${safeName}"
+      />
+      <span class="${className}-text">${safeName}</span>
+    </span>
   `;
 }
 
@@ -7559,6 +13110,31 @@ function buildStoreCatalogBooth() {
   `;
 }
 
+function buildFeaturedStoreCharacterBooth(characterId) {
+  const item = CATALOG.characters.find((entry) => entry.id === characterId);
+
+  if (!item || isOwned("characters", item.id)) {
+    return "";
+  }
+
+  return `
+    <section class="store-booth store-featured-character-booth">
+      <div class="store-booth-copy">
+        <p class="item-title">Nowa postać w sklepie</p>
+        <p class="item-note">${item.name} jest dostępna za monety.</p>
+      </div>
+      <div class="store-booth-grid">
+        ${buildStoreOfferCard("characters", item, {
+          price: item.price,
+          note: item.storeNote || "",
+          allowInsufficientPreview: true,
+          buttonAttributes: 'data-store-offer-source="featured-character"',
+        })}
+      </div>
+    </section>
+  `;
+}
+
 function buildCrateShopBooth(crate) {
   if (!crate) {
     return "";
@@ -7601,51 +13177,6 @@ function buildCrateShopBooth(crate) {
             `
           )
           .join("")}
-      </div>
-    </section>
-  `;
-}
-
-function buildJungleCrateShopBooth(crate) {
-  if (!crate || getActiveStoreWorldId() !== "tower") {
-    return "";
-  }
-
-  const packs = [
-    { id: "jungle-crate-pack-1", amount: 1, price: 50 },
-    { id: "jungle-crate-pack-2", amount: 2, price: 95 },
-  ];
-
-  return `
-    <section class="store-booth">
-      <div class="store-booth-copy">
-        <div class="store-booth-head">
-          <p class="item-title">Skrzynie Dżungli</p>
-          <button class="circle-icon-button" data-chest-odds="${crate.id}" aria-label="Szanse skrzyni">?</button>
-        </div>
-        <p class="item-note">Ta skrzynia daje tylko diamenty i może też wyrzucić dżunglowego PlatoYasa.</p>
-      </div>
-      <div class="store-booth-grid">
-        ${packs.map((pack) => `
-          <article class="item-card store-compact-card store-world-card" data-store-world="tower">
-            <p class="store-world-ribbon" data-store-world="tower">SWIAT DŻUNGLI</p>
-            <div class="item-art">
-              <img
-                class="item-image asset-image"
-                src="${crate.image}"
-                alt="${crate.name}"
-                data-fallback-text="${crate.fallbackText}"
-              />
-              <div class="asset-fallback">${crate.fallbackText}</div>
-            </div>
-            <p class="item-title">${pack.amount} x ${crate.name}</p>
-            <div class="card-actions">
-              <button class="pixel-button small-button" data-buy-crate-pack="${pack.id}" ${state.diamonds >= pack.price ? "" : "disabled"}>
-                ${buildCurrencyAmountMarkup(pack.price, "diamonds")}
-              </button>
-            </div>
-          </article>
-        `).join("")}
       </div>
     </section>
   `;
@@ -7727,6 +13258,52 @@ function buildDiamondBooth() {
   `;
 }
 
+function buildAllPlatoYaUnlockBooth() {
+  const item = CATALOG.platoYaUnlocks?.[0];
+
+  if (!item) {
+    return "";
+  }
+
+  const allOwned = CATALOG.pets
+    .filter((pet) => !isPetExcludedFromRandomUnlocks(pet.id))
+    .every((pet) => state.ownedPets.includes(pet.id));
+
+  return `
+    <section class="store-booth">
+      <div class="store-booth-copy">
+        <p class="item-title">Oferta PlatoYI</p>
+        <p class="item-note">Specjalna oferta za haslo. Odblokowuje wszystkie PlatoYe w szafie.</p>
+      </div>
+      <div class="store-booth-grid">
+        <article class="item-card store-compact-card">
+          <div class="item-art">
+            <img
+              class="item-image asset-image"
+              src="${item.image}"
+              alt="${item.name}"
+              data-fallback-text="PLATOYA"
+            />
+            <div class="asset-fallback">PLATOYA</div>
+          </div>
+          <p class="item-title">${item.name}</p>
+          <p class="item-note">${allOwned ? "Masz juz wszystkie PlatoYe w szafie." : item.description}</p>
+          <div class="card-actions">
+            <button
+              class="pixel-button small-button"
+              data-store-buy="${item.id}"
+              data-store-kind="platoYaUnlocks"
+              ${allOwned || state.diamonds < item.price ? "disabled" : ""}
+            >
+              ${buildCurrencyAmountMarkup(item.price, "diamonds")}
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+  `;
+}
+
 function buildTrophyBooth() {
   if (!Array.isArray(CATALOG.trophies) || CATALOG.trophies.length === 0) {
     return "";
@@ -7772,44 +13349,134 @@ function ensureStoreOffersCurrent(force = false) {
   const now = Date.now();
   const characterPool = getStoreOfferCandidates("characters");
   const characterPoolIds = new Set(characterPool.map((item) => item.id));
-  const expectedCharacterCount = Math.min(2, characterPool.length);
-  if (
+  const specialCurrencyOfferIds = new Set(STORE_SPECIAL_CURRENCY_OFFERS.map((offer) => offer.id));
+  const platoMachineOfferIds = new Set(STORE_PLATOYA_MACHINE_OFFERS.map((offer) => offer.id));
+  const premiumAlleyOfferIds = new Set(STORE_PREMIUM_ALLEY_OFFERS.map((offer) => offer.id));
+  const expectedCharacterCount = Math.min(1, characterPool.length);
+  const needsMainRefresh =
     force ||
     !state.storeOffers ||
     !Array.isArray(state.storeOffers.characterIds) ||
     state.storeOffers.characterIds.length !== expectedCharacterCount ||
     state.storeOffers.characterIds.some((itemId) => !characterPoolIds.has(itemId)) ||
-    now >= Number(state.storeOffers.nextRefreshAt || 0)
-  ) {
+    !specialCurrencyOfferIds.has(state.storeOffers.specialCurrencyOfferId) ||
+    !platoMachineOfferIds.has(state.storeOffers.platoKeyOfferId) ||
+    !premiumAlleyOfferIds.has(state.storeOffers.premiumAlleyOfferId) ||
+    now >= Number(state.storeOffers.nextRefreshAt || 0);
+
+  if (needsMainRefresh) {
     regenerateStoreOffers(now);
+    return;
+  }
+
+  if (isStorePetSkinOfferSelectionExpiredOrInvalid(now)) {
+    regenerateStorePetSkinOffers(now);
   }
 }
 
 function regenerateStoreOffers(now = Date.now()) {
-  const characterIds = pickRandomItems(getStoreOfferCandidates("characters"), 2).map((item) => item.id);
+  const characterIds = pickRandomItems(getStoreOfferCandidates("characters"), 1).map((item) => item.id);
+  const previousSpecialOfferId = sanitizeStoredId(state.storeOffers?.specialCurrencyOfferId);
+  const specialCurrencyPool = STORE_SPECIAL_CURRENCY_OFFERS.filter((offer) => offer.id !== previousSpecialOfferId);
+  const specialCurrencyOffer =
+    pickRandomItems(specialCurrencyPool.length > 0 ? specialCurrencyPool : STORE_SPECIAL_CURRENCY_OFFERS, 1)[0] ||
+    STORE_SPECIAL_CURRENCY_OFFERS[0] ||
+    null;
+  const platoMachineOffer = STORE_PLATOYA_MACHINE_OFFERS[0] || null;
+  const previousPremiumAlleyOfferId = sanitizeStoredId(state.storeOffers?.premiumAlleyOfferId);
+  const premiumAlleyOfferPool = STORE_PREMIUM_ALLEY_OFFERS.filter((offer) => offer.id !== previousPremiumAlleyOfferId);
+  const premiumAlleyOffer =
+    pickRandomItems(premiumAlleyOfferPool.length > 0 ? premiumAlleyOfferPool : STORE_PREMIUM_ALLEY_OFFERS, 1)[0] ||
+    STORE_PREMIUM_ALLEY_OFFERS[0] ||
+    null;
   state.storeOffers = {
     characterIds,
     petIds: [],
+    petSkinOfferIds: getRegeneratedStorePetSkinOfferIds(),
+    specialCurrencyOfferId: specialCurrencyOffer?.id || "",
+    specialCurrencyPurchasedId: "",
+    platoKeyOfferId: platoMachineOffer?.id || "",
+    platoKeyPurchasedId: "",
+    premiumAlleyOfferId: premiumAlleyOffer?.id || "",
+    maxPlatoyaPurchasedCycleKey: sanitizeDateKey(state.storeOffers?.maxPlatoyaPurchasedCycleKey),
+    cardDeckPurchasedCycleKey: sanitizeDateKey(state.storeOffers?.cardDeckPurchasedCycleKey),
+    highTowerClimbPackPurchasedCycleKey: sanitizeDateKey(state.storeOffers?.highTowerClimbPackPurchasedCycleKey),
+    highTowerLuckPackPurchasedCycleKey: sanitizeDateKey(state.storeOffers?.highTowerLuckPackPurchasedCycleKey),
+    highTowerCoinLuckPackPurchasedCycleKey: sanitizeDateKey(state.storeOffers?.highTowerCoinLuckPackPurchasedCycleKey),
+    highTowerSparkPackPurchased: Boolean(state.storeOffers?.highTowerSparkPackPurchased),
     nextRefreshAt: getNextStoreRefreshAt(now),
+    nextPetSkinRefreshAt: getNextStorePetSkinRefreshAt(now),
+  };
+  saveState();
+}
+
+function getRegeneratedStorePetSkinOfferIds() {
+  return {
+    [STORE_OFFER_TAB_MAGIC]: pickRandomItems(
+      getStorePetSkinOfferPool(STORE_OFFER_TAB_MAGIC),
+      STORE_PET_SKIN_VISIBLE_COUNT,
+    ).map((offer) => offer.id),
+    [STORE_OFFER_TAB_PIRATE]: pickRandomItems(
+      getStorePetSkinOfferPool(STORE_OFFER_TAB_PIRATE),
+      STORE_PET_SKIN_VISIBLE_COUNT,
+    ).map((offer) => offer.id),
+  };
+}
+
+function isStorePetSkinOfferSelectionExpiredOrInvalid(now = Date.now()) {
+  if (!state.storeOffers || now >= Number(state.storeOffers.nextPetSkinRefreshAt || 0)) {
+    return true;
+  }
+
+  const selectedByTab = state.storeOffers.petSkinOfferIds;
+  if (!selectedByTab || typeof selectedByTab !== "object") {
+    return true;
+  }
+
+  return [STORE_OFFER_TAB_MAGIC, STORE_OFFER_TAB_PIRATE].some((tab) => {
+    const selectedIds = Array.isArray(selectedByTab[tab]) ? selectedByTab[tab].map(sanitizeStoredId).filter(Boolean) : [];
+    const validOfferIds = new Set(getStorePetSkinOfferPool(tab, { includeOwned: true }).map((offer) => offer.id));
+    const expectedCount = Math.min(STORE_PET_SKIN_VISIBLE_COUNT, getStorePetSkinOfferPool(tab).length);
+    const uniqueIds = new Set(selectedIds);
+
+    return (
+      selectedIds.length !== expectedCount ||
+      uniqueIds.size !== selectedIds.length ||
+      selectedIds.some((offerId) => !validOfferIds.has(offerId))
+    );
+  });
+}
+
+function regenerateStorePetSkinOffers(now = Date.now()) {
+  state.storeOffers = {
+    ...(state.storeOffers || {}),
+    petSkinOfferIds: getRegeneratedStorePetSkinOfferIds(),
+    nextPetSkinRefreshAt: getNextStorePetSkinRefreshAt(now),
   };
   saveState();
 }
 
 function getStoreOfferCandidates(kind) {
   const items = CATALOG[kind];
+  const dailyCharacterIds = getStoreDailyCharacterIdsForWorld(
+    ui.storeOfferTab === STORE_OFFER_TAB_PIRATE ? "magicians" : getActiveStoreWorldId()
+  );
   return items.filter((item) => (
     Number(item.price || 0) > 0 &&
     !isWorldLockedItem(item) &&
     !isOwned(kind, item.id) &&
-    (kind !== "characters" || isStoreCharacterVisibleInShop(item))
+    (
+      kind !== "characters" ||
+      (dailyCharacterIds.includes(item.id) && isStoreCharacterVisibleInShop(item))
+    )
   ));
 }
 
-function getActiveStoreWorldId() {
-  if (isTowerWorldUnlocked()) {
-    return "tower";
-  }
+function getStoreDailyCharacterIdsForWorld(worldId = getActiveStoreWorldId()) {
+  return STORE_DAILY_CHARACTER_IDS_BY_WORLD[worldId] || STORE_DAILY_CHARACTER_IDS_BY_WORLD.magicians;
+}
 
+function getActiveStoreWorldId() {
   if (isWinterWorldUnlocked()) {
     return "winter";
   }
@@ -7827,6 +13494,45 @@ function getCurrentStoreOfferItems(kind, options = {}) {
       (kind !== "characters" || isStoreCharacterVisibleInShop(item)) &&
       (includeOwned || !isOwned(kind, item.id))
     ));
+}
+
+function getCurrentStoreSpecialCurrencyOffer() {
+  ensureStoreOffersCurrent();
+  const offerId = sanitizeStoredId(state.storeOffers?.specialCurrencyOfferId);
+  const purchasedOfferId = sanitizeStoredId(state.storeOffers?.specialCurrencyPurchasedId);
+
+  if (offerId && offerId === purchasedOfferId) {
+    return null;
+  }
+
+  return STORE_SPECIAL_CURRENCY_OFFERS.find((offer) => offer.id === offerId) || STORE_SPECIAL_CURRENCY_OFFERS[0] || null;
+}
+
+function hasUnownedMagiciansPlatoYa() {
+  return getMagiciansPetShopItems().some((item) => !state.ownedPets.includes(item.id));
+}
+
+function getCurrentStorePlatoMachineOffer() {
+  ensureStoreOffersCurrent();
+  if (getActiveStoreWorldId() !== "magicians" || !hasUnownedMagiciansPlatoYa()) {
+    return null;
+  }
+
+  const offerId = sanitizeStoredId(state.storeOffers?.platoKeyOfferId);
+
+  return STORE_PLATOYA_MACHINE_OFFERS.find((offer) => offer.id === offerId) || STORE_PLATOYA_MACHINE_OFFERS[0] || null;
+}
+
+function getCurrentStorePremiumAlleyOffer() {
+  ensureStoreOffersCurrent();
+  const worldId = getStorePremiumAlleyWorldId();
+
+  if (isSuperAlleyActiveForWorld(worldId) || getSuperAlleyBlockedContent(worldId)) {
+    return null;
+  }
+
+  const offerId = sanitizeStoredId(state.storeOffers?.premiumAlleyOfferId);
+  return STORE_PREMIUM_ALLEY_OFFERS.find((offer) => offer.id === offerId) || STORE_PREMIUM_ALLEY_OFFERS[0] || null;
 }
 
 function pickRandomItems(items, count) {
@@ -7890,6 +13596,97 @@ function formatStoreRefreshCountdown(ms) {
   return `${hours} ${formatPolishCountdownUnit(hours, "GODZINĘ", "GODZINY", "GODZIN")}, ${minutes} ${formatPolishCountdownUnit(minutes, "MINUTĘ", "MINUTY", "MINUT")}`;
 }
 
+function formatStoreRefreshShortCountdown(ms) {
+  const totalMinutes = Math.max(0, Math.ceil(ms / 60000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  return `${hours} H, ${minutes} MIN.`;
+}
+
+function getTrophyWorldBaseRewards(world) {
+  if (!world) {
+    return [];
+  }
+
+  if (Array.isArray(world.standardRewards)) {
+    return world.standardRewards;
+  }
+
+  return Array.isArray(world.rewards) ? world.rewards : [];
+}
+
+function getTrophyWorldSuperRewards(world) {
+  if (!world) {
+    return [];
+  }
+
+  return Array.isArray(world.superRewards) ? world.superRewards : [];
+}
+
+function getTrophyWorldRewards(world) {
+  if (!world) {
+    return [];
+  }
+
+  if (Array.isArray(world.standardRewards) || Array.isArray(world.superRewards)) {
+    return [
+      ...getTrophyWorldBaseRewards(world),
+      ...getTrophyWorldSuperRewards(world),
+    ].sort((left, right) => {
+      if (left.trophies !== right.trophies) {
+        return left.trophies - right.trophies;
+      }
+
+      if ((left.rewardLane || "base") === (right.rewardLane || "base")) {
+        return 0;
+      }
+
+      return (left.rewardLane || "base") === "super" ? -1 : 1;
+    });
+  }
+
+  return Array.isArray(world.rewards) ? world.rewards : [];
+}
+
+function getTrophyWorldRewardById(world, rewardId) {
+  return getTrophyWorldRewards(world).find((reward) => reward.id === rewardId) || null;
+}
+
+function getTrophyWorldProgressRewards(world) {
+  return getTrophyWorldBaseRewards(world);
+}
+
+function isMagiciansStyleTrophyWorld(world) {
+  return world?.id === "alley" || world?.id === "winter";
+}
+
+function hasMagiciansRoadPortal(world) {
+  return world?.id === "alley";
+}
+
+function getMagiciansStyleProgressSlots(world) {
+  if (world?.id === "winter") {
+    return WINTER_ALLEY_PROGRESS_SLOTS;
+  }
+
+  return MAGICIANS_ALLEY_PROGRESS_SLOTS;
+}
+
+function getTrophyNodeMetrics(world) {
+  if (isMagiciansStyleTrophyWorld(world)) {
+    return {
+      width: MAGICIANS_TROPHY_NODE_WIDTH,
+      gap: TROPHY_NODE_GAP,
+    };
+  }
+
+  return {
+    width: TROPHY_NODE_WIDTH,
+    gap: TROPHY_NODE_GAP,
+  };
+}
+
 function getClaimableTrophyRewards(worldId) {
   const world = getTrophyWorldById(worldId);
 
@@ -7897,7 +13694,7 @@ function getClaimableTrophyRewards(worldId) {
     return [];
   }
 
-  return world.rewards.filter((reward) => {
+  return getTrophyWorldRewards(world).filter((reward) => {
     if (state.trophies < reward.trophies || isTrophyRewardClaimed(worldId, reward)) {
       return false;
     }
@@ -7911,15 +13708,24 @@ function getClaimableTrophyRewards(worldId) {
 }
 
 function getTrophyWorldProgressPercent(world) {
-  const rewards = Array.isArray(world?.rewards) ? world.rewards : [];
+  const rewards = getTrophyWorldProgressRewards(world);
+  const metrics = getTrophyNodeMetrics(world);
 
   if (rewards.length === 0) {
     return 0;
   }
 
-  const totalWidth = (rewards.length * TROPHY_NODE_WIDTH) + (Math.max(0, rewards.length - 1) * TROPHY_NODE_GAP);
+  if (world.id === "alley") {
+    return getMagiciansPortalProgressPercent(world, metrics);
+  }
+
+  if (isMagiciansStyleTrophyWorld(world)) {
+    return getMagiciansStyleProgressPercent(world, metrics);
+  }
+
+  const totalWidth = (rewards.length * metrics.width) + (Math.max(0, rewards.length - 1) * metrics.gap);
   const getRewardCenterPercent = (index) => {
-    const center = (index * (TROPHY_NODE_WIDTH + TROPHY_NODE_GAP)) + (TROPHY_NODE_WIDTH / 2);
+    const center = (index * (metrics.width + metrics.gap)) + (metrics.width / 2);
     return clamp((center / totalWidth) * 100, 0, 100);
   };
 
@@ -7946,18 +13752,83 @@ function getTrophyWorldProgressPercent(world) {
   return 100;
 }
 
-function getTrophyWorldOverlayConfig(worldId) {
-  if (worldId === "tower" && !isTowerWorldUnlocked()) {
-    return {
-      theme: "tower",
-      visibility: "always",
-      align: "start",
-      image: "./assets/alley/jungle.jpeg",
-      fallbackText: "DZUNGLA",
-      message: "NAJPIERW ZAKOŃCZ ŚWIAT ZIMOWY",
-    };
+function getMagiciansStyleProgressPercent(world, metrics) {
+  const currentTrophies = Math.max(0, Number(state.trophies || 0));
+  const rewardSlots = getMagiciansStyleProgressSlots(world);
+  const leadOffset = metrics.width + metrics.gap;
+  const getSlotCenter = (index) => (
+    leadOffset + (index * (metrics.width + metrics.gap)) + (metrics.width / 2)
+  );
+  const finalSlotCenter = getSlotCenter(Math.max(0, rewardSlots.length - 1));
+
+  if (currentTrophies <= world.threshold || rewardSlots.length === 0) {
+    return 0;
   }
 
+  for (let index = 0; index < rewardSlots.length; index += 1) {
+    const slotTrophies = rewardSlots[index];
+    const previousThreshold = index === 0 ? world.threshold : rewardSlots[index - 1];
+    const previousCenter = index === 0 ? 0 : getSlotCenter(index - 1);
+    const nextCenter = getSlotCenter(index);
+
+    if (currentTrophies <= slotTrophies) {
+      const localProgress = clamp(
+        (currentTrophies - previousThreshold) / Math.max(1, slotTrophies - previousThreshold),
+        0,
+        1
+      );
+      return clamp(((previousCenter + ((nextCenter - previousCenter) * localProgress)) / finalSlotCenter) * 100, 0, 100);
+    }
+  }
+
+  return 100;
+}
+
+function getMagiciansPortalProgressPercent(world, metrics) {
+  const currentTrophies = Math.max(0, Number(state.trophies || 0));
+  const rewardSlots = MAGICIANS_ALLEY_PROGRESS_SLOTS;
+  const leadOffset = metrics.width + metrics.gap;
+  const getSlotCenter = (index) => (
+    leadOffset + (index * (metrics.width + metrics.gap)) + (metrics.width / 2)
+  );
+  const portalCenter = (
+    metrics.width
+    + (rewardSlots.length * metrics.width)
+    + ((rewardSlots.length + 1) * metrics.gap)
+    + MAGICIANS_PORTAL_SPACER_WIDTH
+    - (MAGICIANS_PORTAL_SIZE / 2)
+  );
+
+  if (currentTrophies <= world.threshold) {
+    return 0;
+  }
+
+  if (currentTrophies >= MAGICIANS_WORLD_END_TROPHIES) {
+    return 100;
+  }
+
+  for (let index = 0; index < rewardSlots.length; index += 1) {
+    const slotTrophies = rewardSlots[index];
+    const previousThreshold = index === 0 ? world.threshold : rewardSlots[index - 1];
+    const previousCenter = index === 0 ? 0 : getSlotCenter(index - 1);
+    const nextCenter = slotTrophies >= MAGICIANS_WORLD_END_TROPHIES
+      ? portalCenter
+      : getSlotCenter(index);
+
+    if (currentTrophies <= slotTrophies) {
+      const localProgress = clamp(
+        (currentTrophies - previousThreshold) / Math.max(1, slotTrophies - previousThreshold),
+        0,
+        1
+      );
+      return clamp(((previousCenter + ((nextCenter - previousCenter) * localProgress)) / portalCenter) * 100, 0, 100);
+    }
+  }
+
+  return 100;
+}
+
+function getTrophyWorldOverlayConfig(worldId) {
   if (worldId === "winter" && !isWinterWorldUnlocked()) {
     return {
       theme: "winter",
@@ -7981,21 +13852,6 @@ function getTrophyWorldOverlayConfig(worldId) {
       message: "UKOŃCZYŁEŚ JUŻ ŚWIAT MAGIKÓW",
       actionWorldId: claimableRewards.length > 0 ? "alley" : "",
       actionLabel: claimableRewards.length > 0 ? "Odbierz nagrody ze Świata Magików" : "",
-    };
-  }
-
-  if (worldId === "winter" && isTowerWorldUnlocked()) {
-    const claimableRewards = getClaimableTrophyRewards("winter");
-
-    return {
-      theme: "winter",
-      visibility: "tower",
-      align: "end",
-      image: "./assets/backgrounds/ładowanie_2.png",
-      fallbackText: "ZIMA",
-      message: "UKOŃCZYŁEŚ JUŻ ŚWIAT ZIMOWY",
-      actionWorldId: claimableRewards.length > 0 ? "winter" : "",
-      actionLabel: claimableRewards.length > 0 ? "Odbierz nagrody ze Świata Zimowego" : "",
     };
   }
 
@@ -8101,13 +13957,6 @@ function getTrophyRewardUiState(worldId, reward) {
 }
 
 function getWorldPromoVisual(worldId) {
-  if (worldId === "tower") {
-    return {
-      image: "./assets/alley/jungle.jpeg",
-      fallbackText: "DZUNGLA",
-    };
-  }
-
   if (worldId === "winter") {
     return {
       image: "./assets/backgrounds/ładowanie_2.png",
@@ -8128,7 +13977,8 @@ function getNextTrophyWorld(worldId) {
 
 function getWorldTransitionRequirement(worldId) {
   const world = getTrophyWorldById(worldId);
-  const lastReward = Array.isArray(world.rewards) ? world.rewards[world.rewards.length - 1] : null;
+  const rewards = getTrophyWorldRewards(world);
+  const lastReward = rewards.length > 0 ? rewards[rewards.length - 1] : null;
   return lastReward?.trophies || 0;
 }
 
@@ -8140,11 +13990,36 @@ function canTransitionToWorld(targetWorldId) {
   }
 
   const previousWorld = TROPHY_WORLDS[targetIndex - 1];
-  return state.trophies >= getWorldTransitionRequirement(previousWorld.id);
+  const hasRequiredTrophies = state.trophies >= getWorldTransitionRequirement(previousWorld.id);
+
+  if (targetWorldId === "winter") {
+    return hasRequiredTrophies && Number(state.silver || 0) >= WINTER_WORLD_SILVER_REQUIREMENT;
+  }
+
+  return hasRequiredTrophies;
 }
 
 function getTrophyWorldBannerStatus(worldId) {
-  return isSuperAlleyActiveForWorld(worldId) ? "SUPER AKTYWOWANA" : "ALEJA ZWYKŁA";
+  return isSuperAlleyActiveForWorld(worldId) ? "SUPER" : "";
+}
+
+function buildTrophyWorldBannerTitle(world) {
+  return "";
+}
+
+function getSuperAlleyBenefits(worldId) {
+  const benefits = [
+    "DODATKOWE NAGRODY PREMIUM W ALEI",
+    "WIĘCEJ MONET I DIAMENTÓW DO ODEBRANIA",
+  ];
+
+  if (worldId === "winter") {
+    benefits.push("SZANSA NA KLUCZE ZIMOWYCH PLATOYI");
+  } else {
+    benefits.push("SZANSA NA KLUCZE MAGIKÓW");
+  }
+
+  return benefits;
 }
 
 function buildTrophyWorldStartCard(world) {
@@ -8180,10 +14055,9 @@ function buildTrophyWorldStartCard(world) {
           data-fallback-text="${visual.fallbackText}"
         />
         <div class="asset-fallback">${visual.fallbackText}</div>
+        ${buildTrophyWorldBannerTitle(world)}
       </div>
       <div class="trophy-world-banner-meta">
-        <p class="trophy-world-banner-label trophy-world-banner-world">${world.name}</p>
-        <p class="trophy-world-banner-label trophy-world-banner-state">${getTrophyWorldBannerStatus(world.id)}</p>
         ${petKeyBalance}
         ${petShopButton}
         ${superAlleyActive ? "" : `
@@ -8193,7 +14067,50 @@ function buildTrophyWorldStartCard(world) {
           >
             AKTYWUJ ALEJĘ SUPER
           </button>
+          <ul class="trophy-world-banner-benefits">
+            ${getSuperAlleyBenefits(world.id)
+              .map((benefit) => `<li class="trophy-world-banner-benefit-item">${benefit}</li>`)
+              .join("")}
+          </ul>
         `}
+      </div>
+    </article>
+  `;
+}
+
+function buildMagiciansRarityStoreTransitionCard(world, nextWorld) {
+  const hasRequiredTrophies = Number(state.trophies || 0) >= MAGICIANS_SILVER_GATE_TROPHIES;
+
+  return `
+    <article
+      class="trophy-world-banner trophy-world-banner-end magicians-rarity-transition"
+      data-world-theme="${world.id}"
+      data-rarity-state="${hasRequiredTrophies ? "unlocked" : "locked"}"
+      style="--magicians-portal-fill:${hasRequiredTrophies ? "50" : "0"}%;"
+    >
+      <div class="magicians-rarity-chain">
+        <div class="magicians-rarity-road" aria-hidden="true">
+          <div class="magicians-rarity-road-fill"></div>
+        </div>
+        <button
+          class="magicians-rarity-store-button"
+          type="button"
+          data-open-rarity-store="true"
+          aria-label="${hasRequiredTrophies ? "Otwórz portal" : "Portal zablokowany"}"
+        >
+          <img
+            class="magicians-rarity-store-image asset-image"
+            src="${PORTAL_IMAGE}"
+            alt="Portal"
+            data-fallback-text="PORTAL"
+          />
+          <div class="asset-fallback">PORTAL</div>
+          ${hasRequiredTrophies ? "" : `
+            <span class="magicians-rarity-lock" aria-hidden="true">
+              <img class="asset-image" src="${MAGICIANS_LOCK_IMAGE}" alt="" data-fallback-text="LOCK" />
+            </span>
+          `}
+        </button>
       </div>
     </article>
   `;
@@ -8214,13 +14131,17 @@ function buildTrophyWorldTransitionCard(world) {
             data-fallback-text="${visual.fallbackText}"
           />
           <div class="asset-fallback">${visual.fallbackText}</div>
+          ${buildTrophyWorldBannerTitle(world)}
         </div>
         <div class="trophy-world-banner-meta">
-          <p class="trophy-world-banner-label trophy-world-banner-world">${world.name}</p>
           <p class="trophy-world-banner-label trophy-world-banner-state">OSTATNI ŚWIAT</p>
         </div>
       </article>
     `;
+  }
+
+  if (world.id === "alley" && nextWorld.id === "winter") {
+    return buildMagiciansRarityStoreTransitionCard(world, nextWorld);
   }
 
   const visual = getWorldPromoVisual(nextWorld.id);
@@ -8237,9 +14158,9 @@ function buildTrophyWorldTransitionCard(world) {
           data-fallback-text="${visual.fallbackText}"
         />
         <div class="asset-fallback">${visual.fallbackText}</div>
+        ${buildTrophyWorldBannerTitle(nextWorld)}
       </div>
       <div class="trophy-world-banner-meta">
-        <p class="trophy-world-banner-label trophy-world-banner-world">${nextWorld.name}</p>
         ${
           transitionReady
             ? `
@@ -8250,7 +14171,21 @@ function buildTrophyWorldTransitionCard(world) {
                 PRZEJDŹ
               </button>
             `
-            : `<p class="trophy-world-banner-label trophy-world-banner-state">ZA ${requiredTrophies} PUCHARÓW</p>`
+            : `
+              <p class="trophy-world-banner-label trophy-world-banner-state trophy-world-banner-lock-label">
+                <span>WYMAGANE: ${requiredTrophies}</span>
+                <img class="trophy-world-banner-lock-label-icon" src="${TROPHY_ICON_IMAGE}" alt="" aria-hidden="true" />
+              </p>
+              <div class="trophy-world-banner-lock-visual">
+                <img
+                  class="item-image asset-image"
+                  src="${MAGICIANS_LOCK_IMAGE}"
+                  alt="Zablokowane przejście"
+                  data-fallback-text="LOCK"
+                />
+                <div class="asset-fallback">LOCK</div>
+              </div>
+            `
         }
       </div>
     </article>
@@ -8269,7 +14204,7 @@ async function transitionToTrophyWorld(targetWorldId) {
   const previousWorld = TROPHY_WORLDS[targetIndex - 1];
   const previousVisual = getWorldPromoVisual(previousWorld.id);
   const targetVisual = getWorldPromoVisual(targetWorld.id);
-  const completionVisual = targetWorld.id === "tower" ? targetVisual : previousVisual;
+  const completionVisual = previousVisual;
   const previousWorldCompletionTitle = previousWorld.id === "alley"
     ? "UKOŃCZYŁEŚ ŚWIAT MAGIKÓW"
     : previousWorld.id === "winter"
@@ -8277,14 +14212,10 @@ async function transitionToTrophyWorld(targetWorldId) {
       : `UKOŃCZYŁEŚ ${previousWorld.name.toUpperCase()}`;
   const targetWorldCopy = targetWorld.id === "winter"
     ? "Możesz przejsc do Świata Zimowego"
-    : targetWorld.id === "tower"
-      ? "Możesz przejsc do Świata Dżungli"
-      : `Możesz przejsc do ${targetWorld.name}`;
+    : `Możesz przejsc do ${targetWorld.name}`;
   const targetWorldWelcomeTitle = targetWorld.id === "winter"
     ? "Witaj w Świecie Zimowym"
-    : targetWorld.id === "tower"
-      ? "Witaj w Świecie Dżungli"
-      : `Witaj w ${targetWorld.name}`;
+    : `Witaj w ${targetWorld.name}`;
 
   try {
     await playAlleyIntroSequence([
@@ -8305,45 +14236,64 @@ async function transitionToTrophyWorld(targetWorldId) {
       },
     ]);
 
+    const silverBeforeExchange = targetWorld.id === "winter"
+      ? Math.max(0, Math.floor(Number(state.silver || 0)))
+      : 0;
+    const diamondsFromSilver = silverBeforeExchange * SILVER_TO_DIAMONDS_RATE;
+
     state.activeTrophyWorld = targetWorld.id;
     ui.trophyWorldId = targetWorld.id;
     if (targetWorld.id === "winter") {
       state.seenWinterWorldIntro = true;
-    }
-    if (targetWorld.id === "tower") {
-      state.seenTowerWorldIntro = true;
+      if (silverBeforeExchange > 0) {
+        state.silver = 0;
+        state.diamonds = Math.max(0, Number(state.diamonds || 0) + diamondsFromSilver);
+      }
     }
     saveState();
     renderAll();
     if (trophyGrid) {
       trophyGrid.scrollLeft = 0;
     }
+    if (targetWorld.id === "winter" && silverBeforeExchange > 0) {
+      showSilverExchangeModal(silverBeforeExchange, diamondsFromSilver);
+    }
   } finally {
     trophyWorldTransitionBusy = false;
   }
 }
 
-function renderTrophyRoad() {
-  if (!trophyGrid || !worldProgressValue || !worldTitle) {
+function showSilverExchangeModal(silverAmount = 0, diamondAmount = 0) {
+  if (silverAmount <= 0 || diamondAmount <= 0) {
     return;
   }
 
-  const previousScrollLeft = trophyGrid.scrollLeft;
-  worldProgressValue.textContent = String(state.trophies);
-  const world = getActiveTrophyWorld();
-  worldTitle.textContent = world.name;
-  if (worldHeaderPanel) {
-    worldHeaderPanel.dataset.worldTheme = world.id;
+  openModal({
+    title: "WYMIANA",
+    message: `${silverAmount} esencji zostało automatycznie wymienione.\n1 esencja -> 2 diamenty\nOtrzymujesz ${diamondAmount} diamentów.`,
+    image: SILVER_REWARD_IMAGE,
+    imageAlt: "Esencja",
+    buttonText: "OK",
+    dismissible: true,
+    onConfirm: closeModal,
+  });
+
+  if (modalBox) {
+    modalBox.classList.add("silver-exchange-modal");
   }
-  if (trophyRoadTitleBadge) {
-    trophyRoadTitleBadge.dataset.worldTheme = world.id;
-  }
-  const worldProgress = getTrophyWorldProgressPercent(world);
-  renderMagicWorldHeaderControls(world, worldProgress);
-  const progressLabels = world.rewards.map((reward) => `
-    <span class="trophy-world-progress-label">${reward.trophies}</span>
+}
+
+function buildTrophyWorldProgressLabels(rewards = [], options = {}) {
+  return rewards.map((reward) => `
+    <span class="trophy-world-progress-label ${options.withIcons ? "trophy-world-progress-label-icon" : ""}">
+      ${options.withIcons ? `<img class="trophy-world-progress-icon" src="${TROPHY_ICON_IMAGE}" alt="" aria-hidden="true" />` : ""}
+      <span class="trophy-world-progress-value">${reward.trophies}</span>
+    </span>
   `).join("");
-  const rewardCards = world.rewards.map((reward) => {
+}
+
+function buildClassicTrophyRewardCards(world, rewards = []) {
+  return rewards.map((reward) => {
     const rewardUiState = getTrophyRewardUiState(world.id, reward);
     const rewardImage = getTrophyRewardImage(reward);
 
@@ -8352,6 +14302,9 @@ function renderTrophyRoad() {
         class="item-card trophy-node ${rewardUiState.requiresSuperAlley ? "super-alley-reward" : ""}"
         data-world-theme="${world.id}"
         data-node-state="${rewardUiState.stateId}"
+        data-reward-id="${reward.id}"
+        data-reward-lane="${reward.rewardLane || "base"}"
+        data-reward-type="${reward.type}"
         ${rewardUiState.requiresSuperAlley ? `data-super-theme="${world.id}"` : ""}
       >
         ${rewardUiState.stateId === "claimed" ? `<p class="trophy-node-check" aria-hidden="true">✓</p>` : ""}
@@ -8378,34 +14331,1582 @@ function renderTrophyRoad() {
       </article>
     `;
   }).join("");
+}
 
-  trophyGrid.innerHTML = `
-    <section class="trophy-stage" data-trophy-world="${world.id}">
-      ${buildTrophyWorldStartCard(world)}
-      <div class="trophy-stage-rewards">
-        <div class="trophy-world-cards">
-          ${rewardCards}
-        </div>
-        <div class="trophy-world-progress" data-world-theme="${world.id}">
-          <div class="trophy-world-progress-track">
-            <div class="trophy-world-progress-fill" style="width:${worldProgress}%;"></div>
+function getTrophyRewardCountLabel(reward) {
+  if (reward?.type === "ranking-unlock") {
+    return reward.label || "Odblokowanie Rankingu";
+  }
+
+  if (reward?.type === "profile-photo") {
+    return reward.label || "Zdjęcie Profilu";
+  }
+
+  if (reward?.type === "card-deck") {
+    return reward.label || "Karty";
+  }
+
+  const amount = Math.max(1, Number(reward?.amount || 1));
+  return `x${amount}`;
+}
+
+function getTrophyRewardCountTheme(reward) {
+  if (reward?.type === "coins") {
+    return "coins";
+  }
+
+  if (reward?.type === "diamonds") {
+    return "diamonds";
+  }
+
+  if (reward?.type === "plato-keys") {
+    return "keys";
+  }
+
+  if (reward?.type === "elixir") {
+    return "elixir";
+  }
+
+  if (reward?.type === "crate") {
+    return "crate";
+  }
+
+  if (reward?.type === "ranking-unlock") {
+    return "ranking";
+  }
+
+  if (reward?.type === "card-deck") {
+    return "cards";
+  }
+
+  return "special";
+}
+
+function getMagiciansRewardCornerVisual(worldId, rewardUiState) {
+  if (rewardUiState.claimed) {
+    return {
+      src: MAGICIANS_CLAIMED_IMAGE,
+      alt: "Odebrana nagroda",
+      kind: "claimed",
+    };
+  }
+
+  if (rewardUiState.requiresSuperAlley && !isSuperAlleyActiveForWorld(worldId)) {
+    return {
+      src: worldId === "winter" ? WINTER_PREMIUM_LOCK_IMAGE : MAGICIANS_PREMIUM_LOCK_IMAGE,
+      alt: "Nagroda premium",
+      kind: "lock",
+    };
+  }
+
+  if (rewardUiState.stateId === "locked" || rewardUiState.stateId === "super-locked") {
+    return {
+      src: MAGICIANS_LOCK_IMAGE,
+      alt: "Nagroda zablokowana",
+      kind: "lock",
+    };
+  }
+
+  return null;
+}
+
+function isMagiciansLargeVisualReward(reward) {
+  return reward?.type === "character";
+}
+
+function getMagiciansRewardCycleVisuals(reward) {
+  if (reward?.type !== "character" || !reward.skinItemId) {
+    return [];
+  }
+
+  return [reward.itemId, reward.skinItemId]
+    .map((itemId) => getCharacterById(itemId))
+    .filter(Boolean)
+    .map((item) => ({
+      src: item.image,
+      alt: item.name,
+      fallbackText: item.name,
+    }));
+}
+
+function getMagiciansRewardBundleTheme(reward) {
+  if (reward?.itemId === "sylas" || reward?.skinItemId === "elegancki-sylias") {
+    return "sylas";
+  }
+
+  if (reward?.itemId === "mycelia" || reward?.skinItemId === "lazurowa-mycelia") {
+    return "mycelia";
+  }
+
+  return "";
+}
+
+function buildMagiciansRewardCycleCountMarkup(cycleVisuals, countTheme) {
+  return `
+    <p class="trophy-node-magicians-count trophy-node-magicians-cycle-count" data-count-theme="${countTheme}" data-cycle-count="true">
+      ${cycleVisuals.map((visual, index) => `
+        <span class="trophy-node-magicians-cycle-count-name" data-cycle-index="${index}">
+          ${escapeHtml(visual.fallbackText)}
+        </span>
+      `).join("")}
+    </p>
+  `;
+}
+
+function getMagiciansRoadRewardStyle(rewardIndex = 0) {
+  const normalizedIndex = Math.max(0, Number(rewardIndex) || 0);
+  const delayMs = 340 + normalizedIndex * 38;
+  return `--trophy-reward-index:${normalizedIndex};--trophy-reward-delay:${delayMs}ms;`;
+}
+
+function buildMagiciansEmptyRewardCard(trophies, lane = "base", rewardIndex = 0) {
+  return `
+    <article
+      class="trophy-node trophy-node-magicians trophy-node-magicians-empty"
+      data-reward-lane="${lane}"
+      data-node-state="empty"
+      style="${getMagiciansRoadRewardStyle(rewardIndex)}"
+      aria-hidden="true"
+    >
+      <div class="trophy-node-magicians-art"></div>
+    </article>
+  `;
+}
+
+function buildMagiciansRewardCard(world, reward, rewardIndex = 0) {
+  const rewardUiState = getTrophyRewardUiState(world.id, reward);
+  const rewardImage = getTrophyRewardImage(reward);
+  const isClaimable = rewardUiState.stateId === "ready";
+  const countLabel = reward.type === "character"
+    ? reward.label
+    : getTrophyRewardCountLabel(reward);
+  const countTheme = getTrophyRewardCountTheme(reward);
+  const cornerVisual = getMagiciansRewardCornerVisual(world.id, rewardUiState);
+  const hasCountLabel = Boolean(countLabel);
+  const isLargeVisual = isMagiciansLargeVisualReward(reward);
+  const cycleVisuals = getMagiciansRewardCycleVisuals(reward);
+  const hasCycleVisuals = cycleVisuals.length > 1;
+  const bundleTheme = getMagiciansRewardBundleTheme(reward);
+  const mediaMarkup = hasCycleVisuals
+    ? cycleVisuals.map((visual, index) => `
+          <img
+            class="item-image asset-image trophy-node-magicians-cycle-image"
+            data-cycle-index="${index}"
+            src="${visual.src}"
+            alt="${visual.alt}"
+            data-fallback-text="${visual.fallbackText}"
+          />
+        `).join("")
+    : `
+          <img
+            class="item-image asset-image"
+            src="${rewardImage.src}"
+            alt="${reward.label}"
+            data-fallback-text="${rewardImage.fallbackText}"
+          />
+        `;
+
+  return `
+    <article
+      class="trophy-node trophy-node-magicians ${rewardUiState.requiresSuperAlley ? "trophy-node-magicians-super" : ""} ${isClaimable ? "claimable" : ""} ${isLargeVisual ? "trophy-node-magicians-large-visual" : ""}"
+      data-world-theme="${world.id}"
+      data-node-state="${rewardUiState.stateId}"
+      data-reward-id="${reward.id}"
+      data-reward-lane="${reward.rewardLane || "base"}"
+      data-reward-type="${reward.type}"
+      ${bundleTheme ? `data-bundle-theme="${bundleTheme}"` : ""}
+      style="${getMagiciansRoadRewardStyle(rewardIndex)}"
+      ${rewardUiState.requiresSuperAlley ? `data-super-theme="${world.id}"` : ""}
+      ${isClaimable ? `data-trophy-claim="${world.id}:${reward.id}" role="button" tabindex="0" aria-label="Odbierz ${reward.label}"` : ""}
+    >
+      <div class="trophy-node-magicians-art">
+        ${hasCycleVisuals ? `<p class="trophy-node-magicians-bundle-label"><span>POSTAĆ + PRZEBRANIE</span></p>` : ""}
+        ${cornerVisual ? `
+          <div class="trophy-node-magicians-corner" data-corner-kind="${cornerVisual.kind}">
+            <img
+              class="item-image asset-image"
+              src="${cornerVisual.src}"
+              alt="${cornerVisual.alt}"
+              data-fallback-text=""
+            />
           </div>
-          <div class="trophy-world-progress-labels">
-            ${progressLabels}
-          </div>
+        ` : ""}
+        <div class="trophy-node-magicians-media ${hasCycleVisuals ? "trophy-node-magicians-cycle-media" : ""}">
+          ${mediaMarkup}
+          <div class="asset-fallback">${rewardImage.fallbackText}</div>
         </div>
+        ${hasCycleVisuals
+          ? buildMagiciansRewardCycleCountMarkup(cycleVisuals, countTheme)
+          : hasCountLabel
+            ? `<p class="trophy-node-magicians-count" data-count-theme="${countTheme}">${countLabel}</p>`
+            : ""}
       </div>
-      ${buildTrophyWorldTransitionCard(world)}
+    </article>
+  `;
+}
+
+function buildMagiciansLaneLeadCard(world, lane = "premium", rewardIndex = 0) {
+  const isPremium = lane === "premium";
+  const isUnlocked = isPremium ? isSuperAlleyActiveForWorld(world.id) : true;
+  const premiumVisual = isPremium ? getRandomMagiciansPremiumLeadVisual(world.id) : null;
+  const premiumVisualMarkup = premiumVisual
+    ? `
+      <img
+        class="item-image asset-image trophy-node-magicians-lead-random-image"
+        src="${premiumVisual.image}"
+        alt="${premiumVisual.alt}"
+        data-fallback-text="${premiumVisual.fallbackText}"
+      />
+    `
+    : "";
+
+  return `
+    <article
+      class="trophy-node trophy-node-magicians trophy-node-magicians-lead trophy-node-magicians-lead-${lane}"
+      data-world-theme="${world.id}"
+      data-reward-lane="${lane}"
+      style="${getMagiciansRoadRewardStyle(rewardIndex)}"
+      ${isPremium ? `data-premium-active="${isUnlocked ? "true" : "false"}"` : ""}
+    >
+      <div class="trophy-node-magicians-art trophy-node-magicians-lead-art">
+        <div class="trophy-node-magicians-lead-visual">
+          ${isPremium ? premiumVisualMarkup : `
+            <img
+              class="item-image asset-image"
+              src="${TROPHY_ICON_IMAGE}"
+              alt="Darmowe"
+              data-fallback-text="FREE"
+            />
+          `}
+          <div class="asset-fallback">${premiumVisual ? premiumVisual.fallbackText : "FREE"}</div>
+        </div>
+        <p class="trophy-node-magicians-lead-title">${isPremium ? "PREMIUM" : "DARMOWE"}</p>
+        <p class="trophy-node-magicians-lead-copy">
+          ${isPremium ? "ODBLOKUJ WSZYSTKIE NAGRODY PREMIUM" : "DARMOWE NAGRODY BEZ AKTYWACJI ALEI PREMIUM"}
+        </p>
+        ${
+          isPremium
+            ? isUnlocked
+              ? `
+                <img
+                  class="trophy-node-magicians-lead-activated-check asset-image"
+                  src="${MAGICIANS_CLAIMED_IMAGE}"
+                  alt="Premium aktywowane"
+                  data-fallback-text=""
+                />
+              `
+              : `
+                <button
+                  class="trophy-node-magicians-lead-button"
+                  data-super-alley-trigger="${world.id}"
+                >
+                  ODBLOKUJ
+                </button>
+              `
+            : ""
+        }
+      </div>
+    </article>
+  `;
+}
+
+function getPremiumLeadRotationForWorld(worldId = "alley") {
+  return worldId === "winter" ? WINTER_PREMIUM_LEAD_ROTATION : MAGICIANS_PREMIUM_LEAD_ROTATION;
+}
+
+function getRandomMagiciansPremiumLeadVisual(worldId = "alley") {
+  const normalizedWorldId = worldId === "winter" ? "winter" : "alley";
+  const rotation = getPremiumLeadRotationForWorld(normalizedWorldId);
+
+  if (!rotation.length) {
+    return { image: MAGICIANS_PREMIUM_CROWN_IMAGE, fallbackText: "PREM", alt: "Premium" };
+  }
+
+  let nextIndex = randomBetween(0, rotation.length - 1);
+  const previousIndex = Number(lastMagiciansPremiumLeadVisualIndex[normalizedWorldId] ?? -1);
+  if (rotation.length > 1 && nextIndex === previousIndex) {
+    nextIndex = (nextIndex + 1 + randomBetween(0, rotation.length - 2)) % rotation.length;
+  }
+  lastMagiciansPremiumLeadVisualIndex[normalizedWorldId] = nextIndex;
+  return rotation[nextIndex];
+}
+
+function applyMagiciansPremiumLeadVisual(imageNode, visual) {
+  if (!imageNode || !visual) {
+    return;
+  }
+
+  imageNode.src = visual.image;
+  imageNode.alt = visual.alt;
+  imageNode.dataset.fallbackText = visual.fallbackText;
+  imageNode.classList.remove("broken");
+  const fallbackNode = imageNode.parentElement?.querySelector(".asset-fallback");
+  if (fallbackNode) {
+    fallbackNode.textContent = visual.fallbackText;
+  }
+}
+
+function stopMagiciansPremiumLeadRotation() {
+  if (magiciansPremiumLeadRotationTimer) {
+    window.clearInterval(magiciansPremiumLeadRotationTimer);
+    magiciansPremiumLeadRotationTimer = null;
+  }
+}
+
+function startMagiciansPremiumLeadRotation() {
+  stopMagiciansPremiumLeadRotation();
+
+  const imageNode = trophyGrid?.querySelector(".trophy-node-magicians-lead-random-image");
+  if (!imageNode) {
+    return;
+  }
+
+  magiciansPremiumLeadRotationTimer = window.setInterval(() => {
+    const worldId = imageNode.closest("[data-world-theme]")?.dataset.worldTheme || getActiveTrophyWorldId();
+    const nextVisual = getRandomMagiciansPremiumLeadVisual(worldId);
+    imageNode.classList.add("is-switching");
+    window.setTimeout(() => {
+      applyMagiciansPremiumLeadVisual(imageNode, nextVisual);
+      imageNode.classList.remove("is-switching");
+      syncBrokenAssets(imageNode.closest(".trophy-node-magicians-lead-visual") || trophyGrid);
+    }, 180);
+  }, 6000);
+}
+
+function stopStorePremiumOfferRotation() {
+  if (storePremiumOfferRotationTimer) {
+    window.clearInterval(storePremiumOfferRotationTimer);
+    storePremiumOfferRotationTimer = null;
+  }
+}
+
+function startStorePremiumOfferRotation() {
+  stopStorePremiumOfferRotation();
+
+  const imageNodes = Array.from(storeGrid?.querySelectorAll(".store-premium-lead-random-image") || []);
+
+  if (imageNodes.length === 0) {
+    return;
+  }
+
+  storePremiumOfferRotationTimer = window.setInterval(() => {
+    imageNodes.forEach((imageNode) => {
+      const worldId = imageNode.closest("[data-world-theme]")?.dataset.worldTheme || getStorePremiumAlleyWorldId();
+      const nextVisual = getRandomMagiciansPremiumLeadVisual(worldId);
+      imageNode.classList.add("is-switching");
+      window.setTimeout(() => {
+        applyMagiciansPremiumLeadVisual(imageNode, nextVisual);
+        imageNode.classList.remove("is-switching");
+        syncBrokenAssets(imageNode.closest(".store-premium-lead-visual") || storeGrid);
+      }, 180);
+    });
+  }, 6000);
+}
+
+function buildMagiciansTrophyRewardCards(world, rewards = [], startIndex = 1) {
+  return rewards.map((reward, index) => buildMagiciansRewardCard(world, reward, startIndex + index)).join("");
+}
+
+function buildMagiciansBaseRewardCards(world, rewards = [], startIndex = 1, progressSlots = MAGICIANS_ALLEY_PROGRESS_SLOTS) {
+  const rewardByTrophies = new Map(rewards.map((reward) => [reward.trophies, reward]));
+  return progressSlots.map((trophies, index) => {
+    const reward = rewardByTrophies.get(trophies);
+    if (!reward) {
+      return buildMagiciansEmptyRewardCard(trophies, "base", startIndex + index);
+    }
+    return buildMagiciansRewardCard(world, reward, startIndex + index);
+  }).join("");
+}
+
+function buildMagiciansPortalSpacerCard(rewardIndex = 0) {
+  return `
+    <article
+      class="trophy-node trophy-node-magicians trophy-node-magicians-portal-spacer"
+      aria-hidden="true"
+      style="${getMagiciansRoadRewardStyle(rewardIndex)}"
+    ></article>
+  `;
+}
+
+function buildMagiciansProgressPortal() {
+  const hasRequiredTrophies = Number(state.trophies || 0) >= MAGICIANS_WORLD_END_TROPHIES;
+  const essenceAmount = clamp(Math.floor(Number(state.silver || 0)), 0, WINTER_WORLD_SILVER_REQUIREMENT);
+  const portalHint = hasRequiredTrophies
+    ? `Naciśnij w portal, aby sprawdzić misje, oraz zbierz esencję potrzebną do przejścia do następnego Świata`
+    : `Ukończ Świat Magików, mając 2000 <img class="magicians-progress-portal-hint-icon asset-image" src="${TROPHY_ICON_IMAGE}" alt="Puchary" data-fallback-text="P" /> aby uaktywnić misje portalu, i zebrać 200 esencji`;
+
+  return `
+    <button
+      class="magicians-progress-portal-button"
+      type="button"
+      data-open-rarity-store="true"
+      aria-label="${hasRequiredTrophies ? "Otwórz portal" : "Portal zablokowany"}"
+    >
+      <img
+        class="magicians-progress-portal-image asset-image"
+        src="${PORTAL_IMAGE}"
+        alt="Portal"
+        data-fallback-text="PORTAL"
+      />
+      <div class="asset-fallback">PORTAL</div>
+      <span
+        class="magicians-progress-portal-counter pet-rank-track"
+        data-pet-rank-theme="winter"
+        aria-label="${essenceAmount} z ${WINTER_WORLD_SILVER_REQUIREMENT} esencji"
+      >
+        <span class="pet-rank-fill" style="width:${((essenceAmount / WINTER_WORLD_SILVER_REQUIREMENT) * 100).toFixed(2)}%;"></span>
+        <span class="pet-rank-value">
+          <span>${essenceAmount}/${WINTER_WORLD_SILVER_REQUIREMENT}</span>
+          <img
+            class="pet-rank-trophy asset-image"
+            src="${SILVER_REWARD_IMAGE}"
+            alt="Esencja"
+            data-fallback-text="E"
+          />
+        </span>
+      </span>
+      <span class="magicians-progress-portal-hint">
+        ${portalHint}
+      </span>
+      ${hasRequiredTrophies ? "" : `
+        <span class="magicians-rarity-lock" aria-hidden="true">
+          <img class="asset-image" src="${MAGICIANS_LOCK_IMAGE}" alt="" data-fallback-text="LOCK" />
+        </span>
+      `}
+    </button>
+  `;
+}
+
+function isRankingAlleyUnlocked() {
+  return Boolean(
+    state.rankingAlleyUnlocked ||
+    isTrophyRewardClaimed("alley", "alley-base-500")
+  );
+}
+
+function getRankingAlleyRewards() {
+  return [
+    ...RANKING_ALLEY_REWARDS.premium,
+    ...RANKING_ALLEY_REWARDS.free,
+  ];
+}
+
+function isRankingPremiumActive() {
+  return Boolean(state.rankingPremiumActive);
+}
+
+function getRankingPoints() {
+  return Math.max(0, Math.floor(Number(state.rankingPoints || 0)));
+}
+
+function getRankingTickets() {
+  return Math.max(0, Math.floor(Number(state.rankingTickets || 0)));
+}
+
+function buildRankingPlayDock() {
+  return `
+    <div class="ranking-play-dock" aria-label="Tryb Alei Rankingowej">
+      <div class="ranking-play-ticket-badge">
+        <img
+          class="asset-image"
+          src="${RANKING_GAME_TICKET_IMAGE}"
+          alt=""
+          data-fallback-src="${RANKING_ALLEY_TICKET_IMAGE}"
+          data-fallback-text="B"
+        />
+        <span>Liczba Biletów: ${getRankingTickets()}</span>
+      </div>
+      <button class="ranking-play-button" type="button" data-ranking-game-open>
+        GRAJ
+      </button>
+    </div>
+  `;
+}
+
+function getRankingMaxPoints() {
+  return Math.max(
+    250,
+    ...getRankingAlleyRewards().map((reward) => Math.max(0, Number(reward.points || 0)))
+  );
+}
+
+function getRankingRoadMarkers() {
+  return [...new Set(getRankingAlleyRewards().map((reward) => Math.max(0, Number(reward.points || 0))))]
+    .filter((points) => points > 0)
+    .sort((first, second) => first - second);
+}
+
+function getRankingRoadSlotCount() {
+  const premiumCount = RANKING_ALLEY_REWARDS.premium.length + 1;
+  const freeCount = RANKING_ALLEY_REWARDS.free.length + 1;
+  return Math.max(2, premiumCount, freeCount);
+}
+
+function getRankingRoadHeightPx() {
+  const slotCount = getRankingRoadSlotCount();
+  return (RANKING_ROAD_NODE_SIZE * slotCount) + (RANKING_ROAD_NODE_GAP * (slotCount - 1));
+}
+
+function getRankingMarkerCenterPx(markerIndex) {
+  return (
+    (RANKING_ROAD_NODE_SIZE * 1.5) +
+    RANKING_ROAD_NODE_GAP +
+    (Math.max(0, markerIndex) * (RANKING_ROAD_NODE_SIZE + RANKING_ROAD_NODE_GAP))
+  );
+}
+
+function getRankingMarkerCenterPercent(markerIndex) {
+  return clamp((getRankingMarkerCenterPx(markerIndex) / getRankingRoadHeightPx()) * 100, 0, 100);
+}
+
+function getRankingProgressPercent() {
+  const markers = getRankingRoadMarkers();
+  const points = getRankingPoints();
+
+  if (points <= 0 || markers.length === 0) {
+    return 0;
+  }
+
+  let previousPoints = 0;
+  let previousPercent = 0;
+
+  for (let index = 0; index < markers.length; index += 1) {
+    const markerPoints = markers[index];
+    const markerPercent = getRankingMarkerCenterPercent(index);
+
+    if (points < markerPoints) {
+      const span = Math.max(1, markerPoints - previousPoints);
+      const progress = clamp((points - previousPoints) / span, 0, 1);
+      return previousPercent + (markerPercent - previousPercent) * progress;
+    }
+
+    previousPoints = markerPoints;
+    previousPercent = markerPercent;
+  }
+
+  if (points >= getRankingMaxPoints()) {
+    return 100;
+  }
+
+  const finalSpan = Math.max(1, getRankingMaxPoints() - previousPoints);
+  const finalProgress = clamp((points - previousPoints) / finalSpan, 0, 1);
+  return previousPercent + (100 - previousPercent) * finalProgress;
+}
+
+function isRankingRewardClaimed(reward) {
+  const laneRewards = state.claimedRankingRewards?.[reward.lane];
+  return Array.isArray(laneRewards) && laneRewards.includes(reward.id);
+}
+
+function getRankingRewardUiState(reward) {
+  const claimed = isRankingRewardClaimed(reward);
+  const hasPoints = getRankingPoints() >= Number(reward.points || 0);
+  const premiumBlocked = reward.lane === "premium" && !isRankingPremiumActive();
+
+  if (claimed) {
+    return {
+      stateId: "claimed",
+      label: "ODEBRANE",
+      disabled: true,
+    };
+  }
+
+  if (premiumBlocked) {
+    return {
+      stateId: "premium-locked",
+      label: "PREMIUM",
+      disabled: true,
+    };
+  }
+
+  if (!hasPoints) {
+    return {
+      stateId: "locked",
+      label: `${Math.max(0, Number(reward.points || 0) - getRankingPoints())}`,
+      disabled: true,
+    };
+  }
+
+  return {
+    stateId: "ready",
+    label: "ODBIERZ",
+    disabled: false,
+  };
+}
+
+function getRankingRewardCornerVisual(reward, rewardUiState) {
+  if (rewardUiState.stateId === "claimed") {
+    return { src: MAGICIANS_CLAIMED_IMAGE, fallbackText: "", alt: "Odebrano" };
+  }
+
+  if (rewardUiState.stateId === "premium-locked") {
+    return { src: RANKING_ALLEY_TICKET_IMAGE, fallbackText: "BILET", alt: "Rankingowa Premium" };
+  }
+
+  if (rewardUiState.stateId === "locked") {
+    return { src: MAGICIANS_LOCK_IMAGE, fallbackText: "LOCK", alt: "Zablokowane" };
+  }
+
+  return null;
+}
+
+function getRankingRoadRewardStyle(rewardIndex = 0) {
+  const normalizedIndex = Math.max(0, Number(rewardIndex) || 0);
+  const delayMs = 260 + normalizedIndex * 54;
+  return `--ranking-card-index:${normalizedIndex};--trophy-reward-index:${normalizedIndex};--trophy-reward-delay:${delayMs}ms;`;
+}
+
+function buildRankingRewardCard(reward, index = 0) {
+  const rewardUiState = getRankingRewardUiState(reward);
+  const rewardImage = getTrophyRewardImage(reward);
+  const cornerVisual = getRankingRewardCornerVisual(reward, rewardUiState);
+  const countTheme = getTrophyRewardCountTheme(reward);
+  const countLabel = reward.type === "character" || reward.type === "pet" ? reward.label : getTrophyRewardCountLabel(reward);
+  const rewardLane = reward.lane === "premium" ? "premium" : "base";
+  const readyAttrs = rewardUiState.stateId === "ready"
+    ? `data-ranking-claim="${reward.lane}:${reward.id}" role="button" tabindex="0" aria-label="Odbierz ${reward.label}"`
+    : "";
+
+  return `
+    <article
+      class="trophy-node trophy-node-magicians ranking-reward-card ${reward.lane === "premium" ? "ranking-reward-premium" : "ranking-reward-free"} ${rewardUiState.stateId === "ready" ? "claimable" : ""}"
+      data-world-theme="ranking"
+      data-ranking-lane="${reward.lane}"
+      data-ranking-state="${rewardUiState.stateId}"
+      data-node-state="${rewardUiState.stateId}"
+      data-reward-lane="${rewardLane}"
+      data-reward-type="${reward.type}"
+      data-reward-id="${reward.id}"
+      style="${getRankingRoadRewardStyle(index)}"
+      ${readyAttrs}
+    >
+      <div class="trophy-node-magicians-art">
+        ${cornerVisual ? `
+          <div class="trophy-node-magicians-corner" data-corner-kind="${rewardUiState.stateId === "premium-locked" ? "premium-lock" : "lock"}">
+            <img
+              class="item-image asset-image"
+              src="${cornerVisual.src}"
+              alt="${cornerVisual.alt}"
+              data-fallback-text="${cornerVisual.fallbackText}"
+            />
+          </div>
+        ` : ""}
+        <div class="trophy-node-magicians-media">
+          <img
+            class="item-image asset-image"
+            src="${rewardImage.src}"
+            alt="${escapeHtml(reward.label)}"
+            data-fallback-text="${rewardImage.fallbackText}"
+          />
+          <div class="asset-fallback">${rewardImage.fallbackText}</div>
+        </div>
+        <p class="trophy-node-magicians-count ranking-reward-count" data-count-theme="${countTheme}">${countLabel}</p>
+      </div>
+    </article>
+  `;
+}
+
+function buildRankingLeadCard(lane, rewardIndex = 0) {
+  const isPremium = lane === "premium";
+
+  if (isPremium) {
+    const active = isRankingPremiumActive();
+    return `
+      <article
+        class="trophy-node trophy-node-magicians trophy-node-magicians-lead trophy-node-magicians-lead-premium ranking-lead-card"
+        data-world-theme="ranking"
+        data-ranking-lane="premium"
+        data-reward-lane="premium"
+        data-premium-active="${active ? "true" : "false"}"
+        style="${getRankingRoadRewardStyle(rewardIndex)}"
+      >
+        <div class="trophy-node-magicians-art trophy-node-magicians-lead-art">
+          <div class="trophy-node-magicians-lead-visual ranking-lead-ticket-visual">
+            <img class="item-image asset-image" src="${RANKING_ALLEY_TICKET_IMAGE}" alt="Rankingowa Premium" data-fallback-text="BILET" />
+            <div class="asset-fallback">BILET</div>
+          </div>
+          <p class="trophy-node-magicians-lead-title">PREMIUM</p>
+          <p class="trophy-node-magicians-lead-copy">ODBLOKUJ WSZYSTKIE NAGRODY PREMIUM RANKINGU</p>
+          ${active ? `
+            <img
+              class="trophy-node-magicians-lead-activated-check asset-image"
+              src="${MAGICIANS_CLAIMED_IMAGE}"
+              alt="Rankingowa Premium aktywna"
+              data-fallback-text=""
+            />
+          ` : `
+            <button class="trophy-node-magicians-lead-button ranking-premium-open-button" type="button" data-ranking-premium-trigger>
+              ODBLOKUJ
+            </button>
+          `}
+        </div>
+      </article>
+    `;
+  }
+
+  return `
+    <article
+      class="trophy-node trophy-node-magicians trophy-node-magicians-lead trophy-node-magicians-lead-base ranking-lead-card"
+      data-world-theme="ranking"
+      data-ranking-lane="free"
+      data-reward-lane="base"
+      style="${getRankingRoadRewardStyle(rewardIndex)}"
+    >
+      <div class="trophy-node-magicians-art trophy-node-magicians-lead-art">
+        <div class="trophy-node-magicians-lead-visual ranking-lead-points-visual">
+          <img class="item-image asset-image" src="${RANKING_ALLEY_POINT_ICON}" alt="Punkty Rankingu" data-fallback-text="PR" />
+          <div class="asset-fallback">PR</div>
+        </div>
+        <p class="trophy-node-magicians-lead-title">DARMOWE</p>
+        <p class="trophy-node-magicians-lead-copy">DARMOWE ZA PUNKTY RANKINGU</p>
+      </div>
+    </article>
+  `;
+}
+
+function buildRankingLane(lane, rewards = []) {
+  const rewardsFromTop = [...rewards].sort((first, second) => Number(second.points || 0) - Number(first.points || 0));
+  const leadIndex = rewardsFromTop.length + 1;
+  return `
+    <div class="ranking-road-lane" data-ranking-lane="${lane}">
+      ${rewardsFromTop.map((reward, index) => buildRankingRewardCard(reward, index)).join("")}
+      ${buildRankingLeadCard(lane, leadIndex)}
+    </div>
+  `;
+}
+
+function buildRankingRoadMarkers() {
+  const markers = getRankingRoadMarkers();
+
+  return markers
+    .map((points, index) => {
+      const bottom = getRankingMarkerCenterPx(index);
+      return `
+        <div class="ranking-road-progress-label" style="bottom:${bottom}px;--ranking-marker-index:${index};">
+          <span>${points}</span>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderRankingAlley(options = {}) {
+  if (!rankingAlleyGrid) {
+    return;
+  }
+
+  const resetScroll = Boolean(options.resetScroll);
+  const suppressEntranceAnimation = options.suppressEntranceAnimation ?? ui.currentView === "ranking";
+  const previousScroller = rankingAlleyGrid.querySelector(".ranking-road-scroll");
+  const previousScrollTop = previousScroller ? previousScroller.scrollTop : rankingRoadLastScrollTop;
+
+  if (rankingAlleyPointsValue) {
+    rankingAlleyPointsValue.textContent = String(getRankingPoints());
+  }
+
+  const progressPercent = getRankingProgressPercent();
+  const slotCount = getRankingRoadSlotCount();
+  const roadHeight = getRankingRoadHeightPx();
+  rankingAlleyGrid.dataset.roadRender = suppressEntranceAnimation ? "quiet" : "enter";
+  rankingAlleyGrid.innerHTML = `
+    <div class="ranking-road-scroll">
+      <section class="ranking-road-stage" style="--ranking-progress:${progressPercent.toFixed(2)}%;--ranking-slot-count:${slotCount};--ranking-road-height:${roadHeight}px;">
+        <div class="ranking-road-lanes">
+          ${buildRankingLane("premium", RANKING_ALLEY_REWARDS.premium)}
+          <div class="ranking-road-progress" aria-hidden="true">
+            <div class="ranking-road-progress-track">
+              <div class="ranking-road-progress-fill"></div>
+            </div>
+            ${buildRankingRoadMarkers()}
+          </div>
+          ${buildRankingLane("free", RANKING_ALLEY_REWARDS.free)}
+        </div>
+      </section>
+    </div>
+    ${buildRankingPlayDock()}
+  `;
+
+  syncBrokenAssets(rankingAlleyGrid);
+  const scroller = rankingAlleyGrid.querySelector(".ranking-road-scroll");
+
+  if (scroller) {
+    scroller.addEventListener("scroll", handleRankingRoadScroll, { passive: true });
+    window.requestAnimationFrame(() => {
+      const maxScroll = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+      scroller.scrollTop = resetScroll
+        ? maxScroll
+        : Math.min(Math.max(0, previousScrollTop), maxScroll);
+      rankingRoadLastScrollTop = scroller.scrollTop;
+    });
+  }
+}
+
+function handleRankingRoadScroll(event) {
+  const scroller = event.currentTarget;
+
+  if (!scroller || !rankingAlleyGrid) {
+    return;
+  }
+
+  const currentScrollTop = scroller.scrollTop;
+  const delta = currentScrollTop - rankingRoadLastScrollTop;
+  rankingRoadLastScrollTop = currentScrollTop;
+  const scrollPower = clamp(delta / 34, -1, 1);
+  rankingAlleyGrid.style.setProperty("--ranking-scroll-tilt", `${(scrollPower * -2.2).toFixed(2)}deg`);
+  rankingAlleyGrid.style.setProperty("--ranking-scroll-shift", `${(scrollPower * -5).toFixed(2)}px`);
+  rankingAlleyGrid.classList.add("is-road-scrolling");
+
+  if (rankingRoadScrollTimer) {
+    window.clearTimeout(rankingRoadScrollTimer);
+  }
+
+  rankingRoadScrollTimer = window.setTimeout(() => {
+    if (!rankingAlleyGrid) {
+      return;
+    }
+    rankingAlleyGrid.classList.remove("is-road-scrolling");
+    rankingAlleyGrid.style.setProperty("--ranking-scroll-tilt", "0deg");
+    rankingAlleyGrid.style.setProperty("--ranking-scroll-shift", "0px");
+    rankingRoadScrollTimer = null;
+  }, 150);
+}
+
+function renderRankingAlleyEntry() {
+  if (!rankingAlleyEntry) {
+    return;
+  }
+
+  const unlocked = isRankingAlleyUnlocked();
+  rankingAlleyEntry.dataset.rankingState = unlocked ? "unlocked" : "locked";
+  rankingAlleyEntry.disabled = false;
+  rankingAlleyEntry.setAttribute("aria-label", unlocked
+    ? "Otwórz Aleję Rankingową"
+    : `Aleja Rankingowa od ${RANKING_ALLEY_UNLOCK_TROPHIES} pucharów`);
+  const imageNode = rankingAlleyEntry.querySelector(".ranking-alley-entry-image");
+  if (imageNode) {
+    imageNode.src = RANKING_ALLEY_ENTRY_IMAGE;
+  }
+  syncBrokenAssets(rankingAlleyEntry);
+}
+
+function renderHighTowerEntry() {
+  if (!highTowerEntry) {
+    return;
+  }
+
+  const imageNode = highTowerEntry.querySelector(".high-tower-entry-image");
+  if (imageNode) {
+    imageNode.src = HIGH_TOWER_ENTRY_IMAGE;
+  }
+  updateHighTowerCountdown();
+  syncBrokenAssets(highTowerEntry);
+}
+
+function maybeShowHighTowerStoryIntro() {
+  if (state.seenHighTowerStoryIntro) {
+    return;
+  }
+
+  state.seenHighTowerStoryIntro = true;
+  saveState();
+  window.setTimeout(() => {
+    showHighTowerStoryIntro();
+  }, 380);
+}
+
+function showHighTowerStoryIntro() {
+  const existing = document.querySelector(".high-tower-story-backdrop");
+  if (existing) {
+    existing.remove();
+  }
+
+  const storyText = "Dawno, dawno temu żyła Księżniczka Psotka - córka króla i królowej królewskiego dworu. Jej dobroć była tak wielka, że Astralny Mag uznał ją za zagrożenie i zamknął wysoko w wieży. Od tamtej pory wejścia pilnuje Pies Magik w smoczym przebraniu. Wcale nie chce tego robić, ale musi, jeśli chce przetrwać zaklęcie. Pluto Wyłącznie Trzy Życzenia codziennie spełnia małe pragnienia księżniczki, lecz nawet jego magia nie potrafi otworzyć wieży. A Ozzy? Ozzy zostaje obok, dotrzymując wszystkim towarzystwa, kiedy noc robi się zbyt długa. Legenda mówi, że jedyne zaklęcie zdolne przełamać klątwę ukryto w komplecie wszystkich przebrań. Dopiero ich odblokowanie i zdobycie limitowanej PlatoYI może obudzić magię, która otworzy Wysoką Wieżę.";
+  const backdrop = document.createElement("div");
+  backdrop.className = "high-tower-story-backdrop";
+  backdrop.innerHTML = `
+    <section class="high-tower-story-letter" role="dialog" aria-modal="true" aria-label="Historia Wyzwania Wysokiej Wieży">
+      <div class="high-tower-story-glow" aria-hidden="true"></div>
+      <div class="high-tower-story-paper">
+        <div class="high-tower-story-title">WYZWANIE WYSOKIEJ WIEŻY</div>
+        <p class="high-tower-story-copy" data-high-tower-story-copy></p>
+        <button class="high-tower-story-close" type="button" data-high-tower-story-close hidden>DALEJ</button>
+      </div>
     </section>
   `;
-  trophyGrid.scrollLeft = Math.min(previousScrollLeft, Math.max(0, trophyGrid.scrollWidth - trophyGrid.clientWidth));
+  document.body.appendChild(backdrop);
+
+  const copy = backdrop.querySelector("[data-high-tower-story-copy]");
+  const closeButton = backdrop.querySelector("[data-high-tower-story-close]");
+  let index = 0;
+  let typeTimer = 0;
+  let closed = false;
+  window.requestAnimationFrame(() => {
+    backdrop.classList.add("show");
+  });
+
+  const finish = () => {
+    if (closed) {
+      return;
+    }
+
+    copy.classList.add("done");
+    closeButton.hidden = false;
+    window.requestAnimationFrame(() => closeButton.classList.add("show"));
+  };
+  const typeNext = () => {
+    if (closed) {
+      return;
+    }
+
+    const currentChar = storyText[index] || "";
+    const isPauseChar = [".", "!", "?"].includes(currentChar);
+    const isComma = [",", ";", ":"].includes(currentChar);
+    const step = isPauseChar ? 1 : storyText[index + 1] === " " ? 1 : 2;
+    index += step;
+    copy.textContent = storyText.slice(0, index);
+
+    if (index >= storyText.length) {
+      finish();
+      return;
+    }
+
+    const nextTickMs = isPauseChar ? 150 : isComma ? 78 : randomBetween(18, 34);
+    typeTimer = window.setTimeout(typeNext, nextTickMs);
+  };
+  typeTimer = window.setTimeout(typeNext, 180);
+
+  const close = () => {
+    closed = true;
+    window.clearTimeout(typeTimer);
+    backdrop.classList.add("hide");
+    window.setTimeout(() => backdrop.remove(), 280);
+  };
+
+  closeButton.addEventListener("click", close);
+  backdrop.addEventListener("click", (event) => {
+    if (event.target === backdrop && !closeButton.hidden) {
+      close();
+    }
+  });
+}
+
+function handleHighTowerChallengeClick(event) {
+  const costumeButton = event.target.closest("[data-high-tower-buy-costume]");
+  if (costumeButton) {
+    const rewardId = costumeButton.dataset.highTowerBuyCostume;
+    void purchaseHighTowerCostume(rewardId);
+    return;
+  }
+
+  const flaroButton = event.target.closest("[data-high-tower-buy-flaro]");
+  if (flaroButton) {
+    void purchaseHighTowerFlaro();
+    return;
+  }
+
+  const waveChestTrack = event.target.closest("[data-high-tower-wave-chests]");
+  if (waveChestTrack) {
+    openHighTowerWaveChestScene();
+    return;
+  }
+
+  const chestTrigger = event.target.closest("[data-open-high-tower-chest]");
+  if (!chestTrigger) {
+    return;
+  }
+
+  openHighTowerChestScene();
+}
+
+function handleHighTowerChallengeKeydown(event) {
+  if (event.key !== "Enter" && event.key !== " ") {
+    return;
+  }
+
+  const costumeButton = event.target.closest("[data-high-tower-buy-costume]");
+  if (costumeButton) {
+    event.preventDefault();
+    const rewardId = costumeButton.dataset.highTowerBuyCostume;
+    void purchaseHighTowerCostume(rewardId);
+    return;
+  }
+
+  const flaroButton = event.target.closest("[data-high-tower-buy-flaro]");
+  if (flaroButton) {
+    event.preventDefault();
+    void purchaseHighTowerFlaro();
+    return;
+  }
+
+  const waveChestTrack = event.target.closest("[data-high-tower-wave-chests]");
+  if (waveChestTrack) {
+    event.preventDefault();
+    openHighTowerWaveChestScene();
+    return;
+  }
+
+  const chestTrigger = event.target.closest("[data-open-high-tower-chest]");
+  if (!chestTrigger) {
+    return;
+  }
+
+  event.preventDefault();
+  openHighTowerChestScene();
+}
+
+async function purchaseHighTowerCostume(rewardId) {
+  const item = HIGH_TOWER_REWARDS.find((reward) => reward.id === sanitizeStoredId(rewardId));
+
+  if (!item || state.ownedPets.includes(item.id)) {
+    renderHighTowerChallenge();
+    return;
+  }
+
+  if (getHighTowerSparkles() < HIGH_TOWER_COSTUME_SPARKLE_PRICE) {
+    showTrophyNotice("ZA MAŁO BŁYSKOTEK");
+    return;
+  }
+
+  state.highTowerSparkles = getHighTowerSparkles() - HIGH_TOWER_COSTUME_SPARKLE_PRICE;
+  state.ownedPets.push(item.id);
+  saveState();
+  renderHighTowerChallenge();
+  renderInventory();
+
+  await showRewardShowcase({
+    image: item.image,
+    name: item.name,
+    countLabel: "PRZEBRANIE",
+    mode: "character",
+    superTheme: "high-tower",
+    autoCloseMs: 2400,
+    soundEffectName: "characterUnlock",
+  });
+}
+
+async function purchaseHighTowerFlaro() {
+  const item = getPetById(HIGH_TOWER_FLARO_ID);
+
+  if (!item || isFlaroOwned()) {
+    renderHighTowerChallenge();
+    return;
+  }
+
+  if (!hasAllHighTowerCostumes()) {
+    showTrophyNotice("ZDOBĄDŹ WSZYSTKIE PRZEBRANIA");
+    return;
+  }
+
+  if (getHighTowerSparkles() < HIGH_TOWER_FLARO_SPARKLE_PRICE) {
+    showTrophyNotice("ZA MAŁO BŁYSKOTEK");
+    return;
+  }
+
+  state.highTowerSparkles = getHighTowerSparkles() - HIGH_TOWER_FLARO_SPARKLE_PRICE;
+  state.ownedPets.push(item.id);
+  saveState();
+  renderHighTowerChallenge();
+  renderInventory();
+
+  await showRewardShowcase({
+    image: item.image,
+    name: item.name,
+    countLabel: "LIMITOWANA PLATOYA",
+    mode: "character",
+    superTheme: "high-tower",
+    autoCloseMs: 2500,
+    soundEffectName: "characterUnlock",
+  });
+}
+
+function openHighTowerChestScene() {
+  if (getHighTowerFreeChestReadyInMs() > 0) {
+    showTrophyNotice("DARMOWA SKRZYNIA JESZCZE SIĘ ŁADUJE");
+    renderHighTowerChallenge();
+    return;
+  }
+
+  state.highTowerLastFreeChestAt = Date.now();
+  saveState();
+  renderHighTowerChallenge();
+
+  const preparedSession = createChestSession(HIGH_TOWER_CHEST_CRATE);
+  void showCrateRewardScene(HIGH_TOWER_CHEST_CRATE, preparedSession.rewards, {
+    superTheme: "high-tower",
+    appearSound: HIGH_TOWER_CHEST_CRATE.appearSound,
+    openSound: HIGH_TOWER_CHEST_CRATE.openSound,
+  });
+}
+
+function openHighTowerWaveChestScene() {
+  resetHighTowerDailyChestProgressIfNeeded();
+
+  const earnedToday = getHighTowerVictoryChestsToday();
+  const claimedToday = getHighTowerVictoryChestsClaimedToday();
+
+  if (claimedToday >= earnedToday) {
+    showTrophyNotice(earnedToday >= HIGH_TOWER_DAILY_VICTORY_CHEST_LIMIT ? "WRÓĆ PO RESECIE" : "PRZEJDŹ WSZYSTKIE FALE");
+    renderHighTowerChallenge();
+    return;
+  }
+
+  state.highTowerVictoryChestsClaimedToday = claimedToday + 1;
+  saveState();
+  renderHighTowerChallenge();
+
+  const preparedSession = createChestSession(HIGH_TOWER_CHEST_CRATE);
+  void showCrateRewardScene(HIGH_TOWER_CHEST_CRATE, preparedSession.rewards, {
+    superTheme: "high-tower",
+    appearSound: HIGH_TOWER_CHEST_CRATE.appearSound,
+    openSound: HIGH_TOWER_CHEST_CRATE.openSound,
+  });
+}
+
+function formatHighTowerCountdown(ms) {
+  const remaining = Math.max(0, Number(ms || 0));
+
+  if (remaining <= 0) {
+    return "ZAKOŃCZONE";
+  }
+
+  const totalSeconds = Math.floor(remaining / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (days > 0) {
+    return `${days}D ${String(hours).padStart(2, "0")}H ${String(minutes).padStart(2, "0")}M`;
+  }
+
+  return `${String(hours).padStart(2, "0")}H ${String(minutes).padStart(2, "0")}M ${String(seconds).padStart(2, "0")}S`;
+}
+
+function formatHighTowerEntryCountdown(ms) {
+  const remaining = Math.max(0, Number(ms || 0));
+
+  if (remaining <= 0) {
+    return "ZAKOŃCZONE";
+  }
+
+  const totalSeconds = Math.floor(remaining / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+
+  if (days > 0) {
+    return `${days} DNI ${hours}H`;
+  }
+
+  return `${hours}H`;
+}
+
+function updateHighTowerCountdown() {
+  const remaining = HIGH_TOWER_DEADLINE_AT - Date.now();
+
+  if (highTowerCountdown) {
+    highTowerCountdown.textContent = formatHighTowerCountdown(remaining);
+  }
+
+  if (highTowerEntryCountdown) {
+    highTowerEntryCountdown.textContent = formatHighTowerEntryCountdown(remaining);
+  }
+
+  updateHighTowerChestCounter();
+}
+
+function startHighTowerCountdown() {
+  stopHighTowerCountdown();
+  updateHighTowerCountdown();
+  highTowerCountdownTimer = window.setInterval(updateHighTowerCountdown, 1000);
+}
+
+function stopHighTowerCountdown() {
+  if (highTowerCountdownTimer) {
+    window.clearInterval(highTowerCountdownTimer);
+    highTowerCountdownTimer = 0;
+  }
+}
+
+function isHighTowerRewardOwned(reward) {
+  return Boolean(reward?.id && state.ownedPets.includes(reward.id));
+}
+
+function getHighTowerOwnedCount() {
+  return HIGH_TOWER_REWARDS.filter(isHighTowerRewardOwned).length;
+}
+
+function updateHighTowerOwnedCounter() {
+  if (!highTowerOwnedCounter) {
+    return;
+  }
+
+  highTowerOwnedCounter.textContent = `${getHighTowerOwnedCount()}/${HIGH_TOWER_REWARDS.length}`;
+}
+
+function getHighTowerSparkles() {
+  return Math.max(0, Math.floor(Number(state.highTowerSparkles || 0)));
+}
+
+function getHighTowerChestCostumePity() {
+  return Math.max(0, Math.floor(Number(state.highTowerChestCostumePity || 0)));
+}
+
+function getHighTowerDailyChestDateKey() {
+  return sanitizeDateKey(state.highTowerDailyChestDateKey) || getCurrentDailyGiftCycleKey();
+}
+
+function resetHighTowerDailyChestProgressIfNeeded() {
+  const todayKey = getCurrentDailyGiftCycleKey();
+
+  if (sanitizeDateKey(state.highTowerDailyChestDateKey) === todayKey) {
+    return false;
+  }
+
+  state.highTowerDailyChestDateKey = todayKey;
+  state.highTowerVictoryChestsToday = 0;
+  state.highTowerVictoryChestsClaimedToday = 0;
+  return true;
+}
+
+function getHighTowerVictoryChestsToday() {
+  resetHighTowerDailyChestProgressIfNeeded();
+  return clamp(Math.floor(Number(state.highTowerVictoryChestsToday || 0)), 0, HIGH_TOWER_DAILY_VICTORY_CHEST_LIMIT);
+}
+
+function getHighTowerVictoryChestsClaimedToday() {
+  resetHighTowerDailyChestProgressIfNeeded();
+  return clamp(
+    Math.floor(Number(state.highTowerVictoryChestsClaimedToday || 0)),
+    0,
+    getHighTowerVictoryChestsToday()
+  );
+}
+
+function getHighTowerFreeChestReadyInMs() {
+  const lastClaimAt = Math.max(0, Number(state.highTowerLastFreeChestAt || 0));
+
+  if (!lastClaimAt) {
+    return 0;
+  }
+
+  return Math.max(0, HIGH_TOWER_FREE_CHEST_COOLDOWN_MS - (Date.now() - lastClaimAt));
+}
+
+function awardHighTowerVictoryChestIfEligible() {
+  if (game.mode !== "solo") {
+    return false;
+  }
+
+  resetHighTowerDailyChestProgressIfNeeded();
+
+  if (getHighTowerVictoryChestsToday() >= HIGH_TOWER_DAILY_VICTORY_CHEST_LIMIT) {
+    saveState();
+    return false;
+  }
+
+  state.highTowerVictoryChestsToday = getHighTowerVictoryChestsToday() + 1;
+  saveState();
+  return true;
+}
+
+function updateHighTowerSparkleCounter() {
+  if (!highTowerSparkleCounter) {
+    return;
+  }
+
+  highTowerSparkleCounter.textContent = String(getHighTowerSparkles());
+}
+
+function updateHighTowerChestCounter() {
+  if (!highTowerChestCounter) {
+    return;
+  }
+
+  if (resetHighTowerDailyChestProgressIfNeeded()) {
+    saveState();
+  }
+
+  const freeReady = getHighTowerFreeChestReadyInMs() <= 0;
+  const earnedToday = getHighTowerVictoryChestsToday();
+  const claimedToday = getHighTowerVictoryChestsClaimedToday();
+  const cooldownText = freeReady ? "DARMOWA: GOTOWA" : `DARMOWA ZA: ${formatRemainingTime(getHighTowerFreeChestReadyInMs())}`;
+  const waveLabel = earnedToday >= HIGH_TOWER_DAILY_VICTORY_CHEST_LIMIT
+    ? `RESET O ${formatRemainingTime(Math.max(0, getNextStoreRefreshAt() - Date.now()))}`
+    : "ZDOBYWAJ JEDNĄ SKRZYNIĘ ZA WYGRANĄ GRĘ!";
+
+  highTowerChestCounter.innerHTML = `
+    <div class="high-tower-free-chest-status">
+      <span>DARMOWA SKRZYNIA</span>
+      <small>${cooldownText}</small>
+    </div>
+    <button
+      class="high-tower-wave-chest-track"
+      data-high-tower-wave-chests
+      type="button"
+      aria-label="Skrzynie za przejście wszystkich fal"
+    >
+      <span class="high-tower-wave-chest-points">
+        ${Array.from({ length: HIGH_TOWER_DAILY_VICTORY_CHEST_LIMIT }, (_, index) => {
+          const pointNumber = index + 1;
+          const earned = pointNumber <= earnedToday;
+          const claimed = pointNumber <= claimedToday;
+          const claimable = pointNumber > claimedToday && pointNumber <= earnedToday;
+
+          return `
+            <span class="high-tower-wave-chest-point${earned ? " is-earned" : ""}${claimed ? " is-claimed" : ""}${claimable ? " is-claimable" : ""}">
+              <img class="high-tower-wave-chest-icon asset-image" src="${HIGH_TOWER_CHEST_IMAGE}" alt="" data-fallback-text="S" />
+              ${earned ? `<img class="high-tower-wave-chest-check asset-image" src="./haczyk.png" alt="" data-fallback-text="OK" />` : ""}
+            </span>
+          `;
+        }).join("")}
+      </span>
+      <small>${waveLabel}</small>
+    </button>
+  `;
+
+  syncBrokenAssets(highTowerChestCounter);
+}
+
+function hasAllHighTowerCostumes() {
+  return getHighTowerOwnedCount() >= HIGH_TOWER_REWARDS.length;
+}
+
+function isFlaroOwned() {
+  return state.ownedPets.includes(HIGH_TOWER_FLARO_ID);
+}
+
+function buildHighTowerSparklePriceMarkup(price) {
+  return `
+    <span class="high-tower-price">
+      <span>${Number(price || 0)}</span>
+      <img class="asset-image" src="${HIGH_TOWER_SPARKLES_IMAGE}" alt="" data-fallback-text="B" />
+    </span>
+  `;
+}
+
+async function showHighTowerSparklesRewardScene(amount, options = {}) {
+  await showRewardShowcase({
+    image: HIGH_TOWER_SPARKLES_REWARD_IMAGE,
+    name: options.title || "Błyskotki",
+    countLabel: options.countLabel || `+${amount}`,
+    mode: "sparkle",
+    autoCloseMs: options.autoCloseMs || 2200,
+    soundEffectName: "highTowerSparkles",
+  });
+}
+
+function buildHighTowerRewardMarkup(reward, index, suppressEntrance = false) {
+  const isOwned = isHighTowerRewardOwned(reward);
+
+  return `
+    <article class="high-tower-reward-card${isOwned ? " is-owned" : ""}${suppressEntrance ? " no-entrance" : ""}" style="--tower-reward-index:${index};">
+      <div class="high-tower-reward-art">
+        ${buildPreviewAssetMarkup(reward, {
+          imageClass: "high-tower-reward-image asset-image",
+          videoClass: "high-tower-reward-image asset-video",
+          fallbackText: reward.name,
+          alt: reward.name,
+          usePreviewVideo: false,
+          usePetAssetScale: false,
+        })}
+        ${isOwned ? `
+          <span class="high-tower-reward-check" aria-label="Zdobyte">
+            <img class="asset-image" src="./haczyk.png" alt="" data-fallback-text="OK" />
+          </span>
+        ` : ""}
+      </div>
+      <p class="high-tower-reward-name">${escapeHtml(reward.name)}</p>
+      ${isOwned
+        ? `<button class="high-tower-buy-button is-owned" type="button" disabled>ZDOBYTE</button>`
+        : `
+          <button class="high-tower-buy-button" data-high-tower-buy-costume="${escapeHtml(reward.id)}" type="button">
+            ${buildHighTowerSparklePriceMarkup(HIGH_TOWER_COSTUME_SPARKLE_PRICE)}
+          </button>
+        `}
+    </article>
+  `;
+}
+
+function buildHighTowerFlaroPanelMarkup() {
+  const flaro = getPetById(HIGH_TOWER_FLARO_ID);
+  const unlocked = hasAllHighTowerCostumes();
+  const owned = isFlaroOwned();
+  const text = unlocked
+    ? owned
+      ? "Flaro jest już w twojej szafie!"
+      : "Otwieraj skrzynie lub kup Flara za Błyskotki."
+    : "ZDOBĄDŹ WSZYSTKIE PRZEBRANIA, ABY MIEĆ MOŻLIWOŚĆ ODBLOKOWANIA FLARA - LIMITOWANEJ PLATOYI.";
+
+  return `
+    <article class="high-tower-flaro-card${unlocked ? " is-unlocked" : ""}${owned ? " is-owned" : ""}">
+      <div class="high-tower-flaro-art">
+        ${buildPreviewAssetMarkup(flaro || { name: "Flaro", image: "./flaro.png" }, {
+          imageClass: "high-tower-flaro-image asset-image",
+          videoClass: "high-tower-flaro-image asset-video",
+          fallbackText: "FLARO",
+          alt: "Flaro",
+          usePreviewVideo: false,
+          usePetAssetScale: false,
+        })}
+      </div>
+      <div class="high-tower-flaro-bubble">${escapeHtml(text)}</div>
+      ${unlocked && !owned
+        ? `
+          <button class="high-tower-flaro-buy-button" data-high-tower-buy-flaro type="button">
+            ${buildHighTowerSparklePriceMarkup(HIGH_TOWER_FLARO_SPARKLE_PRICE)}
+          </button>
+        `
+        : ""}
+    </article>
+  `;
+}
+
+function renderHighTowerFlaroPanel() {
+  if (!highTowerFlaroPanel) {
+    return;
+  }
+
+  highTowerFlaroPanel.innerHTML = buildHighTowerFlaroPanelMarkup();
+}
+
+function renderHighTowerChallenge() {
+  renderHighTowerEntry();
+  updateHighTowerCountdown();
+  updateHighTowerOwnedCounter();
+  updateHighTowerSparkleCounter();
+  renderHighTowerFlaroPanel();
+
+  if (!highTowerRewards) {
+    return;
+  }
+
+  const suppressRewardEntrance = ui.currentView === "tower-challenge" && highTowerRewards.childElementCount > 0;
+
+  highTowerRewards.innerHTML = HIGH_TOWER_REWARDS
+    .map((reward, index) => buildHighTowerRewardMarkup(reward, index, suppressRewardEntrance))
+    .join("");
+  syncBrokenAssets(viewNodes["tower-challenge"] || highTowerRewards);
+  syncAnimatedAssets(viewNodes["tower-challenge"] || highTowerRewards);
+}
+
+function renderTrophyRoad(options = {}) {
+  if (!trophyGrid || !worldProgressValue || !worldTitle) {
+    return;
+  }
+
+  const resetScroll = Boolean(options.resetScroll);
+  const suppressEntranceAnimation = options.suppressEntranceAnimation ?? ui.currentView === "trophies";
+  const previousScrollLeft = trophyGrid.scrollLeft;
+  worldProgressValue.textContent = String(state.trophies);
+  const world = getActiveTrophyWorld();
+  worldTitle.textContent = world.name;
+  if (viewNodes.trophies) {
+    viewNodes.trophies.dataset.roadTheme = world.id;
+  }
+  trophyGrid.dataset.roadTheme = world.id;
+  trophyGrid.dataset.roadRender = suppressEntranceAnimation ? "quiet" : "enter";
+  if (worldHeaderPanel) {
+    worldHeaderPanel.dataset.worldTheme = world.id;
+  }
+  if (trophyRoadTitleBadge) {
+    trophyRoadTitleBadge.dataset.worldTheme = world.id;
+    trophyRoadTitleBadge.dataset.roadState = "base";
+    trophyRoadTitleBadge.setAttribute("aria-label", "Aleja");
+  }
+  if (trophyRoadTitleBadgeSubtext) {
+    trophyRoadTitleBadgeSubtext.textContent = "";
+    trophyRoadTitleBadgeSubtext.hidden = true;
+  }
+  const worldProgress = getTrophyWorldProgressPercent(world);
+  const baseRewards = getTrophyWorldBaseRewards(world);
+  const allRewards = getTrophyWorldRewards(world);
+  const superRewards = getTrophyWorldSuperRewards(world);
+  const progressRewards = getTrophyWorldProgressRewards(world);
+  const metrics = getTrophyNodeMetrics(world);
+  const cardVars = `--trophy-node-width:${metrics.width}px; --trophy-node-gap:${metrics.gap}px;`;
+  renderMagicWorldHeaderControls(world, worldProgress);
+  renderRankingAlleyEntry();
+
+  if (isMagiciansStyleTrophyWorld(world)) {
+    const progressSlotValues = getMagiciansStyleProgressSlots(world);
+    const hasPortal = hasMagiciansRoadPortal(world);
+    const progressSlots = progressSlotValues.map((trophies) => ({ trophies }));
+    const endSpacerMarkup = hasPortal
+      ? buildMagiciansPortalSpacerCard(progressSlotValues.length + 1)
+      : "";
+    trophyGrid.innerHTML = `
+      <section class="trophy-stage trophy-stage-magicians" data-trophy-world="${world.id}" data-has-portal="${hasPortal ? "true" : "false"}">
+        <div class="trophy-stage-rewards trophy-stage-rewards-magicians">
+          <div class="trophy-world-cards trophy-world-cards-magicians trophy-world-cards-magicians-super" style="${cardVars}">
+            ${buildMagiciansLaneLeadCard(world, "premium", 0)}
+            ${buildMagiciansTrophyRewardCards(world, superRewards, 1)}
+            ${endSpacerMarkup}
+          </div>
+          <div class="trophy-world-progress" data-world-theme="${world.id}" style="${cardVars}">
+            <div class="trophy-world-progress-track">
+              <div class="trophy-world-progress-fill" style="width:${worldProgress}%;"></div>
+            </div>
+            <div class="trophy-world-progress-labels" style="${cardVars}">
+              ${buildTrophyWorldProgressLabels(progressSlots)}
+            </div>
+            ${hasPortal ? buildMagiciansProgressPortal() : ""}
+          </div>
+          <div class="trophy-world-cards trophy-world-cards-magicians trophy-world-cards-magicians-base" style="${cardVars}">
+            ${buildMagiciansLaneLeadCard(world, "base", 0)}
+            ${buildMagiciansBaseRewardCards(world, baseRewards, 1, progressSlotValues)}
+            ${endSpacerMarkup}
+          </div>
+        </div>
+      </section>
+    `;
+  } else {
+    trophyGrid.innerHTML = `
+      <section class="trophy-stage" data-trophy-world="${world.id}">
+        ${buildTrophyWorldStartCard(world)}
+        <div class="trophy-stage-rewards">
+          <div class="trophy-world-cards" style="${cardVars}">
+            ${buildClassicTrophyRewardCards(world, allRewards)}
+          </div>
+          <div class="trophy-world-progress" data-world-theme="${world.id}" style="${cardVars}">
+            <div class="trophy-world-progress-track">
+              <div class="trophy-world-progress-fill" style="width:${worldProgress}%;"></div>
+            </div>
+            <div class="trophy-world-progress-labels" style="${cardVars}">
+              ${buildTrophyWorldProgressLabels(progressRewards)}
+            </div>
+          </div>
+        </div>
+        ${buildTrophyWorldTransitionCard(world)}
+      </section>
+    `;
+  }
+  trophyGrid.scrollLeft = resetScroll
+    ? 0
+    : Math.min(previousScrollLeft, Math.max(0, trophyGrid.scrollWidth - trophyGrid.clientWidth));
+  trophyRoadLastScrollLeft = trophyGrid.scrollLeft;
   clampTrophyRoadScrollPosition();
 
   syncBrokenAssets(trophyGrid);
   syncTrophyRoadThemeFromScroll();
+  if (isMagiciansStyleTrophyWorld(world)) {
+    startMagiciansPremiumLeadRotation();
+  } else {
+    stopMagiciansPremiumLeadRotation();
+  }
 }
 
 function renderInventory() {
+  if (ui.inventoryTab !== "characters" && ui.inventoryTab !== "pets") {
+    ui.inventoryTab = "characters";
+  }
+
+  const activeWorldFilter = ui.inventoryWorldFilter === "winter" || ui.inventoryWorldFilter === "ranking"
+    ? ui.inventoryWorldFilter
+    : "magicians";
+  if (viewNodes.inventory) {
+    viewNodes.inventory.dataset.inventoryWorldFilter = activeWorldFilter;
+  }
+
   renderWardrobeOverview();
   const items = getOwnedItems(ui.inventoryTab);
 
@@ -8439,8 +15940,8 @@ function getInventoryItemWorldFilterId(kind, item) {
     return null;
   }
 
-  if (item.unlockWorld === "tower") {
-    return "tower";
+  if (isRankingInventoryItem(kind, item)) {
+    return "ranking";
   }
 
   if (item.unlockWorld === "winter") {
@@ -8450,7 +15951,198 @@ function getInventoryItemWorldFilterId(kind, item) {
   return "magicians";
 }
 
+function isRankingInventoryItem(kind, item) {
+  const itemId = sanitizeStoredId(item?.id);
+
+  if (!itemId) {
+    return false;
+  }
+
+  if (item?.unlockWorld === "ranking") {
+    return true;
+  }
+
+  if (kind === "characters") {
+    return isPirateStoreCharacterId(itemId) || itemId === "thalia" || itemId === "shulla";
+  }
+
+  if (kind === "pets") {
+    return itemId === "coral" ||
+      itemId === "kapitan-rozdzka-emerald" ||
+      itemId === "pies-majtek" ||
+      itemId === "pluto-z-zakazanej-beczki";
+  }
+
+  return false;
+}
+
+function isPetSkinId(petId) {
+  return Boolean(PET_SKIN_BASE_BY_ID[sanitizeStoredId(petId)]);
+}
+
+function getPetBaseId(petId) {
+  const itemId = sanitizeStoredId(petId);
+  return PET_SKIN_BASE_BY_ID[itemId] || itemId;
+}
+
+function getPetById(petId) {
+  const itemId = sanitizeStoredId(petId);
+  return CATALOG.pets.find((item) => item.id === itemId) || null;
+}
+
+function getPetSkins(baseId) {
+  return (PET_SKIN_GROUPS[sanitizeStoredId(baseId)] || [])
+    .map((skinId) => getPetById(skinId))
+    .filter(Boolean);
+}
+
+function getOwnedPetSkins(baseId) {
+  return getPetSkins(baseId).filter((skin) => state.ownedPets.includes(skin.id));
+}
+
+function isPetBaseEquipped(baseId) {
+  return getPetBaseId(state.equippedPet) === sanitizeStoredId(baseId);
+}
+
+function getInventoryPetVisual(baseItem) {
+  if (!baseItem) {
+    return null;
+  }
+
+  const equippedItem = getPetById(state.equippedPet);
+
+  if (
+    equippedItem &&
+    getPetBaseId(equippedItem.id) === baseItem.id &&
+    state.ownedPets.includes(equippedItem.id)
+  ) {
+    return equippedItem;
+  }
+
+  return baseItem;
+}
+
+function isPetExcludedFromRandomUnlocks(petId) {
+  const itemId = sanitizeStoredId(petId);
+  return isPetSkinId(itemId) || itemId === "coral" || itemId === HIGH_TOWER_FLARO_ID;
+}
+
+function isMainPetItem(item) {
+  return Boolean(item && !isPetSkinId(item.id));
+}
+
+function getOwnedMainPetItems() {
+  return CATALOG.pets.filter((item) => state.ownedPets.includes(item.id) && isMainPetItem(item));
+}
+
+function getPetAssetVisualScale(petId) {
+  const scale = Number(PET_ASSET_VISUAL_SCALE_BY_ID[sanitizeStoredId(petId)] || 1);
+  return Number.isFinite(scale) && scale > 0 ? scale : 1;
+}
+
+function getPetSkinTone(petId) {
+  const itemId = sanitizeStoredId(petId);
+  const rank = Object.values(PET_MINI_ALLEY_CONFIGS)
+    .flatMap((config) => config.ranks)
+    .find((entry) => entry.rewardPetId === itemId);
+
+  return rank?.id || "";
+}
+
+function buildPetSkinSparkleMarkup(petId) {
+  if (!getPetSkinTone(petId)) {
+    return "";
+  }
+
+  return Array.from({ length: 9 }, (_, index) => (
+    `<span class="pet-mini-skin-star pet-skin-overlay-star star-${index + 1}" aria-hidden="true"></span>`
+  )).join("");
+}
+
+function syncPetSkinSparkles(container, petId) {
+  if (!container) {
+    return;
+  }
+
+  const normalizedPetId = sanitizeStoredId(petId);
+  if (container.dataset.petSkinCurrent === normalizedPetId) {
+    return;
+  }
+
+  container.dataset.petSkinCurrent = normalizedPetId;
+  container.querySelectorAll(".pet-skin-overlay-star").forEach((node) => node.remove());
+  const tone = getPetSkinTone(normalizedPetId);
+
+  if (tone) {
+    container.dataset.petSkinTone = tone;
+    container.insertAdjacentHTML("beforeend", buildPetSkinSparkleMarkup(normalizedPetId));
+  } else {
+    delete container.dataset.petSkinTone;
+  }
+}
+
+function isCharacterSkinId(characterId) {
+  return Boolean(CHARACTER_SKIN_BASE_BY_ID[sanitizeStoredId(characterId)]);
+}
+
+function getCharacterBaseId(characterId) {
+  const itemId = sanitizeStoredId(characterId);
+  return CHARACTER_SKIN_BASE_BY_ID[itemId] || itemId;
+}
+
+function getCharacterById(characterId) {
+  const itemId = sanitizeStoredId(characterId);
+  return CATALOG.characters.find((item) => item.id === itemId) || null;
+}
+
+function getCharacterSkins(baseId) {
+  return (CHARACTER_SKIN_GROUPS[sanitizeStoredId(baseId)] || [])
+    .map((skinId) => getCharacterById(skinId))
+    .filter(Boolean);
+}
+
+function getOwnedCharacterSkins(baseId) {
+  return getCharacterSkins(baseId).filter((skin) => state.ownedCharacters.includes(skin.id));
+}
+
+function getOwnedMainCharacterItems() {
+  return CATALOG.characters.filter((item) => (
+    state.ownedCharacters.includes(item.id) &&
+    !isCharacterSkinId(item.id)
+  ));
+}
+
+function isCharacterBaseEquipped(baseId) {
+  return getCharacterBaseId(state.equippedCharacter) === sanitizeStoredId(baseId);
+}
+
+function getInventoryCharacterVisual(baseItem) {
+  if (!baseItem) {
+    return null;
+  }
+
+  const equippedItem = getCharacterById(state.equippedCharacter);
+
+  if (
+    equippedItem &&
+    getCharacterBaseId(equippedItem.id) === baseItem.id &&
+    state.ownedCharacters.includes(equippedItem.id)
+  ) {
+    return equippedItem;
+  }
+
+  return baseItem;
+}
+
 function buildInventoryCards(kind, items) {
+  if (kind === "characters") {
+    return buildInventoryCharacterCards(items);
+  }
+
+  if (kind === "pets") {
+    return buildInventoryPetCards(items);
+  }
+
   return items
     .map((item) => {
       const equipped = isEquipped(kind, item.id);
@@ -8466,6 +16158,7 @@ function buildInventoryCards(kind, items) {
               fallbackText: item.name,
               alt: item.name,
             })}
+            ${kind === "pets" ? buildPetRankBadgeMarkup(item) : ""}
           </div>
           <p class="item-title">${item.name}</p>
           ${
@@ -8491,43 +16184,1220 @@ function buildInventoryCards(kind, items) {
     .join("");
 }
 
+function buildInventoryCharacterCards(items) {
+  return items
+    .map((item) => {
+      const equipped = isCharacterBaseEquipped(item.id);
+      const visualItem = getInventoryCharacterVisual(item);
+
+      return `
+        <article class="wardrobe-character-tile ${equipped ? "active" : ""}">
+          <button class="wardrobe-character-open" data-character-detail="${item.id}" type="button" aria-label="Pokaż szczegóły ${item.name}">
+            <div class="wardrobe-character-art" ${getWardrobeVisualStyle("characters", visualItem, "list")}>
+              ${buildPreviewAssetMarkup(visualItem, {
+                imageClass: "item-image asset-image",
+                videoClass: "item-image asset-video",
+                fallbackText: visualItem?.name || item.name,
+                alt: visualItem?.name || item.name,
+              })}
+            </div>
+            <p class="wardrobe-character-name">${item.name}</p>
+          </button>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function buildInventoryPetCards(items) {
+  return items
+    .map((item) => {
+      const equipped = isPetBaseEquipped(item.id);
+      const visualItem = getInventoryPetVisual(item);
+
+      return `
+        <article class="wardrobe-pet-tile ${equipped ? "active" : ""}">
+          <button class="wardrobe-pet-open" data-pet-detail="${item.id}" type="button" aria-label="Pokaż szczegóły ${item.name}">
+            <div class="wardrobe-pet-art" data-pet-skin-tone="${getPetSkinTone(visualItem?.id)}" ${getWardrobeVisualStyle("pets", visualItem, "list")}>
+              ${buildPreviewAssetMarkup(visualItem, {
+                imageClass: "item-image asset-image",
+                videoClass: "item-image asset-video",
+                fallbackText: visualItem?.name || item.name,
+                alt: visualItem?.name || item.name,
+              })}
+              ${buildPetRankBadgeMarkup(item)}
+              ${buildPetSkinSparkleMarkup(visualItem?.id)}
+            </div>
+            <p class="wardrobe-pet-name">${item.name}</p>
+          </button>
+        </article>
+      `;
+    })
+    .join("");
+}
+
 function buildInventoryWorldSections(kind) {
-  const items = getOwnedItems(kind);
+  const items = kind === "characters"
+    ? getOwnedMainCharacterItems()
+    : kind === "pets"
+      ? getOwnedMainPetItems()
+      : getOwnedItems(kind);
+  const activeFilter = ui.inventoryWorldFilter === "winter" || ui.inventoryWorldFilter === "ranking"
+    ? ui.inventoryWorldFilter
+    : "magicians";
+  const group = INVENTORY_WORLD_GROUPS.find((entry) => entry.id === activeFilter) || INVENTORY_WORLD_GROUPS[0];
+  const groupItems = items.filter((item) => getInventoryItemWorldFilterId(kind, item) === group.id);
+  const content = groupItems.length > 0
+    ? buildInventoryCards(kind, groupItems)
+    : buildInventoryWorldEmptyCard(kind, group.label);
 
-  return INVENTORY_WORLD_GROUPS.map((group) => {
-    const groupItems = items.filter((item) => getInventoryItemWorldFilterId(kind, item) === group.id);
-    const content = groupItems.length > 0
-      ? buildInventoryCards(kind, groupItems)
-      : buildInventoryWorldEmptyCard(kind, group.label);
-
-    return `
-      <section class="inventory-world-section">
-        <p class="inventory-world-heading">${group.label}:</p>
-        <div class="card-grid wardrobe-grid inventory-world-grid">
-          ${content}
-        </div>
-      </section>
-    `;
-  }).join("");
+  return `
+    <section class="inventory-world-section" data-inventory-world-filter="${group.id}">
+      <div class="card-grid wardrobe-grid inventory-world-grid">
+        ${content}
+      </div>
+    </section>
+  `;
 }
 
 function buildInventoryWorldEmptyCard(kind, worldLabel) {
-  const title = kind === "pets"
-    ? `Brak PlatoYasow z ${worldLabel}`
-    : `Brak postaci z ${worldLabel}`;
-  const note = worldLabel === "Swiat Zimowy"
-    ? "Gdy odblokujesz kolejne zimowe nagrody, pojawia sie tutaj."
-    : worldLabel === "Swiat Dzungli"
-      ? "Gdy odblokujesz kolejne nagrody z Dżungli, pojawia sie tutaj."
-    : "Kup cos w sklepie albo odbierz nagrode z Alei, aby uzupelnic te miejsce.";
+  const title = kind === "pets" ? "BRAK PLATOYI" : "BRAK POSTACI";
 
   return `
-    <article class="empty-card wardrobe-empty-card">
-      <div class="empty-card-art"></div>
-      <p class="empty-card-title">${title}</p>
-      <p class="empty-card-note">${note}</p>
+    <article class="wardrobe-empty-world-banner" data-empty-world="${escapeHtml(worldLabel)}">
+      <p>${title}</p>
     </article>
   `;
+}
+
+function getPetDetailTheme(pet) {
+  if (!pet) {
+    return "magicians";
+  }
+
+  if (pet.unlockWorld === "winter") {
+    return "winter";
+  }
+
+  return "magicians";
+}
+
+function formatNumberForUi(value) {
+  const number = Number(value || 0);
+  return Number.isInteger(number)
+    ? String(number)
+    : number.toFixed(1).replace(/\.0$/, "").replace(".", ",");
+}
+
+function buildPetRankTrackMarkup(pet, className = "") {
+  const rankInfo = getPetRankInfo(pet);
+
+  if (!rankInfo) {
+    return "";
+  }
+
+  return `
+    <div class="pet-rank-widget ${className}" data-pet-rank-theme="${rankInfo.theme}" data-pet-rank-open="${pet.id}" role="button" tabindex="0">
+      <img
+        class="pet-rank-emblem asset-image"
+        src="${rankInfo.image}"
+        alt="Ranga PlatoYA ${rankInfo.rankLevel}"
+        data-fallback-text=""
+      />
+      <div class="pet-rank-track" data-pet-rank-theme="${rankInfo.theme}">
+        <span class="pet-rank-fill" style="width:${rankInfo.rankProgress.toFixed(2)}%;"></span>
+        <span class="pet-rank-value">
+          <img class="pet-rank-trophy asset-image" src="${TROPHY_ICON_IMAGE}" alt="" />
+          <span>${rankInfo.trophies}</span>
+        </span>
+      </div>
+    </div>
+  `;
+}
+
+function getPetDetailStats(pet) {
+  const defaultStats = {
+    health: [{ text: "-", tone: "neutral" }],
+    attack: [{ text: "-", tone: "neutral" }],
+    respawn: [{ text: "-", tone: "neutral" }],
+  };
+
+  if (!pet) {
+    return defaultStats;
+  }
+
+  if (getPetBaseId(pet.id) === "pies-magik") {
+    const power = getPetPowerInfo(pet.id) || PET_POWER_UPGRADES["pies-magik"][0];
+
+    return {
+      health: [{ text: String(power.hp), tone: "neutral" }],
+      attack: [{ text: `-${power.damage}/1s`, tone: "damage" }],
+      respawn: [{ text: `${formatNumberForUi(power.respawnSeconds)}s`, tone: "neutral" }],
+    };
+  }
+
+  if (pet.id === "l-psotka") {
+    const power = getLpsotkaPowerStats();
+
+    return {
+      health: [{ text: "-", tone: "neutral" }],
+      attack: [{ text: `${formatNumberForUi(power.bubbleSeconds)}s`, tone: "neutral" }],
+      respawn: [{ text: "-", tone: "neutral" }],
+    };
+  }
+
+  if (pet.id === "papuga-manipulantka") {
+    const power = getParrotPowerStats();
+
+    return {
+      health: [{ text: "-", tone: "neutral" }],
+      attack: [{ text: `co ${formatNumberForUi(power.castIntervalSeconds)}s`, tone: "neutral" }],
+      respawn: [{ text: "-", tone: "neutral" }],
+    };
+  }
+
+  if (pet.id === "el-kruk") {
+    const power = getOzzyPowerStats();
+
+    return {
+      health: [{ text: String(power.hp), tone: "neutral" }],
+      attack: [{ text: `+${power.healPerSecond}/1s`, tone: "heal" }],
+      respawn: [{ text: `${formatNumberForUi(power.respawnSeconds)}s`, tone: "neutral" }],
+    };
+  }
+
+  if (pet.id === "malpka-jasnoksieznik") {
+    const power = getMonkeyMagePowerStats();
+
+    return {
+      health: [{ text: String(power.hp), tone: "neutral" }],
+      attack: [
+        { text: `-${power.power}/1s`, tone: "damage" },
+        { text: `+${power.power}/1s`, tone: "heal" },
+      ],
+      respawn: [{ text: `${formatNumberForUi(power.respawnSeconds)}s`, tone: "neutral" }],
+    };
+  }
+
+  if (getPetBaseId(pet.id) === "pluto") {
+    const power = getPlutoPowerStats();
+
+    return {
+      health: [{ text: "-", tone: "neutral" }],
+      attack: [{ text: `-${Math.round(Number(power.projectileSlow || 0) * 100)}% szybkości pocisków`, tone: "heal" }],
+      respawn: [{ text: "-", tone: "neutral" }],
+    };
+  }
+
+  if (pet.id === HIGH_TOWER_FLARO_ID) {
+    const power = getFlaroPowerStats();
+
+    return {
+      health: [{ text: String(power.hp), tone: "neutral" }],
+      attack: [{ text: `${formatNumberForUi(power.burnSeconds)}s ognia`, tone: "damage" }],
+      respawn: [{ text: `${formatNumberForUi(power.respawnSeconds)}s`, tone: "neutral" }],
+    };
+  }
+
+  if (pet.id === "niedzwiedz-polarny") {
+    const power = getPolarBearPowerStats();
+
+    return {
+      health: [{ text: String(power.hp), tone: "neutral" }],
+      attack: [{ text: `-${power.snowballDamage} x2/4s`, tone: "damage" }],
+      respawn: [{ text: `${formatNumberForUi(power.respawnSeconds)}s`, tone: "neutral" }],
+    };
+  }
+
+  if (pet.id === "sniezynka") {
+    const power = getSnowflakePowerStats();
+
+    return {
+      health: [{ text: "-", tone: "neutral" }],
+      attack: [{ text: `-${Math.round(power.damageReduction * 100)}% obrażeń`, tone: "heal" }],
+      respawn: [{ text: "-", tone: "neutral" }],
+    };
+  }
+
+  if (pet.id === "sowa") {
+    const power = getOwlPowerStats();
+
+    return {
+      health: [{ text: "-", tone: "neutral" }],
+      attack: [{ text: `${formatNumberForUi(power.sleepSeconds)}s snu`, tone: "neutral" }],
+      respawn: [{ text: "-", tone: "neutral" }],
+    };
+  }
+
+  if (pet.id === "coral") {
+    const power = getCoralPowerStats();
+    return {
+      health: [{ text: String(power.hp), tone: "neutral" }],
+      attack: [{ text: `-${power.damage}, próg ${Math.round(Number(power.damagedThreshold || 0.8) * 100)}%`, tone: "damage" }],
+      respawn: [{ text: `${formatNumberForUi(power.respawnSeconds)}s`, tone: "neutral" }],
+    };
+  }
+
+  return defaultStats;
+}
+
+function buildPetDetailStatValue(lines = []) {
+  return lines
+    .map((line) => `<span class="pet-detail-stat-line" data-stat-tone="${line.tone || "neutral"}">${escapeHtml(line.text)}</span>`)
+    .join("");
+}
+
+function setPetDetailDelta(element, text, tone = "heal") {
+  if (!element) {
+    return;
+  }
+
+  element.textContent = text;
+  element.dataset.statTone = tone;
+  element.hidden = !text;
+}
+
+function clearPetUpgradePreviewDeltas() {
+  setPetDetailDelta(petDetailHealthDelta, "");
+  setPetDetailDelta(petDetailAttackDelta, "");
+  setPetDetailDelta(petDetailRespawnDelta, "");
+}
+
+function buildPetUpgradeButtonMarkup(pet) {
+  if (!pet || !petDetailUpgradeButton) {
+    return;
+  }
+
+  const nextPower = getNextPetPowerInfo(pet.id);
+
+  if (!getPetPowerLevels(pet.id).length) {
+    petDetailUpgradeButton.textContent = "ULEPSZANIE WKRÓTCE";
+    petDetailUpgradeButton.disabled = false;
+    return;
+  }
+
+  if (!nextPower) {
+    petDetailUpgradeButton.textContent = "POZIOM MAKSYMALNY";
+    petDetailUpgradeButton.disabled = true;
+    return;
+  }
+
+  petDetailUpgradeButton.disabled = false;
+
+  if (pendingPetUpgradeConfirmId === pet.id) {
+    petDetailUpgradeButton.textContent = "POTWIERDŹ ULEPSZENIE";
+    return;
+  }
+
+  const cost = getPetUpgradeCost(nextPower);
+  petDetailUpgradeButton.innerHTML = `
+    <span class="pet-upgrade-cost">
+      ${buildCurrencyAmountMarkup(cost.coins || 0, "coins")}
+      ${buildCurrencyAmountMarkup(cost.elixirs || 0, "elixirs")}
+    </span>
+  `;
+}
+
+function updatePetUpgradePreview(pet) {
+  clearPetUpgradePreviewDeltas();
+
+  if (!pet || pendingPetUpgradeConfirmId !== pet.id) {
+    return;
+  }
+
+  const currentPower = getPetPowerInfo(pet.id);
+  const nextPower = getNextPetPowerInfo(pet.id);
+
+  if (!currentPower || !nextPower) {
+    return;
+  }
+
+  if (Number.isFinite(Number(currentPower.hp)) && Number.isFinite(Number(nextPower.hp))) {
+    setPetDetailDelta(petDetailHealthDelta, `+${nextPower.hp - currentPower.hp}`, "heal");
+  }
+
+  if (Number.isFinite(Number(currentPower.damage)) && Number.isFinite(Number(nextPower.damage))) {
+    setPetDetailDelta(petDetailAttackDelta, `+${nextPower.damage - currentPower.damage}`, "heal");
+  } else if (Number.isFinite(Number(currentPower.snowballDamage)) && Number.isFinite(Number(nextPower.snowballDamage))) {
+    setPetDetailDelta(petDetailAttackDelta, `+${nextPower.snowballDamage - currentPower.snowballDamage} x2`, "heal");
+  } else if (Number.isFinite(Number(currentPower.damageReduction)) && Number.isFinite(Number(nextPower.damageReduction))) {
+    setPetDetailDelta(
+      petDetailAttackDelta,
+      `+${Math.round((nextPower.damageReduction - currentPower.damageReduction) * 100)}%`,
+      "heal"
+    );
+  } else if (Number.isFinite(Number(currentPower.sleepSeconds)) && Number.isFinite(Number(nextPower.sleepSeconds))) {
+    setPetDetailDelta(
+      petDetailAttackDelta,
+      `+${formatNumberForUi(nextPower.sleepSeconds - currentPower.sleepSeconds)}s`,
+      "heal"
+    );
+  } else if (Number.isFinite(Number(currentPower.bubbleSeconds)) && Number.isFinite(Number(nextPower.bubbleSeconds))) {
+    setPetDetailDelta(
+      petDetailAttackDelta,
+      `+${formatNumberForUi(nextPower.bubbleSeconds - currentPower.bubbleSeconds)}s`,
+      "heal"
+    );
+    } else if (Number.isFinite(Number(currentPower.castIntervalSeconds)) && Number.isFinite(Number(nextPower.castIntervalSeconds))) {
+    setPetDetailDelta(
+      petDetailAttackDelta,
+      `-${formatNumberForUi(currentPower.castIntervalSeconds - nextPower.castIntervalSeconds)}s`,
+      "damage"
+    );
+  } else if (Number.isFinite(Number(currentPower.healPerSecond)) && Number.isFinite(Number(nextPower.healPerSecond))) {
+    setPetDetailDelta(petDetailAttackDelta, `+${nextPower.healPerSecond - currentPower.healPerSecond}/s`, "heal");
+  } else if (Number.isFinite(Number(currentPower.power)) && Number.isFinite(Number(nextPower.power))) {
+    setPetDetailDelta(petDetailAttackDelta, `+${nextPower.power - currentPower.power}/s`, "heal");
+  } else if (Number.isFinite(Number(currentPower.projectileSlow)) && Number.isFinite(Number(nextPower.projectileSlow))) {
+    setPetDetailDelta(
+      petDetailAttackDelta,
+      `+${Math.round((nextPower.projectileSlow - currentPower.projectileSlow) * 100)}%`,
+      "heal"
+    );
+  } else if (Number.isFinite(Number(currentPower.burnSeconds)) && Number.isFinite(Number(nextPower.burnSeconds))) {
+    setPetDetailDelta(
+      petDetailAttackDelta,
+      `+${formatNumberForUi(nextPower.burnSeconds - currentPower.burnSeconds)}s`,
+      "heal"
+    );
+  } else if (Number.isFinite(Number(currentPower.damagedThreshold)) && Number.isFinite(Number(nextPower.damagedThreshold))) {
+    setPetDetailDelta(
+      petDetailAttackDelta,
+      `próg ${Math.round(Number(nextPower.damagedThreshold) * 100)}%`,
+      "damage"
+    );
+  }
+
+  if (Number.isFinite(Number(currentPower.respawnSeconds)) && Number.isFinite(Number(nextPower.respawnSeconds))) {
+    setPetDetailDelta(
+      petDetailRespawnDelta,
+      `-${formatNumberForUi(currentPower.respawnSeconds - nextPower.respawnSeconds)}s`,
+      "damage"
+    );
+  }
+}
+
+function clearPetDetailAnimationTimers() {
+  petDetailAnimationTimers.forEach((timerId) => {
+    window.clearTimeout(timerId);
+    window.clearInterval(timerId);
+    window.cancelAnimationFrame(timerId);
+  });
+  petDetailAnimationTimers = [];
+}
+
+function queuePetDetailAnimation(callback, delay = 0, interval = false) {
+  const timerId = interval
+    ? window.setInterval(callback, delay)
+    : window.setTimeout(callback, delay);
+  petDetailAnimationTimers.push(timerId);
+  return timerId;
+}
+
+function animatePetDetailCount(element, targetValue, duration = 720) {
+  if (!element) {
+    return;
+  }
+
+  const start = performance.now();
+  const tick = () => {
+    const progress = clamp((performance.now() - start) / duration, 0, 1);
+    element.textContent = String(Math.round(targetValue * progress));
+
+    if (progress < 1) {
+      const frame = window.requestAnimationFrame(tick);
+      petDetailAnimationTimers.push(frame);
+    }
+  };
+  tick();
+}
+
+function animatePetDetailDescription(text) {
+  if (!petDetailDescription) {
+    return;
+  }
+
+  petDetailDescription.textContent = "";
+  let index = 0;
+  const timerId = queuePetDetailAnimation(() => {
+    index += 1;
+    petDetailDescription.textContent = text.slice(0, index);
+
+    if (index >= text.length) {
+      window.clearInterval(timerId);
+    }
+  }, 18, true);
+}
+
+function getPetDetailDescriptionContent(pet) {
+  if (!pet) {
+    return {
+      text: "Ta PlatoYA ma wyjątkową moc w rundzie.",
+      html: "<p>Ta PlatoYA ma wyjątkową moc w rundzie.</p>",
+      rich: false,
+    };
+  }
+
+  const abilityText = getPetAbilityDescriptionText(pet);
+  const richDescriptions = {
+    "pies-magik": {
+      history: "Pies Magik jest najlepszym przyjacielem Milla, i towarzyszem w jego nauce czarów. Problem w tym, że ten ciągle zapomina różdżki, więc on musi ciągle za nim z nią biegać...",
+      ability: abilityText,
+    },
+    "papuga-manipulantka": {
+      history: "Kiedyś Emerald była płochliwym dżunglowym ptakiem, jednak przy treningu i małej pomocy czarów Elfie i Lindy, stała się manipulantką o szalonym spojrzeniu na życie",
+      ability: abilityText,
+    },
+    "l-psotka": {
+      history: "Przez tak wiele lat bycia pupilem Lindy, podpatrzyła sobie od niej taktykę na wystrzeliwanie baniek, problem w tym, że oprócz baniek lubi też psocić i podkradać właścicielce koronę...",
+      ability: abilityText,
+    },
+    "el-kruk": {
+      history: "Ozzy to ulubiony towarzysz Elfie, z czasów kiedy jeszcze z Lindą za sobą nie przepadały. Kiedyś, dodawał jej wsparcia a teraz dodaje punkty życia w walce",
+      ability: abilityText,
+    },
+    "malpka-jasnoksieznik": {
+      history: "Przypadkowo wkradła się na lekcje magii, kiedy zostały dostarczone świeże banany, po prostu nie była w stanie się opszeć. Dla Osma - Emerald to najlepsza przyjaciółka, ale ciężko stwierdzić czy papuga uważa o nim to samo...",
+      ability: abilityText,
+    },
+    pluto: {
+      history: "Pluto został odnaleziony i przygarnięty przez Elfie, i chociaż na początku Ozzy był o niego nie mało zazdrosny, to finalnie zaczęli się dogadywać. Nie wiadomo jednak skąd pochodzi jego bransoletka na dłoni, której nie da się zdjąć…",
+      ability: abilityText,
+    },
+    flaro: {
+      history: "Flaro to limitowana PlatoYA z Wyzwania Wysokiej Wieży. Nie stoi z boku, kiedy robi się gorąco - on dopiero wtedy zaczyna działać.",
+      ability: abilityText,
+    },
+    "niedzwiedz-polarny": {
+      history: "Odkąd Lily znalazła puszystego niedźwiadka, Nimbo stał się jej najlepszym przyjacielem, od teraz są nierozłączni i wspierają się w każdej chwili",
+      ability: abilityText,
+    },
+    sniezynka: {
+      history: "Kiedy Lily oddaje się pasji jeżdznia na łyżwach, Śnieżka lubi pilnować zaposową parę, tak żeby wrazie czego była odpowiednio podgrzana",
+      ability: abilityText,
+    },
+    sowa: {
+      history: "Główną pasją Vivi jest spanie, i co tu więcej mówić? Będziecie współpracować, wyłącznie kiedy dasz jej się wyspać",
+      ability: abilityText,
+    },
+    coral: {
+      history: "Choć Hookcrab jest tylko w przebraniu kraba, od zawsze go fascynowały, więc ze swojego pupila zrobił swoją kochankę, ale czy nie wygląda jak prawdziwa gwiazda, oślepiająca swym blaskiem?",
+      ability: abilityText,
+    },
+  };
+  const rich = richDescriptions[pet.id] || richDescriptions[getPetBaseId(pet.id)];
+
+  if (!rich) {
+    const text = pet.description || "Ta PlatoYA ma wyjątkową moc w rundzie.";
+    return {
+      text,
+      html: `<p>${escapeHtml(text)}</p>`,
+      rich: false,
+    };
+  }
+
+  return {
+    text: `${rich.history}\n${rich.ability}`,
+    html: `
+      <div class="pet-detail-story-card">${escapeHtml(rich.history)}</div>
+      <div class="pet-detail-ability-card">${escapeHtml(rich.ability)}</div>
+    `,
+    rich: true,
+  };
+}
+
+function getPetAbilityDescriptionText(pet) {
+  if (!pet) {
+    return "Ta PlatoYA ma wyjątkową moc w rundzie.";
+  }
+
+  if (getPetBaseId(pet.id) === "pies-magik") {
+    const power = getDogPowerStats();
+    return `Jeśli Pies Magik znajduje się wystarczająco blisko robota, zadaje mu ${power.damage} ujemnych punktów życia na sekundę.`;
+  }
+
+  if (pet.id === "papuga-manipulantka") {
+    const power = getParrotPowerStats();
+    return `Emerald manipuluje co ${formatNumberForUi(power.castIntervalSeconds)} sekund jednego robota, wystrzeliwując w jego stronę strzał, który karze mu atakować inne roboty, ale przez co inne roboty atakują też jego.`;
+  }
+
+  if (pet.id === "l-psotka") {
+    const power = getLpsotkaPowerStats();
+    return `Co ${formatNumberForUi(power.castIntervalSeconds)} sekund wystrzeliwuje bańkę Lindy, która uniemożliwia ruch robotom, a dodatkowo cofa ich do tyłu, do momentu skończenia efektu - ${formatNumberForUi(power.bubbleSeconds)} sekundy.`;
+  }
+
+  if (pet.id === "el-kruk") {
+    const power = getOzzyPowerStats();
+    return `Leczy o ${power.healPerSecond}/s jeśli twoje punkty życia, spadną do 2500.`;
+  }
+
+  if (pet.id === "malpka-jasnoksieznik") {
+    const power = getMonkeyMagePowerStats();
+    return `Jako skoczna małpka zadaje robotowi ${power.power} obrażeń na sekundę lub leczy nas o ${power.power} pż.`;
+  }
+
+  if (getPetBaseId(pet.id) === "pluto") {
+    const power = getPlutoPowerStats();
+    return `Spowalnia lecące pociski mini-robotów o ${Math.round(Number(power.projectileSlow || 0) * 100)}%, za pomocą magicznej bransoletki.`;
+  }
+
+  if (pet.id === HIGH_TOWER_FLARO_ID) {
+    const power = getFlaroPowerStats();
+    return `Jeśli otrzymasz dwa obrażenia od robotów, Flaro zieje ogniem we wszystkie roboty na mapie, oddając im siłę ostatniego uderzenia. Potem roboty palą się przez ${formatNumberForUi(power.burnSeconds)}s i tracą po 3 punkty życia co 0.1s.`;
+  }
+
+  if (pet.id === "niedzwiedz-polarny") {
+    return "Obrzuca roboty dwoma śnieżkami.";
+  }
+
+  if (pet.id === "sniezynka") {
+    const power = getSnowflakePowerStats();
+    return `Przez całą grę nakłada tarczę, która zmniejsza obrażenia robotów o ${Math.round(power.damageReduction * 100)}%.`;
+  }
+
+  if (pet.id === "sowa") {
+    const power = getOwlPowerStats();
+    return `Co 10 sekund przechodzisz w sen zimowy, a w tym czasie przez ${formatNumberForUi(power.sleepSeconds)} sekundy roboty atakują siebie nazwajem.`;
+  }
+
+  if (pet.id === "coral") {
+    const power = getCoralPowerStats();
+    return `Swobodnie porusza się po mapie i oślepia roboty, które mają mniej niż ${Math.round(Number(power.damagedThreshold || 0.8) * 100)}% życia. Flash z pereł morskich zadaje ${power.damage} obrażeń i kręci robota w kółko przez ${formatNumberForUi(Number(power.blindMs || 3000) / 1000)} sekundy, a co 2 sekundy dodatkowo uderza do 3 robotów za ${Number(power.pulseDamage || CORAL_PET_STATS.pulseDamage)} obrażeń.`;
+  }
+
+  return pet.description || "Ta PlatoYA ma wyjątkową moc w rundzie.";
+}
+
+function setPetDetailDescriptionContent(content) {
+  if (!petDetailDescription) {
+    return;
+  }
+
+  petDetailDescription.classList.toggle("rich-description", Boolean(content.rich));
+  petDetailDescription.innerHTML = content.html;
+}
+
+function renderPetPowerTrack(pet) {
+  if (!petDetailUpgradeTrack) {
+    return;
+  }
+
+  const levels = getPetPowerLevels(pet?.id);
+
+  if (!levels.length) {
+    petDetailUpgradeTrack.hidden = true;
+    petDetailUpgradeTrack.innerHTML = "";
+    return;
+  }
+
+  const currentLevel = getPetPowerLevel(pet.id);
+  petDetailUpgradeTrack.hidden = false;
+  petDetailUpgradeTrack.classList.remove("is-animating");
+  petDetailUpgradeTrack.innerHTML = levels
+    .map((level) => `<span class="pet-detail-upgrade-segment${level.level <= currentLevel ? " active" : ""}" style="--segment-index:${level.level - 1};"></span>`)
+    .join("");
+}
+
+function animatePetPowerTrack() {
+  if (!petDetailUpgradeTrack || petDetailUpgradeTrack.hidden) {
+    return;
+  }
+
+  petDetailUpgradeTrack.classList.remove("is-animating");
+  void petDetailUpgradeTrack.offsetWidth;
+  petDetailUpgradeTrack.classList.add("is-animating");
+}
+
+function runPetDetailIntroAnimation(pet, descriptionText) {
+  clearPetDetailAnimationTimers();
+
+  if (!petDetailPanel) {
+    return;
+  }
+
+  petDetailPanel.classList.remove("is-closing");
+  petDetailPanel.classList.add("is-animating");
+
+  queuePetDetailAnimation(() => {
+    animatePetPowerTrack();
+  }, 260);
+
+  queuePetDetailAnimation(() => {
+    petDetailPanel.classList.remove("is-animating");
+  }, 340);
+}
+
+function getSelectedPetDetailItem(basePet) {
+  if (!basePet) {
+    return null;
+  }
+
+  const equippedPet = getPetById(state.equippedPet);
+
+  if (
+    equippedPet &&
+    getPetBaseId(equippedPet.id) === basePet.id &&
+    state.ownedPets.includes(equippedPet.id)
+  ) {
+    return equippedPet;
+  }
+
+  return basePet;
+}
+
+function buildPetDetailSkinChoicesMarkup(basePet, selectedPet) {
+  const ownedSkins = getOwnedPetSkins(basePet?.id);
+
+  if (!basePet || ownedSkins.length === 0) {
+    return "";
+  }
+
+  const entries = [basePet, ...ownedSkins];
+  return `
+    <div class="pet-detail-skin-choices" aria-label="Przebrania PlatoYI">
+      ${entries.map((item) => {
+        const selected = selectedPet?.id === item.id;
+        return `
+          <button
+            class="pet-detail-skin-choice ${selected ? "active" : ""}"
+            data-pet-skin="${item.id}"
+            data-pet-skin-tone="${getPetSkinTone(item.id)}"
+            type="button"
+            aria-label="${escapeHtml(item.name)}"
+          >
+            ${buildPreviewAssetMarkup(item, {
+              imageClass: "pet-detail-skin-image asset-image",
+              videoClass: "pet-detail-skin-image asset-video",
+              fallbackText: item.name,
+              alt: item.name,
+            })}
+            ${buildPetSkinSparkleMarkup(item.id)}
+          </button>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderPetDetailPanel(pet, options = {}) {
+  if (!pet || !petDetailPanel) {
+    return;
+  }
+
+  const basePet = getPetById(getPetBaseId(pet.id)) || pet;
+  const selectedPet = getSelectedPetDetailItem(basePet) || basePet;
+  const stats = getPetDetailStats(basePet);
+  const isActive = state.equippedPet === selectedPet.id;
+  const descriptionContent = getPetDetailDescriptionContent(basePet);
+  const descriptionText = descriptionContent.text;
+  petDetailPanel.dataset.petTheme = getPetDetailTheme(basePet);
+
+  if (petDetailName) {
+    petDetailName.textContent = selectedPet.name;
+  }
+
+  if (petDetailPower) {
+    petDetailPower.textContent = formatPetPowerLevelLabel(basePet.id);
+    petDetailPower.hidden = !getPetPowerLevels(basePet.id).length;
+  }
+
+  if (petDetailDescription) {
+    setPetDetailDescriptionContent(descriptionContent);
+  }
+
+  if (petDetailRankSlot) {
+    petDetailRankSlot.innerHTML = `
+      ${buildPetRankTrackMarkup(basePet, "pet-detail-rank-widget")}
+      ${buildPetDetailSkinChoicesMarkup(basePet, selectedPet)}
+    `;
+  }
+
+  if (petDetailImage) {
+    petDetailImage.src = selectedPet.image;
+    petDetailImage.alt = selectedPet.name;
+    petDetailImage.dataset.fallbackText = selectedPet.name;
+    petDetailImage.classList.remove("broken");
+  }
+
+  petDetailImage?.closest?.(".pet-detail-art")?.setAttribute("data-pet-skin-tone", getPetSkinTone(selectedPet.id));
+  const petDetailArt = petDetailImage?.closest?.(".pet-detail-art");
+  if (petDetailArt) {
+    petDetailArt.querySelectorAll(".pet-mini-skin-star").forEach((node) => node.remove());
+    petDetailArt.insertAdjacentHTML("beforeend", buildPetSkinSparkleMarkup(selectedPet.id));
+  }
+
+  if (petDetailHealth) {
+    petDetailHealth.innerHTML = buildPetDetailStatValue(stats.health);
+  }
+
+  if (petDetailAttack) {
+    petDetailAttack.innerHTML = buildPetDetailStatValue(stats.attack);
+  }
+
+  if (petDetailRespawn) {
+    petDetailRespawn.innerHTML = buildPetDetailStatValue(stats.respawn);
+  }
+
+  if (petDetailEquipButton) {
+    petDetailEquipButton.textContent = isActive ? "WYBRANA PLATOYA" : "WYBIERZ PLATOYĘ";
+    petDetailEquipButton.disabled = isActive;
+  }
+
+  buildPetUpgradeButtonMarkup(basePet);
+  renderPetPowerTrack(basePet);
+  updatePetUpgradePreview(basePet);
+
+  if (petDetailBackdrop) {
+    syncBrokenAssets(petDetailBackdrop);
+  }
+
+  if (options.animate) {
+    runPetDetailIntroAnimation(pet, descriptionText);
+  }
+}
+
+function openPetDetailPanel(petId) {
+  const itemId = getPetBaseId(petId);
+  const pet = getOwnedItem("pets", itemId);
+
+  if (!pet || !petDetailBackdrop) {
+    return;
+  }
+
+  if (petDetailCloseTimer) {
+    window.clearTimeout(petDetailCloseTimer);
+    petDetailCloseTimer = null;
+  }
+
+  activePetDetailId = pet.id;
+  pendingPetUpgradeConfirmId = "";
+  renderPetDetailPanel(pet, { animate: true });
+  const voiceEffect = getPetVoiceEffect(pet.id);
+  if (voiceEffect) {
+    playOneShotSound(voiceEffect, 0.86);
+  }
+  petDetailBackdrop.hidden = false;
+  window.requestAnimationFrame(() => {
+    petDetailBackdrop.classList.add("show");
+  });
+}
+
+function closePetDetailPanel() {
+  if (!petDetailBackdrop) {
+    return;
+  }
+
+  clearPetDetailAnimationTimers();
+  if (petDetailTipTimer) {
+    window.clearTimeout(petDetailTipTimer);
+    petDetailTipTimer = null;
+  }
+  if (petDetailTipBubble) {
+    petDetailTipBubble.hidden = true;
+    petDetailTipBubble.classList.remove("show");
+  }
+  pendingPetUpgradeConfirmId = "";
+  petDetailPanel?.classList.remove("is-animating");
+  petDetailPanel?.classList.add("is-closing");
+  petDetailBackdrop.classList.remove("show");
+  petDetailCloseTimer = window.setTimeout(() => {
+    petDetailBackdrop.hidden = true;
+    petDetailPanel?.classList.remove("is-closing");
+    activePetDetailId = "";
+  }, 320);
+}
+
+function equipPetFromDetail() {
+  const pet = getOwnedItem("pets", activePetDetailId);
+
+  if (!pet) {
+    return;
+  }
+
+  state.equippedPet = pet.id;
+  state.favoritePetId = pet.id;
+  saveState();
+  renderAll();
+  renderPetDetailPanel(pet);
+}
+
+function selectPetSkinFromDetail(skinId) {
+  const itemId = sanitizeStoredId(skinId);
+  const basePet = getOwnedItem("pets", activePetDetailId);
+  const item = getPetById(itemId);
+
+  if (!basePet || !item) {
+    return;
+  }
+
+  if (item.id !== basePet.id && (getPetBaseId(item.id) !== basePet.id || !state.ownedPets.includes(item.id))) {
+    return;
+  }
+
+  state.equippedPet = item.id;
+  state.favoritePetId = item.id;
+  saveState();
+  renderAll();
+  renderPetDetailPanel(basePet);
+  const voiceEffect = getPetVoiceEffect(item.id);
+  if (voiceEffect) {
+    playOneShotSound(voiceEffect, 0.72);
+  }
+}
+
+function handlePetUpgradeButton() {
+  const pet = getOwnedItem("pets", activePetDetailId);
+
+  if (!pet) {
+    return;
+  }
+
+  const nextPower = getNextPetPowerInfo(pet.id);
+
+  if (!getPetPowerLevels(pet.id).length) {
+    openModal({
+      title: "Ulepszanie",
+      message: "ULEPSZANIE JUŻ WKRÓTCE!",
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  if (!nextPower) {
+    return;
+  }
+
+  if (pendingPetUpgradeConfirmId !== pet.id) {
+    pendingPetUpgradeConfirmId = pet.id;
+    renderPetDetailPanel(pet);
+    return;
+  }
+
+  const cost = getPetUpgradeCost(nextPower);
+  const missingCoins = Math.max(0, Number(cost.coins || 0) - Number(state.coins || 0));
+  const missingElixirs = Math.max(0, Number(cost.elixirs || 0) - Number(state.elixirs || 0));
+
+  if (missingCoins > 0 || missingElixirs > 0) {
+    openModal({
+      title: "Za mało zasobów",
+      message: `Brakuje: ${missingCoins} monet, ${missingElixirs} eliksirów.`,
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  state.coins = Math.max(0, Number(state.coins || 0) - Number(cost.coins || 0));
+  state.elixirs = Math.max(0, Number(state.elixirs || 0) - Number(cost.elixirs || 0));
+
+  if (!state.petPowerLevels || typeof state.petPowerLevels !== "object") {
+    state.petPowerLevels = {};
+  }
+
+  state.petPowerLevels[getPetBaseId(pet.id)] = nextPower.level;
+  pendingPetUpgradeConfirmId = "";
+  updatePortalMissionProgressForEvent("pet-upgrade", 1);
+  saveState();
+  renderAll();
+  renderPetDetailPanel(pet);
+  showPetUpgradeCelebration(pet, nextPower);
+  animatePetPowerTrack();
+}
+
+function showPetDetailTipBubble() {
+  if (!petDetailTipBubble) {
+    return;
+  }
+
+  if (petDetailTipTimer) {
+    window.clearTimeout(petDetailTipTimer);
+    petDetailTipTimer = null;
+  }
+
+  petDetailTipBubble.hidden = false;
+  petDetailTipBubble.classList.add("show");
+  petDetailTipTimer = window.setTimeout(() => {
+    petDetailTipBubble.classList.remove("show");
+    petDetailTipTimer = window.setTimeout(() => {
+      petDetailTipBubble.hidden = true;
+      petDetailTipTimer = null;
+    }, 180);
+  }, 2500);
+}
+
+function showPetUpgradeCelebration(pet, powerInfo) {
+  if (!petUpgradeCelebration || !pet || !powerInfo) {
+    return;
+  }
+
+  if (petUpgradeImage) {
+    petUpgradeImage.src = pet.image;
+    petUpgradeImage.alt = pet.name;
+    petUpgradeImage.classList.remove("broken");
+  }
+
+  if (petUpgradeTitle) {
+    petUpgradeTitle.textContent = pet.name.toUpperCase();
+  }
+
+  if (petUpgradeLevel) {
+    petUpgradeLevel.textContent = powerInfo.maxLabel ? "POZIOM MAKSYMALNY" : `POZIOM ${powerInfo.level}`;
+  }
+
+  petUpgradeCelebration.hidden = false;
+  petUpgradeCelebration.classList.remove("show");
+  window.requestAnimationFrame(() => {
+    petUpgradeCelebration.classList.add("show");
+  });
+  playOneShotSound("petUpgrade", 0.88);
+  syncBrokenAssets(petUpgradeCelebration);
+  queuePetDetailAnimation(() => {
+    petUpgradeCelebration.classList.remove("show");
+    queuePetDetailAnimation(() => {
+      petUpgradeCelebration.hidden = true;
+    }, 280);
+  }, 1700);
+}
+
+function getCharacterStoryDescription(baseId) {
+  return CHARACTER_STORY_DESCRIPTIONS[sanitizeStoredId(baseId)] || "Ta postać jest gotowa do walki.";
+}
+
+function getSelectedCharacterDetailItem() {
+  const baseId = sanitizeStoredId(activeCharacterDetailId);
+  const selectedId = sanitizeStoredId(activeCharacterDetailSkinId || baseId);
+  const selectedItem = getCharacterById(selectedId);
+
+  if (
+    selectedItem &&
+    (selectedItem.id === baseId || (
+      getCharacterBaseId(selectedItem.id) === baseId &&
+      state.ownedCharacters.includes(selectedItem.id)
+    ))
+  ) {
+    return selectedItem;
+  }
+
+  return getCharacterById(baseId);
+}
+
+function renderCharacterSkinTray(baseId) {
+  if (!characterSkinTray || !characterSkinList) {
+    return;
+  }
+
+  const baseItem = getCharacterById(baseId);
+  const ownedSkins = getOwnedCharacterSkins(baseId);
+
+  if (!baseItem) {
+    characterSkinList.innerHTML = "";
+    return;
+  }
+
+  const entries = [baseItem, ...ownedSkins];
+  characterSkinList.innerHTML = entries
+    .map((item, index) => {
+      const selected = (activeCharacterDetailSkinId || baseId) === item.id;
+      const label = index === 0 ? baseItem.name : item.name;
+
+      return `
+        <button class="character-skin-card ${selected ? "active" : ""}" data-character-skin="${item.id}" type="button">
+          <div class="character-skin-art">
+            ${buildPreviewAssetMarkup(item, {
+              imageClass: "item-image asset-image",
+              videoClass: "item-image asset-video",
+              fallbackText: item.name,
+              alt: item.name,
+            })}
+          </div>
+          <span class="character-skin-name">${escapeHtml(label)}</span>
+        </button>
+      `;
+    })
+    .join("");
+
+  syncBrokenAssets(characterSkinList);
+  syncAnimatedAssets(characterSkinList);
+}
+
+function renderCharacterDetailPanel() {
+  const baseItem = getOwnedItem("characters", activeCharacterDetailId);
+
+  if (!baseItem || !characterDetailPanel) {
+    return;
+  }
+
+  const selectedItem = getSelectedCharacterDetailItem() || baseItem;
+  const isActive = state.equippedCharacter === selectedItem.id;
+
+  if (characterDetailName) {
+    characterDetailName.textContent = selectedItem.name;
+  }
+
+  if (characterDetailDescription) {
+    characterDetailDescription.textContent = getCharacterStoryDescription(baseItem.id);
+  }
+
+  if (characterDetailArt) {
+    renderPreviewAssetIntoFrame(characterDetailArt, selectedItem, {
+      elementId: "character-detail-image",
+      imageClass: "character-detail-image asset-image",
+      videoClass: "character-detail-image asset-video",
+      fallbackText: selectedItem.name,
+      alt: selectedItem.name,
+    });
+  } else if (characterDetailImage) {
+    characterDetailImage.src = selectedItem.image;
+    characterDetailImage.alt = selectedItem.name;
+    characterDetailImage.dataset.fallbackText = selectedItem.name;
+    characterDetailImage.classList.remove("broken");
+  }
+
+  if (characterDetailEquipButton) {
+    characterDetailEquipButton.textContent = isActive ? "WYBRANA POSTAĆ" : "WYBIERZ POSTAĆ";
+    characterDetailEquipButton.disabled = isActive;
+  }
+
+  renderCharacterSkinTray(baseItem.id);
+  syncBrokenAssets(characterDetailBackdrop || characterDetailPanel);
+  syncAnimatedAssets(characterDetailBackdrop || characterDetailPanel);
+}
+
+function openCharacterDetailPanel(characterId) {
+  const baseId = getCharacterBaseId(characterId);
+  const baseItem = getOwnedItem("characters", baseId);
+
+  if (!baseItem || !characterDetailBackdrop) {
+    return;
+  }
+
+  if (characterDetailCloseTimer) {
+    window.clearTimeout(characterDetailCloseTimer);
+    characterDetailCloseTimer = null;
+  }
+
+  activeCharacterDetailId = baseItem.id;
+  activeCharacterDetailSkinId = isCharacterBaseEquipped(baseItem.id)
+    ? (state.equippedCharacter || baseItem.id)
+    : baseItem.id;
+
+  if (
+    isCharacterSkinId(activeCharacterDetailSkinId) &&
+    !state.ownedCharacters.includes(activeCharacterDetailSkinId)
+  ) {
+    activeCharacterDetailSkinId = baseItem.id;
+  }
+
+  closeCharacterSkinTray({ immediate: true });
+
+  characterDetailPanel?.classList.remove("is-closing");
+  renderCharacterDetailPanel();
+  characterDetailBackdrop.hidden = false;
+  queueCharacterVoice(activeCharacterDetailSkinId, 120, 0.64);
+  window.requestAnimationFrame(() => {
+    characterDetailBackdrop.classList.add("show");
+  });
+}
+
+function closeCharacterDetailPanel() {
+  if (!characterDetailBackdrop) {
+    return;
+  }
+
+  characterDetailPanel?.classList.add("is-closing");
+  characterDetailBackdrop.classList.remove("show");
+  characterDetailCloseTimer = window.setTimeout(() => {
+    characterDetailBackdrop.hidden = true;
+    characterDetailPanel?.classList.remove("is-closing");
+    closeCharacterSkinTray({ immediate: true });
+    activeCharacterDetailId = "";
+    activeCharacterDetailSkinId = "";
+  }, 260);
+}
+
+function equipCharacterFromDetail() {
+  const baseItem = getOwnedItem("characters", activeCharacterDetailId);
+  const selectedItem = getSelectedCharacterDetailItem();
+
+  if (!baseItem || !selectedItem) {
+    return;
+  }
+
+  if (selectedItem.id !== baseItem.id && !state.ownedCharacters.includes(selectedItem.id)) {
+    return;
+  }
+
+  state.equippedCharacter = selectedItem.id;
+  state.favoriteCharacterId = selectedItem.id;
+  saveState();
+  renderAll();
+  renderCharacterDetailPanel();
+  queueCharacterVoice(selectedItem.id, 80, 0.64);
+}
+
+function toggleCharacterSkinTray() {
+  if (!characterSkinTray || !activeCharacterDetailId) {
+    return;
+  }
+
+  if (!characterSkinTray.hidden) {
+    renderCharacterSkinTray(activeCharacterDetailId);
+    return;
+  }
+
+  renderCharacterSkinTray(activeCharacterDetailId);
+  characterSkinTray.hidden = false;
+  window.requestAnimationFrame(() => {
+    characterSkinTray.classList.add("show");
+  });
+}
+
+function closeCharacterSkinTray(options = {}) {
+  if (!characterSkinTray) {
+    return;
+  }
+
+  if (characterSkinTrayCloseTimer) {
+    window.clearTimeout(characterSkinTrayCloseTimer);
+    characterSkinTrayCloseTimer = null;
+  }
+
+  characterSkinTray.classList.remove("show");
+
+  if (options.immediate) {
+    characterSkinTray.hidden = true;
+    return;
+  }
+
+  characterSkinTrayCloseTimer = window.setTimeout(() => {
+    characterSkinTray.hidden = true;
+    characterSkinTrayCloseTimer = null;
+  }, 280);
+}
+
+function selectCharacterSkin(skinId) {
+  const itemId = sanitizeStoredId(skinId);
+  const baseId = sanitizeStoredId(activeCharacterDetailId);
+  const item = getCharacterById(itemId);
+
+  if (!item || !baseId) {
+    return;
+  }
+
+  if (item.id !== baseId && (getCharacterBaseId(item.id) !== baseId || !state.ownedCharacters.includes(item.id))) {
+    return;
+  }
+
+  activeCharacterDetailSkinId = item.id;
+  state.equippedCharacter = item.id;
+  state.favoriteCharacterId = item.id;
+  saveState();
+  renderAll();
+  renderCharacterDetailPanel();
+  queueCharacterVoice(item.id, 80, 0.64);
 }
 
 function getInventoryNote(kind, equipped) {
@@ -8553,39 +17423,51 @@ function renderWardrobeOverview() {
     return;
   }
 
+  const signature = [
+    sanitizeStoredId(state.equippedPet),
+    sanitizeStoredId(state.equippedCharacter),
+  ].join("|");
+
+  if (wardrobeOverview.dataset.equippedSignature === signature && wardrobeOverview.childElementCount > 0) {
+    return;
+  }
+
   const slots = [
     {
-      label: "Postac",
-      item: getOwnedItem("characters", state.equippedCharacter),
-      emptyLabel: "Brak postaci",
-      emptyNote: "Wybierz postac w szafie.",
-    },
-    {
       label: "PlatoYa",
+      kind: "pets",
       item: getOwnedItem("pets", state.equippedPet),
       emptyLabel: "Bez PlatoYasa",
       emptyNote: "Mozesz grac bez pomocnika.",
     },
     {
-      label: "Bron",
-      item: getOwnedItem("weapons", state.equippedWeapon),
-      emptyLabel: "Brak broni",
-      emptyNote: "Wybierz bron w szafie.",
+      label: "Postac",
+      kind: "characters",
+      item: getOwnedItem("characters", state.equippedCharacter),
+      emptyLabel: "Brak postaci",
+      emptyNote: "Wybierz postac w szafie.",
     },
   ];
 
   wardrobeOverview.innerHTML = slots
     .map((slot) => {
       const item = slot.item;
+      if (!item) {
+        return `
+          <article class="wardrobe-equipped-slot wardrobe-equipped-${slot.kind} wardrobe-equipped-empty">
+            <div class="wardrobe-equipped-platform" aria-label="${slot.emptyLabel}"></div>
+          </article>
+        `;
+      }
+
       const name = item?.name || slot.emptyLabel;
-      const note = item ? "Teraz zalozone" : slot.emptyNote;
-      const image = item?.image || "";
       const fallback = item?.name || slot.emptyLabel;
 
       return `
-        <article class="wardrobe-slot">
-          <p class="wardrobe-slot-label">${slot.label}</p>
-          <div class="item-art wardrobe-slot-art">
+        <article class="wardrobe-equipped-slot wardrobe-equipped-${slot.kind}">
+          <p class="wardrobe-equipped-kind-bubble">${slot.kind === "pets" ? "PLATOYA" : "POSTAĆ"}</p>
+          <div class="wardrobe-equipped-platform">
+            <div class="item-art wardrobe-slot-art${slot.kind === "pets" ? " wardrobe-slot-pet-art" : " wardrobe-slot-character-art"}" data-pet-skin-tone="${slot.kind === "pets" ? getPetSkinTone(item?.id) : ""}" ${getWardrobeVisualStyle(slot.kind, item, "left")}>
             ${item
               ? buildPreviewAssetMarkup(item, {
                 imageClass: "item-image asset-image",
@@ -8602,20 +17484,23 @@ function renderWardrobeOverview() {
                 />
                 <div class="asset-fallback">${fallback}</div>
               `}
+            ${slot.kind === "pets" ? buildPetRankBadgeMarkup(item, "wardrobe-slot-rank-emblem") : ""}
+            ${slot.kind === "pets" ? buildPetSkinSparkleMarkup(item?.id) : ""}
+            </div>
           </div>
-          <p class="item-title">${name}</p>
-          <p class="wardrobe-slot-note">${note}</p>
+          <p class="wardrobe-equipped-title">${name}</p>
         </article>
       `;
     })
     .join("");
+  wardrobeOverview.dataset.equippedSignature = signature;
 
   syncBrokenAssets(wardrobeOverview);
 }
 
 function renderGameLoadout() {
   const character = getOwnedItem("characters", state.equippedCharacter);
-  const pet = getOwnedItem("pets", state.equippedPet);
+  const pet = getEquippedPet();
   syncAmmoSlotsUI();
 
   renderPreviewAssetIntoFrame(gamePlayerFrame, character, {
@@ -8632,12 +17517,20 @@ function renderGameLoadout() {
     gamePetImage.alt = pet.name;
     gamePetImage.classList.remove("broken");
     gamePetEntity.dataset.petId = pet.id;
+    syncPetSkinSparkles(gamePetImage.closest(".pet-sprite-frame"), pet.id);
+    if (petHealthLabel) {
+      petHealthLabel.hidden = !isMortalPetId(pet.id);
+    }
   } else {
     gamePetEntity.hidden = true;
     gamePetImage.src = "";
     gamePetImage.alt = "PlatoYa";
     gamePetImage.classList.add("broken");
     delete gamePetEntity.dataset.petId;
+    syncPetSkinSparkles(gamePetImage.closest(".pet-sprite-frame"), "");
+    if (petHealthLabel) {
+      petHealthLabel.hidden = true;
+    }
   }
 }
 
@@ -8672,10 +17565,160 @@ function handleStoreClick(event) {
     return;
   }
 
+  const refreshTipButton = event.target.closest("[data-store-refresh-tip]");
+
+  if (refreshTipButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    const offerCard = refreshTipButton.closest(".store-daily-offer-card");
+
+    if (offerCard) {
+      storeGrid.querySelectorAll(".store-daily-offer-card.show-refresh-tip").forEach((activeCard) => {
+        if (activeCard !== offerCard) {
+          activeCard.classList.remove("show-refresh-tip");
+        }
+      });
+      offerCard.classList.add("show-refresh-tip");
+
+      if (storeRefreshTipTimeout) {
+        clearTimeout(storeRefreshTipTimeout);
+      }
+
+      storeRefreshTipTimeout = setTimeout(() => {
+        offerCard.classList.remove("show-refresh-tip");
+        storeRefreshTipTimeout = null;
+      }, 3500);
+    }
+    return;
+  }
+
+  const dailyGiftButton = event.target.closest("[data-store-daily-gift]");
+
+  if (dailyGiftButton) {
+    void claimDailyGiftFromStore();
+    return;
+  }
+
+  const premiumAlleyOfferButton = event.target.closest("[data-store-premium-alley-offer]");
+
+  if (premiumAlleyOfferButton) {
+    const offer = STORE_PREMIUM_ALLEY_OFFERS.find((entry) => entry.id === premiumAlleyOfferButton.dataset.storePremiumAlleyOffer);
+
+    if (offer) {
+      openStorePremiumAlleyPurchase(offer);
+    }
+    return;
+  }
+
+  const premiumBoostOfferButton = event.target.closest("[data-store-premium-boost-offer]");
+
+  if (premiumBoostOfferButton) {
+    if (premiumBoostOfferButton.dataset.storePremiumBoostOffer === STORE_WINTER_PREMIUM_BOOST_OFFER.id) {
+      openStorePremiumBoostPurchase(STORE_WINTER_PREMIUM_BOOST_OFFER);
+    }
+    return;
+  }
+
+  const specialCurrencyButton = event.target.closest("[data-store-special-currency]");
+
+  if (specialCurrencyButton) {
+    const offer = STORE_SPECIAL_CURRENCY_OFFERS.find((entry) => entry.id === specialCurrencyButton.dataset.storeSpecialCurrency);
+
+    if (offer) {
+      openStoreSpecialCurrencyPurchase(offer);
+    }
+    return;
+  }
+
+  const platoMachineOfferButton = event.target.closest("[data-store-plato-machine-offer]");
+
+  if (platoMachineOfferButton) {
+    const offer = STORE_PLATOYA_MACHINE_OFFERS.find((entry) => entry.id === platoMachineOfferButton.dataset.storePlatoMachineOffer);
+
+    if (offer) {
+      openStorePlatoMachinePurchase(offer);
+    }
+    return;
+  }
+
+  const starterPackButton = event.target.closest("[data-store-starter-pack-offer]");
+
+  const contentCreatorOfferButton = event.target.closest("[data-store-content-creator-offer]");
+
+  if (contentCreatorOfferButton) {
+    if (isContentCreatorMachineOfferAvailable()) {
+      openStoreContentCreatorMachinePurchase();
+    }
+    return;
+  }
+
+  if (starterPackButton) {
+    if (isStarterPackAvailable()) {
+      openStoreStarterPackPurchase();
+    }
+    return;
+  }
+
+  const maxPlatoyaButton = event.target.closest("[data-store-max-platoya-offer]");
+
+  if (maxPlatoyaButton) {
+    openStoreMaxPlatoyaPurchase();
+    return;
+  }
+
+  const cardDeckButton = event.target.closest("[data-store-card-deck-offer]");
+
+  if (cardDeckButton) {
+    openStoreRankingCardDeckPurchase();
+    return;
+  }
+
+  const highTowerOfferButton = event.target.closest("[data-store-high-tower-offer]");
+
+  if (highTowerOfferButton) {
+    openStoreHighTowerOfferPurchase(highTowerOfferButton.dataset.storeHighTowerOffer);
+    return;
+  }
+
+  const creatorSupportClearButton = event.target.closest("[data-creator-support-clear]");
+
+  if (creatorSupportClearButton) {
+    state.supportedCreatorCode = "";
+    saveState();
+    renderStore();
+    return;
+  }
+
+  const petSkinOfferButton = event.target.closest("[data-store-pet-skin-offer]");
+
+  if (petSkinOfferButton) {
+    openStorePetSkinPurchase(petSkinOfferButton.dataset.storePetSkinOffer);
+    return;
+  }
+
   const chestOddsButton = event.target.closest("[data-chest-odds]");
 
   if (chestOddsButton) {
     openChestOddsModal(chestOddsButton.dataset.chestOdds || "drewniana-skrzynia");
+    return;
+  }
+
+  const characterPreviewButton = event.target.closest("[data-store-preview-character]");
+
+  if (characterPreviewButton) {
+    const item = CATALOG.characters.find((entry) => entry.id === characterPreviewButton.dataset.storePreviewCharacter);
+
+    if (item) {
+      const storeOfferSource = characterPreviewButton.dataset.storeOfferSource || "daily-characters";
+      openStoreCharacterPurchase({
+        ...item,
+        price: STORE_DAILY_CHARACTER_PRICE,
+        currency: "diamonds",
+        storeOfferSource,
+        purchaseKicker: characterPreviewButton.dataset.storeCharacterKicker ||
+          (storeOfferSource === "magic-lunella" ? "MAGICZNA OFERTA" : "DZIENNA OFERTA"),
+      });
+    }
     return;
   }
 
@@ -8708,7 +17751,7 @@ function handleStoreClick(event) {
     if (pet) {
       openModal({
         title: pet.name,
-        message: pet.description,
+        message: getPetAbilityDescriptionText(pet),
         image: pet.image,
         imageAlt: pet.name,
         buttonText: "OK",
@@ -8769,6 +17812,11 @@ function handleStoreClick(event) {
     return;
   }
 
+  if (kind === "platoYaUnlocks") {
+    buyAllPlatoYaUnlock(item);
+    return;
+  }
+
   if (kind === "characters" && button.dataset.storeOfferSource === "daily-characters") {
     openStoreCharacterPurchase(item);
     return;
@@ -8788,6 +17836,24 @@ function handleStoreClick(event) {
   buyItem(kind, item, { currency, price });
 }
 
+function handleStoreInput(event) {
+  const creatorInput = event.target.closest("[data-creator-code-input]");
+
+  if (!creatorInput) {
+    return;
+  }
+
+  const creatorCode = String(creatorInput.value || "").trim().toLowerCase();
+
+  if (creatorCode !== "natix" || state.supportedCreatorCode === "NATIX") {
+    return;
+  }
+
+  state.supportedCreatorCode = "NATIX";
+  saveState();
+  renderStore();
+}
+
 function confirmAccountReset() {
   openModal({
     title: "Restart konta",
@@ -8795,13 +17861,34 @@ function confirmAccountReset() {
     buttonText: "RESETUJ",
     dismissible: true,
     onConfirm: () => {
+      LEGACY_STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
       window.localStorage.removeItem(STORAGE_KEY);
       window.location.reload();
     },
   });
 }
 
+function confirmLogoutAccount() {
+  LEGACY_STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
+  window.localStorage.removeItem(STORAGE_KEY);
+  window.location.reload();
+}
+
 function handleInventoryClick(event) {
+  const characterDetailButton = event.target.closest("[data-character-detail]");
+
+  if (characterDetailButton) {
+    openCharacterDetailPanel(characterDetailButton.dataset.characterDetail);
+    return;
+  }
+
+  const petDetailButton = event.target.closest("[data-pet-detail]");
+
+  if (petDetailButton) {
+    openPetDetailPanel(petDetailButton.dataset.petDetail);
+    return;
+  }
+
   const button = event.target.closest("[data-inventory-equip]");
 
   if (!button) {
@@ -8827,11 +17914,76 @@ function handleInventoryClick(event) {
   renderAll();
 }
 
+function triggerRankingLockFeedback(entryNode = rankingAlleyEntry) {
+  const lockNode = entryNode?.querySelector?.(".ranking-alley-entry-lock");
+
+  if (lockNode) {
+    lockNode.classList.remove("is-shaking");
+    void lockNode.offsetWidth;
+    lockNode.classList.add("is-shaking");
+  }
+
+  playPortalLockSound();
+}
+
+function triggerStorePirateOfferLockFeedback(tabNode) {
+  const lockNode = tabNode?.querySelector?.(".store-offer-tab-lock");
+
+  if (lockNode) {
+    lockNode.classList.remove("is-shaking");
+    void lockNode.offsetWidth;
+    lockNode.classList.add("is-shaking");
+  } else if (tabNode) {
+    tabNode.classList.remove("is-shaking");
+    void tabNode.offsetWidth;
+    tabNode.classList.add("is-shaking");
+  }
+
+  playPortalLockSound();
+}
+
+function triggerTrophyNodeLockFeedback(rewardNode) {
+  const lockNode = rewardNode?.querySelector?.(".trophy-node-magicians-corner");
+
+  if (lockNode) {
+    lockNode.classList.remove("is-shaking");
+    void lockNode.offsetWidth;
+    lockNode.classList.add("is-shaking");
+  }
+}
+
+function handleRankingEntryClick(event) {
+  event?.preventDefault?.();
+
+  if (!isRankingAlleyUnlocked()) {
+    triggerRankingLockFeedback(rankingAlleyEntry);
+    showTrophyNotice("WYMAGANE 500 PUCHARÓW");
+    return;
+  }
+
+  showView("ranking");
+  playOneShotSound("rankingEnter", 0.86);
+}
+
 function handleTrophyClick(event) {
   const superAlleyTrigger = event.target.closest("[data-super-alley-trigger]");
 
   if (superAlleyTrigger) {
     openSuperAlleyOffer(superAlleyTrigger.dataset.superAlleyTrigger);
+    return;
+  }
+
+  const rarityStoreButton = event.target.closest("[data-open-rarity-store]");
+
+  if (rarityStoreButton) {
+    if (!hasReachedMagiciansSilverGate()) {
+      triggerPortalLockFeedback(rarityStoreButton);
+      showTrophyNotice("ZA MAŁO PUCHARÓW");
+      return;
+    }
+
+    ui.rarityMode = "missions";
+    showView("rarity");
     return;
   }
 
@@ -8873,18 +18025,151 @@ function handleTrophyClick(event) {
   const claimButton = event.target.closest("[data-trophy-claim]");
 
   if (!claimButton) {
+    const rewardNode = event.target.closest(".trophy-node[data-world-theme][data-reward-id]");
+
+    if (!rewardNode || rewardNode.dataset.nodeState === "claimed" || rewardNode.dataset.nodeState === "ready") {
+      return;
+    }
+
+    const worldId = rewardNode.dataset.worldTheme;
+    const rewardId = rewardNode.dataset.rewardId;
+    const world = getTrophyWorldById(worldId);
+    const reward = getTrophyWorldRewardById(world, rewardId);
+
+    if (!world || !reward) {
+      return;
+    }
+
+    const isPremiumBlocked = isSuperAlleyReward(worldId, reward) && !isSuperAlleyActiveForWorld(worldId);
+    if (reward.type === "ranking-unlock" && state.trophies < RANKING_ALLEY_UNLOCK_TROPHIES) {
+      triggerTrophyNodeLockFeedback(rewardNode);
+      playPortalLockSound();
+      showTrophyNotice("WYMAGANE 500 PUCHARÓW");
+      return;
+    }
+
+    showTrophyNotice(isPremiumBlocked
+      ? "TA NAGRODA JEST DOSTĘPNA W ALEI PREMIUM"
+      : "ZA MAŁO PUCHARÓW");
     return;
   }
 
   const [worldId, rewardId] = claimButton.dataset.trophyClaim.split(":");
   const world = TROPHY_WORLDS.find((entry) => entry.id === worldId);
-  const reward = world?.rewards.find((entry) => entry.id === rewardId);
+  const reward = getTrophyWorldRewardById(world, rewardId);
 
   if (trophyWorldBatchClaimBusy || !world || !reward || state.trophies < reward.trophies || isTrophyRewardClaimed(worldId, reward)) {
     return;
   }
 
   void claimTrophyReward(world, reward);
+}
+
+function triggerPortalLockFeedback(portalNode) {
+  const lockNode = portalNode?.querySelector?.(".magicians-rarity-lock");
+
+  if (lockNode) {
+    lockNode.classList.remove("is-shaking");
+    void lockNode.offsetWidth;
+    lockNode.classList.add("is-shaking");
+  }
+
+  playPortalLockSound();
+}
+
+function playPortalLockSound() {
+  const audio = playOneShotSound("portalLock", 0.72, 1, 700);
+
+  if (!audio) {
+    playSyntheticPortalLockSound();
+    return;
+  }
+
+  let usedFallback = false;
+  const playFallback = () => {
+    if (usedFallback) {
+      return;
+    }
+
+    usedFallback = true;
+    playSyntheticPortalLockSound();
+  };
+
+  audio.addEventListener("error", playFallback, { once: true });
+  window.setTimeout(() => {
+    if (audio.readyState === 0) {
+      playFallback();
+    }
+  }, 160);
+}
+
+function playSyntheticPortalLockSound() {
+  const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContextCtor) {
+    return;
+  }
+
+  if (!soundEffectsAudioContext) {
+    soundEffectsAudioContext = new AudioContextCtor();
+  }
+
+  const context = soundEffectsAudioContext;
+  if (context.state === "suspended") {
+    context.resume().catch(() => {});
+  }
+
+  const startAt = context.currentTime;
+  const gain = context.createGain();
+  const oscillator = context.createOscillator();
+
+  oscillator.type = "square";
+  oscillator.frequency.setValueAtTime(180, startAt);
+  oscillator.frequency.exponentialRampToValueAtTime(86, startAt + 0.12);
+  gain.gain.setValueAtTime(0.0001, startAt);
+  gain.gain.exponentialRampToValueAtTime(0.2 * getSoundVolumeFactor(), startAt + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.16);
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start(startAt);
+  oscillator.stop(startAt + 0.18);
+}
+
+function showTrophyNotice(message) {
+  const noticeHost = viewNodes[ui.currentView] || appScreen || document.body;
+  let notice = noticeHost.querySelector(".trophy-quick-notice");
+
+  if (!notice) {
+    notice = document.createElement("div");
+    notice.className = "trophy-quick-notice";
+    noticeHost.appendChild(notice);
+  }
+
+  notice.textContent = message;
+  notice.dataset.worldTheme = getActiveTrophyWorldId() === "winter" ? "winter" : "alley";
+  notice.classList.remove("show");
+  void notice.offsetWidth;
+  notice.classList.add("show");
+
+  if (trophyNoticeTimer) {
+    window.clearTimeout(trophyNoticeTimer);
+  }
+
+  trophyNoticeTimer = window.setTimeout(() => {
+    notice.classList.remove("show");
+    trophyNoticeTimer = null;
+  }, 1900);
+}
+
+function handleTrophyKeydown(event) {
+  const claimableNode = event.target.closest("[data-trophy-claim]");
+
+  if (!claimableNode || (event.key !== "Enter" && event.key !== " ")) {
+    return;
+  }
+
+  event.preventDefault();
+  claimableNode.click();
 }
 
 function buyItem(kind, item, options = {}) {
@@ -8917,7 +18202,11 @@ function buyItem(kind, item, options = {}) {
     if (!state.ownedCharacters.includes(item.id)) {
       state.ownedCharacters.push(item.id);
     }
-    state.equippedCharacter = item.id;
+    const baseId = getCharacterBaseId(item.id);
+    const canEquipNow = item.id === baseId || state.ownedCharacters.includes(baseId);
+    if (canEquipNow) {
+      state.equippedCharacter = item.id;
+    }
   } else if (kind === "pets") {
     if (!state.ownedPets.includes(item.id)) {
       state.ownedPets.push(item.id);
@@ -8929,17 +18218,27 @@ function buyItem(kind, item, options = {}) {
   renderAll();
   showView("inventory");
 
+  if (kind === "characters" && isPirateStoreCharacterId(item.id)) {
+    void showRankingPrizeRewardScene(item, "character", {
+      autoCloseMs: 2600,
+      soundEffectName: "rankingPremiumUnlock",
+    });
+    return;
+  }
+
   void showRewardShowcase({
     image: item.image,
     name: item.name,
     previewVideo: item.previewVideo || "",
     superTheme: getRewardSceneWorldTheme(kind, item),
+    mode: kind === "characters" ? "character" : "default",
     soundEffectName:
       kind === "pets"
         ? getPetVoiceEffect(item.id)
         : kind === "characters"
           ? "characterUnlock"
           : null,
+    characterVoiceId: kind === "characters" ? item.id : "",
   });
 }
 
@@ -9044,6 +18343,8 @@ function closeAlleyIntro(resetVideo = true, shouldSyncMusic = true) {
   if (shouldSyncMusic) {
     syncBackgroundMusic();
   }
+
+  scheduleDailyGiftLobbyCheck();
 }
 
 function renderSuperAlleyControls() {
@@ -9053,7 +18354,6 @@ function renderSuperAlleyControls() {
 
   const world = getActiveTrophyWorld();
   const isWinterWorld = world.id === "winter";
-  const isTowerWorld = world.id === "tower";
   const isActive = isSuperAlleyActiveForWorld(world.id);
   const blockedContent = isActive ? null : getSuperAlleyBlockedContent(world.id);
 
@@ -9061,11 +18361,9 @@ function renderSuperAlleyControls() {
   superAlleyStatus.dataset.theme = world.id;
 
   if (isActive) {
-    superAlleyStatus.textContent = isTowerWorld
-      ? "Aleja Super Świata Dżungli aktywna. Super nagrody sa odblokowane."
-      : isWinterWorld
-        ? "Aleja Super Swiata Zimowego aktywna. Super nagrody sa odblokowane."
-        : "Aleja Super aktywna. Super nagrody sa odblokowane.";
+    superAlleyStatus.textContent = isWinterWorld
+      ? "Aleja Super Swiata Zimowego aktywna. Super nagrody sa odblokowane."
+      : "Aleja Super aktywna. Super nagrody sa odblokowane.";
     superAlleyButton.textContent = "ALEJA SUPER AKTYWNA";
     superAlleyButton.disabled = true;
     superAlleyButton.classList.add("active");
@@ -9080,11 +18378,9 @@ function renderSuperAlleyControls() {
     return;
   }
 
-  superAlleyStatus.textContent = isTowerWorld
-    ? "Aktywuj Aleję Super, aby odbierac zielone nagrody premium Dżungli."
-    : isWinterWorld
-      ? "Aktywuj Aleję Super, aby odbierac jasnoniebieskie nagrody premium."
-      : "Aktywuj Aleję Super, aby odbierac rozowe nagrody premium.";
+  superAlleyStatus.textContent = isWinterWorld
+    ? "Aktywuj Aleję Super, aby odbierac jasnoniebieskie nagrody premium."
+    : "Aktywuj Aleję Super, aby odbierac rozowe nagrody premium.";
   superAlleyButton.textContent = "AKTYWUJ ALEJĘ SUPER";
   superAlleyButton.disabled = false;
   superAlleyButton.classList.remove("active");
@@ -9127,14 +18423,26 @@ function getMagicMachineCurrentCost() {
   return isMagicMachineFirstPurchase() ? MAGIC_MACHINE_FIRST_PRICE : MAGIC_MACHINE_PRICE;
 }
 
+function buildMagicMachineDiamondFallbackReward() {
+  return {
+    id: "magic-machine-99-diamonds",
+    name: "99 diamentów",
+    image: DIAMOND_REWARD_IMAGE,
+    diamondFallback: true,
+  };
+}
+
 function pickMagicMachineRewardPet() {
   if (isMagicMachineFirstPurchase()) {
-    return CATALOG.pets.find((item) => item.id === MAGIC_MACHINE_FIRST_REWARD_PET_ID) || null;
+    const firstReward = CATALOG.pets.find((item) => item.id === MAGIC_MACHINE_FIRST_REWARD_PET_ID) || null;
+    if (firstReward && !state.ownedPets.includes(firstReward.id)) {
+      return firstReward;
+    }
   }
 
   const prizePool = getMagicMachinePrizePool();
   const unownedPool = prizePool.filter((item) => !state.ownedPets.includes(item.id));
-  const rollPool = unownedPool.length > 0 ? unownedPool : prizePool;
+  const rollPool = unownedPool.length > 0 ? unownedPool : [buildMagicMachineDiamondFallbackReward()];
 
   if (rollPool.length === 0) {
     return null;
@@ -9179,7 +18487,7 @@ function showMagicMachineMissingKeysMessage(missingCount = 1) {
       return;
     }
 
-    magicMachineLabel.textContent = "MASZYNA PLATOYI";
+    magicMachineLabel.textContent = magicMachineSource === "store" ? "MASZYNA PLATOI" : "MASZYNA PLATOYI";
     magicMachineLabel.classList.remove("missing-keys");
     magicMachineLabel.classList.remove("fade-out");
   }, 1520);
@@ -9197,7 +18505,7 @@ function setMagicMachineMessage(message = "", priceMarkup = "") {
 }
 
 function canCloseMagicMachineBackdrop() {
-  return !magicMachineBusy && magicMachineStage === "buy";
+  return magicMachineSource !== "store" && !magicMachineBusy && magicMachineStage === "buy";
 }
 
 function setMagicMachineSceneMode(mode = "buy") {
@@ -9221,11 +18529,15 @@ function setMagicMachineSceneMode(mode = "buy") {
   magicMachineArt.classList.remove("reward-visible");
   magicMachineArt.classList.remove("blink");
   magicMachineArt.setAttribute("aria-disabled", String(mode === "rolling" || mode === "reward"));
-  magicMachineLabel.textContent = "MASZYNA PLATOYI";
+  const machineTitle = magicMachineSource === "store" ? "MASZYNA PLATOI" : "MASZYNA PLATOYI";
+  magicMachineLabel.textContent = machineTitle;
   magicMachineLabel.hidden = false;
   magicMachineLabel.classList.remove("missing-keys");
   magicMachineLabel.classList.remove("fade-out");
   magicMachineWord.hidden = true;
+  if (magicMachineCloseButton) {
+    magicMachineCloseButton.hidden = magicMachineSource === "store";
+  }
 
   if (magicMachineLaunchBall) {
     magicMachineLaunchBall.hidden = true;
@@ -9247,10 +18559,10 @@ function setMagicMachineSceneMode(mode = "buy") {
 
   const fallback = magicMachineImage.nextElementSibling;
   magicMachineImage.src = MAGIC_MACHINE_IMAGE;
-  magicMachineImage.alt = "Automat PlatoYI";
+  magicMachineImage.alt = machineTitle;
   magicMachineImage.dataset.fallbackText = "AUTOMAT";
   magicMachineImage.classList.toggle("split-hidden", mode === "reward");
-  magicMachineArt.setAttribute("aria-label", mode === "reward" ? "Wylosowany PlatoYA" : "Automat PlatoYI");
+  magicMachineArt.setAttribute("aria-label", mode === "reward" ? "Wylosowany PlatoYA" : machineTitle);
   if (fallback) {
     fallback.textContent = "AUTOMAT";
   }
@@ -9261,7 +18573,7 @@ function setMagicMachineSceneMode(mode = "buy") {
   } else if (mode === "rolling") {
     setMagicMachineMessage("");
   } else if (mode === "reward") {
-    const rewardPet = getMagicMachinePrizePool().find((item) => item.id === magicMachineRewardPetId) || null;
+    const rewardPet = magicMachineRewardPrize || getMagicMachinePrizePool().find((item) => item.id === magicMachineRewardPetId) || null;
     setMagicMachineMessage(rewardPet?.name?.toUpperCase?.() || "");
   } else {
     setMagicMachineMessage("");
@@ -9294,8 +18606,34 @@ function openMagicMachine() {
   }
 
   magicMachineSequenceId += 1;
+  magicMachineSource = "alley";
   magicMachineBusy = false;
   magicMachineRewardPetId = "";
+  magicMachineRewardPrize = null;
+  setMagicMachineSceneMode("buy");
+  playOneShotSound("superIntro", 0.82);
+  magicMachineBackdrop.hidden = false;
+  syncBrokenAssets(magicMachineBackdrop);
+  syncBackgroundMusic();
+}
+
+function openStorePlatoMachineRoll(rewardPet) {
+  if (
+    !rewardPet ||
+    !magicMachineBackdrop ||
+    !magicMachineScene ||
+    !magicMachineCard ||
+    !magicMachineImage ||
+    !magicMachineBackdrop.hidden
+  ) {
+    return;
+  }
+
+  magicMachineSequenceId += 1;
+  magicMachineSource = "store";
+  magicMachineBusy = false;
+  magicMachineRewardPetId = rewardPet.id;
+  magicMachineRewardPrize = rewardPet;
   setMagicMachineSceneMode("buy");
   playOneShotSound("superIntro", 0.82);
   magicMachineBackdrop.hidden = false;
@@ -9311,12 +18649,16 @@ function closeMagicMachineBackdrop(shouldSyncMusic = true) {
   magicMachineSequenceId += 1;
   magicMachineBusy = false;
   magicMachineRewardPetId = "";
+  magicMachineRewardPrize = null;
+  magicMachineSource = "alley";
   setMagicMachineSceneMode("buy");
   magicMachineBackdrop.hidden = true;
 
   if (shouldSyncMusic) {
     syncBackgroundMusic();
   }
+
+  scheduleDailyGiftLobbyCheck();
 }
 
 async function handleMagicMachineAction() {
@@ -9325,8 +18667,45 @@ async function handleMagicMachineAction() {
   }
 
   if (magicMachineStage === "buy") {
+    if (magicMachineSource === "store") {
+      await startStorePlatoMachineRoll();
+      return;
+    }
+
     await startMagicMachineRoll();
   }
+}
+
+async function startStorePlatoMachineRoll() {
+  if (
+    !magicMachineBackdrop ||
+    magicMachineBackdrop.hidden ||
+    magicMachineBusy ||
+    magicMachineStage !== "buy" ||
+    magicMachineSource !== "store"
+  ) {
+    return;
+  }
+
+  const rewardPet = magicMachineRewardPrize || getMagicMachinePrizePool().find((item) => item.id === magicMachineRewardPetId) || null;
+  if (!rewardPet) {
+    closeMagicMachineBackdrop();
+    return;
+  }
+
+  const sequenceId = ++magicMachineSequenceId;
+  magicMachineRewardPetId = rewardPet.id;
+  magicMachineRewardPrize = rewardPet;
+  magicMachineBusy = true;
+  setMagicMachineSceneMode("rolling");
+  playOneShotSound("magicMachineRoll", 0.82);
+  await wait(940);
+
+  if (sequenceId !== magicMachineSequenceId || !magicMachineBackdrop || magicMachineBackdrop.hidden) {
+    return;
+  }
+
+  await grantMagicMachineReward(rewardPet);
 }
 
 async function startMagicMachineRoll() {
@@ -9375,6 +18754,7 @@ async function startMagicMachineRoll() {
 
   const sequenceId = ++magicMachineSequenceId;
   magicMachineRewardPetId = rewardPet.id;
+  magicMachineRewardPrize = rewardPet;
   magicMachineBusy = true;
   setMagicMachineSceneMode("rolling");
   playOneShotSound("magicMachineRoll", 0.82);
@@ -9388,7 +18768,7 @@ async function startMagicMachineRoll() {
 }
 
 async function grantMagicMachineReward(rewardPetOverride = null) {
-  const rewardPet = rewardPetOverride || getMagicMachinePrizePool().find((item) => item.id === magicMachineRewardPetId) || pickMagicMachineRewardPet();
+  const rewardPet = rewardPetOverride || magicMachineRewardPrize || getMagicMachinePrizePool().find((item) => item.id === magicMachineRewardPetId) || pickMagicMachineRewardPet();
   magicMachineBusy = false;
 
   if (!rewardPet) {
@@ -9396,23 +18776,36 @@ async function grantMagicMachineReward(rewardPetOverride = null) {
     return;
   }
 
-  if (!state.ownedPets.includes(rewardPet.id)) {
+  if (rewardPet.diamondFallback) {
+    state.diamonds = Number(state.diamonds || 0) + 99;
+  } else if (!state.ownedPets.includes(rewardPet.id)) {
     state.ownedPets.push(rewardPet.id);
   }
 
   saveState();
   renderAll();
   closeMagicMachineBackdrop(false);
-  await showRewardShowcase({
-    image: rewardPet.image,
-    name: rewardPet.name,
-    mode: "magic",
-    autoCloseMs: 2500,
-  });
+  if (rewardPet.diamondFallback) {
+    await showDiamondRewardScene(99, {
+      title: "Masz już wszystkie PlatoYE",
+      autoCloseMs: 2500,
+    });
+  } else {
+    await showRewardShowcase({
+      image: rewardPet.image,
+      name: rewardPet.name,
+      mode: "magic",
+      autoCloseMs: 2500,
+    });
+  }
   syncBackgroundMusic();
 }
 
 function isSuperAlleyReward(worldId, reward) {
+  if (reward && typeof reward === "object" && reward.rewardLane) {
+    return reward.rewardLane === "super";
+  }
+
   return Boolean(SUPER_ALLEY_REWARD_THRESHOLDS[worldId]?.has(reward.trophies));
 }
 
@@ -9439,21 +18832,38 @@ function setSuperAlleySceneMode(mode = "offer", worldId = getActiveTrophyWorldId
       fallback.textContent = visual.fallbackText;
     }
   }
+  if (superAlleyPreviewCoin) {
+    superAlleyPreviewCoin.src = COIN_REWARD_IMAGE;
+  }
+  if (superAlleyPreviewDiamond) {
+    superAlleyPreviewDiamond.src = DIAMOND_REWARD_IMAGE;
+  }
+  if (superAlleyPreviewKeyWrap && superAlleyPreviewKey) {
+    const keyTheme = getPlatoKeyThemeForWorld(world.id);
+    superAlleyPreviewKeyWrap.hidden = false;
+    superAlleyPreviewKey.src = getPlatoKeyImageForTheme(keyTheme);
+    superAlleyPreviewKey.alt = keyTheme === "winter" ? "Klucz PlatoYI Zimy" : "Klucz PlatoYI Magikow";
+    superAlleyScene.dataset.keyTheme = keyTheme;
+  }
   superAlleyTitle.textContent = successMode
     ? "AKTYWOWANO!"
     : blockedContent
       ? blockedContent.title
       : "Aktywuj Aleję Super";
-  superAlleyCopy.textContent = successMode
-    ? getSuperAlleyUnlockedCopy(world.id)
-    : blockedContent
-      ? blockedContent.copy
-      : getSuperAlleyOfferCopy(world.id);
+  if (superAlleyCopy) {
+    const offerCopy = successMode
+      ? getSuperAlleyUnlockedCopy(world.id)
+      : blockedContent
+        ? blockedContent.copy
+        : "";
+    superAlleyCopy.textContent = offerCopy;
+    superAlleyCopy.hidden = !offerCopy;
+  }
   superAlleyActions.hidden = successMode || Boolean(blockedContent);
 
   if (superAlleyCoinsButton) {
     superAlleyCoinsButton.innerHTML = buildCurrencyAmountMarkup(SUPER_ALLEY_DIAMOND_PRICE, "diamonds");
-    superAlleyCoinsButton.disabled = superAlleyBusy;
+    superAlleyCoinsButton.disabled = superAlleyBusy || Number(state.diamonds || 0) < SUPER_ALLEY_DIAMOND_PRICE;
   }
 
   if (superAlleyCashButton) {
@@ -9486,11 +18896,14 @@ function closeSuperAlleyBackdrop(shouldSyncMusic = true) {
   delete superAlleyBackdrop.dataset.theme;
   if (superAlleyScene) {
     delete superAlleyScene.dataset.theme;
+    delete superAlleyScene.dataset.keyTheme;
   }
 
   if (shouldSyncMusic) {
     syncBackgroundMusic();
   }
+
+  scheduleDailyGiftLobbyCheck();
 }
 
 async function showSuperAlleySuccessScene(worldId = getActiveTrophyWorldId()) {
@@ -9521,7 +18934,7 @@ async function activateSuperAlley(paymentMethod) {
     return;
   }
 
-  if (paymentMethod === "coins" && state.diamonds < SUPER_ALLEY_DIAMOND_PRICE) {
+  if (paymentMethod === "diamonds" && state.diamonds < SUPER_ALLEY_DIAMOND_PRICE) {
     openModal({
       title: "Za mało klejnotow",
       message: `Potrzebujesz ${SUPER_ALLEY_DIAMOND_PRICE} klejnotow, aby aktywowac Aleje Super tego swiata.`,
@@ -9535,7 +18948,7 @@ async function activateSuperAlley(paymentMethod) {
   superAlleyBusy = true;
   setSuperAlleySceneMode("offer", worldId);
 
-  if (paymentMethod === "coins") {
+  if (paymentMethod === "diamonds") {
     state.diamonds -= SUPER_ALLEY_DIAMOND_PRICE;
   }
 
@@ -9547,6 +18960,471 @@ async function activateSuperAlley(paymentMethod) {
   await showSuperAlleySuccessScene(worldId);
   superAlleyBusy = false;
   renderSuperAlleyControls();
+}
+
+function handleRankingAlleyClick(event) {
+  const rankingGameOpen = event.target.closest("[data-ranking-game-open]");
+
+  if (rankingGameOpen) {
+    openRankingGameSetup();
+    return;
+  }
+
+  const setupClose = event.target.closest("[data-ranking-setup-close]");
+
+  if (setupClose) {
+    closeRankingGameSetup();
+    return;
+  }
+
+  const setupPetPick = event.target.closest("[data-ranking-pet-pick]");
+
+  if (setupPetPick) {
+    selectRankingGamePet(setupPetPick.dataset.rankingPetPick);
+    return;
+  }
+
+  const setupPetRemove = event.target.closest("[data-ranking-pet-remove]");
+
+  if (setupPetRemove) {
+    removeRankingGamePet(Number(setupPetRemove.dataset.rankingPetRemove || 0));
+    return;
+  }
+
+  const setupStart = event.target.closest("[data-ranking-game-start]");
+
+  if (setupStart) {
+    startRankingShipGameFromSetup();
+    return;
+  }
+
+  const premiumTrigger = event.target.closest("[data-ranking-premium-trigger]");
+
+  if (premiumTrigger) {
+    openRankingPremiumOffer();
+    return;
+  }
+
+  const claimTarget = event.target.closest("[data-ranking-claim]");
+
+  if (claimTarget) {
+    const [lane, rewardId] = String(claimTarget.dataset.rankingClaim || "").split(":");
+    const reward = (RANKING_ALLEY_REWARDS[lane] || []).find((entry) => entry.id === rewardId);
+
+    if (reward) {
+      void claimRankingReward(reward);
+    }
+  }
+}
+
+function handleRankingShipHudClick(event) {
+  const previewButton = event.target.closest("[data-ranking-opponent-preview]");
+
+  if (!previewButton || !isRankingShipMatchActive()) {
+    return;
+  }
+
+  event.preventDefault();
+  game.rankingShip.previewOpen = !game.rankingShip.previewOpen;
+  renderGameScene();
+}
+
+function getOwnedRankingGamePets() {
+  return state.ownedPets
+    .map((petId) => getOwnedItem("pets", petId))
+    .filter((pet) => pet && !isPetSkinId(pet.id));
+}
+
+function getRankingGamePetCounts(selection = ui.rankingGameSelectedPetIds) {
+  return selection.reduce((counts, petId) => {
+    counts[petId] = (counts[petId] || 0) + 1;
+    return counts;
+  }, {});
+}
+
+function hasRequiredRankingGamePets() {
+  const uniqueOwnedPets = new Set(getOwnedRankingGamePets().map((pet) => pet.id));
+  return uniqueOwnedPets.size >= 2;
+}
+
+function createRankingShipOpponent() {
+  const easyBot = Math.max(0, Number(state.rankingLossStreak || 0)) >= 3;
+  const playerNumber = randomBetween(10000, 99999);
+
+  return {
+    id: `bot-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    name: `Gracz ${playerNumber}`,
+    type: "bot",
+    difficulty: easyBot ? "easy" : "medium",
+    petIds: createRankingOpponentPetIds(),
+  };
+}
+
+function createRankingOpponentPetIds() {
+  const pool = CATALOG.pets
+    .filter((pet) => !isPetSkinId(pet.id))
+    .map((pet) => pet.id);
+  const selected = [];
+  const counts = {};
+
+  while (selected.length < 4 && pool.length > 0) {
+    const petId = pool[randomBetween(0, pool.length - 1)];
+    counts[petId] = counts[petId] || 0;
+
+    if (counts[petId] >= 2) {
+      continue;
+    }
+
+    selected.push(petId);
+    counts[petId] += 1;
+  }
+
+  return selected.length >= 4
+    ? selected
+    : ["pies-magik", "papuga-manipulantka", "pies-magik", "l-psotka"];
+}
+
+function buildRankingGamePetSlotsMarkup() {
+  const selected = ui.rankingGameSelectedPetIds.slice(0, 4);
+
+  return new Array(4).fill(null)
+    .map((_, index) => {
+      const pet = selected[index] ? getOwnedItem("pets", selected[index]) : null;
+      return `
+        <button
+          class="ranking-match-pet-slot${pet ? " filled" : ""}"
+          type="button"
+          ${pet ? `data-ranking-pet-remove="${index}"` : ""}
+          aria-label="${pet ? `Usuń ${escapeHtml(pet.name)}` : "Puste miejsce PlatoYI"}"
+        >
+          ${pet ? `
+            <img class="asset-image" src="${pet.image}" alt="${escapeHtml(pet.name)}" data-fallback-text="P" />
+          ` : `<span>+</span>`}
+        </button>
+      `;
+    })
+    .join("");
+}
+
+function buildRankingGamePetPickerMarkup() {
+  const counts = getRankingGamePetCounts();
+
+  return getOwnedRankingGamePets()
+    .map((pet) => {
+      const pickedCount = counts[pet.id] || 0;
+      const disabled = pickedCount >= 2 || ui.rankingGameSelectedPetIds.length >= 4;
+      return `
+        <button
+          class="ranking-match-pet-pick"
+          type="button"
+          data-ranking-pet-pick="${pet.id}"
+          ${disabled ? "disabled" : ""}
+          aria-label="Wybierz ${escapeHtml(pet.name)}"
+        >
+          <img class="asset-image" src="${pet.image}" alt="${escapeHtml(pet.name)}" data-fallback-text="P" />
+          <span>${escapeHtml(pet.name)}</span>
+          ${pickedCount > 0 ? `<small>${pickedCount}/2</small>` : ""}
+        </button>
+      `;
+    })
+    .join("");
+}
+
+function buildRankingGameSetupMarkup() {
+  const opponent = ui.rankingGameOpponent || createRankingShipOpponent();
+  ui.rankingGameOpponent = opponent;
+  const ready = ui.rankingGameSelectedPetIds.length === 4;
+  const searchingText = ui.rankingGameSearching ? "SZUKANIE GRACZA..." : `PRZECIWNIK: ${opponent.name}`;
+
+  return `
+    <div class="ranking-match-setup-backdrop" data-ranking-setup>
+      <section class="ranking-match-setup-panel" role="dialog" aria-modal="true" aria-label="Rankingowy mecz">
+        <button class="ranking-match-close" type="button" data-ranking-setup-close aria-label="Zamknij">X</button>
+        <div class="ranking-match-title-frame">
+          <span>${searchingText}</span>
+        </div>
+        <div class="ranking-match-layout">
+          <div class="ranking-match-loadout">
+            <p class="ranking-match-loadout-title">WYBIERZ 4 PLATOYE</p>
+            <div class="ranking-match-pet-slots">
+              ${buildRankingGamePetSlotsMarkup()}
+            </div>
+          </div>
+          <div class="ranking-match-opponent-card">
+            <div class="ranking-match-opponent-ship" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+            <p>${opponent.difficulty === "easy" ? "ŁATWY BOT" : "ŚREDNI BOT"}</p>
+          </div>
+          <div class="ranking-match-pet-picker">
+            ${buildRankingGamePetPickerMarkup()}
+          </div>
+        </div>
+        <button class="ranking-match-start" type="button" data-ranking-game-start ${ready ? "" : "disabled"}>
+          START
+        </button>
+      </section>
+    </div>
+  `;
+}
+
+function renderRankingGameSetup() {
+  if (!rankingAlleyGrid) {
+    return;
+  }
+
+  const existing = rankingAlleyGrid.querySelector("[data-ranking-setup]");
+  if (existing) {
+    existing.remove();
+  }
+
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = buildRankingGameSetupMarkup();
+  const setupNode = wrapper.firstElementChild;
+
+  if (setupNode) {
+    rankingAlleyGrid.appendChild(setupNode);
+    syncBrokenAssets(setupNode);
+  }
+}
+
+function openRankingGameSetup() {
+  if (getRankingTickets() < 10) {
+    showTrophyNotice("ALEJA RANKINGOWA I TRYB GRY W KRÓTCE");
+    return;
+  }
+
+  if (getRankingTickets() <= 0) {
+    showTrophyNotice("BRAK BILETÓW");
+    return;
+  }
+
+  if (!hasRequiredRankingGamePets()) {
+    showTrophyNotice("WYMAGANE PRZYNAJMNIEJ DWIE ROZNE PLATOYE");
+    return;
+  }
+
+  ui.rankingGameSelectedPetIds = [];
+  ui.rankingGameOpponent = createRankingShipOpponent();
+  ui.rankingGameSearching = true;
+  renderRankingGameSetup();
+
+  window.setTimeout(() => {
+    if (ui.currentView !== "ranking" || !ui.rankingGameOpponent) {
+      return;
+    }
+    ui.rankingGameSearching = false;
+    renderRankingGameSetup();
+  }, 850);
+}
+
+function closeRankingGameSetup(options = {}) {
+  if (!options.preserveSelection) {
+    ui.rankingGameSelectedPetIds = [];
+    ui.rankingGameOpponent = null;
+  }
+  ui.rankingGameSearching = false;
+  rankingAlleyGrid?.querySelector("[data-ranking-setup]")?.remove();
+}
+
+function selectRankingGamePet(petId) {
+  const sanitizedPetId = sanitizeStoredId(petId);
+  const pet = getOwnedItem("pets", sanitizedPetId);
+
+  if (!pet || ui.rankingGameSelectedPetIds.length >= 4) {
+    return;
+  }
+
+  const counts = getRankingGamePetCounts();
+
+  if ((counts[sanitizedPetId] || 0) >= 2) {
+    showTrophyNotice("MAKSYMALNIE DWIE TAKIE SAME PLATOYE");
+    return;
+  }
+
+  ui.rankingGameSelectedPetIds.push(sanitizedPetId);
+  renderRankingGameSetup();
+}
+
+function removeRankingGamePet(index) {
+  const safeIndex = Math.max(0, Math.floor(Number(index || 0)));
+  ui.rankingGameSelectedPetIds.splice(safeIndex, 1);
+  renderRankingGameSetup();
+}
+
+function startRankingShipGameFromSetup() {
+  if (getRankingTickets() < 10) {
+    showTrophyNotice("ALEJA RANKINGOWA I TRYB GRY W KRÓTCE");
+    closeRankingGameSetup();
+    return;
+  }
+
+  if (getRankingTickets() <= 0) {
+    showTrophyNotice("BRAK BILETÓW");
+    return;
+  }
+
+  if (!hasRequiredRankingGamePets()) {
+    showTrophyNotice("WYMAGANE PRZYNAJMNIEJ DWIE ROZNE PLATOYE");
+    return;
+  }
+
+  if (ui.rankingGameSelectedPetIds.length !== 4) {
+    showTrophyNotice("WYBIERZ 4 PLATOYE");
+    return;
+  }
+
+  const counts = Object.values(getRankingGamePetCounts());
+  if (counts.some((count) => count > 2)) {
+    showTrophyNotice("MAKSYMALNIE DWIE TAKIE SAME PLATOYE");
+    return;
+  }
+
+  state.rankingTickets = Math.max(0, getRankingTickets() - 1);
+  ui.nextGameMode = "ranking-ship";
+  ui.rankingGameActivePetId = ui.rankingGameSelectedPetIds[0] || "";
+  saveState();
+  closeRankingGameSetup({ preserveSelection: true });
+  showView("game");
+}
+
+function openRankingPremiumOffer() {
+  if (!rankingPremiumBackdrop || isRankingPremiumActive()) {
+    return;
+  }
+
+  playOneShotSoundWithMusicDuck("rankingPremiumUnlock", 0.84);
+  rankingPremiumBackdrop.hidden = false;
+  rankingPremiumBackdrop.dataset.theme = "ranking";
+  rankingPremiumScene?.classList.remove("success-mode");
+  syncBrokenAssets(rankingPremiumBackdrop);
+  syncBackgroundMusic();
+}
+
+function closeRankingPremiumOffer(shouldSyncMusic = true) {
+  if (!rankingPremiumBackdrop) {
+    return;
+  }
+
+  rankingPremiumBackdrop.hidden = true;
+  delete rankingPremiumBackdrop.dataset.theme;
+
+  if (shouldSyncMusic) {
+    syncBackgroundMusic();
+  }
+}
+
+async function activateRankingPremium(paymentMethod = "diamonds") {
+  if (isRankingPremiumActive()) {
+    return;
+  }
+
+  if (paymentMethod === "diamonds" && Number(state.diamonds || 0) < RANKING_ALLEY_PREMIUM_DIAMOND_PRICE) {
+    openModal({
+      title: "Za mało diamentów",
+      message: `Potrzebujesz ${RANKING_ALLEY_PREMIUM_DIAMOND_PRICE} diamentów, aby odblokować Rankingową Premium.`,
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  if (paymentMethod === "diamonds") {
+    state.diamonds = Math.max(0, Number(state.diamonds || 0) - RANKING_ALLEY_PREMIUM_DIAMOND_PRICE);
+  }
+
+  state.rankingPremiumActive = true;
+  saveState();
+  renderAll();
+  closeRankingPremiumOffer(false);
+  playOneShotSoundWithMusicDuck("rankingPremiumUnlock", 0.8);
+}
+
+async function claimRankingReward(reward) {
+  if (!reward || !isRankingAlleyUnlocked()) {
+    return;
+  }
+
+  const rewardUiState = getRankingRewardUiState(reward);
+  if (rewardUiState.stateId !== "ready") {
+    renderRankingAlley();
+    return;
+  }
+
+  if (!state.claimedRankingRewards || typeof state.claimedRankingRewards !== "object") {
+    state.claimedRankingRewards = { premium: [], free: [] };
+  }
+
+  if (!Array.isArray(state.claimedRankingRewards[reward.lane])) {
+    state.claimedRankingRewards[reward.lane] = [];
+  }
+
+  state.claimedRankingRewards[reward.lane].push(reward.id);
+
+  if (reward.type === "coins") {
+    state.coins = Math.max(0, Number(state.coins || 0) + Number(reward.amount || 0));
+  } else if (reward.type === "diamonds") {
+    state.diamonds = Math.max(0, Number(state.diamonds || 0) + Number(reward.amount || 0));
+  } else if (reward.type === "elixir") {
+    state.elixirs = Math.max(0, Number(state.elixirs || 0) + Number(reward.amount || 0));
+  } else if (reward.type === "character" && reward.itemId && !state.ownedCharacters.includes(reward.itemId)) {
+    state.ownedCharacters.push(reward.itemId);
+  } else if (reward.type === "profile-photo" && reward.itemId && !state.ownedProfilePhotos.includes(reward.itemId)) {
+    state.ownedProfilePhotos.push(reward.itemId);
+  } else if (reward.type === "pet" && reward.itemId && !state.ownedPets.includes(reward.itemId)) {
+    state.ownedPets.push(reward.itemId);
+  } else if (reward.type === "crate") {
+    const crate = CATALOG.crates.find((entry) => entry.id === reward.crateId);
+    saveState();
+    renderAll();
+
+    if (crate) {
+      const preparedSession = createChestSession(crate, { source: "ranking" });
+      void showCrateRewardScene(crate, preparedSession.rewards, {
+        superTheme: "",
+      });
+    }
+    return;
+  }
+
+  saveState();
+  renderAll();
+
+  if (reward.type === "coins") {
+    await showCoinRewardScene(reward.amount, {
+      title: "Monety z Rankingu",
+      autoCloseMs: 2200,
+    });
+    await animateCoinsToBalance();
+  } else if (reward.type === "diamonds") {
+    await showDiamondRewardScene(reward.amount, {
+      title: "Diamenty z Rankingu",
+      autoCloseMs: 2200,
+    });
+  } else if (reward.type === "elixir") {
+    await showElixirRewardScene(reward.amount, {
+      title: "Eliksiry z Rankingu",
+      autoCloseMs: 2200,
+    });
+  } else if (reward.type === "card-deck") {
+    await showRankingCardDeckScene();
+  } else if (reward.type === "character") {
+    const character = CATALOG.characters.find((item) => item.id === reward.itemId);
+    if (character) {
+      await showRankingPrizeRewardScene(character, "character");
+    }
+  } else if (reward.type === "profile-photo") {
+    const profilePhoto = CATALOG.profilePhotos.find((item) => item.id === reward.itemId);
+    if (profilePhoto) {
+      await showRankingProfilePhotoRewardScene(profilePhoto);
+    }
+  } else if (reward.type === "pet") {
+    const pet = CATALOG.pets.find((item) => item.id === reward.itemId);
+    if (pet) {
+      await showRankingPrizeRewardScene(pet, "pet");
+    }
+  }
 }
 
 async function claimWorldRewardsSequentially(worldId) {
@@ -9610,6 +19488,8 @@ async function claimTrophyReward(world, reward, options = {}) {
     state.coins += reward.amount;
   } else if (reward.type === "diamonds") {
     state.diamonds += reward.amount;
+  } else if (reward.type === "elixir") {
+    state.elixirs += reward.amount;
   } else if (reward.type === "plato-keys") {
     state.platoKeys += reward.amount;
   } else if (reward.type === "crate") {
@@ -9642,6 +19522,11 @@ async function claimTrophyReward(world, reward, options = {}) {
     if (!state.ownedCharacters.includes(reward.itemId)) {
       state.ownedCharacters.push(reward.itemId);
     }
+    if (reward.skinItemId && !state.ownedCharacters.includes(reward.skinItemId)) {
+      state.ownedCharacters.push(reward.skinItemId);
+    }
+  } else if (reward.type === "ranking-unlock") {
+    state.rankingAlleyUnlocked = true;
   }
 
   saveState();
@@ -9697,6 +19582,23 @@ async function claimTrophyReward(world, reward, options = {}) {
     return;
   }
 
+  if (reward.type === "elixir") {
+    if (batchMode) {
+      await showElixirRewardScene(reward.amount, {
+        title: "Eliksiry z Alei",
+        autoCloseMs: 2200,
+        superTheme: rewardSuperTheme,
+      });
+    } else {
+      void showElixirRewardScene(reward.amount, {
+        title: "Eliksiry z Alei",
+        autoCloseMs: 2500,
+        superTheme: rewardSuperTheme,
+      });
+    }
+    return;
+  }
+
   if (reward.type === "plato-keys") {
     if (batchMode) {
       await showPlatoKeyRewardScene(reward.amount, {
@@ -9712,6 +19614,15 @@ async function claimTrophyReward(world, reward, options = {}) {
         superTheme: rewardSuperTheme,
         keyTheme: reward.keyTheme || getPlatoKeyThemeForWorld(world.id),
       });
+    }
+    return;
+  }
+
+  if (reward.type === "ranking-unlock") {
+    if (batchMode) {
+      await showRankingUnlockScene({ autoCloseMs: 2200 });
+    } else {
+      void showRankingUnlockScene();
     }
     return;
   }
@@ -9743,10 +19654,6 @@ function isWorldLockedItem(item) {
     return false;
   }
 
-  if (item.unlockWorld === "tower") {
-    return !isTowerWorldUnlocked();
-  }
-
   if (item.unlockWorld === "winter") {
     return !isWinterWorldUnlocked();
   }
@@ -9755,12 +19662,20 @@ function isWorldLockedItem(item) {
 }
 
 function getTrophyRewardImage(reward) {
+  if (reward.type === "ranking-unlock") {
+    return { src: RANKING_ALLEY_UNLOCK_IMAGE, fallbackText: "RANKING" };
+  }
+
   if (reward.type === "coins") {
     return { src: COIN_REWARD_IMAGE, fallbackText: "MONETY" };
   }
 
   if (reward.type === "diamonds") {
     return { src: DIAMOND_REWARD_IMAGE, fallbackText: "DIAMENTY" };
+  }
+
+  if (reward.type === "elixir") {
+    return { src: ELIXIR_REWARD_IMAGE, fallbackText: "ELIKSIR" };
   }
 
   if (reward.type === "plato-keys") {
@@ -9776,6 +19691,10 @@ function getTrophyRewardImage(reward) {
       src: crate?.image || "./assets/shop/skrzynia_1.png",
       fallbackText: crate?.fallbackText || "SKRZYNIA",
     };
+  }
+
+  if (reward.type === "card-deck") {
+    return { src: RANKING_CARD_DECK_IMAGE, fallbackText: "KARTY" };
   }
 
   if (reward.type === "pet") {
@@ -9812,10 +19731,6 @@ function getWorldLockedMessage(item) {
 
   if (item.unlockWorld === "winter") {
     return "Ten przedmiot odblokujesz w dalszej części Świata Zimowego.";
-  }
-
-  if (item.unlockWorld === "tower") {
-    return "Ten przedmiot odblokujesz w dalszej części Świata Dżungli.";
   }
 
   return "Ten przedmiot odblokujesz w dalszej części Alei Pucharów.";
@@ -9910,6 +19825,8 @@ function closeWinterBundlePurchase(shouldSyncMusic = true, options = {}) {
   if (shouldSyncMusic) {
     syncBackgroundMusic();
   }
+
+  scheduleDailyGiftLobbyCheck();
 }
 
 async function confirmWinterBundlePurchase() {
@@ -10005,6 +19922,7 @@ function closeBundleUnlockScene() {
   }
 
   syncBackgroundMusic();
+  scheduleDailyGiftLobbyCheck();
 }
 
 function setStoreCharacterPurchaseScene(item = activeStoreCharacterPurchase) {
@@ -10020,29 +19938,13 @@ function setStoreCharacterPurchaseScene(item = activeStoreCharacterPurchase) {
     return;
   }
 
-  const isBookPet = item.kind === "book-pet";
-  const isBookGrandReward = item.kind === "book-grand-reward";
-  const isBookScene = isBookPet || isBookGrandReward;
-  const worldTheme = isBookScene ? { id: "tower", label: "SWIAT DŻUNGLI" } : getStoreCharacterWorldTheme(item);
+  const worldTheme = getStoreCharacterWorldTheme(item);
   const currency = item.currency || "coins";
-  const isProgressGate = currency === "progress";
-  const balance = isProgressGate ? 0 : currency === "diamonds" ? state.diamonds : state.coins;
-  const progressCurrent = Number(item.progressCurrent || 0);
-  const progressTotal = Number(item.progressTotal || 0);
-  const missingAmount = isProgressGate
-    ? Math.max(0, progressTotal - progressCurrent)
-    : Math.max(0, Number(item.price || 0) - balance);
-  const canAfford = item.alreadyOwned ? false : missingAmount === 0;
 
   if (worldTheme.id === "winter") {
     storeCharacterPurchaseScene.dataset.theme = "winter";
     if (storeCharacterPurchaseBackdrop) {
       storeCharacterPurchaseBackdrop.dataset.theme = "winter";
-    }
-  } else if (worldTheme.id === "tower") {
-    storeCharacterPurchaseScene.dataset.theme = "tower";
-    if (storeCharacterPurchaseBackdrop) {
-      storeCharacterPurchaseBackdrop.dataset.theme = "tower";
     }
   } else {
     delete storeCharacterPurchaseScene.dataset.theme;
@@ -10050,6 +19952,13 @@ function setStoreCharacterPurchaseScene(item = activeStoreCharacterPurchase) {
       delete storeCharacterPurchaseBackdrop.dataset.theme;
     }
   }
+  storeCharacterPurchaseScene.dataset.purchaseKind = item.storeOfferSource === "magic-lunella" ? "magic-lunella" : "daily-character";
+  if (isPirateStoreCharacterId(item.id)) {
+    storeCharacterPurchaseScene.dataset.offerTab = STORE_OFFER_TAB_PIRATE;
+  } else {
+    delete storeCharacterPurchaseScene.dataset.offerTab;
+  }
+  storeCharacterPurchaseArtFrame.classList.remove("store-offer-modal-bundle-art");
 
   renderPreviewAssetIntoFrame(storeCharacterPurchaseArtFrame, item, {
     elementId: "store-character-purchase-image",
@@ -10060,24 +19969,441 @@ function setStoreCharacterPurchaseScene(item = activeStoreCharacterPurchase) {
   });
 
   if (storeCharacterPurchaseKicker) {
-    storeCharacterPurchaseKicker.textContent = isBookScene ? "Księga Dżungli" : "Dzisiejsza postac sklepu";
+    storeCharacterPurchaseKicker.textContent = item.purchaseKicker || "DZIENNA OFERTA";
   }
-  storeCharacterPurchaseTitle.textContent = item.name;
+  storeCharacterPurchaseTitle.innerHTML = `<span>${escapeHtml(item.name)}</span>`;
   storeCharacterPurchaseCopy.textContent = item.purchaseCopy || "Potwierdz zakup tej postaci.";
-  storeCharacterPurchaseActions.hidden = !canAfford;
-  storeCharacterPurchaseMissing.hidden = canAfford;
-  storeCharacterPurchaseMissing.textContent = typeof item.missingCopy === "function"
-    ? item.missingCopy(missingAmount, progressTotal, progressCurrent)
-    : item.alreadyOwned
-      ? "Masz już tę postać."
-      : currency === "diamonds"
-      ? `Brakuje ci ${missingAmount} diamentów.`
-      : `Brakuje ci ${missingAmount} monet.`;
+  storeCharacterPurchaseCopy.hidden = false;
+  storeCharacterPurchaseActions.hidden = false;
+  storeCharacterPurchaseMissing.hidden = true;
+  storeCharacterPurchaseMissing.textContent = "";
 
   if (storeCharacterPurchaseConfirmButton) {
-    storeCharacterPurchaseConfirmButton.disabled = storeCharacterPurchaseBusy;
-    storeCharacterPurchaseConfirmButton.textContent = item.confirmLabel || "Potwierdz zakup";
+    storeCharacterPurchaseConfirmButton.disabled = storeCharacterPurchaseBusy || Boolean(item.alreadyOwned);
+    storeCharacterPurchaseConfirmButton.innerHTML = item.confirmLabel || buildCurrencyAmountMarkup(Number(item.price || 0), currency);
+    syncBrokenAssets(storeCharacterPurchaseConfirmButton);
   }
+}
+
+function setStoreOfferPurchaseScene(purchase = activeStoreOfferPurchase) {
+  if (
+    !purchase ||
+    !storeCharacterPurchaseScene ||
+    !storeCharacterPurchaseArtFrame ||
+    !storeCharacterPurchaseTitle ||
+    !storeCharacterPurchaseCopy ||
+    !storeCharacterPurchaseActions ||
+    !storeCharacterPurchaseMissing
+  ) {
+    return;
+  }
+
+  const isPiratePurchase =
+    purchase.offerTab === STORE_OFFER_TAB_PIRATE ||
+    purchase.kind === "ranking-card-deck";
+  const isHighTowerPurchase =
+    purchase.offerTab === STORE_OFFER_TAB_HIGH_TOWER ||
+    purchase.kind === "high-tower-offer";
+
+  if (getActiveStoreWorldId() === "winter" && !isPiratePurchase && !isHighTowerPurchase) {
+    storeCharacterPurchaseScene.dataset.theme = "winter";
+    if (storeCharacterPurchaseBackdrop) {
+      storeCharacterPurchaseBackdrop.dataset.theme = "winter";
+    }
+  } else {
+    delete storeCharacterPurchaseScene.dataset.theme;
+    if (storeCharacterPurchaseBackdrop) {
+      delete storeCharacterPurchaseBackdrop.dataset.theme;
+    }
+  }
+  storeCharacterPurchaseScene.dataset.purchaseKind = purchase.kind || "offer";
+  if (purchase.offerTab) {
+    storeCharacterPurchaseScene.dataset.offerTab = purchase.offerTab;
+  } else {
+    delete storeCharacterPurchaseScene.dataset.offerTab;
+  }
+
+  if (purchase.contentMarkup) {
+    storeCharacterPurchaseArtFrame.classList.add("store-offer-modal-bundle-art");
+    storeCharacterPurchaseArtFrame.innerHTML = purchase.contentMarkup;
+    syncBrokenAssets(storeCharacterPurchaseArtFrame);
+    syncAnimatedAssets(storeCharacterPurchaseArtFrame);
+  } else {
+    storeCharacterPurchaseArtFrame.classList.remove("store-offer-modal-bundle-art");
+    renderPreviewAssetIntoFrame(storeCharacterPurchaseArtFrame, {
+      name: purchase.title,
+      image: purchase.image,
+    }, {
+      elementId: "store-character-purchase-image",
+      imageClass: `modal-image asset-image ${purchase.imageClass || ""}`.trim(),
+      videoClass: "modal-image asset-video",
+      fallbackText: purchase.fallbackText || purchase.title,
+      alt: purchase.title,
+      usePreviewVideo: false,
+    });
+  }
+
+  if (storeCharacterPurchaseKicker) {
+    storeCharacterPurchaseKicker.textContent = purchase.kicker || "OFERTA";
+  }
+
+  storeCharacterPurchaseTitle.innerHTML = `<span>${escapeHtml(purchase.title)}</span>`;
+  storeCharacterPurchaseCopy.textContent = "";
+  storeCharacterPurchaseCopy.hidden = true;
+  storeCharacterPurchaseActions.hidden = false;
+  storeCharacterPurchaseMissing.hidden = true;
+  storeCharacterPurchaseMissing.textContent = "";
+
+  if (storeCharacterPurchaseConfirmButton) {
+    storeCharacterPurchaseConfirmButton.disabled = storeCharacterPurchaseBusy || Boolean(purchase.disabled);
+    storeCharacterPurchaseConfirmButton.innerHTML = purchase.priceMarkup || escapeHtml(purchase.priceLabel || "KUP");
+    syncBrokenAssets(storeCharacterPurchaseConfirmButton);
+  }
+}
+
+function openStoreOfferPurchase(purchase) {
+  if (!purchase || !storeCharacterPurchaseBackdrop || storeCharacterPurchaseBusy) {
+    return;
+  }
+
+  activeStoreCharacterPurchase = null;
+  activeStoreOfferPurchase = purchase;
+  storeCharacterPurchaseBusy = false;
+  setStoreOfferPurchaseScene(purchase);
+  storeCharacterPurchaseBackdrop.hidden = false;
+  syncBrokenAssets(storeCharacterPurchaseBackdrop);
+  syncAnimatedAssets(storeCharacterPurchaseBackdrop);
+}
+
+function openStoreSpecialCurrencyPurchase(offer) {
+  if (!offer) {
+    return;
+  }
+
+  const winterStore = getActiveStoreWorldId() === "winter";
+  openStoreOfferPurchase({
+    kind: "special-currency",
+    id: offer.id,
+    title: offer.title || offer.name,
+    image: offer.image,
+    fallbackText: offer.title || offer.name,
+    priceLabel: offer.priceLabel,
+    kicker: winterStore ? "ZIMOWY DEAL" : "OFERTA PIRACKA",
+    imageClass: "store-offer-modal-currency-image",
+  });
+}
+
+function openStorePlatoMachinePurchase(offer) {
+  if (!offer) {
+    return;
+  }
+
+  const machineImage = offer.image || MAGIC_MACHINE_IMAGE;
+
+  openStoreOfferPurchase({
+    kind: "plato-machine",
+    id: offer.id,
+    title: offer.title || offer.name,
+    image: machineImage,
+    fallbackText: "MASZYNA",
+    priceMarkup: buildCurrencyAmountMarkup(offer.price, "diamonds"),
+    kicker: "PLATOISTYCZNA OFERTA",
+    imageClass: "store-offer-modal-machine-image",
+    disabled: Number(state.diamonds || 0) < Number(offer.price || 0) || !hasUnownedMagiciansPlatoYa(),
+  });
+}
+
+function openStorePremiumAlleyPurchase(offer) {
+  if (!offer) {
+    return;
+  }
+
+  const disabled =
+    (offer.type === "coins" && Number(state.coins || 0) < Number(offer.price || 0)) ||
+    (offer.type === "diamonds" && Number(state.diamonds || 0) < Number(offer.price || 0));
+
+  openStoreOfferPurchase({
+    kind: "premium-alley",
+    id: offer.id,
+    title: "ALEJA PREMIUM",
+    image: "./bilet.png",
+    fallbackText: "BILET",
+    priceMarkup: buildStorePremiumAlleyPriceMarkup(offer),
+    kicker: "PREMIUM",
+    disabled,
+    imageClass: "store-offer-modal-ticket-image",
+  });
+}
+
+function openStorePremiumBoostPurchase(offer) {
+  if (!offer) {
+    return;
+  }
+
+  openStoreOfferPurchase({
+    kind: "premium-boost",
+    id: offer.id,
+    title: offer.title,
+    image: offer.image,
+    fallbackText: "BILET",
+    priceLabel: offer.priceLabel,
+    kicker: "ZIMOWY DEAL",
+    imageClass: "store-offer-modal-ticket-image",
+  });
+}
+
+function openStoreContentCreatorMachinePurchase() {
+  if (!isContentCreatorMachineOfferAvailable()) {
+    renderStore();
+    return;
+  }
+
+  openStoreOfferPurchase({
+    kind: "content-creator-machine",
+    id: CONTENT_CREATOR_MACHINE_OFFER_ID,
+    title: "MASZYNA PLATOYI",
+    image: MAGIC_MACHINE_IMAGE,
+    fallbackText: "MASZYNA",
+    priceLabel: "ZA DARMO",
+    kicker: "CONTENT CREATOR OFERTA",
+    imageClass: "store-offer-modal-machine-image",
+  });
+}
+
+function openStoreStarterPackPurchase() {
+  openStoreOfferPurchase({
+    kind: "starter-pack",
+    id: STORE_STARTER_PACK_OFFER.id,
+    title: STORE_STARTER_PACK_OFFER.title,
+    image: MAGIC_MACHINE_IMAGE,
+    fallbackText: "MASZYNA",
+    contentMarkup: buildStoreOfferModalItemsMarkup([
+      {
+        image: MAGIC_MACHINE_IMAGE,
+        amount: "x1",
+        label: "Maszyna Platoi",
+        className: "store-offer-modal-machine-item",
+      },
+      {
+        image: COIN_REWARD_IMAGE,
+        amount: `x${STORE_STARTER_PACK_OFFER.coins}`,
+        label: "Monety",
+        className: "store-offer-modal-coin-item",
+      },
+      {
+        image: ELIXIR_REWARD_IMAGE,
+        amount: `x${STORE_STARTER_PACK_OFFER.elixirs}`,
+        label: "Eliksir",
+        className: "store-offer-modal-elixir-item",
+      },
+    ], "store-offer-modal-starter-items"),
+    priceLabel: STORE_STARTER_PACK_OFFER.priceLabel,
+    kicker: "MAGICZNA OFERTA",
+    imageClass: "store-offer-modal-machine-image",
+  });
+}
+
+function openStoreMaxPlatoyaPurchase() {
+  if (isMaxPlatoyaOfferPurchasedToday()) {
+    renderStore();
+    return;
+  }
+
+  openStoreOfferPurchase({
+    kind: "max-platoya",
+    id: STORE_MAX_PLATOYA_OFFER.id,
+    title: STORE_MAX_PLATOYA_OFFER.title,
+    image: COIN_REWARD_IMAGE,
+    fallbackText: "MONETY",
+    contentMarkup: buildStoreOfferModalItemsMarkup([
+      {
+        image: COIN_REWARD_IMAGE,
+        amount: `x${STORE_MAX_PLATOYA_OFFER.coins}`,
+        label: "Monety",
+        className: "store-offer-modal-coin-item",
+      },
+      {
+        image: ELIXIR_REWARD_IMAGE,
+        amount: `x${STORE_MAX_PLATOYA_OFFER.elixirs}`,
+        label: "Eliksiry",
+        className: "store-offer-modal-elixir-item",
+      },
+    ], "store-offer-modal-max-items"),
+    priceLabel: STORE_MAX_PLATOYA_OFFER.priceLabel,
+    kicker: "MAGICZNA OFERTA",
+    imageClass: "store-offer-modal-currency-image",
+  });
+}
+
+function openStoreRankingCardDeckPurchase() {
+  if (isRankingCardDeckOfferPurchasedToday()) {
+    renderStore();
+    return;
+  }
+
+  openStoreOfferPurchase({
+    kind: "ranking-card-deck",
+    id: STORE_RANKING_CARD_DECK_OFFER.id,
+    title: STORE_RANKING_CARD_DECK_OFFER.title,
+    image: RANKING_CARD_DECK_IMAGE,
+    fallbackText: "KARTY",
+    contentMarkup: buildStoreOfferModalItemsMarkup([
+      {
+        image: RANKING_CARD_DECK_IMAGE,
+        amount: "x2",
+        label: "Karty",
+        className: "store-offer-modal-card-deck-item",
+      },
+    ], "store-offer-modal-card-deck-items"),
+    priceMarkup: buildStoreCardDeckSalePriceMarkup(),
+    kicker: "PIRACKA OFERTA",
+    imageClass: "store-offer-modal-card-deck-image",
+    offerTab: STORE_OFFER_TAB_PIRATE,
+    disabled: Number(state.diamonds || 0) < STORE_RANKING_CARD_DECK_OFFER.price,
+  });
+}
+
+function getHighTowerOfferModalItems(offer) {
+  if (!offer) {
+    return [];
+  }
+
+  if (offer.flaro) {
+    const flaro = getPetById(HIGH_TOWER_FLARO_ID);
+    return flaro ? [{
+      image: flaro.image,
+      amount: "",
+      label: flaro.name,
+      className: "store-offer-modal-high-tower-flaro-item",
+      scale: 1.08,
+    }] : [];
+  }
+
+  const items = [];
+
+  if (Number(offer.chestCount || 0) > 0) {
+    items.push({
+      image: HIGH_TOWER_CHEST_IMAGE,
+      amount: `x${Number(offer.chestCount || 0)}`,
+      label: "Skrzynia Wysokiej Wieży",
+      className: "store-offer-modal-high-tower-chest-item",
+      scale: 1.04,
+    });
+  }
+
+  if (Number(offer.sparkles || 0) > 0) {
+    items.push({
+      image: HIGH_TOWER_SPARKLES_REWARD_IMAGE,
+      amount: `x${Number(offer.sparkles || 0)}`,
+      label: "Błyskotki",
+      className: "store-offer-modal-high-tower-sparkles-item",
+      scale: 0.96,
+    });
+  }
+
+  return items;
+}
+
+function isHighTowerStoreOfferDisabled(offer) {
+  if (!isHighTowerStoreOfferVisible(offer)) {
+    return true;
+  }
+
+  if (offer.priceCurrency === "diamonds") {
+    return Number(state.diamonds || 0) < Number(offer.price || 0);
+  }
+
+  if (offer.priceCurrency === "coins") {
+    return Number(state.coins || 0) < Number(offer.price || 0);
+  }
+
+  return false;
+}
+
+function openStoreHighTowerOfferPurchase(offerId) {
+  const offer = getStoreHighTowerOfferById(offerId);
+
+  if (!offer || !isHighTowerStoreOfferVisible(offer)) {
+    renderStore();
+    return;
+  }
+
+  const flaro = offer.flaro ? getPetById(HIGH_TOWER_FLARO_ID) : null;
+  const title = offer.flaro ? (flaro?.name || "Flaro") : offer.title;
+
+  openStoreOfferPurchase({
+    kind: "high-tower-offer",
+    id: offer.id,
+    title,
+    image: offer.flaro ? flaro?.image || "./flaro.png" : HIGH_TOWER_CHEST_IMAGE,
+    fallbackText: title,
+    contentMarkup: buildStoreOfferModalItemsMarkup(getHighTowerOfferModalItems(offer), "store-offer-modal-high-tower-items"),
+    priceMarkup: buildHighTowerStoreOfferPriceMarkup(offer),
+    priceLabel: offer.priceLabel,
+    kicker: offer.title,
+    imageClass: offer.flaro ? "store-offer-modal-pet-skin-image" : "store-offer-modal-machine-image",
+    offerTab: STORE_OFFER_TAB_HIGH_TOWER,
+    disabled: isHighTowerStoreOfferDisabled(offer),
+  });
+}
+
+function openStorePetSkinPurchase(offerId) {
+  const offer = getCurrentStorePetSkinOfferById(offerId);
+
+  if (!offer || hasStorePetSkin(offer)) {
+    renderStore();
+    return;
+  }
+
+  const basePet = getPetById(offer.basePetId);
+  const skinPet = getPetById(offer.skinPetId);
+
+  if (!basePet || !skinPet) {
+    return;
+  }
+
+  const mode = getStorePetSkinOfferMode(offer);
+  const price = getStorePetSkinOfferPrice(offer);
+  const title = getStorePetSkinOfferTitle(offer, basePet, skinPet);
+  const items = mode === "bundle"
+    ? [
+      {
+        image: basePet.image,
+        label: basePet.name,
+        className: "store-offer-modal-pet-skin-base-item",
+        scale: offer.baseScale || 1,
+      },
+      {
+        image: skinPet.image,
+        label: skinPet.name,
+        className: "store-offer-modal-pet-skin-item",
+        scale: offer.skinScale || 1,
+      },
+    ]
+    : [
+      {
+        image: skinPet.image,
+        label: skinPet.name,
+        className: "store-offer-modal-pet-skin-item",
+        scale: offer.singleScale || 1.16,
+      },
+    ];
+
+  openStoreOfferPurchase({
+    kind: "pet-skin-offer",
+    id: offer.id,
+    title,
+    image: skinPet.image,
+    fallbackText: title,
+    contentMarkup: buildStoreOfferModalItemsMarkup(items, `store-offer-modal-pet-skin-items store-offer-modal-pet-skin-${mode}`),
+    priceMarkup: mode === "bundle"
+      ? buildStoreDiamondSalePriceMarkup(getStorePetSkinOfferOldPrice(offer), price)
+      : buildCurrencyAmountMarkup(price, "diamonds"),
+    kicker: offer.title || STORE_PET_SKIN_OFFER_DEFAULTS.title,
+    imageClass: "store-offer-modal-pet-skin-image",
+    offerTab: getStorePetSkinOfferTab(offer),
+    disabled: Number(state.diamonds || 0) < price,
+  });
 }
 
 function openStoreCharacterPurchase(item) {
@@ -10085,6 +20411,7 @@ function openStoreCharacterPurchase(item) {
     return;
   }
 
+  activeStoreOfferPurchase = null;
   activeStoreCharacterPurchase = item;
   storeCharacterPurchaseBusy = false;
   setStoreCharacterPurchaseScene(item);
@@ -10101,11 +20428,97 @@ function closeStoreCharacterPurchase() {
   storeCharacterPurchaseBackdrop.hidden = true;
   delete storeCharacterPurchaseBackdrop.dataset.theme;
   delete storeCharacterPurchaseScene.dataset.theme;
+  delete storeCharacterPurchaseScene.dataset.purchaseKind;
+  delete storeCharacterPurchaseScene.dataset.offerTab;
+  storeCharacterPurchaseArtFrame?.classList.remove("store-offer-modal-bundle-art");
   activeStoreCharacterPurchase = null;
+  activeStoreOfferPurchase = null;
   storeCharacterPurchaseBusy = false;
 
   if (storeCharacterPurchaseConfirmButton) {
     storeCharacterPurchaseConfirmButton.disabled = false;
+  }
+
+  scheduleDailyGiftLobbyCheck();
+}
+
+async function confirmStorePurchase() {
+  if (activeStoreOfferPurchase) {
+    await confirmStoreOfferPurchase();
+    return;
+  }
+
+  await confirmStoreCharacterPurchase();
+}
+
+async function confirmStoreOfferPurchase() {
+  if (
+    !activeStoreOfferPurchase ||
+    !storeCharacterPurchaseBackdrop ||
+    storeCharacterPurchaseBackdrop.hidden ||
+    storeCharacterPurchaseBusy
+  ) {
+    return;
+  }
+
+  const purchase = activeStoreOfferPurchase;
+  storeCharacterPurchaseBusy = true;
+  if (storeCharacterPurchaseConfirmButton) {
+    storeCharacterPurchaseConfirmButton.disabled = true;
+  }
+
+  closeStoreCharacterPurchase();
+
+  if (purchase.kind === "special-currency") {
+    const offer = STORE_SPECIAL_CURRENCY_OFFERS.find((entry) => entry.id === purchase.id);
+    await buySpecialCurrencyOffer(offer);
+    return;
+  }
+
+  if (purchase.kind === "plato-machine") {
+    const offer = STORE_PLATOYA_MACHINE_OFFERS.find((entry) => entry.id === purchase.id);
+    await buyStorePlatoMachineOffer(offer);
+    return;
+  }
+
+  if (purchase.kind === "premium-alley") {
+    const offer = STORE_PREMIUM_ALLEY_OFFERS.find((entry) => entry.id === purchase.id);
+    await buyStorePremiumAlleyOffer(offer);
+    return;
+  }
+
+  if (purchase.kind === "premium-boost") {
+    await buyStorePremiumBoostOffer(STORE_WINTER_PREMIUM_BOOST_OFFER);
+    return;
+  }
+
+  if (purchase.kind === "starter-pack") {
+    await buyStoreStarterPackOffer();
+    return;
+  }
+
+  if (purchase.kind === "content-creator-machine") {
+    await buyContentCreatorMachineOffer();
+    return;
+  }
+
+  if (purchase.kind === "max-platoya") {
+    await buyStoreMaxPlatoyaOffer();
+    return;
+  }
+
+  if (purchase.kind === "ranking-card-deck") {
+    await buyStoreRankingCardDeckOffer();
+    return;
+  }
+
+  if (purchase.kind === "high-tower-offer") {
+    await buyStoreHighTowerOffer(purchase.id);
+    return;
+  }
+
+  if (purchase.kind === "pet-skin-offer") {
+    await buyStorePetSkinOffer(purchase.id);
   }
 }
 
@@ -10136,112 +20549,465 @@ async function confirmStoreCharacterPurchase() {
     storeCharacterPurchaseConfirmButton.disabled = true;
   }
 
-  if (item.kind === "book-pet") {
-    closeStoreCharacterPurchase();
-    await buyBookPet(item.id);
-    return;
-  }
-
-  if (item.kind === "book-grand-reward") {
-    closeStoreCharacterPurchase();
-    await claimBookGrandReward(item.id);
-    return;
-  }
-
   closeStoreCharacterPurchase();
   buyItem("characters", item);
 }
 
-function buyCashUnlock(kind, item) {
+async function buyCashUnlock(kind, item) {
   if (kind === "bundles") {
-    openWinterBundlePurchase(item);
+    if (
+      !item ||
+      isBundleOwned(item) ||
+      !hasCompletedMagiciansWorld()
+    ) {
+      return;
+    }
+
+    const rewardCharacters = getBundleRewardCharacters(item);
+    rewardCharacters.forEach((character) => {
+      if (!state.ownedCharacters.includes(character.id)) {
+        state.ownedCharacters.push(character.id);
+      }
+    });
+
+    saveState();
+    renderAll();
+    playOneShotSound("characterUnlock", 0.8);
+    await showBundleUnlockScene(rewardCharacters);
     return;
   }
 
-  openModal({
-    title: item.name,
-    message: "Autoryzowanie transakcji...",
-    buttonText: "CZEKAJ",
-    dismissible: false,
-    showSpinner: true,
-    onConfirm: async () => {},
+  buyItem(kind, { ...item, price: 0 });
+}
+
+async function buyCoinPack(item) {
+  await showCoinRewardScene(item.amount, {
+    title: "Monety",
+    autoCloseMs: 2500,
   });
+  await animateCoinsToBalance();
+  state.coins += item.amount;
+  saveState();
+  renderAll();
+}
 
-  modalConfirm.disabled = true;
+async function buyDiamondPack(item) {
+  await showDiamondRewardScene(item.amount, {
+    title: "Klejnoty",
+    autoCloseMs: 2500,
+  });
+  state.diamonds += item.amount;
+  saveState();
+  renderAll();
+}
 
-  window.setTimeout(() => {
-    openModal({
-      title: item.name,
-      message: "Przekaz pieniadze autorowi",
-      buttonText: "ODBLOKUJ",
-      dismissible: false,
-      image: item.image,
-      imageAlt: item.name,
-      onConfirm: async () => {
-        modalConfirm.disabled = true;
-        closeModal();
-        buyItem(kind, { ...item, price: 0 });
-      },
+async function buySpecialCurrencyOffer(offer) {
+  if (
+    !offer ||
+    sanitizeStoredId(state.storeOffers?.specialCurrencyOfferId) !== offer.id ||
+    sanitizeStoredId(state.storeOffers?.specialCurrencyPurchasedId) === offer.id
+  ) {
+    return;
+  }
+
+  if (offer.type === "diamonds") {
+    await showDiamondRewardScene(offer.amount, {
+      title: "Klejnoty",
+      autoCloseMs: 2500,
     });
-  }, 3000);
+  } else if (offer.type === "elixirs") {
+    await showElixirRewardScene(offer.amount, {
+      title: "Eliksiry",
+      autoCloseMs: 2500,
+    });
+  } else {
+    await showCoinRewardScene(offer.amount, {
+      title: "Monety",
+      autoCloseMs: 2500,
+    });
+    await animateCoinsToBalance();
+  }
+
+  changeCurrencyBalance(offer.type, offer.amount);
+  state.storeOffers = {
+    ...(state.storeOffers || {}),
+    specialCurrencyPurchasedId: offer.id,
+  };
+  saveState();
+  renderAll();
 }
 
-function buyCoinPack(item) {
-  openModal({
-    title: "Zakup monet",
-    message: "Przekaz pieniadze autorowi",
-    buttonText: `ODBIERZ ${item.amount}`,
-    dismissible: false,
-    image: item.image,
-    imageAlt: item.name,
-    onConfirm: async () => {
-      modalConfirm.disabled = true;
-      closeModal();
-      await showRewardShowcase({
-        image: item.image,
-        name: "Platnosc przyjeta",
-        countLabel: item.priceLabel,
-        mode: "payment",
-        autoCloseMs: 1700,
-      });
-      await showCoinRewardScene(item.amount, {
-        title: "Monety",
-        autoCloseMs: 2500,
-      });
-      await animateCoinsToBalance();
-      state.coins += item.amount;
-      saveState();
-      renderAll();
-    },
+function pickStorePlatoMachineRewardPet() {
+  const unownedPool = getMagiciansPetShopItems().filter((item) => !state.ownedPets.includes(item.id));
+
+  if (unownedPool.length === 0) {
+    return null;
+  }
+
+  return unownedPool[Math.floor(Math.random() * unownedPool.length)] || null;
+}
+
+async function buyStorePlatoMachineOffer(offer) {
+  if (
+    !offer ||
+    getActiveStoreWorldId() !== "magicians" ||
+    sanitizeStoredId(state.storeOffers?.platoKeyOfferId) !== offer.id ||
+    Number(state.diamonds || 0) < Number(offer.price || 0)
+  ) {
+    return;
+  }
+
+  const rewardPet = pickStorePlatoMachineRewardPet();
+  if (!rewardPet) {
+    renderAll();
+    return;
+  }
+
+  state.diamonds = Math.max(0, Number(state.diamonds || 0) - Number(offer.price || 0));
+  saveState();
+  renderAll();
+  openStorePlatoMachineRoll(rewardPet);
+}
+
+async function buyStorePremiumAlleyOffer(offer) {
+  const currentOffer = getCurrentStorePremiumAlleyOffer();
+  const worldId = getStorePremiumAlleyWorldId();
+
+  if (!offer || !currentOffer || currentOffer.id !== offer.id || isSuperAlleyActiveForWorld(worldId) || superAlleyBusy) {
+    return;
+  }
+
+  if (offer.type === "coins" && Number(state.coins || 0) < Number(offer.price || 0)) {
+    return;
+  }
+
+  if (offer.type === "diamonds" && Number(state.diamonds || 0) < Number(offer.price || 0)) {
+    return;
+  }
+
+  superAlleyBusy = true;
+
+  try {
+    if (offer.type === "coins") {
+      state.coins = Math.max(0, Number(state.coins || 0) - Number(offer.price || 0));
+    } else if (offer.type === "diamonds") {
+      state.diamonds = Math.max(0, Number(state.diamonds || 0) - Number(offer.price || 0));
+    }
+
+    setSuperAlleyActiveForWorld(worldId, true);
+    saveState();
+    renderAll();
+    await wait(80);
+    await showSuperAlleySuccessScene(worldId);
+  } finally {
+    superAlleyBusy = false;
+    renderAll();
+  }
+}
+
+async function buyStorePremiumBoostOffer(offer) {
+  if (
+    !offer ||
+    offer.id !== STORE_WINTER_PREMIUM_BOOST_OFFER.id ||
+    getActiveStoreWorldId() !== "winter" ||
+    isSuperAlleyActiveForWorld("winter") ||
+    superAlleyBusy
+  ) {
+    return;
+  }
+
+  superAlleyBusy = true;
+
+  try {
+    setSuperAlleyActiveForWorld("winter", true);
+    state.trophies = Math.max(0, Number(state.trophies || 0) + Number(offer.trophyBoost || 0));
+    saveState();
+    renderAll();
+    await showSuperAlleySuccessScene("winter");
+  } finally {
+    superAlleyBusy = false;
+    renderAll();
+  }
+}
+
+async function buyStoreStarterPackOffer() {
+  if (!isStarterPackAvailable()) {
+    renderAll();
+    return;
+  }
+
+  const rewardPet = pickStorePlatoMachineRewardPet();
+
+  state.storeStarterPackPurchased = true;
+  changeCurrencyBalance("coins", STORE_STARTER_PACK_OFFER.coins);
+  changeCurrencyBalance("elixirs", STORE_STARTER_PACK_OFFER.elixirs);
+  saveState();
+  renderAll();
+
+  await showCoinRewardScene(STORE_STARTER_PACK_OFFER.coins, {
+    title: "Monety",
+    autoCloseMs: 1800,
+  });
+  await showElixirRewardScene(STORE_STARTER_PACK_OFFER.elixirs, {
+    title: "Eliksir",
+    autoCloseMs: 1800,
+  });
+
+  if (rewardPet) {
+    await wait(120);
+    openStorePlatoMachineRoll(rewardPet);
+  }
+}
+
+async function buyContentCreatorMachineOffer() {
+  if (!isContentCreatorMachineOfferAvailable()) {
+    renderAll();
+    return;
+  }
+
+  const rewardPet = pickMagicMachineRewardPet();
+  state.contentCreatorMachineClaimed = true;
+  saveState();
+  renderAll();
+
+  if (rewardPet) {
+    await wait(120);
+    openStorePlatoMachineRoll(rewardPet);
+  }
+}
+
+async function buyStoreMaxPlatoyaOffer() {
+  if (isMaxPlatoyaOfferPurchasedToday()) {
+    renderAll();
+    return;
+  }
+
+  changeCurrencyBalance("coins", STORE_MAX_PLATOYA_OFFER.coins);
+  changeCurrencyBalance("elixirs", STORE_MAX_PLATOYA_OFFER.elixirs);
+  state.storeOffers = {
+    ...(state.storeOffers || {}),
+    maxPlatoyaPurchasedCycleKey: getStoreDailyPurchaseCycleKey(),
+  };
+  saveState();
+  renderAll();
+
+  await showCoinRewardScene(STORE_MAX_PLATOYA_OFFER.coins, {
+    title: "Monety",
+    autoCloseMs: 1800,
+  });
+  await showElixirRewardScene(STORE_MAX_PLATOYA_OFFER.elixirs, {
+    title: "Eliksiry",
+    autoCloseMs: 1800,
   });
 }
 
-function buyDiamondPack(item) {
-  openModal({
-    title: "Zakup klejnotow",
-    message: "Przekaz pieniadze autorowi",
-    buttonText: `ODBIERZ ${item.amount}`,
-    dismissible: false,
-    image: item.image,
-    imageAlt: item.name,
-    onConfirm: async () => {
-      modalConfirm.disabled = true;
-      closeModal();
-      await showRewardShowcase({
-        image: item.image,
-        name: "Platnosc przyjeta",
-        countLabel: item.priceLabel,
-        mode: "payment",
-        autoCloseMs: 1700,
-      });
-      await showDiamondRewardScene(item.amount, {
-        title: "Klejnoty",
-        autoCloseMs: 2500,
-      });
-      state.diamonds += item.amount;
-      saveState();
-      renderAll();
-    },
+async function buyStoreRankingCardDeckOffer() {
+  if (isRankingCardDeckOfferPurchasedToday()) {
+    renderAll();
+    return;
+  }
+
+  if (Number(state.diamonds || 0) < STORE_RANKING_CARD_DECK_OFFER.price) {
+    renderAll();
+    return;
+  }
+
+  state.diamonds = Math.max(0, Number(state.diamonds || 0) - STORE_RANKING_CARD_DECK_OFFER.price);
+  state.storeOffers = {
+    ...(state.storeOffers || {}),
+    cardDeckPurchasedCycleKey: getStoreDailyPurchaseCycleKey(),
+  };
+  saveState();
+  renderAll();
+  await showRankingCardDeckScene();
+  await wait(180);
+  await showRankingCardDeckScene();
+}
+
+async function openHighTowerPurchasedChests(amount = 1) {
+  const count = Math.max(0, Math.floor(Number(amount || 0)));
+
+  for (let index = 0; index < count; index += 1) {
+    const preparedSession = createChestSession(HIGH_TOWER_CHEST_CRATE);
+    await showCrateRewardScene(HIGH_TOWER_CHEST_CRATE, preparedSession.rewards, {
+      superTheme: "high-tower",
+      appearSound: HIGH_TOWER_CHEST_CRATE.appearSound,
+      openSound: HIGH_TOWER_CHEST_CRATE.openSound,
+    });
+    await wait(420);
+  }
+}
+
+async function grantHighTowerStoreFlaro() {
+  const flaro = getPetById(HIGH_TOWER_FLARO_ID);
+
+  if (!flaro || isFlaroOwned()) {
+    return;
+  }
+
+  state.ownedPets.push(flaro.id);
+  state.equippedPet = flaro.id;
+  state.favoritePetId = flaro.id;
+  saveState();
+  renderAll();
+
+  await showRewardShowcase({
+    image: flaro.image,
+    name: flaro.name,
+    countLabel: "LIMITOWANA PLATOYA",
+    mode: "character",
+    superTheme: "high-tower",
+    autoCloseMs: 2500,
+    soundEffectName: "characterUnlock",
+  });
+}
+
+async function buyStoreHighTowerOffer(offerId) {
+  const offer = getStoreHighTowerOfferById(offerId);
+
+  if (!offer || !isHighTowerStoreOfferVisible(offer) || isHighTowerStoreOfferDisabled(offer)) {
+    renderAll();
+    return;
+  }
+
+  if (offer.priceCurrency === "diamonds") {
+    state.diamonds = Math.max(0, Number(state.diamonds || 0) - Number(offer.price || 0));
+  } else if (offer.priceCurrency === "coins") {
+    state.coins = Math.max(0, Number(state.coins || 0) - Number(offer.price || 0));
+  }
+
+  state.storeOffers = {
+    ...(state.storeOffers || {}),
+  };
+
+  if (offer.dailyPurchaseKey) {
+    state.storeOffers[offer.dailyPurchaseKey] = getStoreDailyPurchaseCycleKey();
+  }
+
+  if (offer.oneTimePurchaseKey) {
+    state.storeOffers[offer.oneTimePurchaseKey] = true;
+  }
+
+  if (Number(offer.sparkles || 0) > 0) {
+    state.highTowerSparkles = getHighTowerSparkles() + Number(offer.sparkles || 0);
+  }
+
+  saveState();
+  renderAll();
+
+  if (Number(offer.sparkles || 0) > 0) {
+    await showHighTowerSparklesRewardScene(Number(offer.sparkles || 0), {
+      title: "Błyskotki",
+      countLabel: `+${Number(offer.sparkles || 0)}`,
+      autoCloseMs: 2100,
+    });
+    await wait(120);
+  }
+
+  if (offer.flaro) {
+    await grantHighTowerStoreFlaro();
+    return;
+  }
+
+  if (Number(offer.chestCount || 0) > 0) {
+    await openHighTowerPurchasedChests(offer.chestCount);
+  }
+}
+
+function getStorePetSkinRewardTheme(offer) {
+  if (getStorePetSkinOfferTab(offer) === STORE_OFFER_TAB_PIRATE) {
+    return "pirate";
+  }
+
+  if (getActiveStoreWorldId() === "winter") {
+    return "winter";
+  }
+
+  return "magic";
+}
+
+function getStorePetSkinRewardShowcaseOptions(offer) {
+  const rewardTheme = getStorePetSkinRewardTheme(offer);
+
+  if (rewardTheme === "pirate") {
+    return {
+      mode: "ranking-prize",
+      superTheme: "",
+      soundEffectName: "rankingPremiumUnlock",
+    };
+  }
+
+  if (rewardTheme === "winter") {
+    return {
+      mode: "character",
+      superTheme: "winter",
+      soundEffectName: "characterUnlock",
+    };
+  }
+
+  return {
+    mode: "magic",
+    superTheme: "",
+    soundEffectName: "elixirReward",
+  };
+}
+
+async function buyStorePetSkinOffer(offerId) {
+  const offer = getCurrentStorePetSkinOfferById(offerId);
+
+  if (!offer || hasStorePetSkin(offer)) {
+    renderAll();
+    return;
+  }
+
+  const basePet = getPetById(offer.basePetId);
+  const skinPet = getPetById(offer.skinPetId);
+  const mode = getStorePetSkinOfferMode(offer);
+  const price = getStorePetSkinOfferPrice(offer);
+
+  if (!basePet || !skinPet || Number(state.diamonds || 0) < price) {
+    renderAll();
+    return;
+  }
+
+  state.diamonds = Math.max(0, Number(state.diamonds || 0) - price);
+
+  if (!state.ownedPets.includes(basePet.id)) {
+    state.ownedPets.push(basePet.id);
+  }
+
+  if (!state.ownedPets.includes(skinPet.id)) {
+    state.ownedPets.push(skinPet.id);
+  }
+
+  state.equippedPet = skinPet.id;
+  state.favoritePetId = skinPet.id;
+  saveState();
+  renderAll();
+
+  const rewardOptions = getStorePetSkinRewardShowcaseOptions(offer);
+
+  if (mode === "bundle") {
+    await showRewardShowcase({
+      image: basePet.image,
+      name: basePet.name,
+      countLabel: "PLATOYA",
+      mode: rewardOptions.mode,
+      superTheme: rewardOptions.superTheme,
+      soundEffectName: getPetVoiceEffect(basePet.id) || rewardOptions.soundEffectName,
+      autoCloseMs: 2200,
+    });
+    await wait(140);
+  }
+
+  await showRewardShowcase({
+    image: skinPet.image,
+    name: skinPet.name,
+    countLabel: "PRZEBRANIE",
+    mode: rewardOptions.mode,
+    superTheme: rewardOptions.superTheme,
+    soundEffectName: getPetVoiceEffect(basePet.id) || rewardOptions.soundEffectName,
+    autoCloseMs: 2300,
   });
 }
 
@@ -10277,6 +21043,69 @@ function buyCodeLockedTrophyPack(item) {
   buyTrophyPack(item);
 }
 
+function buyAllPlatoYaUnlock(item) {
+  if (state.diamonds < item.price) {
+    openModal({
+      title: "Za malo diamentow",
+      message: "Nie masz teraz 1 diamentu na te oferte.",
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  const enteredCode = window.prompt("Wpisz haslo, aby odblokowac wszystkie PlatoYe za 1 diament.", "");
+
+  if (enteredCode === null) {
+    return;
+  }
+
+  if (enteredCode.trim() !== ALL_PLATOYA_STORE_CODE) {
+    openModal({
+      title: "Zle haslo",
+      message: "To haslo nie odblokowuje tej oferty.",
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  const missingPetIds = CATALOG.pets
+    .map((pet) => pet.id)
+    .filter((petId) => !isPetExcludedFromRandomUnlocks(petId) && !state.ownedPets.includes(petId));
+
+  if (missingPetIds.length === 0) {
+    openModal({
+      title: "Masz wszystkie PlatoYe",
+      message: "Wszystkie PlatoYe sa juz w twojej szafie.",
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  state.diamonds -= item.price;
+  state.ownedPets.push(...missingPetIds);
+  if (!state.equippedPet) {
+    state.equippedPet = missingPetIds[0];
+  }
+  ui.inventoryTab = "pets";
+  saveState();
+  renderAll();
+  showView("inventory");
+
+  void showRewardShowcase({
+    image: item.image,
+    name: "Wszystkie PlatoYe",
+    countLabel: `+${missingPetIds.length}`,
+    mode: "default",
+    soundEffectName: "petUpgrade",
+  });
+}
+
 function buyTrophyPack(item) {
   if (state.coins < item.price) {
     openModal({
@@ -10309,8 +21138,6 @@ async function buyDiamondCratePack(packId) {
   const packs = {
     "crate-pack-1": { amount: 1, price: 20, crateId: "drewniana-skrzynia" },
     "crate-pack-2": { amount: 2, price: 35, crateId: "drewniana-skrzynia" },
-    "jungle-crate-pack-1": { amount: 1, price: 50, crateId: "dzunglowa-skrzynia" },
-    "jungle-crate-pack-2": { amount: 2, price: 95, crateId: "dzunglowa-skrzynia" },
   };
   const pack = packs[packId];
   const crate = CATALOG.crates.find((entry) => entry.id === pack?.crateId);
@@ -10379,13 +21206,16 @@ function claimFreeCrate(crate) {
   });
 }
 
-function createChestSession(crate) {
+function createChestSession(crate, options = {}) {
   const chestNumber = getOpenedCrateCount(crate.id) + 1;
+  const rewards = buildChestRewards(crate, chestNumber, options);
 
   return {
     crate,
     chestNumber,
-    rewards: buildChestRewards(crate, chestNumber),
+    rewards: crate.id === HIGH_TOWER_CHEST_CRATE.id
+      ? rewards.map((reward) => ({ ...reward, source: "high-tower-chest" }))
+      : rewards,
     nextRewardIndex: 0,
     shownRewards: [],
     busy: false,
@@ -10396,6 +21226,7 @@ function createChestSession(crate) {
 
 function openChestScene(crate, preparedSession = null) {
   chestSession = preparedSession || createChestSession(crate);
+  chestSession.openSound = crate.openSound || "crateOpen";
 
   chestTitle.textContent = crate.name;
   chestMessage.textContent = "Kliknij skrzynie, aby ja otworzyc.";
@@ -10416,7 +21247,18 @@ function openChestScene(crate, preparedSession = null) {
   if (chestBurstLayer) {
     chestBurstLayer.innerHTML = "";
   }
+  const chestTheme = crate.theme || "";
+  if (chestTheme) {
+    chestBackdrop.dataset.chestTheme = chestTheme;
+    chestBox.dataset.chestTheme = chestTheme;
+  } else {
+    delete chestBackdrop.dataset.chestTheme;
+    delete chestBox.dataset.chestTheme;
+  }
   chestBackdrop.hidden = false;
+  if (crate.appearSound) {
+    playOneShotSound(crate.appearSound, 0.82);
+  }
   syncBrokenAssets(chestBox);
   incrementOpenedCrateCount(crate.id);
   saveState();
@@ -10438,8 +21280,8 @@ async function revealChestReward() {
   if (!chestSession.opened) {
     chestSession.opened = true;
     chestOpenButton.classList.add("opened");
-    playOneShotSound("crateOpen", 0.84);
-    await wait(260);
+    playOneShotSound(chestSession.openSound || "crateOpen", 0.84);
+    await wait(430);
     await animateChestBurst(chestSession.rewards, chestBurstLayer);
     chestMessage.textContent = "Nagrody wypadly ze skrzyni.";
   }
@@ -10516,38 +21358,198 @@ function closeChestScene() {
   }
   chestRewardCard.classList.remove("reveal");
   chestBackdrop.hidden = true;
+  delete chestBackdrop.dataset.chestTheme;
+  delete chestBox.dataset.chestTheme;
   chestSession = null;
 }
 
-function buildChestRewards(crate, chestNumber) {
-  if (crate.id === "dzunglowa-skrzynia") {
-    const diamondAmount = randomBetween(1, 20);
-    const rewards = [
-      buildChestCurrencyReward("diamonds", diamondAmount, {
-        title: "Diamenty z Dżungli",
-        note: "Ta skrzynia daje tylko diamenty oraz moze skrywac dżunglowego PlatoYasa.",
-      }),
-    ];
-    const junglePetPool = CATALOG.pets.filter(
-      (item) => item.unlockWorld === "tower" && !state.ownedPets.includes(item.id)
-    );
-
-    if (junglePetPool.length > 0 && Math.random() < 0.33) {
-      const item = junglePetPool[randomBetween(0, junglePetPool.length - 1)];
-      rewards.push(buildChestItemReward("pets", item));
-    }
-
-    return rewards;
+function buildChestRewards(crate, chestNumber, options = {}) {
+  if (crate.id === HIGH_TOWER_CHEST_CRATE.id) {
+    return buildHighTowerChestReward();
   }
 
   if (crate.id !== "drewniana-skrzynia") {
     return [];
   }
 
-  return buildWoodenChestReward(chestNumber);
+  return buildWoodenChestReward(chestNumber, options);
+}
+
+function getHighTowerEligibleCostumeRewards() {
+  return HIGH_TOWER_REWARDS
+    .map((reward) => getPetById(reward.id))
+    .filter((item) => item && !state.ownedPets.includes(item.id));
+}
+
+function buildHighTowerCostumeReward() {
+  const costumes = getHighTowerEligibleCostumeRewards();
+
+  if (!costumes.length) {
+    return buildChestCurrencyReward("high-tower-sparkles", randomBetween(50, 8000), {
+      title: "Błyskotki",
+      note: "Masz już wszystkie limitowane przebrania, więc rzadki los zamienił się w Błyskotki.",
+    });
+  }
+
+  const item = costumes[randomBetween(0, costumes.length - 1)];
+  return buildChestItemReward("pets", item, {
+    countLabel: "Przebranie",
+    note: "Limitowane przebranie z Wyzwania Wysokiej Wieży trafia do twojej kolekcji.",
+    summaryLabel: item.name,
+    displayMode: "character",
+    superTheme: "high-tower",
+  });
+}
+
+function buildHighTowerFlaroReward() {
+  const flaro = getPetById(HIGH_TOWER_FLARO_ID);
+
+  if (!flaro || isFlaroOwned()) {
+    return buildChestCurrencyReward("high-tower-sparkles", randomBetween(50, 8000), {
+      title: "Błyskotki",
+      note: "Flaro jest już odblokowany, więc najrzadszy los zamienił się w Błyskotki.",
+    });
+  }
+
+  return buildChestItemReward("pets", flaro, {
+    countLabel: "Limitowana PlatoYA",
+    note: "Flaro z Wyzwania Wysokiej Wieży trafia do twojej kolekcji.",
+    summaryLabel: flaro.name,
+    displayMode: "character",
+    superTheme: "high-tower",
+  });
+}
+
+function buildHighTowerChestReward() {
+  const roll = Math.random() * 100;
+  const allCostumesOwned = hasAllHighTowerCostumes();
+
+  if (allCostumesOwned) {
+    if (roll < 50) {
+      return [buildChestCurrencyReward("coins", randomBetween(100, 2000), {
+        title: "Monety",
+        note: "Monety ze skrzyni Wysokiej Wieży trafiają prosto do twojego salda.",
+      })];
+    }
+
+    if (roll < 70) {
+      return [buildChestCurrencyReward("diamonds", randomBetween(3, 25), {
+        title: "Diamenty",
+        note: "Diamenty ze skrzyni Wysokiej Wieży trafiają prosto do twojego salda.",
+      })];
+    }
+
+    if (roll < 88) {
+      return [buildChestCurrencyReward("high-tower-sparkles", randomBetween(50, 8000), {
+        title: "Błyskotki",
+        note: "Błyskotki możesz wydać w Wyzwaniu Wysokiej Wieży.",
+      })];
+    }
+
+    if (roll < 90) {
+      return [buildChestCurrencyReward("high-tower-sparkles", randomBetween(50, 8000), {
+        title: "Błyskotki",
+        note: "Duży pakiet Błyskotek z Wysokiej Wieży.",
+      })];
+    }
+
+    if (roll < 99.9) {
+      return [buildChestCurrencyReward("elixirs", randomBetween(1, 8), {
+        title: "Eliksiry",
+        note: "Eliksiry ze skrzyni Wysokiej Wieży trafiają prosto do twojego salda.",
+      })];
+    }
+
+    return [buildHighTowerFlaroReward()];
+  }
+
+  if (getHighTowerChestCostumePity() >= HIGH_TOWER_CHEST_COSTUME_PITY_LIMIT - 1) {
+    return [buildHighTowerCostumeReward()];
+  }
+
+  if (roll < 50) {
+    return [buildChestCurrencyReward("coins", randomBetween(100, 2000), {
+      title: "Monety",
+      note: "Monety ze skrzyni Wysokiej Wieży trafiają prosto do twojego salda.",
+    })];
+  }
+
+  if (roll < 70) {
+    return [buildChestCurrencyReward("diamonds", randomBetween(3, 25), {
+      title: "Diamenty",
+      note: "Diamenty ze skrzyni Wysokiej Wieży trafiają prosto do twojego salda.",
+    })];
+  }
+
+  if (roll < 90) {
+    return [buildChestCurrencyReward("high-tower-sparkles", randomBetween(50, 8000), {
+      title: "Błyskotki",
+      note: "Błyskotki możesz wydać w Wyzwaniu Wysokiej Wieży.",
+    })];
+  }
+
+  if (roll < 99) {
+    return [buildChestCurrencyReward("elixirs", randomBetween(1, 8), {
+      title: "Eliksiry",
+      note: "Eliksiry ze skrzyni Wysokiej Wieży trafiają prosto do twojego salda.",
+    })];
+  }
+
+  return [buildHighTowerCostumeReward()];
 }
 
 function buildChestCurrencyReward(type, amount, options = {}) {
+  if (type === "high-tower-sparkles") {
+    return {
+      type: "high-tower-sparkles",
+      amount,
+      image: HIGH_TOWER_SPARKLES_IMAGE,
+      title: options.title || "Błyskotki",
+      countLabel: `+${amount}`,
+      note: options.note || "Błyskotki trafiają do wydarzenia Wysokiej Wieży.",
+      summaryLabel: options.summaryLabel || `${amount} Błyskotek`,
+    };
+  }
+
+  if (type === "ranking-points") {
+    return {
+      type: "ranking-points",
+      amount,
+      image: RANKING_ALLEY_POINT_ICON,
+      title: options.title || "Punkty Rankingu",
+      countLabel: `+${amount}`,
+      note: options.note || "Punkty rankingu trafiają prosto do Alei Rankingu.",
+      summaryLabel: options.summaryLabel || `${amount} punktów rankingu`,
+    };
+  }
+
+  if (type === "elixirs") {
+    const label = amount === 1 ? "eliksir" : amount < 5 ? "eliksiry" : "eliksirów";
+    return {
+      type: "elixirs",
+      amount,
+      image: ELIXIR_REWARD_IMAGE,
+      title: options.title || "Eliksiry",
+      countLabel: `+${amount} ${label}`,
+      note: options.note || "Eliksiry ze skrzyni trafiają prosto do twojego salda.",
+      summaryLabel: options.summaryLabel || `${amount} ${label}`,
+    };
+  }
+
+  if (type === "plato-keys") {
+    const keyTheme = options.keyTheme || getPlatoKeyThemeForWorld(getActiveTrophyWorldId());
+    return {
+      type: "plato-keys",
+      amount,
+      keyTheme,
+      image: getPlatoKeyImageForTheme(keyTheme),
+      title: options.title || "Klucz PlatoYI",
+      countLabel: `+${formatPlatoKeyCountLabel(amount)}`,
+      note: options.note || "Klucz PlatoYI ze skrzyni trafia prosto do twojego salda.",
+      summaryLabel: options.summaryLabel || formatPlatoKeyCountLabel(amount),
+    };
+  }
+
   if (type === "diamonds") {
     return {
       type: "diamonds",
@@ -10588,8 +21590,20 @@ function getChestEligibleWorldPetsForCurrentWorld() {
   return CATALOG.pets.filter(
     (item) =>
       item.unlockWorld === worldId &&
+      !isPetExcludedFromRandomUnlocks(item.id) &&
       !state.ownedPets.includes(item.id)
   );
+}
+
+function getChestEligiblePetSkinsForCurrentWorld() {
+  if (getActiveTrophyWorldId() !== "alley") {
+    return [];
+  }
+
+  const chestSkinIds = ["prestizowy-detektyw-em3rald"];
+  return chestSkinIds
+    .map((skinId) => getPetById(skinId))
+    .filter((item) => item && !state.ownedPets.includes(item.id));
 }
 
 function buildChestItemReward(kind, item, options = {}) {
@@ -10600,31 +21614,42 @@ function buildChestItemReward(kind, item, options = {}) {
     image: item.image,
     title: options.title || item.name,
     countLabel: options.countLabel || (kind === "characters" ? "Postac ze skrzyni" : "PlatoYa ze skrzyni"),
-    note: options.note || (item.unlockWorld === "tower"
-      ? "Dżunglowa nagroda bonusowa trafia do twojej szafy."
-      : "Nagroda bonusowa ze skrzyni trafia do twojej szafy."),
+    note: options.note || "Nagroda bonusowa ze skrzyni trafia do twojej szafy.",
     summaryLabel: options.summaryLabel || item.name,
+    displayMode: options.displayMode || "",
+    superTheme: options.superTheme || "",
   };
 }
 
-function buildWoodenChestReward() {
+function buildWoodenChestReward(chestNumber = 1, options = {}) {
   const activeWorld = getActiveTrophyWorld();
   const characterPool = getChestEligibleStoreCharactersForCurrentWorld();
   const petPool = getChestEligibleWorldPetsForCurrentWorld();
+  const petSkinPool = getChestEligiblePetSkinsForCurrentWorld();
   const rewardPool = [
     {
       chance: 60,
       create: () => buildChestCurrencyReward("coins", rollWoodenChestCoinAmount()),
     },
     {
-      chance: 37,
-      create: () => buildChestCurrencyReward("diamonds", randomBetween(3, 35)),
+      chance: 25,
+      create: () => buildChestCurrencyReward("diamonds", randomBetween(3, 20)),
+    },
+    {
+      chance: 10,
+      create: () => buildChestCurrencyReward("elixirs", randomBetween(1, 9)),
+    },
+    {
+      chance: 1,
+      create: () => buildChestCurrencyReward("plato-keys", 1, {
+        keyTheme: getPlatoKeyThemeForWorld(getActiveTrophyWorldId()),
+      }),
     },
   ];
 
   if (characterPool.length > 0) {
     rewardPool.push({
-      chance: 2.5,
+      chance: 3,
       create: () => {
         const item = characterPool[randomBetween(0, characterPool.length - 1)];
         return buildChestItemReward("characters", item, {
@@ -10636,13 +21661,45 @@ function buildWoodenChestReward() {
 
   if (petPool.length > 0) {
     rewardPool.push({
-      chance: 0.5,
+      chance: 1,
       create: () => {
         const item = petPool[randomBetween(0, petPool.length - 1)];
         return buildChestItemReward("pets", item, {
           note: `PlatoYa z Alei ${activeWorld?.name || "biezacego swiata"} trafia do twojej kolekcji.`,
         });
       },
+    });
+  }
+
+  if (petSkinPool.length > 0) {
+    rewardPool.push({
+      chance: 3,
+      create: () => {
+        const item = petSkinPool[randomBetween(0, petSkinPool.length - 1)];
+        return buildChestItemReward("pets", item, {
+          countLabel: "Przebranie ze skrzyni",
+          note: "Prestiżowe przebranie Emerald trafia do twojej kolekcji. Jeśli nie masz jeszcze Emerald, będzie dostępne po jej odblokowaniu.",
+        });
+      },
+    });
+  }
+
+  if (options.source === "ranking") {
+    rewardPool.push({
+      chance: 8,
+      create: () => buildChestCurrencyReward("ranking-points", 250, {
+        title: "Punkty Rankingu",
+        note: "Bonus ze skrzyni rankingowej.",
+        summaryLabel: "250 punktów rankingu",
+      }),
+    });
+    rewardPool.push({
+      chance: 3,
+      create: () => buildChestCurrencyReward("ranking-points", 500, {
+        title: "Punkty Rankingu",
+        note: "Rzadszy bonus ze skrzyni rankingowej.",
+        summaryLabel: "500 punktów rankingu",
+      }),
     });
   }
 
@@ -10660,25 +21717,7 @@ function buildWoodenChestReward() {
 }
 
 function rollWoodenChestCoinAmount() {
-  const buckets = [
-    { weight: 40, min: 50, max: 1500 },
-    { weight: 13, min: 1500, max: 6000 },
-    { weight: 5, min: 6000, max: 9000 },
-    { weight: 0.7, min: 9000, max: 10000 },
-    { weight: 0.3, min: 10000, max: 15000 },
-  ];
-  const totalWeight = buckets.reduce((sum, bucket) => sum + bucket.weight, 0);
-  let roll = Math.random() * totalWeight;
-
-  for (const bucket of buckets) {
-    if (roll < bucket.weight) {
-      return randomBetween(bucket.min, bucket.max);
-    }
-    roll -= bucket.weight;
-  }
-
-  const fallbackBucket = buckets[0];
-  return randomBetween(fallbackBucket.min, fallbackBucket.max);
+  return randomBetween(500, 4000);
 }
 
 function getFreeCrateCount(crateId) {
@@ -10699,6 +21738,7 @@ function getOpenedCrateCount(crateId) {
 
 function incrementOpenedCrateCount(crateId) {
   state.openedCrates[crateId] = getOpenedCrateCount(crateId) + 1;
+  updatePortalMissionProgressForEvent("crate-open", 1);
 }
 
 async function maybeRunIntro() {
@@ -10710,38 +21750,19 @@ async function maybeRunIntro() {
   closeModal();
 
   try {
-    if (state.introStep <= 1) {
-      if (!state.ownedCharacters.includes("magik-millo")) {
-        state.ownedCharacters.push("magik-millo");
-      }
+    if (!state.ownedCharacters.includes("magik-millo")) {
+      state.ownedCharacters.unshift("magik-millo");
+    }
 
+    if (!state.equippedCharacter || !state.ownedCharacters.includes(state.equippedCharacter)) {
       state.equippedCharacter = "magik-millo";
-      state.introStep = 2;
-      saveState();
-      renderAll();
-
-      await showRewardShowcase({
-        image: "./assets/characters/postac_1.png",
-        name: "Magik Millo",
-        soundEffectName: "characterUnlock",
-      });
     }
 
     if (state.introStep <= 2) {
-      await showCoinRewardScene(300, {
-        title: "Monety na start",
-        autoCloseMs: 2400,
-      });
-      await animateCoinsToBalance();
       state.coins += 300;
-      state.introStep = 3;
-      state.seenIntro = true;
-      saveState();
-      renderAll();
-      maybePromptNicknameAfterIntro();
-      return;
     }
 
+    state.introStep = 3;
     state.seenIntro = true;
     saveState();
     renderAll();
@@ -10749,6 +21770,7 @@ async function maybeRunIntro() {
   } finally {
     introSequenceRunning = false;
     syncFirstGameGuide();
+    scheduleDailyGiftLobbyCheck();
   }
 }
 
@@ -11822,42 +22844,78 @@ function closeModal() {
   modalBackdrop.hidden = true;
   modalBackdrop.classList.remove("processing");
   modalBox.classList.remove("processing");
+  modalBox.classList.remove("silver-exchange-modal");
   modalAction = null;
   modalDismissible = true;
+  scheduleDailyGiftLobbyCheck();
 }
 
 function showRewardShowcase({
   image,
   name,
   previewVideo = "",
+  bundleItems = [],
   superTheme = "",
   keyTheme = "",
+  kicker = "",
   countLabel = "",
+  claimButtonText = "",
   hideName = false,
   mode = "default",
   autoCloseMs = 2800,
   interactionMode = "auto",
+  manualTrigger = "card",
   onInteract = null,
   soundEffectName = null,
+  soundDelayMs = 0,
+  characterVoiceId = "",
 }) {
-  if (!image || !alleyRewardBackdrop || !alleyRewardCard) {
+  const safeBundleItems = Array.isArray(bundleItems)
+    ? bundleItems.filter((item) => item && item.image)
+    : [];
+
+  if ((!image && safeBundleItems.length === 0) || !alleyRewardBackdrop || !alleyRewardCard) {
     return Promise.resolve();
   }
 
   const safeName = name || "Nagroda";
 
   if (soundEffectName) {
-    playOneShotSound(soundEffectName, mode === "coin" || mode === "diamond" || mode === "key" ? 0.82 : 0.8);
+    const soundVolume = mode === "coin" || mode === "diamond" || mode === "key" || mode === "sparkle" ? 0.82 : 0.8;
+    const playRewardSound = () => {
+      if (soundEffectName === "rankingPremiumUnlock") {
+        playOneShotSoundWithMusicDuck(soundEffectName, soundVolume);
+      } else {
+        playOneShotSound(soundEffectName, soundVolume);
+      }
+    };
+
+    if (Number(soundDelayMs || 0) > 0) {
+      window.setTimeout(playRewardSound, Number(soundDelayMs || 0));
+    } else {
+      playRewardSound();
+    }
+  }
+
+  if (characterVoiceId) {
+    queueCharacterVoice(characterVoiceId, 360, 0.32);
   }
 
   closeAlleyRewardScene();
   alleyRewardBackdrop.classList.toggle("coin-mode", mode === "coin");
   alleyRewardBackdrop.classList.toggle("diamond-mode", mode === "diamond");
+  alleyRewardBackdrop.classList.toggle("sparkle-mode", mode === "sparkle");
   alleyRewardBackdrop.classList.toggle("magic-mode", mode === "magic");
   alleyRewardBackdrop.classList.toggle("key-mode", mode === "key");
   alleyRewardBackdrop.classList.toggle("trophy-mode", mode === "trophy");
   alleyRewardBackdrop.classList.toggle("payment-mode", mode === "payment");
   alleyRewardBackdrop.classList.toggle("crate-mode", mode === "crate");
+  alleyRewardBackdrop.classList.toggle("character-mode", mode === "character");
+  alleyRewardBackdrop.classList.toggle("ranking-unlock-mode", mode === "ranking-unlock");
+  alleyRewardBackdrop.classList.toggle("ranking-prize-mode", mode === "ranking-prize");
+  alleyRewardBackdrop.classList.toggle("ranking-profile-photo-mode", mode === "ranking-profile-photo");
+  alleyRewardBackdrop.classList.toggle("bundle-character-mode", safeBundleItems.length > 1);
+  alleyRewardBackdrop.classList.toggle("daily-gift-mode", Boolean(kicker));
   if (superTheme) {
     alleyRewardBackdrop.dataset.superTheme = superTheme;
   } else {
@@ -11868,26 +22926,81 @@ function showRewardShowcase({
   } else {
     delete alleyRewardBackdrop.dataset.keyTheme;
   }
-  renderPreviewAssetIntoFrame(
-    alleyRewardArtFrame,
-    {
-      image,
-      name: safeName,
-      previewVideo,
-    },
-    {
-      elementId: "alley-reward-image",
-      imageClass: "modal-image asset-image",
-      videoClass: "modal-image asset-video",
-      fallbackText: safeName,
-      alt: safeName,
-    },
-  );
+  if (safeBundleItems.length > 1 && alleyRewardArtFrame) {
+    alleyRewardArtFrame.classList.add("alley-reward-bundle-art");
+    alleyRewardArtFrame.innerHTML = `
+      <div class="alley-reward-bundle-pair">
+        ${safeBundleItems.map((bundleItem) => `
+          <div class="alley-reward-bundle-item">
+            <div class="alley-reward-bundle-image-frame">
+              ${buildPreviewAssetMarkup(bundleItem, {
+                imageClass: "alley-reward-bundle-image asset-image",
+                videoClass: "alley-reward-bundle-image asset-video",
+                fallbackText: bundleItem.name,
+                alt: bundleItem.name,
+                usePreviewVideo: false,
+              })}
+            </div>
+            <span class="alley-reward-bundle-name">${escapeHtml(bundleItem.name)}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  } else if (mode === "crate") {
+    alleyRewardArtFrame?.classList.remove("alley-reward-bundle-art");
+    if (alleyRewardArtFrame) {
+      const safeImage = escapeHtml(image);
+      const safeAlt = escapeHtml(safeName);
+      alleyRewardArtFrame.innerHTML = `
+        <img
+          id="alley-reward-image"
+          class="modal-image asset-image crate-showcase-image crate-showcase-closed"
+          src="${safeImage}"
+          alt="${safeAlt}"
+          data-fallback-text="${safeAlt}"
+        />
+        <span class="crate-showcase-half crate-showcase-half-top" aria-hidden="true">
+          <img class="crate-showcase-half-image asset-image" src="${safeImage}" alt="" data-fallback-text="${safeAlt}" />
+        </span>
+        <span class="crate-showcase-half crate-showcase-half-bottom" aria-hidden="true">
+          <img class="crate-showcase-half-image asset-image" src="${safeImage}" alt="" data-fallback-text="${safeAlt}" />
+        </span>
+        <span class="crate-showcase-glint" aria-hidden="true"></span>
+        <div class="asset-fallback">${safeAlt}</div>
+      `;
+    }
+  } else {
+    alleyRewardArtFrame?.classList.remove("alley-reward-bundle-art");
+    renderPreviewAssetIntoFrame(
+      alleyRewardArtFrame,
+      {
+        image,
+        name: safeName,
+        previewVideo,
+      },
+      {
+        elementId: "alley-reward-image",
+        imageClass: "modal-image asset-image",
+        videoClass: "modal-image asset-video",
+        fallbackText: safeName,
+        alt: safeName,
+      },
+    );
+  }
+  if (alleyRewardKicker) {
+    alleyRewardKicker.textContent = kicker || "NAGRODA";
+    alleyRewardKicker.hidden = !kicker;
+  }
   alleyRewardName.textContent = safeName;
   alleyRewardName.hidden = hideName;
   alleyRewardCount.textContent = countLabel;
   alleyRewardCount.hidden = !countLabel;
-  alleyRewardCard.classList.toggle("interactive", interactionMode === "manual");
+  if (alleyRewardClaimButton) {
+    alleyRewardClaimButton.textContent = claimButtonText || "ODBIERZ";
+    alleyRewardClaimButton.hidden = !claimButtonText;
+  }
+  alleyRewardManualTrigger = interactionMode === "manual" ? manualTrigger : "card";
+  alleyRewardCard.classList.toggle("interactive", interactionMode === "manual" && alleyRewardManualTrigger !== "button");
   alleyRewardCard.classList.remove("show");
   alleyRewardCard.classList.remove("manual-show");
   alleyRewardCard.classList.remove("opening");
@@ -11931,8 +23044,19 @@ function getAlleyRewardItem(reward) {
   return null;
 }
 
+function getAlleyRewardBundleItems(reward) {
+  if (reward?.type !== "character" || !reward.skinItemId) {
+    return [];
+  }
+
+  return [reward.itemId, reward.skinItemId]
+    .map((itemId) => CATALOG.characters.find((item) => item.id === itemId) || null)
+    .filter(Boolean);
+}
+
 function showAlleyRewardScene(reward, options = {}) {
   const item = getAlleyRewardItem(reward);
+  const bundleItems = getAlleyRewardBundleItems(reward);
 
   if (!item) {
     openModal({
@@ -11949,13 +23073,18 @@ function showAlleyRewardScene(reward, options = {}) {
     image: item.image,
     name: item.name,
     previewVideo: item.previewVideo || "",
+    bundleItems,
     superTheme: options.superTheme || getRewardSceneWorldTheme(reward.type === "pet" ? "pets" : "characters", item),
+    hideName: bundleItems.length > 1,
+    countLabel: "",
+    mode: reward.type === "character" ? "character" : "default",
     soundEffectName:
       reward.type === "pet"
         ? getPetVoiceEffect(item.id)
         : reward.type === "character" || reward.type === "profile-photo"
           ? "characterUnlock"
           : null,
+    characterVoiceId: reward.type === "character" ? item.id : "",
   });
 }
 
@@ -11966,10 +23095,14 @@ function showCoinRewardScene(amount, options = {}) {
   return showRewardShowcase({
     image: COIN_REWARD_IMAGE,
     name: title,
+    kicker: options.kicker || "",
     countLabel: `+${amount} monet`,
+    claimButtonText: options.claimButtonText || "",
     superTheme: options.superTheme || "",
     mode: "coin",
     autoCloseMs,
+    interactionMode: options.interactionMode || "auto",
+    manualTrigger: options.manualTrigger || "card",
     soundEffectName: "coins",
   });
 }
@@ -11981,11 +23114,35 @@ function showDiamondRewardScene(amount, options = {}) {
   return showRewardShowcase({
     image: DIAMOND_REWARD_IMAGE,
     name: title,
-    countLabel: `+${amount} diamenty`,
+    kicker: options.kicker || "",
+    countLabel: options.countLabel || `+${amount} diamenty`,
+    claimButtonText: options.claimButtonText || "",
     superTheme: options.superTheme || "",
     mode: "diamond",
     autoCloseMs,
+    interactionMode: options.interactionMode || "auto",
+    manualTrigger: options.manualTrigger || "card",
     soundEffectName: "diamondShine",
+  });
+}
+
+function showElixirRewardScene(amount, options = {}) {
+  const title = options.title || "Eliksiry z Alei";
+  const autoCloseMs = options.autoCloseMs || 2500;
+  const label = amount === 1 ? "eliksir" : amount < 5 ? "eliksiry" : "eliksirów";
+
+  return showRewardShowcase({
+    image: ELIXIR_REWARD_IMAGE,
+    name: title,
+    kicker: options.kicker || "",
+    countLabel: `+${amount} ${label}`,
+    claimButtonText: options.claimButtonText || "",
+    superTheme: options.superTheme || "",
+    mode: "magic",
+    autoCloseMs,
+    interactionMode: options.interactionMode || "auto",
+    manualTrigger: options.manualTrigger || "card",
+    soundEffectName: "elixirReward",
   });
 }
 
@@ -11997,11 +23154,17 @@ function showPlatoKeyRewardScene(amount, options = {}) {
   return showRewardShowcase({
     image: getPlatoKeyImageForTheme(keyTheme),
     name: title,
+    kicker: options.kicker || "",
     countLabel: `+${formatPlatoKeyCountLabel(amount)}`,
+    claimButtonText: options.claimButtonText || "",
     keyTheme,
+    superTheme: options.superTheme || "",
     mode: "key",
     autoCloseMs,
-    soundEffectName: "coins",
+    interactionMode: options.interactionMode || "auto",
+    manualTrigger: options.manualTrigger || "card",
+    soundEffectName: "keyReward",
+    soundDelayMs: 520,
   });
 }
 
@@ -12019,26 +23182,560 @@ function showTrophyRewardScene(amount, options = {}) {
   });
 }
 
-function showCrateRewardScene(crate, rewards = [], options = {}) {
+function showRankingUnlockScene(options = {}) {
   return showRewardShowcase({
+    image: RANKING_ALLEY_ENTRY_IMAGE,
+    name: "ODBLOKOWANO",
+    countLabel: "ALEJĘ RANKINGU",
+    claimButtonText: "DO DZIEŁA",
+    mode: "ranking-unlock",
+    autoCloseMs: options.autoCloseMs || 2700,
+    interactionMode: "manual",
+    manualTrigger: "button",
+    soundEffectName: "rankingPremiumUnlock",
+    onInteract: async () => {
+      window.setTimeout(() => {
+        showView("ranking");
+        playOneShotSound("rankingEnter", 0.86);
+      }, 80);
+      return true;
+    },
+  });
+}
+
+function showRankingPrizeRewardScene(item, kind = "character", options = {}) {
+  if (!item) {
+    return Promise.resolve();
+  }
+
+  return showRewardShowcase({
+    image: item.image,
+    name: item.name,
+    previewVideo: item.previewVideo || "",
+    countLabel: kind === "pet" ? "PLATOYA" : "POSTAĆ",
+    mode: "ranking-prize",
+    autoCloseMs: options.autoCloseMs || 2600,
+    soundEffectName: options.soundEffectName || "rankingPremiumUnlock",
+    characterVoiceId: kind === "character" ? item.id : "",
+  });
+}
+
+function showRankingProfilePhotoRewardScene(profilePhoto, options = {}) {
+  if (!profilePhoto) {
+    return Promise.resolve();
+  }
+
+  return showRewardShowcase({
+    image: profilePhoto.image,
+    name: "Odblokowano",
+    countLabel: profilePhoto.name || "Zdjęcie Profilu",
+    mode: "ranking-profile-photo",
+    autoCloseMs: options.autoCloseMs || 2500,
+    soundEffectName: "coralFlash",
+  });
+}
+
+function createRankingCardDeckRewards() {
+  const rewardBuilders = [
+    () => ({
+      type: "coins",
+      title: "Monety",
+      amount: randomBetween(100, 1500),
+      image: COIN_REWARD_IMAGE,
+      tone: "coins",
+      unit: "monet",
+    }),
+    () => ({
+      type: "diamonds",
+      title: "Diamenty",
+      amount: randomBetween(1, 20),
+      image: DIAMOND_REWARD_IMAGE,
+      tone: "diamonds",
+      unit: "diamentów",
+    }),
+    () => ({
+      type: "elixir",
+      title: "Eliksiry",
+      amount: randomBetween(1, 8),
+      image: ELIXIR_REWARD_IMAGE,
+      tone: "elixir",
+      unit: "eliksirów",
+    }),
+    () => ({
+      type: "rotten-shell",
+      title: "Zgniła Muszla",
+      amount: 0,
+      image: "./muszlaa.png",
+      tone: "shell",
+      unit: "pech",
+    }),
+  ];
+
+  return RANKING_CARD_BACK_IMAGES.map((backImage, index) => ({
+    ...rewardBuilders[randomBetween(0, rewardBuilders.length - 1)](),
+    id: `ranking-card-${index + 1}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    backImage,
+    index,
+  }));
+}
+
+function getRankingCardRewardLabel(reward) {
+  if (!reward) {
+    return "";
+  }
+
+  if (reward.type === "rotten-shell") {
+    return "ZGNIŁA MUSZLA";
+  }
+
+  return `x${reward.amount}`;
+}
+
+function getRankingCardFrontImage(reward) {
+  return RANKING_CARD_FRONT_IMAGES[reward?.tone] || RANKING_CARD_FRONT_IMAGES.ranking;
+}
+
+function applyRankingCardDeckReward(reward) {
+  if (!reward) {
+    return;
+  }
+
+  if (reward.type === "coins") {
+    state.coins = Math.max(0, Number(state.coins || 0) + Number(reward.amount || 0));
+  } else if (reward.type === "diamonds") {
+    state.diamonds = Math.max(0, Number(state.diamonds || 0) + Number(reward.amount || 0));
+  } else if (reward.type === "elixir") {
+    state.elixirs = Math.max(0, Number(state.elixirs || 0) + Number(reward.amount || 0));
+  }
+}
+
+function summarizeRankingCardRewards(rewards = []) {
+  const summary = {
+    coins: 0,
+    diamonds: 0,
+    elixir: 0,
+  };
+
+  rewards.forEach((reward) => {
+    if (reward.type === "coins") {
+      summary.coins += Number(reward.amount || 0);
+    } else if (reward.type === "diamonds") {
+      summary.diamonds += Number(reward.amount || 0);
+    } else if (reward.type === "elixir") {
+      summary.elixir += Number(reward.amount || 0);
+    }
+  });
+
+  return summary;
+}
+
+function buildRankingCardSummaryMarkup(rewards = []) {
+  const summary = summarizeRankingCardRewards(rewards);
+  const items = [
+    { amount: summary.coins, label: "Monety", image: COIN_REWARD_IMAGE },
+    { amount: summary.diamonds, label: "Diamenty", image: DIAMOND_REWARD_IMAGE },
+    { amount: summary.elixir, label: "Eliksiry", image: ELIXIR_REWARD_IMAGE },
+  ].filter((item) => item.amount > 0);
+
+  return `
+    <div class="ranking-card-summary" data-ranking-card-summary>
+      <div class="ranking-card-summary-title"><span>OTRZYMANO</span></div>
+      <div class="ranking-card-summary-list">
+        ${items.map((item) => `
+          <div class="ranking-card-summary-item">
+            <img class="asset-image" src="${item.image}" alt="${escapeHtml(item.label)}" data-fallback-text="${escapeHtml(item.label)}" />
+            <span class="ranking-card-summary-amount"><span>+${item.amount}</span></span>
+            <small><span>${escapeHtml(item.label)}</span></small>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function buildRankingCardChoiceMarkup(reward, index) {
+  const column = (index % 3) + 1;
+  const row = index < 3 ? 1 : 2;
+  const x = [16, 50, 84][column - 1];
+  const y = row === 1 ? 28 : 78;
+  const rotation = [-6, 3, 7, -3, 5, -5][index] || 0;
+  const delay = 180 + index * 115;
+
+  return `
+    <button
+      class="ranking-card-choice"
+      type="button"
+      data-ranking-card-choice="${index}"
+      data-card-tone="${reward.tone}"
+      style="--card-x:${x}%;--card-y:${y}%;--card-rotation:${rotation}deg;--card-delay:${delay}ms;"
+      aria-label="Wybierz kartę ${index + 1}"
+    >
+      <span class="ranking-card-choice-inner">
+        <span class="ranking-card-face ranking-card-back">
+          <img class="asset-image ranking-card-back-image" src="${reward.backImage}" alt="" data-fallback-text="KARTA" />
+          <span class="asset-fallback">KARTA</span>
+        </span>
+        <span class="ranking-card-face ranking-card-front">
+          <img class="asset-image ranking-card-front-image" src="${getRankingCardFrontImage(reward)}" alt="" data-fallback-text="" />
+          <span class="ranking-card-prize-layer">
+            <span class="ranking-card-prize-art">
+              <img class="asset-image" src="${reward.image}" alt="${escapeHtml(reward.title)}" data-fallback-text="${escapeHtml(reward.title)}" />
+              <span class="asset-fallback">${escapeHtml(reward.title)}</span>
+            </span>
+            <span class="ranking-card-prize-amount"><span>${escapeHtml(getRankingCardRewardLabel(reward))}</span></span>
+          </span>
+        </span>
+      </span>
+    </button>
+  `;
+}
+
+function getRankingCardDeckIntroScenario() {
+  const scenarios = [
+    {
+      image: "./hira4.png",
+      startText: "Mmm... czujesz ten aromat? To nie zwykła kawa, szczurze lądowy. To napój z głębin oceanu, parzony na wrzątku z podwodnego wulkanu i ziarnach skradzionych samemu Krakenowi. Jeden łyk i albo zobaczysz przyszłość... albo zaczniesz mówić po krabiemu.",
+      choices: {
+        fast: {
+          label: "WYPIJĘ Z TOBĄ PIRATKO!",
+          image: "./hira5.png",
+          text: "Ha! Wiedziałam, że masz w sobie odrobinę soli morskiej! Siadaj, bierz kubek i nie pytaj, czemu coś w nim świeci. Karty lubią odważnych... a kofeina z głębin lubi jeszcze bardziej.",
+          openLabel: "Otwórz talię",
+        },
+        wait: {
+          label: "NIE DZIĘKI, WOLĘ NIE BULGOTAĆ.",
+          image: "./hira.png",
+          text: "Tchórzysz przed filiżanką? No pięknie. Dobrze, więcej zostanie dla mnie. Ale nie marudź potem, gdy talia pokaże komuś innemu drogę do skarbu!",
+          openLabel: "Otwórz talię",
+        },
+      },
+    },
+    {
+      image: "./hira3.png",
+      startText: "Arrr... cicho tam! Właśnie tasuję talię wyłowioną z samego dna oceanu. Jeden zły ruch i cała fortuna pójdzie na karmę dla krabów!",
+      choices: {
+        fast: {
+          label: "Dawaj te karty, piratko!",
+          image: "./hira.png",
+          text: "Ughh... piracka cierpliwość to chyba nie twoja mocna strona! No dobra, bierz tę talię... ale jak trafisz zgniłą muszlę zamiast skarbu, to nie płacz mi później na pokładzie!",
+          openLabel: "Otwórz talię",
+        },
+        wait: {
+          label: "Dobra, dokończ swoje czary!",
+          image: "./hira2.png",
+          text: "Ha! Tak mówi prawdziwy korsarz z klasą! Ustawiłam karty tak sprytnie, że aż skrzynia skarbów by się zarumieniła. No dalej - wybieraj, zanim kraby ukradną nagrody!",
+          openLabel: "Otwórz szczęśliwą talię",
+        },
+      },
+    },
+    {
+      image: "./hira6.png",
+      startText: "Ciii... podejdź bliżej. Widzisz tę mapę? Nie patrz tak, plamy po rumie są częścią legendy. Podobno prowadzi do skrzyni, której nie otworzy nawet klucz platoYI, tylko właściwa karta z talii. Problem w tym, że mapa gryzie, gdy ktoś jej nie okazuje szacunku.",
+      choices: {
+        fast: {
+          label: "POKAŻ MI TĘ MAPĘ, PIRATKO!",
+          image: "./hira7.png",
+          text: "Ha! Masz odwagę, to lubię. Tylko trzymaj palce z dala od rogu mapy - ostatni śmiałek stracił paznokieć i godność. No dobrze... zobaczmy, czy talia wskaże ci drogę do skarbu.",
+          openLabel: "Otwórz talię",
+        },
+        wait: {
+          label: "NIE UFAM MAPOM, KTÓRE MAJĄ ZĘBY.",
+          image: "./hira8.png",
+          text: "Rozsądnie... aż za rozsądnie jak na kogoś, kto gada z piratką przy magicznej talii. Ale dobrze, chowam mapę. Tylko nie płacz, jeśli skarb odpłynie komuś sprzed nosa.",
+          openLabel: "Otwórz talię",
+        },
+      },
+    },
+  ];
+
+  return scenarios[Math.floor(Math.random() * scenarios.length)] || scenarios[0];
+}
+
+function buildRankingCardDeckIntroMarkup(scenario) {
+  const introScenario = scenario || getRankingCardDeckIntroScenario();
+  const fastChoice = introScenario.choices?.fast || {};
+  const waitChoice = introScenario.choices?.wait || {};
+
+  return `
+    <div class="ranking-card-intro" data-ranking-card-intro>
+      <div class="ranking-card-intro-character">
+        <img class="asset-image ranking-card-intro-image" src="${escapeHtml(introScenario.image || "./hira.png")}" alt="Hira" data-fallback-text="HIRA" data-fallback-src="./hira.png" data-ranking-card-intro-image />
+        <span class="asset-fallback">HIRA</span>
+      </div>
+      <div class="ranking-card-intro-bubble">
+        <p class="ranking-card-intro-text" data-ranking-card-intro-text></p>
+        <div class="ranking-card-intro-actions" data-ranking-card-intro-actions hidden>
+          <button class="ranking-card-intro-button" type="button" data-ranking-card-intro-choice="fast">${escapeHtml(fastChoice.label || "Otwórz talię")}</button>
+          <button class="ranking-card-intro-button" type="button" data-ranking-card-intro-choice="wait">${escapeHtml(waitChoice.label || "Poczekaj")}</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function typeRankingCardIntroText(element, text, speedMs = 28) {
+  if (!element) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const safeText = String(text || "");
+    let index = 0;
+    element.textContent = "";
+
+    const timer = window.setInterval(() => {
+      index += 1;
+      element.textContent = safeText.slice(0, index);
+      if (index >= safeText.length) {
+        window.clearInterval(timer);
+        resolve();
+      }
+    }, Math.max(8, Number(speedMs || 28)));
+  });
+}
+
+function stopRankingCardHiraVoice() {
+  if (!rankingCardHiraVoiceAudio) {
+    return;
+  }
+
+  rankingCardHiraVoiceAudio.pause();
+  rankingCardHiraVoiceAudio.currentTime = 0;
+  rankingCardHiraVoiceAudio = null;
+}
+
+function playRankingCardHiraVoice() {
+  stopRankingCardHiraVoice();
+  rankingCardHiraVoiceAudio = playOneShotSound("hiraVoice", 0.74);
+}
+
+function showRankingCardDeckScene(rewards = createRankingCardDeckRewards()) {
+  const safeRewards = Array.isArray(rewards) && rewards.length ? rewards.slice(0, 6) : createRankingCardDeckRewards();
+
+  return new Promise((resolve) => {
+    const backdrop = document.createElement("div");
+    const selectedRewards = [];
+    const selectedCardIndexes = [];
+    let pickedCount = 0;
+    let done = false;
+    let waitingForCardContinue = false;
+    const introScenario = getRankingCardDeckIntroScenario();
+
+    backdrop.className = "ranking-card-deck-backdrop";
+    backdrop.innerHTML = `
+      <div class="ranking-card-deck-scene ranking-card-deck-intro-mode" role="dialog" aria-modal="true" aria-label="Karty">
+        ${buildRankingCardDeckIntroMarkup(introScenario)}
+      </div>
+    `;
+    document.body.appendChild(backdrop);
+    syncBrokenAssets(backdrop);
+    playOneShotSound("rankingCardDeckUnlock", 0.72, 1, 1800);
+
+    const scene = backdrop.querySelector(".ranking-card-deck-scene");
+    let board = null;
+    let introBusy = true;
+
+    const showCards = () => {
+      if (!scene || board) {
+        return;
+      }
+
+      stopRankingCardHiraVoice();
+      scene.classList.remove("ranking-card-deck-intro-mode");
+      scene.innerHTML = `
+        <div class="ranking-card-deck-title"><span>WYBIERZ TRZY KARTY</span></div>
+        <div class="ranking-card-deck-board" data-ranking-card-board>
+          ${safeRewards.map((reward, index) => buildRankingCardChoiceMarkup(reward, index)).join("")}
+        </div>
+      `;
+      syncBrokenAssets(scene);
+      board = scene.querySelector("[data-ranking-card-board]");
+      window.requestAnimationFrame(() => {
+        window.setTimeout(() => {
+          board?.classList.add("is-spread");
+        }, 100);
+      });
+    };
+
+    const runIntro = async () => {
+      const intro = backdrop.querySelector("[data-ranking-card-intro]");
+      const image = backdrop.querySelector("[data-ranking-card-intro-image]");
+      const text = backdrop.querySelector("[data-ranking-card-intro-text]");
+      const actions = backdrop.querySelector("[data-ranking-card-intro-actions]");
+
+      playRankingCardHiraVoice();
+      await typeRankingCardIntroText(text, introScenario.startText);
+      if (actions) {
+        actions.hidden = false;
+        window.requestAnimationFrame(() => actions.classList.add("show"));
+      }
+      introBusy = false;
+
+      const handleChoice = async (event) => {
+        const openButton = event.target.closest("[data-ranking-card-intro-open]");
+        if (openButton && !introBusy) {
+          introBusy = true;
+          actions?.classList.remove("show");
+          intro?.classList.add("hide");
+          window.setTimeout(showCards, 320);
+          return;
+        }
+
+        const choice = event.target.closest("[data-ranking-card-intro-choice]")?.dataset.rankingCardIntroChoice;
+        if (!choice || introBusy) {
+          return;
+        }
+
+        const choiceConfig = introScenario.choices?.[choice] || introScenario.choices?.fast || {};
+        introBusy = true;
+        actions?.classList.remove("show");
+        if (actions) {
+          actions.hidden = true;
+        }
+
+        if (choiceConfig.image && image) {
+          image.src = choiceConfig.image;
+          image.dataset.fallbackText = "HIRA";
+          syncBrokenAssets(intro);
+        }
+
+        playRankingCardHiraVoice();
+        await typeRankingCardIntroText(text, choiceConfig.text || "");
+        if (actions) {
+          actions.innerHTML = `
+            <button class="ranking-card-intro-button ranking-card-intro-open-button" type="button" data-ranking-card-intro-open="true">${escapeHtml(choiceConfig.openLabel || "Otwórz talię")}</button>
+          `;
+          actions.hidden = false;
+          window.requestAnimationFrame(() => actions.classList.add("show"));
+        }
+        introBusy = false;
+      };
+
+      actions?.addEventListener("click", handleChoice);
+    };
+
+    window.requestAnimationFrame(() => {
+      backdrop.classList.add("show");
+      void runIntro();
+    });
+
+    backdrop.addEventListener("click", (event) => {
+      if (waitingForCardContinue) {
+        waitingForCardContinue = false;
+        backdrop.classList.add("hide");
+        window.setTimeout(() => {
+          backdrop.remove();
+          resolve();
+        }, 260);
+        return;
+      }
+
+      const card = event.target.closest("[data-ranking-card-choice]");
+
+      if (!card || done || card.classList.contains("is-revealed")) {
+        return;
+      }
+
+      const index = Number(card.dataset.rankingCardChoice || -1);
+      const reward = safeRewards[index];
+
+      if (!reward || pickedCount >= 3) {
+        return;
+      }
+
+      pickedCount += 1;
+      card.classList.add("is-revealed");
+      card.disabled = true;
+      applyRankingCardDeckReward(reward);
+      selectedRewards.push(reward);
+      selectedCardIndexes.push(index);
+      if (reward.type === "rotten-shell") {
+        playOneShotSound("rankingCardRottenShell", 0.72, 1, 1300);
+      } else {
+        playOneShotSound(`rankingCardPick${Math.min(3, pickedCount)}`, 0.68, 1, 1300);
+      }
+
+      if (pickedCount >= 3) {
+        done = true;
+        saveState();
+        renderAll();
+        window.setTimeout(() => {
+          scene?.classList.add("ranking-card-selected-preview-scene");
+          board?.classList.add("selected-preview-mode");
+          safeRewards.forEach((_, rewardIndex) => {
+            const choice = board?.querySelector(`[data-ranking-card-choice="${rewardIndex}"]`);
+            if (choice && !choice.classList.contains("is-revealed")) {
+              choice.classList.add("is-dismissed");
+            }
+          });
+          selectedCardIndexes.forEach((cardIndex, slotIndex) => {
+            const choice = board?.querySelector(`[data-ranking-card-choice="${cardIndex}"]`);
+            if (choice) {
+              choice.dataset.selectedSlot = String(slotIndex);
+            }
+          });
+          backdrop.querySelector(".ranking-card-deck-title")?.remove();
+          backdrop.querySelector(".ranking-card-deck-scene")?.insertAdjacentHTML("beforeend", `
+            <button class="ranking-card-continue-prompt" type="button" data-ranking-card-continue>
+              <span>NACIŚNIJ ABY KONTYNUOWAC</span>
+            </button>
+          `);
+          syncBrokenAssets(backdrop);
+          waitingForCardContinue = true;
+        }, 720);
+      }
+    });
+  });
+}
+
+function showCrateRewardScene(crate, rewards = [], options = {}) {
+  let interactionStarted = false;
+  let finishSequence = null;
+  const sequenceDone = new Promise((resolve) => {
+    finishSequence = resolve;
+  });
+  const finish = () => {
+    if (typeof finishSequence !== "function") {
+      return;
+    }
+
+    const resolve = finishSequence;
+    finishSequence = null;
+    resolve();
+  };
+
+  const showcase = showRewardShowcase({
     image: crate.image,
     name: crate.name,
+    superTheme: options.superTheme || getCrateRewardTheme(crate),
     countLabel: "Nacisnij!",
     mode: "crate",
     interactionMode: "manual",
-    soundEffectName: "crateAward",
+    soundEffectName: options.appearSound || crate.appearSound || "crateAward",
     onInteract: async () => {
-      playOneShotSound("crateOpen", 0.84);
+      interactionStarted = true;
+      playOneShotSound(options.openSound || crate.openSound || "crateOpen", 0.84);
       incrementOpenedCrateCount(crate.id);
       saveState();
       alleyRewardCard.classList.add("opening");
-      await wait(160);
+      await wait(340);
       await animateChestBurst(rewards, alleyRewardBurstLayer);
       closeAlleyRewardScene();
+      await wait(240);
       await grantChestRewardsDirect(rewards);
+      await wait(760);
+      finish();
       return false;
     },
   });
+
+  void showcase.then(() => {
+    if (!interactionStarted) {
+      finish();
+    }
+  });
+
+  return sequenceDone;
 }
 
 function closeAlleyRewardScene() {
@@ -12058,6 +23755,12 @@ function closeAlleyRewardScene() {
   alleyRewardBackdrop.classList.remove("trophy-mode");
   alleyRewardBackdrop.classList.remove("payment-mode");
   alleyRewardBackdrop.classList.remove("crate-mode");
+  alleyRewardBackdrop.classList.remove("character-mode");
+  alleyRewardBackdrop.classList.remove("ranking-unlock-mode");
+  alleyRewardBackdrop.classList.remove("ranking-prize-mode");
+  alleyRewardBackdrop.classList.remove("ranking-profile-photo-mode");
+  alleyRewardBackdrop.classList.remove("bundle-character-mode");
+  alleyRewardBackdrop.classList.remove("daily-gift-mode");
   delete alleyRewardBackdrop.dataset.superTheme;
   delete alleyRewardBackdrop.dataset.keyTheme;
   alleyRewardBackdrop.hidden = true;
@@ -12065,15 +23768,26 @@ function closeAlleyRewardScene() {
   alleyRewardCard.classList.remove("manual-show");
   alleyRewardCard.classList.remove("opening");
   alleyRewardCard.classList.remove("interactive");
+  if (alleyRewardKicker) {
+    alleyRewardKicker.hidden = true;
+    alleyRewardKicker.textContent = "NAGRODA";
+  }
   alleyRewardName.hidden = false;
   alleyRewardCount.hidden = true;
   alleyRewardCount.textContent = "";
+  alleyRewardArtFrame?.classList.remove("alley-reward-bundle-art");
+  if (alleyRewardClaimButton) {
+    alleyRewardClaimButton.hidden = true;
+    alleyRewardClaimButton.textContent = "ODBIERZ";
+  }
   if (alleyRewardBurstLayer) {
     alleyRewardBurstLayer.innerHTML = "";
   }
   alleyRewardInteractionMode = "auto";
   alleyRewardAction = null;
   alleyRewardBusy = false;
+  alleyRewardManualTrigger = "card";
+  scheduleDailyGiftLobbyCheck();
 
   if (typeof alleyRewardResolve === "function") {
     const resolve = alleyRewardResolve;
@@ -12113,16 +23827,22 @@ async function animateChestBurst(rewards = [], burstLayer = alleyRewardBurstLaye
 
   burstLayer.innerHTML = "";
   const tokens = [];
-  const currencyImages = rewards
-    .filter((reward) => reward.type === "coins" || reward.type === "diamonds")
-    .map((reward) => reward.image)
-    .filter(Boolean);
-  const burstImages = currencyImages.length ? currencyImages : [COIN_REWARD_IMAGE];
+  const currencyTokens = rewards
+    .filter((reward) => reward.type === "coins" || reward.type === "diamonds" || reward.type === "high-tower-sparkles")
+    .map((reward) => ({
+      image: reward.type === "high-tower-sparkles" ? HIGH_TOWER_SPARKLES_REWARD_IMAGE : reward.image,
+      className: reward.type === "high-tower-sparkles" ? "sparkle" : "coin",
+    }))
+    .filter((token) => token.image);
+  const burstTokens = currencyTokens.length
+    ? currencyTokens
+    : [{ image: COIN_REWARD_IMAGE, className: "coin" }];
 
   for (let index = 0; index < 10; index += 1) {
+    const burstToken = burstTokens[index % burstTokens.length];
     const token = document.createElement("div");
-    token.className = "alley-reward-burst-token coin";
-    token.style.setProperty("--burst-token-image", `url("${burstImages[index % burstImages.length]}")`);
+    token.className = `alley-reward-burst-token ${burstToken.className}`;
+    token.style.setProperty("--burst-token-image", `url("${burstToken.image}")`);
     token.style.transform = `translate(-50%, -50%) scale(${randomBetween(70, 120) / 100}) rotate(${randomBetween(-20, 20)}deg)`;
     burstLayer.appendChild(token);
     tokens.push(token);
@@ -12143,16 +23863,16 @@ async function animateChestBurst(rewards = [], burstLayer = alleyRewardBurstLaye
   await wait(40);
 
   tokens.forEach((token, index) => {
-    const isCoin = token.classList.contains("coin");
-    const distanceX = isCoin
+    const isCurrencyToken = token.classList.contains("coin") || token.classList.contains("sparkle");
+    const distanceX = isCurrencyToken
       ? randomBetween(-190, 190)
       : randomBetween(-150, 150);
-    const distanceY = isCoin
+    const distanceY = isCurrencyToken
       ? randomBetween(-180, 30)
       : randomBetween(-210, -20);
     const rotation = randomBetween(120, 340);
-    const scale = isCoin ? randomBetween(30, 55) / 100 : randomBetween(80, 108) / 100;
-    const duration = isCoin ? 820 + index * 20 : 940;
+    const scale = isCurrencyToken ? randomBetween(30, 55) / 100 : randomBetween(80, 108) / 100;
+    const duration = isCurrencyToken ? 820 + index * 20 : 940;
     token.style.transition = `transform ${duration}ms cubic-bezier(0.18, 0.82, 0.14, 1), opacity ${duration}ms linear`;
     token.style.opacity = "1";
     token.style.transform = `translate(calc(-50% + ${distanceX}px), calc(-50% + ${distanceY}px)) scale(${scale}) rotate(${rotation}deg)`;
@@ -12167,6 +23887,8 @@ async function animateChestBurst(rewards = [], burstLayer = alleyRewardBurstLaye
 }
 
 function applyChestReward(reward) {
+  recordHighTowerChestRewardResult(reward);
+
   if (reward.type === "coins") {
     state.coins += reward.amount;
     saveState();
@@ -12176,6 +23898,34 @@ function applyChestReward(reward) {
 
   if (reward.type === "diamonds") {
     state.diamonds += reward.amount;
+    saveState();
+    renderAll();
+    return;
+  }
+
+  if (reward.type === "elixirs") {
+    state.elixirs = Number(state.elixirs || 0) + Number(reward.amount || 0);
+    saveState();
+    renderAll();
+    return;
+  }
+
+  if (reward.type === "plato-keys") {
+    state.platoKeys = Number(state.platoKeys || 0) + Number(reward.amount || 0);
+    saveState();
+    renderAll();
+    return;
+  }
+
+  if (reward.type === "ranking-points") {
+    state.rankingPoints = Math.max(0, Number(state.rankingPoints || 0) + Number(reward.amount || 0));
+    saveState();
+    renderAll();
+    return;
+  }
+
+  if (reward.type === "high-tower-sparkles") {
+    state.highTowerSparkles = getHighTowerSparkles() + Math.max(0, Math.floor(Number(reward.amount || 0)));
     saveState();
     renderAll();
     return;
@@ -12191,6 +23941,24 @@ function applyChestReward(reward) {
 
   saveState();
   renderAll();
+}
+
+function recordHighTowerChestRewardResult(reward) {
+  if (!reward || reward.source !== "high-tower-chest" || hasAllHighTowerCostumes()) {
+    return;
+  }
+
+  const isCostumeReward = reward.type === "item" && reward.kind === "pets" && HIGH_TOWER_REWARD_IDS.has(reward.item?.id);
+
+  if (isCostumeReward) {
+    state.highTowerChestCostumePity = 0;
+    return;
+  }
+
+  state.highTowerChestCostumePity = Math.min(
+    HIGH_TOWER_CHEST_COSTUME_PITY_LIMIT - 1,
+    getHighTowerChestCostumePity() + 1
+  );
 }
 
 async function grantChestRewardsDirect(rewards = []) {
@@ -12216,13 +23984,57 @@ async function grantChestRewardsDirect(rewards = []) {
       continue;
     }
 
+    if (reward.type === "elixirs") {
+      applyChestReward(reward);
+      await showElixirRewardScene(reward.amount, {
+        title: reward.title || "Eliksiry ze skrzyni",
+        autoCloseMs: 2500,
+      });
+      continue;
+    }
+
+    if (reward.type === "plato-keys") {
+      applyChestReward(reward);
+      await showPlatoKeyRewardScene(reward.amount, {
+        title: reward.title || "Klucz PlatoYI ze skrzyni",
+        keyTheme: reward.keyTheme || getPlatoKeyThemeForWorld(getActiveTrophyWorldId()),
+        autoCloseMs: 2500,
+      });
+      continue;
+    }
+
+    if (reward.type === "ranking-points") {
+      applyChestReward(reward);
+      await showRewardShowcase({
+        image: reward.image,
+        name: reward.title || "Punkty Rankingu",
+        countLabel: reward.countLabel || `+${reward.amount}`,
+        mode: "default",
+        autoCloseMs: 2200,
+        soundEffectName: "diamondShine",
+      });
+      continue;
+    }
+
+    if (reward.type === "high-tower-sparkles") {
+      applyChestReward(reward);
+      await showHighTowerSparklesRewardScene(reward.amount, {
+        title: reward.title || "Błyskotki",
+        countLabel: reward.countLabel || `+${reward.amount}`,
+        autoCloseMs: 2300,
+      });
+      continue;
+    }
+
     applyChestReward(reward);
+    const rewardMode = reward.displayMode || (reward.kind === "characters" ? "character" : "default");
     await showRewardShowcase({
       image: reward.image,
       name: reward.title,
       previewVideo: reward.item?.previewVideo || "",
-      superTheme: getRewardSceneWorldTheme(reward.kind, reward.item),
-      countLabel: reward.countLabel || "Nagroda ze skrzyni",
+      superTheme: reward.superTheme || getRewardSceneWorldTheme(reward.kind, reward.item),
+      countLabel: reward.kind === "characters" ? "" : reward.countLabel || "Nagroda ze skrzyni",
+      mode: rewardMode,
       autoCloseMs: 2300,
       soundEffectName:
         reward.kind === "pets"
@@ -12230,28 +24042,16 @@ async function grantChestRewardsDirect(rewards = []) {
           : reward.kind === "characters"
             ? "characterUnlock"
             : null,
+      characterVoiceId: reward.kind === "characters" ? reward.item.id : "",
     });
   }
 }
 
 function getCrateRewardTheme(crate) {
-  return "";
+  return crate?.theme || "";
 }
 
 function openChestOddsModal(crateId = "drewniana-skrzynia") {
-  if (crateId === "dzunglowa-skrzynia") {
-    openModal({
-      title: "Szanse Skrzyni Dżungli",
-      message: "Skrzynia Dżungli zawsze daje od 1 do 20 diamentów i nigdy nie daje monet. Dodatkowo ma 33% szansy na dżunglowego PlatoYasa.",
-      image: "./assets/shop/skrzyniadzungla.jpeg",
-      imageAlt: "Szanse Skrzyni Dżungli",
-      buttonText: "OK",
-      dismissible: true,
-      onConfirm: closeModal,
-    });
-    return;
-  }
-
   openModal({
     title: "Szanse skrzyni",
     message: "Drewniana skrzynia daje jedna nagrode. Monety dalej maja 60%, ale w ich puli sa zakresy: 50-1500, 1500-6000, 6000-9000, 9000-10000 i 10000-15000. Poza tym 37% to diamenty, 2,5% to sklepowa postac z aktualnego swiata, a 0,5% to PlatoYa z Alei aktualnego swiata.",
@@ -12317,54 +24117,96 @@ async function animateCoinsToBalance(fastMode = false) {
   flyers.forEach((flyer) => flyer.remove());
 }
 
-async function animateTrophiesToBalance() {
-  if (!trophyBalanceTarget) {
+function getTrophyFlyerIconCount(amount) {
+  const trophyAmount = Math.max(0, Number(amount || 0));
+
+  if (trophyAmount <= 5) {
+    return 5;
+  }
+
+  if (trophyAmount <= 10) {
+    return 10;
+  }
+
+  if (trophyAmount <= 15) {
+    return 15;
+  }
+
+  if (trophyAmount <= 20) {
+    return 20;
+  }
+
+  return 25;
+}
+
+function getTrophyAlleyFlyTargetElement() {
+  return lobbyTrophyButton || trophyBalanceTarget;
+}
+
+async function animateTrophiesToAlley(amount) {
+  const targetElement = getTrophyAlleyFlyTargetElement();
+
+  if (!targetElement) {
     await wait(700);
     return;
   }
 
-  const target = trophyBalanceTarget.getBoundingClientRect();
-  const startX = window.innerWidth / 2 - 24;
-  const startY = window.innerHeight / 2 - 24;
-  const targetX = target.left + target.width / 2 - 24;
-  const targetY = target.top + target.height / 2 - 24;
-  const flyers = [];
+  const iconCount = getTrophyFlyerIconCount(amount);
+  const target = targetElement.getBoundingClientRect();
+  const startX = window.innerWidth / 2;
+  const startY = window.innerHeight / 2;
+  const targetX = target.left + target.width / 2;
+  const targetY = target.top + target.height / 2;
+  const cluster = document.createElement("div");
+  const label = document.createElement("p");
 
-  for (let index = 0; index < 8; index += 1) {
-    const flyer = document.createElement("div");
-    flyer.className = "trophy-flyer";
-    const size = randomBetween(40, 54);
-    const offsetX = randomBetween(-42, 42);
-    const offsetY = randomBetween(-34, 34);
-    const scale = randomBetween(75, 118) / 100;
-    const rotation = randomBetween(-20, 20);
-    flyer.style.left = `${startX}px`;
-    flyer.style.top = `${startY}px`;
-    flyer.style.width = `${size}px`;
-    flyer.style.height = `${size}px`;
-    flyer.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale}) rotate(${rotation}deg)`;
-    flyer.style.opacity = "0";
-    document.body.appendChild(flyer);
-    flyers.push(flyer);
+  cluster.className = "trophy-flyer-cluster";
+  cluster.style.left = `${startX}px`;
+  cluster.style.top = `${startY}px`;
+  label.className = "trophy-flyer-label";
+  label.textContent = `+${amount}`;
+
+  for (let index = 0; index < iconCount; index += 1) {
+    const icon = document.createElement("span");
+    const angle = (Math.PI * 2 * index) / iconCount;
+    const radius = iconCount <= 5 ? 12 : iconCount <= 10 ? 18 : iconCount <= 15 ? 24 : iconCount <= 20 ? 30 : 36;
+    const jitterX = randomBetween(-4, 4);
+    const jitterY = randomBetween(-4, 4);
+
+    icon.className = "trophy-flyer-icon";
+    icon.style.left = `${Math.cos(angle) * radius + jitterX}px`;
+    icon.style.top = `${Math.sin(angle) * radius + jitterY}px`;
+    icon.style.setProperty("--trophy-icon-rotate", `${randomBetween(-18, 18)}deg`);
+    icon.style.setProperty("--trophy-icon-delay", `${index * 12}ms`);
+    cluster.appendChild(icon);
   }
 
-  await wait(70);
+  cluster.appendChild(label);
+  document.body.appendChild(cluster);
+  playOneShotSound("coins", 0.84);
 
-  flyers.forEach((flyer, index) => {
-    const arcX = targetX - startX + randomBetween(-14, 14) + index * 2;
-    const arcY = targetY - startY - randomBetween(12, 34) - index * 5;
-    const duration = 720 + index * 24;
-    flyer.style.transition = `transform ${duration}ms cubic-bezier(0.18, 0.82, 0.14, 1), opacity ${duration}ms linear`;
-    flyer.style.transform = `translate(${arcX}px, ${arcY}px) scale(0.2) rotate(${randomBetween(180, 420)}deg)`;
-    flyer.style.opacity = "1";
+  await wait(120);
+  cluster.classList.add("show");
+  await wait(640);
 
-    window.setTimeout(() => {
-      flyer.style.opacity = "0";
-    }, 60);
-  });
+  const flyX = targetX - startX;
+  const flyY = targetY - startY;
+  cluster.style.setProperty("--trophy-fly-x", `${flyX}px`);
+  cluster.style.setProperty("--trophy-fly-y", `${flyY}px`);
+  cluster.classList.add("fly");
 
-  await wait(1080);
-  flyers.forEach((flyer) => flyer.remove());
+  await wait(900);
+  cluster.remove();
+}
+
+function createPlayerBuffState() {
+  return {
+    speedBoosts: [],
+    ammoBoosts: [],
+    shieldMs: 0,
+    robotSlowMs: 0,
+    invisibleMs: 0,
+  };
 }
 
 function createGameState() {
@@ -12376,6 +24218,7 @@ function createGameState() {
     lastShotAt: -Infinity,
     nextRobotId: 1,
     nextProjectileId: 1,
+    characterVoiceTimerMs: 0,
     width: 0,
     height: 0,
     keys: {
@@ -12400,6 +24243,10 @@ function createGameState() {
     pet: {
       x: 0,
       y: 0,
+      hp: 0,
+      maxHp: 0,
+      alive: true,
+      respawnTimerMs: 0,
       attackTimer: 0,
       attackTimerMs: 0,
       castTimerMsSecondary: 0,
@@ -12410,11 +24257,16 @@ function createGameState() {
       mode: "a",
       shieldActive: false,
       shieldTimerMs: 0,
-    shieldCooldownMs: 0,
-    targetId: null,
-    jaguarNextTriggerHp: 2500,
-    pascalTriggered: false,
-    pascalInvisibleMs: 0,
+      shieldCooldownMs: 0,
+      targetId: null,
+      pascalTriggered: false,
+      pascalInvisibleMs: 0,
+      ozzyRoamAngle: 0,
+      coralRoamX: 0,
+      coralRoamY: 0,
+      coralRoamTimerMs: 0,
+      coralPulseTimerMs: 0,
+      flaroDamageHits: 0,
     },
     petPack: [],
     hadActiveRobots: false,
@@ -12424,11 +24276,14 @@ function createGameState() {
     energyBuffMs: 0,
     currentWave: 0,
     pendingWave: 1,
-    waveIntroMs: 3000,
+    waveIntroMs: WAVE_INTRO_FULL_MS,
+    waveBannerTone: "",
+    waveBannerToneKey: "",
     paused: false,
     pauseResumeCountdownMs: 0,
     pauseResumeRobotsLeft: 0,
     multiplayerStartCountdownMs: 0,
+    waveElapsedMs: 0,
     waveSpawnTimerMs: 0,
     waveRobotsRemaining: 0,
     waveStages: [],
@@ -12438,6 +24293,10 @@ function createGameState() {
     damageDealtRun: 0,
     runPetId: "",
     trophiesEarnedRun: 0,
+    silverEarnedRun: 0,
+    streakBonusEarnedRun: 0,
+    streakReachedRun: 0,
+    wave4StreakApplied: false,
     statsCounted: false,
     firstRobotPreludeActive: false,
     firstRobotTutorialActive: false,
@@ -12447,6 +24306,8 @@ function createGameState() {
     firstRobotTutorialInitialDistance: 0,
     resultStatus: "Koniec rundy",
     resultNote: "Twoje statystyki z tej rundy.",
+    rankingPointsEarnedRun: 0,
+    rankingShip: null,
     resultTimeouts: [],
     coopPartyId: "",
     coopSessionId: "",
@@ -12462,7 +24323,20 @@ function createGameState() {
     pickups: [],
     barriers: [],
     waterFields: [],
-    jungleFields: [],
+    towerHazards: [],
+    trees: [],
+    fallingLeaves: [],
+    towerBotSpawnTimerMs: TOWER_CONFIG.spawnIntervalMs,
+    nextTowerSpawnIndex: 0,
+    towerBotKills: 0,
+    nextTreeLeafId: 1,
+    nextAppleId: 1,
+    nextSpecialPetCopyId: 1,
+    treeLeafTimerMs: 0,
+    appleSpawnTimerMs: TREE_CONFIG.firstAppleSpawnMs,
+    appleEating: null,
+    playerBuffs: createPlayerBuffState(),
+    specialPetCopies: [],
   };
 }
 
@@ -12790,13 +24664,7 @@ function isCoopMatchActive() {
 }
 
 function getPlayerMaxHpForLoadout(characterId, petId) {
-  let baseHp = characterId === "talia" ? 4000 : GAME_RULES.playerMaxHp;
-
-  if (petId === "norka") {
-    baseHp = Math.max(baseHp, 3200);
-  }
-
-  return baseHp;
+  return GAME_RULES.playerMaxHp;
 }
 
 function getProjectileKindForCharacterId(characterId) {
@@ -12812,10 +24680,6 @@ function getProjectileKindForCharacterId(characterId) {
     return "elfie-shot";
   }
 
-  if (characterId === "millo-jako-elfie") {
-    return "millo-elfie-shot";
-  }
-
   if (characterId === "nora") {
     return "nora-shot";
   }
@@ -12828,44 +24692,36 @@ function getProjectileKindForCharacterId(characterId) {
     return "ann-shot";
   }
 
-  if (characterId === "ivy") {
-    return "ivy-shot";
+  if (characterId === "grifos") {
+    return "grifos-shot";
   }
 
-  if (characterId === "ozdobiona-ivy" || characterId === "ivy-obronczyni-dzungli") {
-    return "ivy-shot";
+  if (characterId === "mycelia" || characterId === "lazurowa-mycelia") {
+    return "mycelia-shot";
   }
 
-  if (characterId === "coco-nkosi") {
-    return "coco-shot";
+  if (characterId === "sylas" || characterId === "elegancki-sylias") {
+    return "sylas-shot";
   }
 
-  if (characterId === "roco-nkosi") {
-    return "coco-shot";
+  if (characterId === "nerissa") {
+    return "nerissa-shot";
   }
 
-  if (characterId === "aslan") {
-    return "aslan-shot";
+  if (characterId === "hookcrab") {
+    return "hookcrab-shot";
   }
 
-  if (characterId === "aslan-za-mlodu" || characterId === "naomi") {
-    return "aslan-shot";
+  if (characterId === "lunella") {
+    return "lunella-shot";
   }
 
-  if (characterId === "wojownik-aslan") {
-    return "aslan-shot";
+  if (characterId === "thalia") {
+    return "thalia-shot";
   }
 
-  if (characterId === "kora" || characterId === "krolowa-kora") {
-    return "kora-shot";
-  }
-
-  if (characterId === "kira") {
-    return "kira-shot";
-  }
-
-  if (characterId === "wodzu") {
-    return "wodzu-shot";
+  if (characterId === "shulla") {
+    return "shulla-shot";
   }
 
   if (characterId === "zlotowlosa") {
@@ -12889,9 +24745,7 @@ function getProjectileKindForCharacterId(characterId) {
 
   if (
     characterId === "linda" ||
-    characterId === "roslinna-krolowa-linda" ||
-    characterId === "elfie-jako-linda" ||
-    characterId === "linda-wojownicza-ksiezniczka"
+    characterId === "roslinna-krolowa-linda"
   ) {
     return "linda-shot";
   }
@@ -13017,7 +24871,8 @@ function initializeCoopGameSession(sessionSnapshot) {
   game.firstRobotTutorialPromptUsed = true;
   game.firstRobotTutorialDelayMs = 0;
   game.firstRobotTutorialRobotId = null;
-  game.waveIntroMs = Math.max(0, Number(sessionSnapshot?.waveIntroMs || 3000));
+  game.waveIntroMs = Math.max(0, Number(sessionSnapshot?.waveIntroMs || WAVE_INTRO_FULL_MS));
+  game.waveElapsedMs = Math.max(0, Number(sessionSnapshot?.waveElapsedMs || 0));
   game.pauseResumeCountdownMs = Math.max(0, Number(sessionSnapshot?.pauseResumeCountdownMs || 0));
   game.pauseResumeRobotsLeft = Math.max(0, Number(sessionSnapshot?.pauseResumeRobotsLeft || 0));
   game.currentWave = Math.max(0, Number(sessionSnapshot?.currentWave || 0));
@@ -13071,6 +24926,7 @@ function buildCoopPartySnapshot(stateName = "playing") {
     currentWave: game.currentWave,
     pendingWave: game.pendingWave,
     waveIntroMs: Math.max(0, Number(game.waveIntroMs || 0)),
+    waveElapsedMs: Math.max(0, Number(game.waveElapsedMs || 0)),
     pauseResumeCountdownMs: Math.max(0, Number(game.pauseResumeCountdownMs || 0)),
     pauseResumeRobotsLeft: Math.max(0, Number(game.pauseResumeRobotsLeft || 0)),
     robotsKilledTotal: Math.max(0, Number(game.robotsKilledTotal || 0)),
@@ -13119,6 +24975,7 @@ function applyRemoteCoopSnapshot(snapshot) {
   game.currentWave = Math.max(0, Number(snapshot.currentWave || 0));
   game.pendingWave = Math.max(1, Number(snapshot.pendingWave || 1));
   game.waveIntroMs = Math.max(0, Number(snapshot.waveIntroMs || 0));
+  game.waveElapsedMs = Math.max(0, Number(snapshot.waveElapsedMs || 0));
   game.pauseResumeCountdownMs = Math.max(0, Number(snapshot.pauseResumeCountdownMs || 0));
   game.pauseResumeRobotsLeft = Math.max(0, Number(snapshot.pauseResumeRobotsLeft || 0));
   game.robotsKilledTotal = Math.max(0, Number(snapshot.robotsKilledTotal || 0));
@@ -13263,6 +25120,7 @@ async function resetPartyAfterCoopResult() {
 
 function startGameSession() {
   stopGameSession();
+  syncGameSurfaceLayout();
   updateGameBounds();
   resetGameSession();
   if (ui.pendingPartyLaunch?.snapshot) {
@@ -13274,7 +25132,8 @@ function startGameSession() {
   hideGameResult();
   renderGameScene();
   syncTouchControlsVisibility();
-  if (!isFirstRobotPreludeActive()) {
+  if (!isFirstRobotPreludeActive() && !isRankingShipMatchActive()) {
+    healDogPetForWaveIntro();
     playWaveIntroSound();
   }
   scheduleRemoteProfileSync(true);
@@ -13302,8 +25161,17 @@ function stopGameSession() {
   barriersLayer.innerHTML = "";
   pickupsLayer.innerHTML = "";
   waterFieldsLayer.innerHTML = "";
-  if (jungleFieldsLayer) {
-    jungleFieldsLayer.innerHTML = "";
+  if (treeBaseLayer) {
+    treeBaseLayer.innerHTML = "";
+  }
+  if (towerLayer) {
+    towerLayer.innerHTML = "";
+  }
+  if (towerHudLayer) {
+    towerHudLayer.innerHTML = "";
+  }
+  if (treeCanopyLayer) {
+    treeCanopyLayer.innerHTML = "";
   }
   if (multiplayerPlayersLayer) {
     multiplayerPlayersLayer.innerHTML = "";
@@ -13315,6 +25183,7 @@ function stopGameSession() {
     gameTutorialOverlay.hidden = true;
   }
   gameMap.classList.remove("multiplayer-ffa");
+  gameMap.classList.remove("ranking-ship-mode");
   gameMap.classList.remove("first-robot-tutorial");
   playerEntity.classList.remove("tutorial-focus");
   playerEntity.classList.remove("pascal-invisible");
@@ -13336,20 +25205,531 @@ function stopGameSession() {
   });
 }
 
+function setupRankingShipMatch() {
+  const selectedPetIds = ui.rankingGameSelectedPetIds
+    .slice(0, 4)
+    .filter((petId) => getOwnedItem("pets", petId));
+  const fallbackPets = getOwnedRankingGamePets().slice(0, 2).map((pet) => pet.id);
+  const activePetId = selectedPetIds[0] || fallbackPets[0] || "";
+  const opponent = ui.rankingGameOpponent || createRankingShipOpponent();
+
+  game.mode = "ranking-ship";
+  game.currentWave = 0;
+  game.pendingWave = 0;
+  game.waveIntroMs = 0;
+  game.waveElapsedMs = 0;
+  game.waveRobotsRemaining = 0;
+  game.waveStages = [];
+  game.currentWaveStageIndex = -1;
+  game.currentWaveConfig = null;
+  game.player.x = clamp(game.width * 0.5, 84, Math.max(84, game.width - 84));
+  game.player.y = clamp(game.height * 0.78, 110, Math.max(110, game.height - 84));
+  game.pet.x = game.player.x + 70;
+  game.pet.y = game.player.y + 36;
+  game.rankingShip = {
+    selectedPetIds,
+    activePetId,
+    opponent,
+    elapsedMs: 0,
+    spawnTimerMs: 400,
+    opponentTimerMs: 0,
+    shipMaxHp: RANKING_SHIP_MAX_HP,
+    shipHp: RANKING_SHIP_MAX_HP,
+    opponentShipMaxHp: RANKING_SHIP_MAX_HP,
+    opponentShipHp: RANKING_SHIP_MAX_HP,
+    shipX: clamp(game.width * 0.5, 120, Math.max(120, game.width - 120)),
+    shipY: clamp(game.height * 0.42, 140, Math.max(140, game.height - 120)),
+    petAllies: createRankingShipPetAllies(selectedPetIds),
+    opponentPetIds: Array.isArray(opponent.petIds) && opponent.petIds.length >= 4
+      ? opponent.petIds.slice(0, 4)
+      : createRankingOpponentPetIds(),
+    nextSpawnIndex: randomBetween(0, 1),
+    previewOpen: false,
+    finished: false,
+  };
+  game.runPetId = activePetId;
+}
+
+function createRankingShipPetAllies(selectedPetIds = []) {
+  const offsets = [
+    { x: -88, y: -34 },
+    { x: 88, y: -36 },
+    { x: -70, y: 58 },
+    { x: 70, y: 58 },
+  ];
+
+  return selectedPetIds.slice(0, 4).map((petId, index) => {
+    const offset = offsets[index] || { x: 0, y: 0 };
+    return {
+      id: `ranking-pet-${index}-${petId}`,
+      petId,
+      x: clamp(game.player.x + offset.x, 42, Math.max(42, game.width - 42)),
+      y: clamp(game.player.y + offset.y, 82, Math.max(82, game.height - 42)),
+      offsetX: offset.x,
+      offsetY: offset.y,
+      targetId: null,
+      attackTimerMs: index * 220,
+      castTimerMs: index * 360,
+      pulseTimerMs: index * 280,
+      bobSeed: randomBetween(0, 1000),
+    };
+  });
+}
+
+function isRankingShipMatchActive() {
+  return game.mode === "ranking-ship" && Boolean(game.rankingShip);
+}
+
+function getRankingShipPercent(kind = "self") {
+  const ship = game.rankingShip;
+
+  if (!ship) {
+    return 100;
+  }
+
+  const hp = kind === "opponent" ? ship.opponentShipHp : ship.shipHp;
+  const maxHp = kind === "opponent" ? ship.opponentShipMaxHp : ship.shipMaxHp;
+  return clamp((Number(hp || 0) / Math.max(1, Number(maxHp || 1))) * 100, 0, 100);
+}
+
+function getRankingShipSpawnPoint() {
+  const ship = game.rankingShip;
+  const spawnIndex = Math.abs(Number(ship?.nextSpawnIndex || 0)) % 2;
+  const isBottomLeft = spawnIndex === 0;
+  const spawn = isBottomLeft
+    ? {
+        id: "ranking-bottom-left",
+        spawnX: clamp(58, 42, Math.max(42, game.width - 42)),
+        spawnY: clamp(game.height - 72, 94, Math.max(94, game.height - 42)),
+        fireIntervalMs: 3600,
+      }
+    : {
+        id: "ranking-top-right",
+        spawnX: clamp(game.width - 58, 42, Math.max(42, game.width - 42)),
+        spawnY: clamp(96, 88, Math.max(88, game.height - 42)),
+        fireIntervalMs: 2550,
+      };
+
+  if (ship) {
+    ship.nextSpawnIndex = (spawnIndex + 1) % 2;
+  }
+
+  return getSpacedTowerBotSpawnPoint(spawn);
+}
+
+function spawnRankingShipBot() {
+  const ship = game.rankingShip;
+
+  if (!ship) {
+    return;
+  }
+
+  const spawnPoint = getRankingShipSpawnPoint();
+  const botWave = 5;
+  const hp = RANKING_SHIP_BOT_HP;
+  const robot = {
+    id: game.nextRobotId,
+    kind: "tower-bot",
+    wave: botWave,
+    towerId: "ranking-ship",
+    x: spawnPoint.x,
+    y: spawnPoint.y,
+    hp,
+    maxHp: hp,
+    damage: 0,
+    attackIntervalMs: randomBetween(2300, 3600),
+    speed: TOWER_CONFIG.robotSpeed * RANKING_SHIP_BOT_SPEED_MULTIPLIER,
+    shotDamage: RANKING_SHIP_BOT_DAMAGE,
+    rewardTrophies: 0,
+    attackTimer: 0,
+    rangedAttackTimerMs: randomBetween(450, 1200),
+    walkAnimMs: 0,
+    isWalking: false,
+    fieldDamageTimer: 0,
+    poisonTimerMs: 0,
+    poisonDamageTimer: 0,
+    slowTimerMs: 0,
+    slowMultiplier: 1,
+    snakeVenomTimerMs: 0,
+    snakeDamageMultiplier: 1,
+    monkeyMarked: false,
+    frogDamageTimer: 0,
+    parrotManipulatedMs: 0,
+    parrotMarkMs: 0,
+    elephantRoamTargetX: spawnPoint.x,
+    elephantRoamTargetY: spawnPoint.y,
+    stunTimerMs: 0,
+    blindTimerMs: 0,
+    blindSpinAngle: 0,
+    history: [],
+    bubbleTimerMs: 0,
+    rewindElapsedMs: 0,
+    rewindDurationMs: 0,
+    rewindFromX: spawnPoint.x,
+    rewindFromY: spawnPoint.y,
+    rewindTargetX: spawnPoint.x,
+    rewindTargetY: spawnPoint.y,
+    sizeClass: "tower-bot",
+    dead: false,
+  };
+
+  game.robots.push(robot);
+  game.nextRobotId += 1;
+  playOneShotSound("towerSpawn", 0.54, 1, 800);
+}
+
+function updateRankingShipSpawns(deltaMs) {
+  const ship = game.rankingShip;
+
+  if (!ship) {
+    return;
+  }
+
+  ship.spawnTimerMs = Number(ship.spawnTimerMs || 0) + deltaMs;
+  const progress = clamp(Number(ship.elapsedMs || 0) / RANKING_SHIP_MATCH_DURATION_MS, 0, 1);
+  const intervalMs = Math.max(760, RANKING_SHIP_SPAWN_INTERVAL_MS - progress * 390);
+
+  while (ship.spawnTimerMs >= intervalMs) {
+    ship.spawnTimerMs -= intervalMs;
+    spawnRankingShipBot();
+  }
+}
+
+function updateRankingShipOpponent(deltaMs) {
+  const ship = game.rankingShip;
+
+  if (!ship) {
+    return;
+  }
+
+  ship.opponentTimerMs = Number(ship.opponentTimerMs || 0) + deltaMs;
+  const difficulty = ship.opponent?.difficulty === "easy" ? "easy" : "medium";
+  const baseDamagePerSecond = difficulty === "easy" ? 2380 : 1450;
+  const wave = 1 + Math.sin((Number(ship.elapsedMs || 0) + 900) / 5200) * 0.18;
+  const damage = baseDamagePerSecond * wave * (deltaMs / 1000);
+  ship.opponentShipHp = Math.max(0, Number(ship.opponentShipHp || 0) - damage);
+}
+
+function getRankingAllyAttackIntervalMs(petId) {
+  if (petId === "papuga-manipulantka") {
+    return getParrotCastIntervalMs();
+  }
+
+  if (petId === "l-psotka") {
+    return Math.round(Number(getLpsotkaPowerStats().castIntervalSeconds || 5) * 1000);
+  }
+
+  if (petId === "niedzwiedz-polarny") {
+    return GAME_RULES.polarBearCastIntervalMs || 4000;
+  }
+
+  if (petId === "sowa") {
+    return 10000;
+  }
+
+  if (petId === "el-kruk") {
+    return 1000;
+  }
+
+  if (petId === "coral") {
+    return 1600;
+  }
+
+  return 900;
+}
+
+function getRankingAllyBaseDamage(petId) {
+  const basePetId = getPetBaseId(petId);
+
+  if (basePetId === "pies-magik") {
+    return Math.max(60, Number(getDogPowerStats().damage || 100));
+  }
+
+  if (basePetId === "malpka-jasnoksieznik") {
+    return Math.max(80, Number(getMonkeyMagePowerStats().power || 200));
+  }
+
+  if (basePetId === "niedzwiedz-polarny") {
+    return Math.max(60, Number(getPolarBearPowerStats().snowballDamage || 50));
+  }
+
+  if (petId === "coral") {
+    return Math.max(70, Number(getCoralPowerStats().damage || 100));
+  }
+
+  if (petId === "papuga-manipulantka") {
+    return 55;
+  }
+
+  if (petId === "l-psotka") {
+    return 45;
+  }
+
+  if (petId === "sniezynka") {
+    return 38;
+  }
+
+  if (petId === "sowa") {
+    return 65;
+  }
+
+  return 70;
+}
+
+function getRankingAllyTarget(ally) {
+  const previousTarget = game.robots.find((robot) => robot.id === ally.targetId && !robot.dead);
+
+  if (previousTarget) {
+    return previousTarget;
+  }
+
+  const petId = ally.petId;
+
+  if (petId === "coral") {
+    const coralStats = getCoralPowerStats();
+    const threshold = Number(coralStats.damagedThreshold || CORAL_PET_STATS.damagedThreshold || 0.8);
+    const damagedTarget = game.robots
+      .filter((robot) => !robot.dead && Number(robot.hp || 0) < Number(robot.maxHp || robot.hp || 1) * threshold)
+      .sort((first, second) => Math.hypot(first.x - ally.x, first.y - ally.y) - Math.hypot(second.x - ally.x, second.y - ally.y))[0];
+
+    if (damagedTarget) {
+      ally.targetId = damagedTarget.id;
+      return damagedTarget;
+    }
+  }
+
+  const target = findNearestRobot(ally.x, ally.y);
+  ally.targetId = target ? target.id : null;
+  return target;
+}
+
+function moveRankingShipPetAlly(ally, deltaSeconds, target) {
+  const homeX = clamp(game.player.x + Number(ally.offsetX || 0), 42, Math.max(42, game.width - 42));
+  const homeY = clamp(game.player.y + Number(ally.offsetY || 0), 82, Math.max(82, game.height - 42));
+  const destination = target
+    ? {
+        x: clamp(target.x + Math.sin((performance.now() + ally.bobSeed) / 520) * 52, 42, Math.max(42, game.width - 42)),
+        y: clamp(target.y + 24 + Math.cos((performance.now() + ally.bobSeed) / 620) * 36, 82, Math.max(82, game.height - 42)),
+      }
+    : { x: homeX, y: homeY };
+  const dx = destination.x - ally.x;
+  const dy = destination.y - ally.y;
+  const distance = Math.hypot(dx, dy) || 1;
+
+  if (distance < 4) {
+    ally.x = destination.x;
+    ally.y = destination.y;
+    return;
+  }
+
+  const speed = (target ? GAME_RULES.dogSpeed * 1.08 : GAME_RULES.dogSpeed * 0.84) * deltaSeconds;
+  ally.x = clamp(ally.x + (dx / distance) * Math.min(speed, distance), 32, Math.max(32, game.width - 32));
+  ally.y = clamp(ally.y + (dy / distance) * Math.min(speed, distance), 70, Math.max(70, game.height - 32));
+}
+
+function applyRankingShipPetAllyAttack(ally, target) {
+  if (!ally || !target || target.dead) {
+    return;
+  }
+
+  const petId = ally.petId;
+
+  if (petId === "l-psotka") {
+    applyLpsotkaBubble(target);
+    damageRobot(target, getRankingAllyBaseDamage(petId), petId);
+    return;
+  }
+
+  if (petId === "papuga-manipulantka") {
+    applyParrotManipulation(target);
+    damageRobot(target, getRankingAllyBaseDamage(petId), petId);
+    return;
+  }
+
+  if (petId === "niedzwiedz-polarny") {
+    findNearestRobots(ally.x, ally.y, 2).forEach((robot) => {
+      damageRobot(robot, getRankingAllyBaseDamage(petId), petId);
+      slowRobot(robot, 900, 0.82);
+    });
+    return;
+  }
+
+  if (petId === "sniezynka") {
+    findNearestRobots(ally.x, ally.y, 3).forEach((robot) => {
+      slowRobot(robot, 1200, 0.76);
+      damageRobot(robot, getRankingAllyBaseDamage(petId), petId);
+    });
+    return;
+  }
+
+  if (petId === "sowa") {
+    target.blindTimerMs = Math.max(Number(target.blindTimerMs || 0), 1600);
+    target.blindSpinAngle = Math.random() * Math.PI * 2;
+    damageRobot(target, getRankingAllyBaseDamage(petId), petId);
+    return;
+  }
+
+  if (petId === "el-kruk") {
+    const ship = game.rankingShip;
+
+    if (ship && Number(ship.shipHp || 0) < Number(ship.shipMaxHp || 1) * 0.72) {
+      const healAmount = Math.min(1600, Number(ship.shipMaxHp || 0) - Number(ship.shipHp || 0));
+      ship.shipHp = Math.min(Number(ship.shipMaxHp || 0), Number(ship.shipHp || 0) + healAmount);
+      if (healAmount > 0) {
+        spawnFloatingText(ship.shipX, ship.shipY - 126, `+${Math.ceil(healAmount)}`, "heal");
+      }
+    } else {
+      damageRobot(target, 38, petId);
+    }
+    return;
+  }
+
+  if (petId === "coral") {
+    applyCoralBlindFromAlly(ally, target);
+    return;
+  }
+
+  damageRobot(target, getRankingAllyBaseDamage(petId), petId);
+}
+
+function applyCoralBlindFromAlly(ally, target) {
+  const coralStats = getCoralPowerStats();
+  spawnCoralFlash(ally.x, ally.y - 8, target.x, target.y - 12);
+  playOneShotSound("coralFlash", 0.58, 1, 520);
+  damageRobot(target, Number(coralStats.damage || CORAL_PET_STATS.damage || getRankingAllyBaseDamage("coral")), "coral");
+
+  if (!target.dead) {
+    target.blindTimerMs = Math.max(Number(target.blindTimerMs || 0), Number(coralStats.blindMs || CORAL_PET_STATS.blindMs || 3000));
+    target.blindSpinAngle = Math.random() * Math.PI * 2;
+    target.attackTimer = 0;
+    target.rangedAttackTimerMs = 0;
+  }
+}
+
+function updateRankingShipPetAllies(deltaSeconds, deltaMs) {
+  const ship = game.rankingShip;
+
+  if (!ship || !Array.isArray(ship.petAllies)) {
+    return;
+  }
+
+  ship.petAllies.forEach((ally) => {
+    const target = getRankingAllyTarget(ally);
+    moveRankingShipPetAlly(ally, deltaSeconds, target);
+    ally.attackTimerMs = Number(ally.attackTimerMs || 0) + deltaMs;
+    const intervalMs = getRankingAllyAttackIntervalMs(ally.petId);
+    const attackDistance = ally.petId === "papuga-manipulantka" || ally.petId === "l-psotka" ? 620 : 170;
+
+    if (!target || target.dead || Math.hypot(target.x - ally.x, target.y - ally.y) > attackDistance) {
+      ally.attackTimerMs = Math.min(Number(ally.attackTimerMs || 0), intervalMs);
+      return;
+    }
+
+    while (ally.attackTimerMs >= intervalMs) {
+      ally.attackTimerMs -= intervalMs;
+      applyRankingShipPetAllyAttack(ally, target);
+      if (target.dead) {
+        ally.targetId = null;
+        break;
+      }
+    }
+  });
+}
+
+function damageRankingShip(amount) {
+  const ship = game.rankingShip;
+
+  if (!ship || ship.finished) {
+    return;
+  }
+
+  const appliedDamage = Math.min(Number(amount || 0), Number(ship.shipHp || 0));
+  ship.shipHp = Math.max(0, Number(ship.shipHp || 0) - Number(amount || 0));
+  spawnFloatingText(ship.shipX, ship.shipY - 96, `-${Math.ceil(appliedDamage)}`, "hurt");
+}
+
+function updateRankingShipFrame(deltaMs, deltaSeconds, timestamp) {
+  const ship = game.rankingShip;
+
+  if (!ship || ship.finished) {
+    return;
+  }
+
+  ship.elapsedMs = Math.min(RANKING_SHIP_MATCH_DURATION_MS, Number(ship.elapsedMs || 0) + deltaMs);
+  updatePlayerMovement(deltaSeconds);
+  updateAmmo(deltaSeconds);
+  tryAutoFire(timestamp);
+  updateRankingShipPetAllies(deltaSeconds, deltaMs);
+  updateCharacterVoiceAmbient(deltaMs);
+  updateRankingShipSpawns(deltaMs);
+  updateRankingShipOpponent(deltaMs);
+  updateRobots(deltaSeconds);
+  updateProjectiles(deltaSeconds);
+  clampGameEntities();
+  cleanupDeadRobots();
+
+  if (Number(ship.shipHp || 0) <= 0 || Number(ship.opponentShipHp || 0) <= 0 || ship.elapsedMs >= RANKING_SHIP_MATCH_DURATION_MS) {
+    finishRankingShipMatch();
+  }
+}
+
+function calculateRankingShipPointDelta(won) {
+  const ownPercent = getRankingShipPercent("self");
+  const opponentPercent = getRankingShipPercent("opponent");
+  const kills = Math.max(0, Number(game.robotsKilledTotal || 0));
+  const percentDiff = ownPercent - opponentPercent;
+
+  if (won) {
+    const quality = clamp(percentDiff * 0.55 + kills * 0.24, 0, 40);
+    return clamp(Math.round(80 + quality), 80, 120);
+  }
+
+  const lossSeverity = clamp(Math.abs(percentDiff) * 0.62 + Math.max(0, 18 - kills) * 2.4, 0, 80);
+  return -clamp(Math.round(20 + lossSeverity), 20, 100);
+}
+
+function finishRankingShipMatch() {
+  const ship = game.rankingShip;
+
+  if (!ship || ship.finished || !game.active) {
+    return;
+  }
+
+  ship.finished = true;
+  const ownPercent = getRankingShipPercent("self");
+  const opponentPercent = getRankingShipPercent("opponent");
+  const won = ownPercent >= opponentPercent && ownPercent > 0;
+  const pointDelta = calculateRankingShipPointDelta(won);
+  state.rankingPoints = Math.max(0, getRankingPoints() + pointDelta);
+  state.rankingLossStreak = won ? 0 : Math.max(0, Number(state.rankingLossStreak || 0)) + 1;
+  game.rankingPointsEarnedRun = pointDelta;
+  saveState();
+  renderRankingAlley({ suppressEntranceAnimation: true });
+  concludeGameSession(
+    won ? "ZWYCIĘSTWO" : "PORAŻKA",
+    `Twój statek: ${Math.round(ownPercent)}%. Statek przeciwnika: ${Math.round(opponentPercent)}%. ${pointDelta >= 0 ? "+" : ""}${pointDelta} punktów rankingu.`
+  );
+}
+
 function resetGameSession() {
+  const requestedGameMode = ui.nextGameMode === "ranking-ship" ? "ranking-ship" : "solo";
   ui.pendingMultiplayerLaunch = null;
-  game.mode = ui.pendingPartyLaunch ? "coop" : "solo";
+  game.mode = ui.pendingPartyLaunch ? "coop" : requestedGameMode;
   game.lastShotAt = -Infinity;
   game.nextRobotId = 1;
   game.nextProjectileId = 1;
+  game.characterVoiceTimerMs = 0;
   game.hadActiveRobots = false;
   game.currentWave = 0;
   game.pendingWave = 1;
-  game.waveIntroMs = 3000;
+  game.waveIntroMs = WAVE_INTRO_FULL_MS;
+  game.waveBannerTone = "";
+  game.waveBannerToneKey = "";
   game.paused = false;
   game.pauseResumeCountdownMs = 0;
   game.pauseResumeRobotsLeft = 0;
   game.multiplayerStartCountdownMs = 0;
+  game.waveElapsedMs = 0;
   game.waveSpawnTimerMs = 0;
   game.waveRobotsRemaining = 0;
   game.waveStages = [];
@@ -13359,6 +25739,10 @@ function resetGameSession() {
   game.damageDealtRun = 0;
   game.runPetId = getEquippedPet()?.id || "";
   game.trophiesEarnedRun = 0;
+  game.silverEarnedRun = 0;
+  game.streakBonusEarnedRun = 0;
+  game.streakReachedRun = 0;
+  game.wave4StreakApplied = false;
   game.statsCounted = false;
   game.firstRobotPreludeActive = false;
   game.firstRobotTutorialActive = false;
@@ -13368,6 +25752,8 @@ function resetGameSession() {
   game.firstRobotTutorialInitialDistance = 0;
   game.resultStatus = "Koniec rundy";
   game.resultNote = "Twoje statystyki z tej rundy.";
+  game.rankingPointsEarnedRun = 0;
+  game.rankingShip = null;
   clearGameResultTimers();
   game.coopPartyId = "";
   game.coopSessionId = "";
@@ -13383,10 +25769,20 @@ function resetGameSession() {
   game.pickups = [];
   game.barriers = [];
   game.waterFields = [];
-  game.jungleFields = [];
-  if (state.bookMissionProgress && typeof state.bookMissionProgress === "object") {
-    state.bookMissionProgress.currentRunRobots = 0;
-  }
+  game.towerHazards = [];
+  game.trees = [];
+  game.fallingLeaves = [];
+  game.towerBotSpawnTimerMs = TOWER_CONFIG.spawnIntervalMs;
+  game.nextTowerSpawnIndex = randomBetween(0, 1);
+  game.towerBotKills = 0;
+  game.nextTreeLeafId = 1;
+  game.nextAppleId = 1;
+  game.nextSpecialPetCopyId = 1;
+  game.treeLeafTimerMs = randomBetween(TREE_CONFIG.leafMinSpawnMs, TREE_CONFIG.leafMaxSpawnMs);
+  game.appleSpawnTimerMs = TREE_CONFIG.firstAppleSpawnMs;
+  game.appleEating = null;
+  game.playerBuffs = createPlayerBuffState();
+  game.specialPetCopies = [];
   setupGameAmmo();
   game.player.hp = getPlayerMaxHp();
   game.player.x = game.width / 2;
@@ -13404,9 +25800,15 @@ function resetGameSession() {
   game.pet.shieldTimerMs = 0;
   game.pet.shieldCooldownMs = 0;
   game.pet.targetId = null;
-  game.pet.jaguarNextTriggerHp = 2500;
   game.pet.pascalTriggered = false;
   game.pet.pascalInvisibleMs = 0;
+  game.pet.ozzyRoamAngle = Math.random() * Math.PI * 2;
+  game.pet.coralRoamX = 0;
+  game.pet.coralRoamY = 0;
+  game.pet.coralRoamTimerMs = 0;
+  game.pet.coralPulseTimerMs = 0;
+  game.pet.flaroDamageHits = 0;
+  resetRunPetVitals();
   game.touch.moveX = 0;
   game.touch.moveY = 0;
   game.touch.movePointerId = null;
@@ -13415,9 +25817,14 @@ function resetGameSession() {
   game.pet.x = game.player.x + 70;
   game.pet.y = game.player.y + 36;
   game.petPack = [];
+  setupGameTrees();
 
-  if (game.mode === "solo" && getEquippedPet()?.id === "sniezynka") {
-    game.pet.shieldCooldownMs = GAME_RULES.snowflakeShieldCooldownMs;
+  if (game.mode === "ranking-ship") {
+    setupRankingShipMatch();
+  }
+
+  if (game.mode === "solo" && getEquippedPet()?.id === "sowa") {
+    game.pet.shieldCooldownMs = GAME_RULES.owlShieldCooldownMs;
   }
 
   if (game.mode === "solo" && !state.seenFirstRobotTutorial) {
@@ -13459,46 +25866,59 @@ function getAmmoSlotConfig() {
   const pet = getEquippedPet();
 
   if (isElKrukElfieSkinBoostActive()) {
-    return {
+    return withAppleAmmoRechargeBoost({
       slotTypes: new Array(GAME_RULES.baseAmmoCount).fill("elfie-bonus"),
       rechargeDurations: new Array(GAME_RULES.baseAmmoCount).fill(
         Math.max(0.4, GAME_RULES.ammoRechargeSeconds - 0.7)
       ),
-    };
+    });
   }
 
   if (pet && pet.id === "chomik-strazak") {
-    return {
+    return withAppleAmmoRechargeBoost({
       slotTypes: new Array(GAME_RULES.baseAmmoCount).fill("bonus"),
       rechargeDurations: new Array(GAME_RULES.baseAmmoCount).fill(
         GAME_RULES.ammoRechargeSeconds + GAME_RULES.hamsterAmmoPenaltySeconds
       ),
-    };
+    });
   }
 
   if (pet && pet.id === "waz-kaktus") {
-    return {
+    return withAppleAmmoRechargeBoost({
       slotTypes: ["slow", "", ""],
       rechargeDurations: [
         GAME_RULES.ammoRechargeSeconds + 1.2,
         GAME_RULES.ammoRechargeSeconds,
         GAME_RULES.ammoRechargeSeconds,
       ],
-    };
+    });
   }
 
   if (isCatHealingBoostActive()) {
-    return {
+    return withAppleAmmoRechargeBoost({
       slotTypes: new Array(GAME_RULES.baseAmmoCount).fill("heal"),
       rechargeDurations: new Array(GAME_RULES.baseAmmoCount).fill(
         GAME_RULES.ammoRechargeSeconds / 1.33
       ),
-    };
+    });
+  }
+
+  return withAppleAmmoRechargeBoost({
+    slotTypes: new Array(GAME_RULES.baseAmmoCount).fill(""),
+    rechargeDurations: new Array(GAME_RULES.baseAmmoCount).fill(GAME_RULES.ammoRechargeSeconds),
+  });
+}
+
+function withAppleAmmoRechargeBoost(slotConfig) {
+  const multiplier = getAppleAmmoRechargeMultiplier();
+
+  if (multiplier === 1) {
+    return slotConfig;
   }
 
   return {
-    slotTypes: new Array(GAME_RULES.baseAmmoCount).fill(""),
-    rechargeDurations: new Array(GAME_RULES.baseAmmoCount).fill(GAME_RULES.ammoRechargeSeconds),
+    ...slotConfig,
+    rechargeDurations: slotConfig.rechargeDurations.map((duration) => Math.max(0.35, duration * multiplier)),
   };
 }
 
@@ -13523,14 +25943,870 @@ function updateGameBounds() {
   game.height = rect.height;
 }
 
+function setupGameTrees() {
+  game.trees = [];
+  game.fallingLeaves = [];
+
+  if (!TREE_MAP_ENABLED || game.mode !== "solo" || game.width <= 0 || game.height <= 0) {
+    return;
+  }
+
+  const treeWidth = TREE_CONFIG.width;
+  const treeHeight = TREE_CONFIG.height;
+  const safeMarginX = Math.min(180, Math.max(120, game.width * 0.16));
+  const minX = Math.min(safeMarginX, Math.max(80, game.width / 2));
+  const maxX = Math.max(minX, game.width - safeMarginX);
+  const minY = Math.min(220, Math.max(168, treeHeight * 0.72));
+  const maxY = Math.max(minY, game.height - 74);
+  const preferredSpots = [
+    { x: game.width * 0.24, y: game.height * 0.34 },
+    { x: game.width * 0.76, y: game.height * 0.36 },
+    { x: game.width * 0.28, y: game.height * 0.72 },
+    { x: game.width * 0.72, y: game.height * 0.72 },
+  ];
+  const safeSpots = preferredSpots
+    .map((spot) => ({
+      x: clamp(spot.x + randomBetween(-54, 54), minX, maxX),
+      y: clamp(spot.y + randomBetween(-36, 36), minY, maxY),
+    }))
+    .filter((spot) => Math.hypot(spot.x - game.player.x, spot.y - game.player.y) > 170);
+  const chosenSpot = safeSpots[Math.floor(Math.random() * safeSpots.length)] || {
+    x: clamp(game.width * 0.74, minX, maxX),
+    y: clamp(game.height * 0.38, minY, maxY),
+  };
+
+  game.trees.push({
+    id: "tree-1",
+    x: chosenSpot.x,
+    y: chosenSpot.y,
+    width: treeWidth,
+    height: treeHeight,
+    zoneRadiusX: TREE_CONFIG.zoneRadiusX,
+    zoneRadiusY: TREE_CONFIG.zoneRadiusY,
+    apples: [],
+  });
+}
+
+function getGameTowers() {
+  if (game.width <= 0 || game.height <= 0) {
+    return [];
+  }
+
+  const width = TOWER_CONFIG.width;
+  const height = TOWER_CONFIG.height;
+  const bottomLeftX = clamp(112, 86, Math.max(86, game.width - 86));
+  const bottomLeftY = clamp(game.height - 18, height + 10, Math.max(height + 10, game.height - 18));
+  const topRightX = clamp(game.width - 112, 86, Math.max(86, game.width - 86));
+  const topRightY = clamp(188, height + 8, Math.max(height + 8, game.height - 48));
+
+  return [
+    {
+      id: "bottom-left",
+      x: bottomLeftX,
+      y: bottomLeftY,
+      width,
+      height,
+      blockerX: bottomLeftX,
+      blockerY: bottomLeftY - 30,
+      spawnX: bottomLeftX + 92,
+      spawnY: bottomLeftY - 74,
+      fireIntervalMs: 4500,
+    },
+    {
+      id: "top-right",
+      x: topRightX,
+      y: topRightY,
+      width,
+      height,
+      blockerX: topRightX,
+      blockerY: topRightY - 30,
+      spawnX: topRightX - 92,
+      spawnY: topRightY + 8,
+      fireIntervalMs: 2500,
+    },
+  ];
+}
+
+function updateTowerSystems(deltaMs) {
+  return;
+}
+
+function getTowerBotSpeedForWave(waveNumber) {
+  const wave = clamp(Math.round(Number(waveNumber || 1)), 1, TOTAL_GAME_WAVES);
+  const multiplier = 1.1 + (wave - 1) * 0.05;
+  return TOWER_CONFIG.robotSpeed * multiplier;
+}
+
+function getSpacedTowerBotSpawnPoint(tower) {
+  const spawnSpacing = Number(TOWER_CONFIG.spawnSpacing || 64);
+  const offsets = [
+    { x: 0, y: 0 },
+    { x: spawnSpacing, y: 0 },
+    { x: -spawnSpacing, y: 0 },
+    { x: 0, y: spawnSpacing },
+    { x: 0, y: -spawnSpacing },
+    { x: spawnSpacing * 0.72, y: spawnSpacing * 0.72 },
+    { x: -spawnSpacing * 0.72, y: spawnSpacing * 0.72 },
+    { x: spawnSpacing * 0.72, y: -spawnSpacing * 0.72 },
+    { x: -spawnSpacing * 0.72, y: -spawnSpacing * 0.72 },
+  ];
+  const aliveTowerBots = game.robots.filter((robot) => robot.kind === "tower-bot" && !robot.dead);
+  let bestPoint = {
+    x: clamp(tower.spawnX, 48, Math.max(48, game.width - 48)),
+    y: clamp(tower.spawnY, 90, Math.max(90, game.height - 40)),
+  };
+  let bestDistance = -Infinity;
+
+  for (const offset of offsets) {
+    const point = {
+      x: clamp(tower.spawnX + offset.x, 48, Math.max(48, game.width - 48)),
+      y: clamp(tower.spawnY + offset.y, 90, Math.max(90, game.height - 40)),
+    };
+    const nearestDistance = aliveTowerBots.reduce((nearest, robot) => (
+      Math.min(nearest, Math.hypot(robot.x - point.x, robot.y - point.y))
+    ), Infinity);
+
+    if (nearestDistance >= spawnSpacing) {
+      return point;
+    }
+
+    if (nearestDistance > bestDistance) {
+      bestPoint = point;
+      bestDistance = nearestDistance;
+    }
+  }
+
+  return bestPoint;
+}
+
+function spawnTowerBot(waveConfig = getWaveConfig(game.currentWave || game.pendingWave || 1)) {
+  const towers = getGameTowers();
+
+  if (!towers.length) {
+    return;
+  }
+
+  const towerIndex = Math.abs(Number(game.nextTowerSpawnIndex || 0)) % towers.length;
+  const tower = towers[towerIndex];
+  const robotStats = {
+    hp: Number(waveConfig.robotHp || TOWER_CONFIG.robotHp),
+    damage: Number(waveConfig.robotDamage || TOWER_CONFIG.robotDamage),
+  };
+  game.nextTowerSpawnIndex = (towerIndex + 1) % towers.length;
+
+  const spawnPoint = getSpacedTowerBotSpawnPoint(tower);
+  const x = spawnPoint.x;
+  const y = spawnPoint.y;
+  const robot = {
+    id: game.nextRobotId,
+    kind: "tower-bot",
+    wave: Number(waveConfig.wave || game.currentWave || game.pendingWave || 1),
+    towerId: tower.id,
+    x,
+    y,
+    hp: robotStats.hp,
+    maxHp: robotStats.hp,
+    damage: 0,
+    attackIntervalMs: tower.fireIntervalMs,
+    speed: getTowerBotSpeedForWave(waveConfig.wave || game.currentWave || game.pendingWave || 1),
+    shotDamage: robotStats.damage,
+    rewardTrophies: 0,
+    attackTimer: 0,
+    rangedAttackTimerMs: Math.round(tower.fireIntervalMs * 0.45),
+    walkAnimMs: 0,
+    isWalking: false,
+    fieldDamageTimer: 0,
+    poisonTimerMs: 0,
+    poisonDamageTimer: 0,
+    slowTimerMs: 0,
+    slowMultiplier: 1,
+    snakeVenomTimerMs: 0,
+    snakeDamageMultiplier: 1,
+    monkeyMarked: false,
+    frogDamageTimer: 0,
+    parrotManipulatedMs: 0,
+    parrotMarkMs: 0,
+    elephantRoamTargetX: x,
+    elephantRoamTargetY: y,
+    stunTimerMs: 0,
+    blindTimerMs: 0,
+    blindSpinAngle: 0,
+    history: [],
+    bubbleTimerMs: 0,
+    rewindElapsedMs: 0,
+    rewindDurationMs: 0,
+    rewindFromX: x,
+    rewindFromY: y,
+    rewindTargetX: x,
+    rewindTargetY: y,
+    sizeClass: "tower-bot",
+    dead: false,
+  };
+
+  game.robots.push(robot);
+  game.nextRobotId += 1;
+  playOneShotSound("towerSpawn", 0.62, 1, 950);
+}
+
+function updateTowerBotRobot(robot, deltaSeconds, deltaMs) {
+  if (!robot || robot.dead || robot.stunTimerMs > 0) {
+    if (robot) {
+      robot.isWalking = false;
+    }
+    return;
+  }
+
+  const target = getTowerBotTarget(robot);
+
+  if (!target) {
+    robot.isWalking = false;
+    return;
+  }
+
+  const dx = target.x - robot.x;
+  const dy = target.y - robot.y;
+  const distance = Math.hypot(dx, dy) || 1;
+  const speed = Number(robot.speed || TOWER_CONFIG.robotSpeed) * getRobotSlowMultiplier(robot);
+  let moveX = 0;
+  let moveY = 0;
+
+  if (distance > TOWER_CONFIG.maxDistance) {
+    moveX = dx / distance;
+    moveY = dy / distance;
+  } else if (distance < TOWER_CONFIG.minDistance) {
+    moveX = -dx / distance;
+    moveY = -dy / distance;
+  }
+
+  robot.isWalking = Math.abs(moveX) + Math.abs(moveY) > 0;
+
+  if (robot.isWalking) {
+    const step = speed * deltaSeconds;
+    robot.x = clamp(robot.x + moveX * step, 42, Math.max(42, game.width - 42));
+    robot.y = clamp(robot.y + moveY * step, 82, Math.max(82, game.height - 42));
+    robot.walkAnimMs = (Number(robot.walkAnimMs || 0) + deltaMs) % 100000;
+    applyTowerBlockersToEntity(robot, 34);
+  }
+
+  robot.rangedAttackTimerMs = Number(robot.rangedAttackTimerMs || 0) + deltaMs;
+
+  if (distance > TOWER_CONFIG.attackRange) {
+    return;
+  }
+
+  while (robot.rangedAttackTimerMs >= Number(robot.attackIntervalMs || 3000)) {
+    robot.rangedAttackTimerMs -= Number(robot.attackIntervalMs || 3000);
+    spawnTowerBotProjectile(robot, target.x, target.y, target.type, target.robot?.id || null);
+  }
+}
+
+function getTowerBotTarget(robot) {
+  if (isRankingShipMatchActive()) {
+    return {
+      type: "ranking-ship",
+      x: game.rankingShip.shipX,
+      y: game.rankingShip.shipY,
+    };
+  }
+
+  const manipulatedTarget = getManipulatedRobotTarget(robot);
+  if (manipulatedTarget) {
+    return manipulatedTarget;
+  }
+
+  if (Number(robot.parrotManipulatedMs || 0) > 0) {
+    return null;
+  }
+
+  const playerTarget = getRobotTargetPlayer(robot);
+  const petTarget = getRobotDogTarget(robot, playerTarget);
+
+  if (petTarget) {
+    return petTarget;
+  }
+
+  if (!playerTarget || playerTarget.alive === false) {
+    return null;
+  }
+
+  return {
+    type: "player",
+    x: playerTarget.x,
+    y: playerTarget.y,
+    playerId: playerTarget.playerId || "",
+  };
+}
+
+function spawnTowerBotProjectile(robot, targetX, targetY, targetType = "player", targetRobotId = null) {
+  const startX = robot.x;
+  const startY = robot.y - 22;
+  const dx = targetX - startX;
+  const dy = targetY - startY;
+  const distance = Math.hypot(dx, dy) || 1;
+  const angle = Math.atan2(dy, dx);
+
+  playOneShotSound("towerShot", 0.66, 1, 900);
+  game.projectiles.push({
+    id: game.nextProjectileId,
+    kind: "tower-bot-shot",
+    x: startX,
+    y: startY,
+    targetX,
+    targetY,
+    vx: (dx / distance) * TOWER_CONFIG.projectileSpeed,
+    vy: (dy / distance) * TOWER_CONFIG.projectileSpeed,
+    angle,
+    damage: Number(robot.shotDamage || TOWER_CONFIG.robotDamage),
+    createsHazard: targetType !== "ranking-ship" && targetType !== "robot" && Number(robot.wave || game.currentWave || 1) >= 3,
+    targetType,
+    targetRobotId,
+    ttlMs: TOWER_CONFIG.projectileTtlMs,
+    ageMs: 0,
+  });
+  game.nextProjectileId += 1;
+}
+
+function getTowerBotProjectileSpeedMultiplier() {
+  const petId = game.runPetId || getEquippedPet()?.id;
+
+  if (getPetBaseId(petId) !== "pluto") {
+    return 1;
+  }
+
+  const power = getPlutoPowerStats();
+  return clamp(1 - Number(power.projectileSlow || 0), 0.35, 1);
+}
+
+function updateTowerBotProjectile(projectile, deltaSeconds, deltaMs) {
+  projectile.ageMs = Number(projectile.ageMs || 0) + deltaMs;
+  const speedMultiplier = getTowerBotProjectileSpeedMultiplier();
+  const vx = Number(projectile.vx || 0) * speedMultiplier;
+  const vy = Number(projectile.vy || 0) * speedMultiplier;
+  const step = Math.hypot(vx, vy) * deltaSeconds;
+
+  if (projectile.createsHazard) {
+    const dx = Number(projectile.targetX || projectile.x) - projectile.x;
+    const dy = Number(projectile.targetY || projectile.y) - projectile.y;
+    const distance = Math.hypot(dx, dy);
+
+    if (distance <= step + 8) {
+      spawnTowerHazard(Number(projectile.targetX || projectile.x), Number(projectile.targetY || projectile.y));
+      return false;
+    }
+  }
+
+  projectile.x += vx * deltaSeconds;
+  projectile.y += vy * deltaSeconds;
+
+  if (projectile.targetType === "ranking-ship" && isRankingShipMatchActive()) {
+    if (Math.hypot(projectile.x - game.rankingShip.shipX, projectile.y - game.rankingShip.shipY) <= TOWER_CONFIG.projectileHitRadius + 58) {
+      damageRankingShip(Number(projectile.damage || RANKING_SHIP_BOT_DAMAGE));
+      return false;
+    }
+  }
+
+  if (projectile.targetType === "robot") {
+    const targetRobot = game.robots.find((robot) => robot.id === projectile.targetRobotId && !robot.dead) || null;
+
+    if (!targetRobot) {
+      return false;
+    }
+
+    if (Math.hypot(projectile.x - targetRobot.x, projectile.y - targetRobot.y) <= TOWER_CONFIG.projectileHitRadius + 24) {
+      damageRobot(targetRobot, Number(projectile.damage || TOWER_CONFIG.robotDamage), "papuga-manipulantka");
+      return false;
+    }
+  }
+
+  if (!projectile.createsHazard && projectile.targetType !== "ranking-ship" && projectile.targetType !== "robot") {
+    const targetType = projectile.targetType === "pet" && isDogPetVulnerable() ? "pet" : "player";
+    const hitTarget = targetType === "pet"
+      ? { x: game.pet.x, y: game.pet.y }
+      : { x: game.player.x, y: game.player.y };
+
+    if (Math.hypot(projectile.x - hitTarget.x, projectile.y - hitTarget.y) <= TOWER_CONFIG.projectileHitRadius) {
+      if (targetType === "pet") {
+        damageDogPet(Number(projectile.damage || TOWER_CONFIG.robotDamage));
+      } else {
+        damagePlayer(Number(projectile.damage || TOWER_CONFIG.robotDamage));
+      }
+      return false;
+    }
+  }
+
+  return (
+    projectile.ageMs < Number(projectile.ttlMs || TOWER_CONFIG.projectileTtlMs) &&
+    projectile.x >= -80 &&
+    projectile.x <= game.width + 80 &&
+    projectile.y >= -80 &&
+    projectile.y <= game.height + 80
+  );
+}
+
+function spawnTowerHazard(x, y) {
+  if (!Array.isArray(game.towerHazards)) {
+    game.towerHazards = [];
+  }
+
+  game.towerHazards.push({
+    id: `tower-hazard-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    x: clamp(Number(x || 0), 40, Math.max(40, game.width - 40)),
+    y: clamp(Number(y || 0), 82, Math.max(82, game.height - 40)),
+    radius: TOWER_CONFIG.hazardRadius,
+    ttlMs: TOWER_CONFIG.hazardTtlMs,
+    ageMs: 0,
+    damageTimerMs: 0,
+    petDamageTimerMs: 0,
+  });
+}
+
+function updateTowerHazards(deltaMs) {
+  if (!Array.isArray(game.towerHazards) || game.towerHazards.length === 0) {
+    return;
+  }
+
+  game.towerHazards = game.towerHazards
+    .map((hazard) => {
+      const nextHazard = {
+        ...hazard,
+        ageMs: Number(hazard.ageMs || 0) + deltaMs,
+      };
+      const insideHazard = game.player.hp > 0 && Math.hypot(game.player.x - nextHazard.x, game.player.y - nextHazard.y) <= Number(nextHazard.radius || TOWER_CONFIG.hazardRadius);
+      const petInsideHazard = isDogPetVulnerable() && Math.hypot(game.pet.x - nextHazard.x, game.pet.y - nextHazard.y) <= Number(nextHazard.radius || TOWER_CONFIG.hazardRadius);
+
+      if (insideHazard) {
+        nextHazard.damageTimerMs = Number(nextHazard.damageTimerMs || 0) + deltaMs;
+
+        while (nextHazard.damageTimerMs >= TOWER_CONFIG.hazardDamageIntervalMs) {
+          nextHazard.damageTimerMs -= TOWER_CONFIG.hazardDamageIntervalMs;
+          damagePlayer(TOWER_CONFIG.hazardDamage);
+        }
+      } else {
+        nextHazard.damageTimerMs = 0;
+      }
+
+      if (petInsideHazard) {
+        nextHazard.petDamageTimerMs = Number(nextHazard.petDamageTimerMs || 0) + deltaMs;
+
+        while (nextHazard.petDamageTimerMs >= TOWER_CONFIG.hazardDamageIntervalMs) {
+          nextHazard.petDamageTimerMs -= TOWER_CONFIG.hazardDamageIntervalMs;
+          damageDogPet(TOWER_CONFIG.hazardDamage);
+        }
+      } else {
+        nextHazard.petDamageTimerMs = 0;
+      }
+
+      return nextHazard;
+    })
+    .filter((hazard) => Number(hazard.ageMs || 0) < Number(hazard.ttlMs || TOWER_CONFIG.hazardTtlMs));
+}
+
+function applyTowerBlockersToEntity(entity, radius = 38) {
+  if (!entity || game.mode !== "solo") {
+    return;
+  }
+
+  getGameTowers().forEach((tower) => {
+    const radiusX = TOWER_CONFIG.blockerRadiusX + radius;
+    const radiusY = TOWER_CONFIG.blockerRadiusY + radius * 0.55;
+    const dx = entity.x - tower.blockerX;
+    const dy = entity.y - tower.blockerY;
+    const normalized = (dx * dx) / (radiusX * radiusX) + (dy * dy) / (radiusY * radiusY);
+
+    if (normalized >= 1) {
+      return;
+    }
+
+    const angle = Math.atan2(dy / radiusY, dx / radiusX);
+    entity.x = tower.blockerX + Math.cos(angle) * radiusX;
+    entity.y = tower.blockerY + Math.sin(angle) * radiusY;
+  });
+}
+
+function updateGameTreeSystems(deltaMs, deltaSeconds) {
+  updatePlayerBuffs(deltaMs);
+
+  if (!game.trees.length) {
+    return;
+  }
+
+  updateTreeLeaves(deltaMs);
+  updateTreeAppleEating(deltaMs);
+  updateTreeAppleSpawns(deltaMs);
+  updateSpecialPetCopies(deltaSeconds, deltaMs);
+}
+
+function updatePlayerBuffs(deltaMs) {
+  const buffs = game.playerBuffs || createPlayerBuffState();
+  game.playerBuffs = buffs;
+  buffs.speedBoosts = (buffs.speedBoosts || [])
+    .map((boost) => ({ ...boost, remainingMs: Math.max(0, Number(boost.remainingMs || 0) - deltaMs) }))
+    .filter((boost) => boost.remainingMs > 0);
+  buffs.ammoBoosts = (buffs.ammoBoosts || [])
+    .map((boost) => ({ ...boost, remainingMs: Math.max(0, Number(boost.remainingMs || 0) - deltaMs) }))
+    .filter((boost) => boost.remainingMs > 0);
+  buffs.shieldMs = Math.max(0, Number(buffs.shieldMs || 0) - deltaMs);
+  buffs.robotSlowMs = Math.max(0, Number(buffs.robotSlowMs || 0) - deltaMs);
+  buffs.invisibleMs = Math.max(0, Number(buffs.invisibleMs || 0) - deltaMs);
+}
+
+function updateTreeLeaves(deltaMs) {
+  game.treeLeafTimerMs = Math.max(0, Number(game.treeLeafTimerMs || 0) - deltaMs);
+
+  while (game.treeLeafTimerMs <= 0) {
+    spawnTreeLeaf();
+    game.treeLeafTimerMs += randomBetween(TREE_CONFIG.leafMinSpawnMs, TREE_CONFIG.leafMaxSpawnMs);
+  }
+
+  game.fallingLeaves = game.fallingLeaves
+    .map((leaf) => {
+      const elapsedSeconds = deltaMs / 1000;
+      return {
+        ...leaf,
+        ageMs: Number(leaf.ageMs || 0) + deltaMs,
+        x: leaf.x + leaf.vx * elapsedSeconds,
+        y: leaf.y + leaf.vy * elapsedSeconds,
+        rotation: leaf.rotation + leaf.rotationSpeed * elapsedSeconds,
+        swingPhase: leaf.swingPhase + leaf.swingSpeed * elapsedSeconds,
+      };
+    })
+    .filter((leaf) => leaf.ageMs < leaf.lifeMs && leaf.y < game.height + 80);
+}
+
+function spawnTreeLeaf() {
+  const tree = game.trees[Math.floor(Math.random() * game.trees.length)];
+
+  if (!tree) {
+    return;
+  }
+
+  const image = TREE_LEAF_IMAGES[Math.floor(Math.random() * TREE_LEAF_IMAGES.length)] || TREE_LEAF_IMAGES[0];
+  const leaf = {
+    id: game.nextTreeLeafId,
+    image,
+    x: tree.x + randomBetween(-82, 82),
+    y: tree.y - randomBetween(214, 136),
+    vx: randomBetween(-14, 18),
+    vy: randomBetween(32, 58),
+    rotation: randomBetween(-35, 35),
+    rotationSpeed: randomBetween(-95, 95),
+    swingPhase: Math.random() * Math.PI * 2,
+    swingSpeed: randomBetween(2, 4),
+    swingAmount: randomBetween(8, 20),
+    lifeMs: randomBetween(3000, 4800),
+    ageMs: 0,
+    size: randomBetween(14, 22),
+  };
+
+  game.nextTreeLeafId += 1;
+  game.fallingLeaves.push(leaf);
+}
+
+function updateTreeAppleSpawns(deltaMs) {
+  game.appleSpawnTimerMs = Math.max(0, Number(game.appleSpawnTimerMs || 0) - deltaMs);
+
+  if (game.appleSpawnTimerMs > 0) {
+    return;
+  }
+
+  spawnTreeAppleBatch();
+  game.appleSpawnTimerMs = randomBetween(TREE_CONFIG.minAppleSpawnMs, TREE_CONFIG.maxAppleSpawnMs);
+}
+
+function getRandomAppleBatchDefinition() {
+  const definitions = Object.entries(TREE_APPLE_TYPES).map(([type, config]) => ({ type, ...config }));
+  const totalWeight = definitions.reduce((sum, definition) => sum + Number(definition.weight || 0), 0);
+  let roll = Math.random() * totalWeight;
+
+  for (const definition of definitions) {
+    roll -= Number(definition.weight || 0);
+
+    if (roll <= 0) {
+      return definition;
+    }
+  }
+
+  return definitions[0];
+}
+
+function spawnTreeAppleBatch() {
+  const tree = game.trees[Math.floor(Math.random() * game.trees.length)];
+  const definition = getRandomAppleBatchDefinition();
+
+  if (!tree || !definition) {
+    return;
+  }
+
+  const count = randomBetween(definition.minCount, definition.maxCount);
+  const spots = [...TREE_APPLE_CROWN_SPOTS].sort(() => Math.random() - 0.5).slice(0, count);
+  tree.apples = spots.map((spot) => ({
+    id: game.nextAppleId++,
+    type: definition.type,
+    image: definition.image,
+    label: definition.label,
+    xOffset: spot.x + randomBetween(-7, 7),
+    yOffset: spot.y + randomBetween(-5, 5),
+    swayDelayMs: randomBetween(0, 900),
+    eating: false,
+  }));
+}
+
+function findTreeApple(treeId, appleId) {
+  const tree = game.trees.find((entry) => entry.id === treeId);
+
+  if (!tree) {
+    return { tree: null, apple: null };
+  }
+
+  return {
+    tree,
+    apple: tree.apples.find((apple) => String(apple.id) === String(appleId)) || null,
+  };
+}
+
+function isPlayerInsideTreeEatingZone(tree) {
+  if (!tree) {
+    return false;
+  }
+
+  const dx = (game.player.x - tree.x) / Math.max(1, tree.zoneRadiusX || TREE_CONFIG.zoneRadiusX);
+  const dy = (game.player.y - (tree.y - 10)) / Math.max(1, tree.zoneRadiusY || TREE_CONFIG.zoneRadiusY);
+  return dx * dx + dy * dy <= 1;
+}
+
+function handleTreeAppleClick(event) {
+  const appleButton = event.target?.closest?.("[data-tree-apple]");
+
+  if (!appleButton || !game.active || ui.currentView !== "game") {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (game.appleEating) {
+    return;
+  }
+
+  const { tree, apple } = findTreeApple(
+    appleButton.dataset.treeId || "",
+    appleButton.dataset.treeApple || ""
+  );
+
+  if (!tree || !apple || apple.eating) {
+    return;
+  }
+
+  if (!isPlayerInsideTreeEatingZone(tree)) {
+    spawnFloatingText(game.player.x, game.player.y - 132, "ZA DALEKO", "hit");
+    return;
+  }
+
+  apple.eating = true;
+  game.appleEating = {
+    treeId: tree.id,
+    appleId: apple.id,
+    type: apple.type,
+    remainingMs: TREE_CONFIG.appleEatMs,
+    totalMs: TREE_CONFIG.appleEatMs,
+  };
+}
+
+function updateTreeAppleEating(deltaMs) {
+  if (!game.appleEating) {
+    return;
+  }
+
+  const eating = game.appleEating;
+  eating.remainingMs = Math.max(0, Number(eating.remainingMs || 0) - deltaMs);
+
+  if (eating.remainingMs > 0) {
+    return;
+  }
+
+  const { tree, apple } = findTreeApple(eating.treeId, eating.appleId);
+
+  if (tree && apple) {
+    applyTreeAppleEffect(apple.type);
+    tree.apples = tree.apples.filter((entry) => entry.id !== apple.id);
+  }
+
+  game.appleEating = null;
+}
+
+function applyTreeAppleEffect(type) {
+  const buffs = game.playerBuffs || createPlayerBuffState();
+  game.playerBuffs = buffs;
+
+  if (type === "red") {
+    healPlayer(50);
+    return;
+  }
+
+  if (type === "yellow") {
+    buffs.speedBoosts.push({ remainingMs: TREE_CONFIG.yellowSpeedMs });
+    spawnFloatingText(game.player.x, game.player.y - 132, "SZYBKOSC +10%", "heal");
+    return;
+  }
+
+  if (type === "green") {
+    buffs.shieldMs = Math.max(Number(buffs.shieldMs || 0), TREE_CONFIG.greenShieldMs);
+    spawnFloatingText(game.player.x, game.player.y - 132, "TARCZA", "heal");
+    return;
+  }
+
+  if (type === "blue") {
+    buffs.robotSlowMs = Math.max(Number(buffs.robotSlowMs || 0), TREE_CONFIG.blueSlowMs);
+    spawnFloatingText(game.player.x, game.player.y - 132, "ROBOTY -20%", "heal");
+    return;
+  }
+
+  if (type === "orange") {
+    buffs.ammoBoosts.push({ remainingMs: TREE_CONFIG.orangeAmmoMs });
+    refreshAmmoConfig();
+    spawnFloatingText(game.player.x, game.player.y - 132, "AMUNICJA +40%", "heal");
+    return;
+  }
+
+  if (type === "purple") {
+    buffs.invisibleMs = Math.max(Number(buffs.invisibleMs || 0), TREE_CONFIG.purpleInvisibleMs);
+    spawnFloatingText(game.player.x, game.player.y - 132, "NIEWIDZIALNOSC", "heal");
+    return;
+  }
+
+  if (type === "special") {
+    spawnSpecialPetCopy();
+  }
+}
+
+function isAppleShieldActive() {
+  return Number(game.playerBuffs?.shieldMs || 0) > 0;
+}
+
+function getAppleSpeedBoostMultiplier() {
+  const activeBoosts = game.playerBuffs?.speedBoosts?.length || 0;
+  return 1 + activeBoosts * 0.1;
+}
+
+function getAppleAmmoRechargeMultiplier() {
+  const activeBoosts = game.playerBuffs?.ammoBoosts?.length || 0;
+  return activeBoosts > 0 ? Math.max(0.25, Math.pow(0.6, activeBoosts)) : 1;
+}
+
+function getSpecialPetCopyDamage(petId) {
+  const basePetId = getPetBaseId(petId);
+
+  if (basePetId === "pies-magik") {
+    return Math.max(20, Math.round(Number(getDogPowerStats().damage || 100) * 0.5));
+  }
+
+  if (basePetId === "malpka-jasnoksieznik") {
+    return Math.max(30, Math.round(Number(getMonkeyMagePowerStats().power || 200) * 0.5));
+  }
+
+  if (basePetId === "niedzwiedz-polarny") {
+    return Math.max(25, Math.round(Number(getPolarBearPowerStats().snowballDamage || 50) * 0.5));
+  }
+
+  if (petId === "el-kruk") {
+    return Math.max(30, Math.round(Number(getOzzyPowerStats().healPerSecond || 100) * 0.35));
+  }
+
+  if (petId === "l-psotka") {
+    return 45;
+  }
+
+  if (petId === "papuga-manipulantka") {
+    return 40;
+  }
+
+  return 50;
+}
+
+function spawnSpecialPetCopy() {
+  const ownedPetIds = state.ownedPets.filter((petId) => CATALOG.pets.some((pet) => pet.id === petId));
+  const equippedPet = getEquippedPet();
+  const fallbackPetId = ownedPetIds[Math.floor(Math.random() * ownedPetIds.length)] || equippedPet?.id || "";
+  const petId = equippedPet && Math.random() < 0.65 ? equippedPet.id : fallbackPetId;
+
+  if (!petId) {
+    spawnFloatingText(game.player.x, game.player.y - 132, "BRAK PLATOYI", "hit");
+    return;
+  }
+
+  game.specialPetCopies.push({
+    id: game.nextSpecialPetCopyId++,
+    petId,
+    x: game.player.x + randomBetween(-44, 44),
+    y: game.player.y + randomBetween(34, 64),
+    ttlMs: TREE_CONFIG.specialCopyMs,
+    attackTimerMs: 0,
+    targetId: null,
+  });
+  spawnFloatingText(game.player.x, game.player.y - 132, "PODWOJNA PLATOYA", "heal");
+}
+
+function updateSpecialPetCopies(deltaSeconds, deltaMs) {
+  if (!game.specialPetCopies.length) {
+    return;
+  }
+
+  game.specialPetCopies = game.specialPetCopies
+    .map((copy) => {
+      const nextCopy = {
+        ...copy,
+        ttlMs: Math.max(0, Number(copy.ttlMs || 0) - deltaMs),
+        attackTimerMs: Math.max(0, Number(copy.attackTimerMs || 0) - deltaMs),
+      };
+      let target = game.robots.find((robot) => robot.id === nextCopy.targetId && !robot.dead);
+
+      if (!target) {
+        target = findNearestRobot(nextCopy.x, nextCopy.y);
+        nextCopy.targetId = target ? target.id : null;
+      }
+
+      if (!target) {
+        moveSpecialPetCopyTowards(nextCopy, game.player.x - 58, game.player.y + 38, deltaSeconds, GAME_RULES.dogSpeed * 0.88);
+        return nextCopy;
+      }
+
+      const distance = Math.hypot(target.x - nextCopy.x, target.y - nextCopy.y);
+
+      if (distance > 88) {
+        moveSpecialPetCopyTowards(nextCopy, target.x, target.y, deltaSeconds, GAME_RULES.dogSpeed * 1.02);
+        return nextCopy;
+      }
+
+      if (nextCopy.attackTimerMs <= 0) {
+        damageRobot(target, getSpecialPetCopyDamage(nextCopy.petId), "special-apple");
+        nextCopy.attackTimerMs = 1000;
+      }
+
+      return nextCopy;
+    })
+    .filter((copy) => copy.ttlMs > 0);
+}
+
+function moveSpecialPetCopyTowards(copy, targetX, targetY, deltaSeconds, speed) {
+  const dx = targetX - copy.x;
+  const dy = targetY - copy.y;
+  const distance = Math.hypot(dx, dy) || 1;
+  const step = Math.min(distance, speed * deltaSeconds);
+  copy.x += (dx / distance) * step;
+  copy.y += (dy / distance) * step;
+}
+
 function clampGameEntities() {
   game.player.x = clamp(game.player.x, 48, Math.max(48, game.width - 48));
   game.player.y = clamp(game.player.y, 90, Math.max(90, game.height - 40));
+  applyTowerBlockersToEntity(game.player, 46);
   game.pet.x = clamp(game.pet.x, 36, Math.max(36, game.width - 36));
   game.pet.y = clamp(game.pet.y, 72, Math.max(72, game.height - 36));
+  applyTowerBlockersToEntity(game.pet, 32);
   game.petPack.forEach((dog) => {
     dog.x = clamp(dog.x, 36, Math.max(36, game.width - 36));
     dog.y = clamp(dog.y, 72, Math.max(72, game.height - 36));
+    applyTowerBlockersToEntity(dog, 30);
   });
 }
 
@@ -13681,13 +26957,14 @@ function updateCoopHostFrame(deltaMs, deltaSeconds, timestamp) {
     if (game.player.hp > 0) {
       updatePet(deltaSeconds, deltaMs);
       updatePetVoiceAmbient(deltaMs);
+      updateCharacterVoiceAmbient(deltaMs);
     }
     updateBarriers(deltaMs);
     updatePickups(deltaMs);
     updateWaterFields(deltaSeconds);
-    updateJungleSupportFields(deltaMs, deltaSeconds);
     updateRobots(deltaSeconds);
     updateProjectiles(deltaSeconds);
+    updateTowerHazards(deltaMs);
     cleanupDeadRobots();
   }
 
@@ -13715,6 +26992,7 @@ function updateCoopGuestFrame(deltaMs, deltaSeconds, timestamp) {
     updatePlayerMovement(deltaSeconds);
     clampGameEntities();
     syncLocalCoopPlayerFromGame();
+    updateCharacterVoiceAmbient(deltaMs);
   }
 
   updateGuestCoopAmmoPreview(deltaSeconds, timestamp);
@@ -13734,6 +27012,10 @@ function updateCoopGuestFrame(deltaMs, deltaSeconds, timestamp) {
 function runGameFrame(timestamp) {
   if (!game.active) {
     return;
+  }
+
+  if (!isInternetConnectionAvailable()) {
+    showOfflineModal();
   }
 
   const deltaMs = Math.min(40, timestamp - game.lastFrameTime || 16);
@@ -13778,6 +27060,7 @@ function runGameFrame(timestamp) {
       updatePlayerMovement(deltaSeconds);
       updateAmmo(deltaSeconds);
       tryAutoFire(timestamp);
+      updateCharacterVoiceAmbient(deltaMs);
     }
     updateProjectiles(deltaSeconds);
     updateMultiplayerPetFollow();
@@ -13810,6 +27093,18 @@ function runGameFrame(timestamp) {
     return;
   }
 
+  if (isRankingShipMatchActive()) {
+    updateRankingShipFrame(deltaMs, deltaSeconds, timestamp);
+
+    if (!game.active) {
+      return;
+    }
+
+    renderGameScene();
+    game.animationId = window.requestAnimationFrame(runGameFrame);
+    return;
+  }
+
   if (isFirstRobotPreludeActive()) {
     updateFirstRobotPrelude(deltaMs);
   } else if (!isFirstRobotTutorialPaused()) {
@@ -13835,10 +27130,12 @@ function runGameFrame(timestamp) {
     if (!isFirstRobotPreludeActive()) {
       updatePet(deltaSeconds, deltaMs);
       updatePetVoiceAmbient(deltaMs);
+      updateCharacterVoiceAmbient(deltaMs);
       updateBarriers(deltaMs);
       updatePickups(deltaMs);
       updateWaterFields(deltaSeconds);
-      updateJungleSupportFields(deltaMs, deltaSeconds);
+      updateGameTreeSystems(deltaMs, deltaSeconds);
+      updateTowerSystems(deltaMs);
     } else {
       game.waterFields = [];
     }
@@ -13848,6 +27145,7 @@ function runGameFrame(timestamp) {
     if (!isFirstRobotTutorialPaused()) {
       updateProjectiles(deltaSeconds);
       clampGameEntities();
+      updateTowerHazards(deltaMs);
       cleanupDeadRobots();
     }
   }
@@ -13992,6 +27290,10 @@ function tryAutoFire(timestamp) {
   });
 }
 
+function hasActiveWaveRobots() {
+  return game.robots.some((robot) => !robot.dead);
+}
+
 function updateWaveProgress(deltaMs) {
   if (game.waveIntroMs > 0) {
     game.waveIntroMs = Math.max(0, game.waveIntroMs - deltaMs);
@@ -14006,8 +27308,23 @@ function updateWaveProgress(deltaMs) {
   const waveConfig = game.currentWaveConfig || getWaveConfig(game.currentWave || 1);
   const currentStage = game.waveStages[game.currentWaveStageIndex] || null;
 
+  if (game.currentWave > 0) {
+    game.waveElapsedMs = Math.max(0, Number(game.waveElapsedMs || 0)) + deltaMs;
+
+    if (game.waveElapsedMs >= Number(waveConfig.durationMs || WAVE_DURATION_MS)) {
+      stopTimedOutWaveSpawns();
+
+      if (!hasActiveWaveRobots()) {
+        clearTowerBotProjectiles();
+        finishWave(waveConfig);
+      }
+
+      return;
+    }
+  }
+
   if (game.waveRobotsRemaining > 0 && currentStage) {
-    if (currentStage.waitForClear && game.robots.length > 0) {
+    if (currentStage.waitForClear && hasActiveWaveRobots()) {
       return;
     }
 
@@ -14028,21 +27345,49 @@ function updateWaveProgress(deltaMs) {
     return;
   }
 
-  if (game.currentWave > 0 && game.waveRobotsRemaining === 0 && game.robots.length === 0) {
+  if (game.currentWave > 0 && game.waveRobotsRemaining === 0 && !hasActiveWaveRobots()) {
     if (game.currentWaveStageIndex >= 0 && game.currentWaveStageIndex < game.waveStages.length - 1) {
       activateWaveStage(game.currentWaveStageIndex + 1);
       return;
     }
-
-    finishWave(game.currentWaveConfig || getWaveConfig(game.currentWave));
   }
+}
+
+function getWaveIntroDuration(waveNumber) {
+  return Math.max(1, Number(waveNumber || 1)) <= 1 ? WAVE_INTRO_FULL_MS : WAVE_INTRO_SHORT_MS;
+}
+
+function getRandomWaveBannerTone() {
+  return WAVE_BANNER_TONES[Math.floor(Math.random() * WAVE_BANNER_TONES.length)] || "pink";
 }
 
 function queueNextWave(waveNumber) {
   game.pendingWave = waveNumber;
-  game.waveIntroMs = 3000;
+  game.waveIntroMs = getWaveIntroDuration(waveNumber);
+  game.waveBannerTone = "";
+  game.waveBannerToneKey = "";
+  game.waveElapsedMs = 0;
   game.waveSpawnTimerMs = 0;
+  healDogPetForWaveIntro();
   playWaveIntroSound();
+}
+
+function healDogPetForWaveIntro() {
+  if (game.mode !== "solo" || getPetBaseId(getEquippedPet()?.id) !== "pies-magik" || game.pet.alive === false) {
+    return;
+  }
+
+  const dogStats = getDogPowerStats();
+  const maxHp = Math.max(1, Number(game.pet.maxHp || dogStats.hp));
+  const currentHp = clamp(Number(game.pet.hp || 0), 0, maxHp);
+  const healAmount = Math.min(300, maxHp - currentHp);
+
+  if (healAmount <= 0) {
+    return;
+  }
+
+  game.pet.hp = currentHp + healAmount;
+  spawnFloatingText(game.pet.x, game.pet.y - 74, `+${healAmount}`, "heal");
 }
 
 function buildWaveStages(waveConfig) {
@@ -14107,6 +27452,7 @@ function beginWave(waveNumber) {
   const waveConfig = getWaveConfig(waveNumber);
   game.currentWave = waveNumber;
   game.currentWaveConfig = waveConfig;
+  game.waveElapsedMs = 0;
   game.waveStages = buildWaveStages(waveConfig);
   game.currentWaveStageIndex = -1;
   activateWaveStage(0);
@@ -14118,12 +27464,28 @@ function spawnRobotBatch(count, waveConfig) {
   }
 }
 
+function stopTimedOutWaveSpawns() {
+  game.waveRobotsRemaining = 0;
+  game.waveSpawnTimerMs = 0;
+}
+
+function clearTowerBotProjectiles() {
+  game.projectiles = game.projectiles.filter((projectile) => projectile.kind !== "tower-bot-shot");
+  game.towerHazards = [];
+}
+
 function finishWave(waveConfig) {
   const completionReward = waveConfig.completionReward || 0;
 
   if (completionReward > 0) {
-    awardTrophies(completionReward);
-    spawnFloatingText(game.player.x, game.player.y - 150, `+${completionReward} PUCHARÓW`, "heal");
+    const awardedTrophies = awardTrophies(completionReward);
+    if (awardedTrophies > 0) {
+      spawnFloatingText(game.player.x, game.player.y - 150, `+${awardedTrophies} PUCHARÓW`, "heal");
+    }
+  }
+
+  if (waveConfig.wave === 4) {
+    applyTrophyStreakForWaveFour();
   }
 
   if (waveConfig.wave >= TOTAL_GAME_WAVES) {
@@ -14134,7 +27496,40 @@ function finishWave(waveConfig) {
   queueNextWave(waveConfig.wave + 1);
 }
 
+function applyTrophyStreakForWaveFour() {
+  if (game.wave4StreakApplied || isCoopMatchActive()) {
+    return;
+  }
+
+  game.wave4StreakApplied = true;
+  state.trophyStreak = Math.max(0, Number(state.trophyStreak || 0)) + 1;
+  game.streakReachedRun = state.trophyStreak;
+  game.streakBonusEarnedRun = getTrophyStreakBonus(state.trophyStreak);
+  updatePortalMissionProgressForEvent("streak", state.trophyStreak);
+
+  if (game.streakBonusEarnedRun > 0) {
+    const awardedStreakTrophies = awardTrophies(game.streakBonusEarnedRun);
+    if (awardedStreakTrophies > 0) {
+      spawnFloatingText(
+        game.player.x,
+        game.player.y - 170,
+        `PASSA +${awardedStreakTrophies}`,
+        "heal"
+      );
+    } else {
+      game.streakBonusEarnedRun = 0;
+      saveState();
+    }
+  } else {
+    saveState();
+  }
+
+  updateStreakDisplays();
+}
+
 function spawnRobot(waveConfig = getWaveConfig(game.currentWave || 1)) {
+  return spawnTowerBot(waveConfig);
+
   const robotStats = getRobotStats(waveConfig);
   const robotWave = Number(waveConfig.wave || game.currentWave || 1);
   const margin = 30;
@@ -14172,14 +27567,17 @@ function spawnRobot(waveConfig = getWaveConfig(game.currentWave || 1)) {
     poisonDamageTimer: 0,
     slowTimerMs: 0,
     slowMultiplier: 1,
-    jaguarRepelMs: 0,
     snakeVenomTimerMs: 0,
     snakeDamageMultiplier: 1,
     monkeyMarked: false,
     frogDamageTimer: 0,
+    parrotManipulatedMs: 0,
+    parrotMarkMs: 0,
     elephantRoamTargetX: x,
     elephantRoamTargetY: y,
     stunTimerMs: 0,
+    blindTimerMs: 0,
+    blindSpinAngle: 0,
     history: [],
     bubbleTimerMs: 0,
     rewindElapsedMs: 0,
@@ -14216,6 +27614,28 @@ function updateRobots(deltaSeconds) {
       robot.bubbleTimerMs = Math.max(0, robot.bubbleTimerMs - deltaMs);
     }
 
+    if (robot.parrotManipulatedMs > 0) {
+      robot.parrotManipulatedMs = Math.max(0, robot.parrotManipulatedMs - deltaMs);
+    }
+
+    if (robot.parrotMarkMs > 0) {
+      robot.parrotMarkMs = Math.max(0, robot.parrotMarkMs - deltaMs);
+    }
+
+    if (robot.flaroBurnMs > 0) {
+      robot.flaroBurnMs = Math.max(0, Number(robot.flaroBurnMs || 0) - deltaMs);
+      robot.flaroBurnTickMs = Math.max(0, Number(robot.flaroBurnTickMs || 0) + deltaMs);
+
+      while (!robot.dead && robot.flaroBurnTickMs >= 100) {
+        robot.flaroBurnTickMs -= 100;
+        damageRobot(robot, 3, "flaro-burn");
+      }
+
+      if (robot.dead) {
+        return;
+      }
+    }
+
     if (robot.rewindDurationMs > 0) {
       robot.rewindElapsedMs = Math.min(robot.rewindDurationMs, robot.rewindElapsedMs + deltaMs);
       const progress = clamp(robot.rewindElapsedMs / robot.rewindDurationMs, 0, 1);
@@ -14235,6 +27655,11 @@ function updateRobots(deltaSeconds) {
       robot.stunTimerMs = Math.max(0, robot.stunTimerMs - deltaMs);
     }
 
+    if (robot.blindTimerMs > 0) {
+      robot.blindTimerMs = Math.max(0, robot.blindTimerMs - deltaMs);
+      robot.blindSpinAngle = Number(robot.blindSpinAngle || 0) + deltaSeconds * 8.2;
+    }
+
     if (robot.slowTimerMs > 0) {
       robot.slowTimerMs = Math.max(0, robot.slowTimerMs - deltaMs);
       if (robot.slowTimerMs === 0) {
@@ -14242,55 +27667,7 @@ function updateRobots(deltaSeconds) {
       }
     }
 
-    if (robot.jaguarRepelMs > 0) {
-      robot.jaguarRepelMs = Math.max(0, robot.jaguarRepelMs - deltaMs);
-    }
-
-    if (robot.snakeVenomTimerMs > 0) {
-      robot.snakeVenomTimerMs = Math.max(0, robot.snakeVenomTimerMs - deltaMs);
-      if (robot.snakeVenomTimerMs === 0) {
-        robot.snakeDamageMultiplier = 1;
-      }
-    }
-
-    if (robot.poisonTimerMs > 0) {
-      robot.poisonTimerMs = Math.max(0, robot.poisonTimerMs - deltaMs);
-      robot.poisonDamageTimer += deltaSeconds;
-
-      while (robot.poisonDamageTimer >= 1 && robot.poisonTimerMs > 0) {
-        robot.poisonDamageTimer -= 1;
-        damageRobot(robot, 45, "poison");
-      }
-    } else {
-      robot.poisonDamageTimer = 0;
-    }
-
-    const fieldEffect = getWaterFieldEffect(robot.x, robot.y);
-    const jungleFieldEffect = getJungleFieldEffect(robot.x, robot.y);
-    const frogFieldEffect = getFrogPuddleEffect(robot.x, robot.y);
-    if (jungleFieldEffect.insideField) {
-      robot.jaguarRepelMs = Math.max(robot.jaguarRepelMs || 0, GAME_RULES.jaguarFieldDurationMs);
-    }
-    robot.fieldDamageTimer = fieldEffect.insideField ? robot.fieldDamageTimer + deltaSeconds : 0;
-    robot.frogDamageTimer = frogFieldEffect.fields.length > 0 ? robot.frogDamageTimer + deltaSeconds : 0;
-
-    while (robot.fieldDamageTimer >= 1) {
-      robot.fieldDamageTimer -= 1;
-      damageRobot(robot, 50, "krab-syrena");
-    }
-
-    while (robot.frogDamageTimer >= 1) {
-      robot.frogDamageTimer -= 1;
-      damageRobot(robot, GAME_RULES.frogPuddleRobotDamagePerSecond, "zaba-dzungli");
-    }
-
-    if (robot.dead) {
-      return;
-    }
-
-    const contactDamage = Math.round(
-      robot.damage * fieldEffect.damageMultiplier * getRobotDamageMultiplier(robot)
-    );
+    const contactDamage = Math.round(robot.damage * getRobotDamageMultiplier(robot));
     const attackIntervalSeconds = Math.max(0.05, Number(robot.attackIntervalMs || 100) / 1000);
 
     if (robot.stunTimerMs > 0) {
@@ -14298,21 +27675,15 @@ function updateRobots(deltaSeconds) {
       return;
     }
 
-    if (getEquippedPet()?.id === "slon-dzungli" && game.pet.targetId === robot.id && game.pet.castTimerMs > 0) {
+    if (robot.blindTimerMs > 0) {
       robot.attackTimer = 0;
+      robot.rangedAttackTimerMs = 0;
+      robot.isWalking = false;
       return;
     }
 
-    if (robot.jaguarRepelMs > 0) {
-      const awayDx = robot.x - game.player.x;
-      const awayDy = robot.y - game.player.y;
-      const awayDistance = Math.hypot(awayDx, awayDy) || 1;
-      const awaySpeed =
-        robot.speed * fieldEffect.speedMultiplier * getRobotSlowMultiplier(robot);
-      const awayStep = awaySpeed * deltaSeconds;
-      robot.x = clamp(robot.x + (awayDx / awayDistance) * awayStep, 24, Math.max(24, game.width - 24));
-      robot.y = clamp(robot.y + (awayDy / awayDistance) * awayStep, 24, Math.max(24, game.height - 24));
-      robot.attackTimer = 0;
+    if (robot.kind === "tower-bot") {
+      updateTowerBotRobot(robot, deltaSeconds, deltaMs);
       return;
     }
 
@@ -14340,8 +27711,7 @@ function updateRobots(deltaSeconds) {
       const robotDx = robotTarget.x - robot.x;
       const robotDy = robotTarget.y - robot.y;
       const robotDistance = Math.hypot(robotDx, robotDy) || 1;
-      const robotMoveSpeed =
-        robot.speed * fieldEffect.speedMultiplier * getRobotSlowMultiplier(robot);
+      const robotMoveSpeed = robot.speed * getRobotSlowMultiplier(robot);
 
       if (robotDistance > 70) {
         const step = robotMoveSpeed * deltaSeconds;
@@ -14361,17 +27731,34 @@ function updateRobots(deltaSeconds) {
       return;
     }
 
-    const playerTarget = getRobotTargetPlayer(robot);
-    if (!playerTarget) {
+    const winterSleepTarget = isOwlShieldActive()
+      ? findNearestRobotExcluding(robot.x, robot.y, robot.id)
+      : null;
+    if (isOwlShieldActive() && !winterSleepTarget) {
+      robot.attackTimer = 0;
+      return;
+    }
+    const isParrotManipulated = Number(robot.parrotManipulatedMs || 0) > 0;
+    const robotTarget = winterSleepTarget
+      ? {
+        type: "robot",
+        x: winterSleepTarget.x,
+        y: winterSleepTarget.y,
+        robot: winterSleepTarget,
+      }
+      : getManipulatedRobotTarget(robot);
+    const playerTarget = robotTarget || isParrotManipulated ? null : getRobotTargetPlayer(robot);
+    const dogTarget = robotTarget ? null : getRobotDogTarget(robot, playerTarget);
+    const attackTarget = robotTarget || dogTarget || (playerTarget ? { type: "player", ...playerTarget } : null);
+    if (!attackTarget) {
       robot.attackTimer = 0;
       return;
     }
 
-    const dx = playerTarget.x - robot.x;
-    const dy = playerTarget.y - robot.y;
+    const dx = attackTarget.x - robot.x;
+    const dy = attackTarget.y - robot.y;
     const distance = Math.hypot(dx, dy) || 1;
-    const moveSpeed =
-      robot.speed * fieldEffect.speedMultiplier * getRobotSlowMultiplier(robot);
+    const moveSpeed = robot.speed * getRobotSlowMultiplier(robot);
 
     if (distance > 70) {
       const step = moveSpeed * deltaSeconds;
@@ -14385,19 +27772,60 @@ function updateRobots(deltaSeconds) {
 
     while (robot.attackTimer >= attackIntervalSeconds) {
       robot.attackTimer -= attackIntervalSeconds;
-      if (isCoopMatchActive() && game.coopIsHost) {
-        damageCoopPlayer(playerTarget.profileId || state.profileId, contactDamage);
+      if (attackTarget.type === "pet") {
+        damageDogPet(contactDamage);
+      } else if (attackTarget.type === "robot") {
+        damageRobot(attackTarget.robot, contactDamage, isOwlShieldActive() ? "sowa" : "papuga-manipulantka");
+      } else if (isCoopMatchActive() && game.coopIsHost) {
+        damageCoopPlayer(attackTarget.profileId || state.profileId, contactDamage);
       } else {
         damagePlayer(contactDamage);
       }
     }
   });
+
+  separateOverlappingRobots();
+}
+
+function separateOverlappingRobots() {
+  const minDistance = 76;
+  const pushStrength = 0.68;
+  const aliveRobots = game.robots.filter((robot) => !robot.dead);
+
+  for (let firstIndex = 0; firstIndex < aliveRobots.length; firstIndex += 1) {
+    for (let secondIndex = firstIndex + 1; secondIndex < aliveRobots.length; secondIndex += 1) {
+      const first = aliveRobots[firstIndex];
+      const second = aliveRobots[secondIndex];
+      const dx = second.x - first.x;
+      const dy = second.y - first.y;
+      const distance = Math.hypot(dx, dy) || 1;
+
+      if (distance >= minDistance) {
+        continue;
+      }
+
+      const overlap = (minDistance - distance) * pushStrength;
+      const nx = dx / distance;
+      const ny = dy / distance;
+      first.x = clamp(first.x - nx * overlap, 24, Math.max(24, game.width - 24));
+      first.y = clamp(first.y - ny * overlap, 72, Math.max(72, game.height - 24));
+      second.x = clamp(second.x + nx * overlap, 24, Math.max(24, game.width - 24));
+      second.y = clamp(second.y + ny * overlap, 72, Math.max(72, game.height - 24));
+    }
+  }
 }
 
 function updateProjectiles(deltaSeconds) {
   const survivors = [];
 
   game.projectiles.forEach((projectile) => {
+    if (projectile.kind === "tower-bot-shot") {
+      if (updateTowerBotProjectile(projectile, deltaSeconds, deltaSeconds * 1000)) {
+        survivors.push(projectile);
+      }
+      return;
+    }
+
     const target = projectile.targetType === "player"
       ? (
         projectile.targetPlayerId === multiplayer.selfId
@@ -14428,7 +27856,7 @@ function updateProjectiles(deltaSeconds) {
     if (distance <= step + 20) {
       if (projectile.targetType === "player") {
         const damage = projectile.kind === "polar-bear-shot"
-          ? GAME_RULES.polarBearProjectileDamage
+          ? getPolarBearPowerStats().snowballDamage
           : Number(projectile.damage || getProjectileDamage());
 
         if (projectile.ownerId === multiplayer.selfId && projectile.targetPlayerId && projectile.targetPlayerId !== multiplayer.selfId) {
@@ -14446,17 +27874,11 @@ function updateProjectiles(deltaSeconds) {
       }
 
       if (projectile.kind === "papuga") {
-        stunRobot(target, GAME_RULES.parrotStunDurationMs);
+        applyParrotManipulation(target);
       } else if (projectile.kind === "polar-bear-shot") {
-        damageRobot(target, GAME_RULES.polarBearProjectileDamage, "niedzwiedz-polarny");
-      } else if (projectile.kind === "jungle-venom-shot") {
-        applyJungleSnakeVenom(target);
+        damageRobot(target, getPolarBearPowerStats().snowballDamage, "niedzwiedz-polarny");
       } else if (projectile.kind === "lpsotka") {
-        damageRobot(target, 150, "l-psotka");
-
-        if (!target.dead) {
-          applyLpsotkaBubble(target);
-        }
+        applyLpsotkaBubble(target);
       } else if (projectile.kind === "papuga-miss") {
         spawnFloatingText(projectile.targetX, projectile.targetY - 24, "NIE TRAFIONO", "hit");
       } else if (projectile.kind === "snake-shot") {
@@ -14479,28 +27901,21 @@ function updateProjectiles(deltaSeconds) {
 function updatePet(deltaSeconds, deltaMs) {
   const pet = getEquippedPet();
 
-  updateJungleMonkeyMarks();
-
   if (!pet) {
-    game.jungleFields = [];
     game.hadActiveRobots = false;
     return;
   }
 
+  const basePetId = getPetBaseId(pet.id);
   const hasRobots = game.robots.some((robot) => !robot.dead);
-  const keepsJungleFields = pet.id === "jaguar" || pet.id === "zaba-dzungli";
 
-  if (!keepsJungleFields) {
-    game.jungleFields = [];
-  }
-
-  if (pet.id === "pies-magik") {
-    updateDogPet(deltaSeconds);
+  if (basePetId === "pies-magik") {
+    updateDogPet(deltaSeconds, deltaMs);
     game.hadActiveRobots = hasRobots;
     return;
   }
 
-  if (pet.id === "niedzwiedz-polarny") {
+  if (basePetId === "niedzwiedz-polarny") {
     updatePolarBearPet(deltaSeconds, deltaMs);
     game.hadActiveRobots = hasRobots;
     return;
@@ -14524,67 +27939,13 @@ function updatePet(deltaSeconds, deltaMs) {
     return;
   }
 
-  if (pet.id === "jaguar") {
-    updateJaguarPet(deltaSeconds, deltaMs);
-    game.hadActiveRobots = hasRobots;
-    return;
-  }
-
-  if (pet.id === "papuga-dzungli") {
-    movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
-    game.hadActiveRobots = hasRobots;
-    return;
-  }
-
-  if (pet.id === "malpa-dzungli") {
-    movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
-    game.hadActiveRobots = hasRobots;
-    return;
-  }
-
-  if (pet.id === "waz-dzungli") {
-    updateJungleSnakePet(deltaSeconds, deltaMs);
-    game.hadActiveRobots = hasRobots;
-    return;
-  }
-
-  if (pet.id === "slon-dzungli") {
-    updateElephantPet(deltaSeconds, deltaMs);
-    game.hadActiveRobots = hasRobots;
-    return;
-  }
-
-  if (pet.id === "zaba-dzungli") {
-    updateFrogPet(deltaSeconds, deltaMs);
-    game.hadActiveRobots = hasRobots;
-    return;
-  }
-
-  if (pet.id === "leniwiec-dzungli") {
-    updateSlothPet(deltaSeconds, deltaMs);
-    game.hadActiveRobots = hasRobots;
-    return;
-  }
-
-  if (pet.id === "tygrys-dzungli") {
-    movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
-    game.hadActiveRobots = hasRobots;
-    return;
-  }
-
-  if (pet.id === "krokodyl-dzungli") {
-    updateCrocodilePet(deltaSeconds, deltaMs);
-    game.hadActiveRobots = hasRobots;
-    return;
-  }
-
   if (pet.id === "pascal") {
     updatePascalPet(deltaSeconds, deltaMs);
     game.hadActiveRobots = hasRobots;
     return;
   }
 
-  if (pet.id === "papuga-manipulantka") {
+  if (basePetId === "papuga-manipulantka") {
     updateParrotPet(deltaSeconds, deltaMs);
     game.hadActiveRobots = hasRobots;
     return;
@@ -14626,11 +27987,49 @@ function updatePet(deltaSeconds, deltaMs) {
     return;
   }
 
+  if (pet.id === "coral") {
+    updateCoralPet(deltaSeconds, deltaMs);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
+  if (pet.id === HIGH_TOWER_FLARO_ID) {
+    updateFlaroPet(deltaSeconds, deltaMs);
+    game.hadActiveRobots = hasRobots;
+    return;
+  }
+
   movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
   game.hadActiveRobots = hasRobots;
 }
 
-function updateDogPet(deltaSeconds) {
+function updateDogPet(deltaSeconds, deltaMs) {
+  const dogStats = getDogPowerStats();
+
+  if (game.pet.maxHp !== dogStats.hp && game.pet.alive !== false) {
+    const missingHp = Math.max(0, Number(game.pet.maxHp || dogStats.hp) - Number(game.pet.hp || dogStats.hp));
+    game.pet.maxHp = dogStats.hp;
+    game.pet.hp = Math.max(1, dogStats.hp - missingHp);
+  }
+
+  if (game.pet.alive === false || game.pet.hp <= 0) {
+    game.pet.alive = false;
+    game.pet.respawnTimerMs = Math.max(0, Number(game.pet.respawnTimerMs || 0) - deltaMs);
+    game.pet.targetId = null;
+    game.pet.attackTimer = 0;
+
+    if (game.pet.respawnTimerMs <= 0) {
+      game.pet.alive = true;
+      game.pet.maxHp = dogStats.hp;
+      game.pet.hp = dogStats.hp;
+      game.pet.x = game.player.x + 70;
+      game.pet.y = game.player.y + 36;
+      spawnFloatingText(game.pet.x, game.pet.y - 74, "PIES MAGIK WRACA!", "heal");
+    }
+
+    return;
+  }
+
   let target = game.robots.find((robot) => robot.id === game.pet.targetId && !robot.dead);
 
   if (!target) {
@@ -14644,7 +28043,7 @@ function updateDogPet(deltaSeconds) {
   if (!target) {
     movePetTowards(fallbackX, fallbackY, deltaSeconds);
     game.pet.targetId = null;
-    game.pet.attackTimer = 0;
+    game.pet.attackTimer = Math.max(0, game.pet.attackTimer - deltaSeconds);
     return;
   }
 
@@ -14652,19 +28051,22 @@ function updateDogPet(deltaSeconds) {
   const dy = target.y - game.pet.y;
   const distance = Math.hypot(dx, dy) || 1;
 
-  if (distance > 58) {
+  if (distance > 86) {
     const step = GAME_RULES.dogSpeed * deltaSeconds;
     game.pet.x += (dx / distance) * step;
     game.pet.y += (dy / distance) * step;
-    game.pet.attackTimer = 0;
+    game.pet.attackTimer = Math.max(0, game.pet.attackTimer - deltaSeconds);
     return;
   }
 
-    game.pet.attackTimer += deltaSeconds;
+  game.pet.attackTimer = Math.max(0, Number(game.pet.attackTimer || 0) - deltaSeconds);
 
-  while (game.pet.attackTimer >= 1) {
-    game.pet.attackTimer -= 1;
-    damageRobot(target, GAME_RULES.dogDamagePerSecond, "pies-magik");
+  if (game.pet.attackTimer <= 0) {
+    damageRobot(target, dogStats.damage, "pies-magik");
+    if (isDogFireBreathSkinId(getEquippedPet()?.id)) {
+      spawnDogFireBreath(game.pet.x + 10, game.pet.y - 12, target.x, target.y - 8);
+    }
+    game.pet.attackTimer = 1;
 
     if (target.dead) {
       const nextTarget = findNearestRobot(game.pet.x, game.pet.y);
@@ -14673,10 +28075,102 @@ function updateDogPet(deltaSeconds) {
 
       if (!target) {
         game.pet.attackTimer = 0;
-        break;
       }
     }
   }
+}
+
+function isDogPetVulnerable() {
+  const petId = getEquippedPet()?.id;
+  return (
+    game.mode === "solo" &&
+    isMortalPetId(petId) &&
+    game.pet.alive !== false &&
+    Number(game.pet.hp || 0) > 0
+  );
+}
+
+function damageDogPet(amount) {
+  if (!isDogPetVulnerable()) {
+    return;
+  }
+
+  const pet = getEquippedPet();
+  const petStats = pet?.id === "el-kruk"
+    ? getOzzyPowerStats()
+    : pet?.id === "malpka-jasnoksieznik"
+      ? getMonkeyMagePowerStats()
+      : pet?.id === "niedzwiedz-polarny"
+        ? getPolarBearPowerStats()
+        : pet?.id === "coral"
+          ? getCoralPowerStats()
+          : pet?.id === HIGH_TOWER_FLARO_ID
+            ? getFlaroPowerStats()
+            : getDogPowerStats();
+  const appliedDamage = Math.min(Number(amount || 0), Number(game.pet.hp || 0));
+  game.pet.hp = Math.max(0, Number(game.pet.hp || 0) - Number(amount || 0));
+  spawnFloatingText(game.pet.x, game.pet.y - 74, `-${Math.ceil(appliedDamage)}`, "hurt");
+
+  if (game.pet.hp <= 0) {
+    game.pet.alive = false;
+    game.pet.respawnTimerMs = petStats.respawnSeconds * 1000;
+    game.pet.respawnX = game.pet.x;
+    game.pet.respawnY = game.pet.y;
+    game.pet.targetId = null;
+    game.pet.attackTimer = 0;
+    spawnFloatingText(game.pet.x, game.pet.y - 104, "ODRODZENIE", "hit");
+  }
+}
+
+function getRobotDogTarget(robot, playerTarget) {
+  if (!isDogPetVulnerable() || !robot || getEquippedPet()?.id === HIGH_TOWER_FLARO_ID) {
+    return null;
+  }
+
+  const dogDistance = Math.hypot(game.pet.x - robot.x, game.pet.y - robot.y);
+  const playerDistance = playerTarget
+    ? Math.hypot(playerTarget.x - robot.x, playerTarget.y - robot.y)
+    : Infinity;
+
+  if (dogDistance <= playerDistance + 90) {
+    return {
+      type: "pet",
+      x: game.pet.x,
+      y: game.pet.y,
+    };
+  }
+
+  return null;
+}
+
+function getManipulatedRobotTarget(robot) {
+  if (!robot || robot.dead) {
+    return null;
+  }
+
+  const isManipulated = Number(robot.parrotManipulatedMs || 0) > 0;
+  const target = isManipulated
+    ? game.robots
+      .filter((candidate) => candidate.id !== robot.id && !candidate.dead && Number(candidate.parrotManipulatedMs || 0) <= 0)
+      .sort((first, second) =>
+        Math.hypot(first.x - robot.x, first.y - robot.y) - Math.hypot(second.x - robot.x, second.y - robot.y)
+      )[0] || findNearestRobotExcluding(robot.x, robot.y, robot.id)
+    : game.robots
+      .filter((candidate) => candidate.id !== robot.id && !candidate.dead && Number(candidate.parrotManipulatedMs || 0) > 0)
+      .sort((first, second) =>
+        Math.hypot(first.x - robot.x, first.y - robot.y) - Math.hypot(second.x - robot.x, second.y - robot.y)
+      )[0] || null;
+
+  if (!target) {
+    return null;
+  }
+
+  return {
+    type: "robot",
+    x: target.x,
+    y: target.y,
+    robot: target,
+  };
 }
 
 function firePolarBearShot() {
@@ -14695,6 +28189,34 @@ function firePolarBearShot() {
 }
 
 function updatePolarBearPet(deltaSeconds, deltaMs) {
+  const polarBearStats = getPolarBearPowerStats();
+
+  if (game.pet.maxHp !== polarBearStats.hp && game.pet.alive !== false) {
+    const missingHp = Math.max(0, Number(game.pet.maxHp || polarBearStats.hp) - Number(game.pet.hp || polarBearStats.hp));
+    game.pet.maxHp = polarBearStats.hp;
+    game.pet.hp = Math.max(1, polarBearStats.hp - missingHp);
+  }
+
+  if (game.pet.alive === false || game.pet.hp <= 0) {
+    game.pet.alive = false;
+    game.pet.respawnTimerMs = Math.max(0, Number(game.pet.respawnTimerMs || 0) - deltaMs);
+    game.pet.castTimerMs = 0;
+    game.pet.castTimerMsSecondary = 0;
+
+    if (game.pet.respawnTimerMs <= 0) {
+      game.pet.alive = true;
+      game.pet.maxHp = polarBearStats.hp;
+      game.pet.hp = polarBearStats.hp;
+      game.pet.x = game.player.x + 70;
+      game.pet.y = game.player.y + 34;
+      game.pet.respawnX = 0;
+      game.pet.respawnY = 0;
+      spawnFloatingText(game.pet.x, game.pet.y - 74, "NIMBO WRACA!", "heal");
+    }
+
+    return;
+  }
+
   movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
   game.pet.castTimerMsSecondary += deltaMs;
 
@@ -14741,201 +28263,6 @@ function updateCatPet(deltaSeconds, deltaMs) {
 
 function updateSnowflakePet(deltaSeconds, deltaMs) {
   movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
-  updateSnowflakeShield(deltaMs);
-}
-
-function createJaguarField() {
-  game.jungleFields.push({
-    id: `jaguar-field-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    kind: "jaguar",
-    x: game.player.x,
-    y: game.player.y,
-    radius: GAME_RULES.jaguarFieldRadius,
-    ttlMs: GAME_RULES.jaguarFieldDurationMs,
-  });
-}
-
-function createFrogPuddle() {
-  game.jungleFields.push({
-    id: `frog-puddle-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    kind: "frog",
-    x: game.player.x,
-    y: game.player.y,
-    radius: GAME_RULES.frogPuddleRadius,
-    ttlMs: GAME_RULES.frogPuddleDurationMs,
-    playerHealTimerMs: 0,
-    coopHealTimers: {},
-  });
-}
-
-function updateJaguarPet(deltaSeconds, deltaMs) {
-  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
-  updateJungleFields(deltaMs);
-
-  while (
-    game.player.hp > 0 &&
-    game.pet.jaguarNextTriggerHp > 0 &&
-    game.player.hp <= game.pet.jaguarNextTriggerHp
-  ) {
-    createJaguarField();
-    spawnFloatingText(game.player.x, game.player.y - 136, "JAGUAR", "heal");
-    game.pet.jaguarNextTriggerHp -= 500;
-  }
-}
-
-function updateJungleSnakePet(deltaSeconds, deltaMs) {
-  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
-  game.pet.castTimerMsSecondary += deltaMs;
-
-  while (game.pet.castTimerMsSecondary >= GAME_RULES.jungleSnakeCastIntervalMs) {
-    game.pet.castTimerMsSecondary -= GAME_RULES.jungleSnakeCastIntervalMs;
-    const targets = findNearestRobots(
-      game.pet.x,
-      game.pet.y,
-      GAME_RULES.jungleSnakeTargetCount
-    );
-
-    targets.forEach((target) => {
-      spawnProjectile({
-        x: game.pet.x,
-        y: game.pet.y - 10,
-        targetId: target.id,
-        kind: "jungle-venom-shot",
-      });
-    });
-  }
-}
-
-function updateElephantPet(deltaSeconds, deltaMs) {
-  let target = game.robots.find((robot) => robot.id === game.pet.targetId && !robot.dead) || null;
-
-  if (target && game.pet.castTimerMs > 0) {
-    game.pet.castTimerMs = Math.max(0, game.pet.castTimerMs - deltaMs);
-
-    const targetDistance = Math.hypot(
-      Number(target.elephantRoamTargetX || target.x) - target.x,
-      Number(target.elephantRoamTargetY || target.y) - target.y
-    );
-
-    if (!Number.isFinite(target.elephantRoamTargetX) || !Number.isFinite(target.elephantRoamTargetY) || targetDistance < 36) {
-      target.elephantRoamTargetX = randomBetween(48, Math.max(48, game.width - 48));
-      target.elephantRoamTargetY = randomBetween(84, Math.max(84, game.height - 48));
-    }
-
-    const dx = target.elephantRoamTargetX - target.x;
-    const dy = target.elephantRoamTargetY - target.y;
-    const distance = Math.hypot(dx, dy) || 1;
-    const step = GAME_RULES.elephantRideSpeed * deltaSeconds;
-    target.x = clamp(target.x + (dx / distance) * Math.min(step, distance), 24, Math.max(24, game.width - 24));
-    target.y = clamp(target.y + (dy / distance) * Math.min(step, distance), 24, Math.max(24, game.height - 24));
-    game.pet.x = target.x + 10;
-    game.pet.y = target.y - 18;
-    target.attackTimer = 0;
-
-    if (game.pet.castTimerMs === 0 && !target.dead) {
-      damageRobot(target, target.hp, "slon-dzungli");
-      spawnFloatingText(target.x, target.y - 132, "SLON", "heal");
-      game.pet.targetId = null;
-    }
-
-    return;
-  }
-
-  if (!target) {
-    game.pet.targetId = null;
-    game.pet.castTimerMs = 0;
-  }
-
-  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
-  game.pet.castTimerMsSecondary += deltaMs;
-
-  while (game.pet.castTimerMsSecondary >= GAME_RULES.elephantRideCooldownMs) {
-    game.pet.castTimerMsSecondary -= GAME_RULES.elephantRideCooldownMs;
-    const aliveRobots = game.robots.filter((robot) => !robot.dead);
-
-    if (aliveRobots.length === 0) {
-      continue;
-    }
-
-    target = aliveRobots[randomBetween(0, aliveRobots.length - 1)];
-    game.pet.targetId = target.id;
-    game.pet.castTimerMs = GAME_RULES.elephantRideDurationMs;
-    target.elephantRoamTargetX = randomBetween(48, Math.max(48, game.width - 48));
-    target.elephantRoamTargetY = randomBetween(84, Math.max(84, game.height - 48));
-    spawnFloatingText(target.x, target.y - 132, "PRZEJAZDZKA", "heal");
-    break;
-  }
-}
-
-function updateFrogPet(deltaSeconds, deltaMs) {
-  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
-  updateJungleFields(deltaMs);
-  game.pet.castTimerMsSecondary += deltaMs;
-
-  while (game.pet.castTimerMsSecondary >= GAME_RULES.frogPuddleIntervalMs) {
-    game.pet.castTimerMsSecondary -= GAME_RULES.frogPuddleIntervalMs;
-    createFrogPuddle();
-    spawnFloatingText(game.player.x, game.player.y - 136, "ZABA", "heal");
-  }
-}
-
-function updateSlothPet(deltaSeconds, deltaMs) {
-  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
-
-  if (game.pet.castTimerMs > 0) {
-    game.pet.castTimerMs = Math.max(0, game.pet.castTimerMs - deltaMs);
-  }
-
-  game.pet.castTimerMsSecondary += deltaMs;
-
-  while (game.pet.castTimerMsSecondary >= GAME_RULES.slothSlowCooldownMs) {
-    game.pet.castTimerMsSecondary -= GAME_RULES.slothSlowCooldownMs;
-    game.pet.castTimerMs = GAME_RULES.slothSlowDurationMs;
-    spawnFloatingText(game.player.x, game.player.y - 136, "LENIWIEC", "heal");
-  }
-}
-
-function updateCrocodilePet(deltaSeconds, deltaMs) {
-  let target = game.robots.find((robot) => robot.id === game.pet.targetId && !robot.dead) || null;
-
-  if (!target) {
-    game.pet.targetId = null;
-    game.pet.castTimerMs = 0;
-  }
-
-  if (game.pet.targetId && target) {
-    game.pet.castTimerMs = Math.max(0, game.pet.castTimerMs - deltaMs);
-    game.pet.x = target.x;
-    game.pet.y = target.y + 12;
-    target.attackTimer = 0;
-
-    if (game.pet.castTimerMs === 0) {
-      damageRobot(target, target.hp, "krokodyl-dzungli");
-      spawnFloatingText(target.x, target.y - 132, "KROKODYL", "heal");
-      game.pet.targetId = null;
-      game.pet.castTimerMsSecondary = 0;
-    }
-
-    return;
-  }
-
-  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
-  game.pet.castTimerMsSecondary += deltaMs;
-
-  if (game.pet.castTimerMsSecondary < GAME_RULES.crocodileSurfaceDurationMs) {
-    return;
-  }
-
-  target = findNearestRobot(game.player.x, game.player.y);
-
-  if (!target) {
-    return;
-  }
-
-  game.pet.targetId = target.id;
-  game.pet.castTimerMs = GAME_RULES.crocodileBurrowDurationMs;
-  game.pet.castTimerMsSecondary = 0;
-  spawnFloatingText(target.x, target.y - 132, "POD ZIEMIA", "heal");
 }
 
 function updatePascalPet(deltaSeconds, deltaMs) {
@@ -14958,30 +28285,326 @@ function updateCrabPet(deltaSeconds, deltaMs) {
   ];
 }
 
+function updateCoralPet(deltaSeconds, deltaMs) {
+  const coralStats = getCoralPowerStats();
+
+  if (game.pet.maxHp !== coralStats.hp && game.pet.alive !== false) {
+    const missingHp = Math.max(0, Number(game.pet.maxHp || coralStats.hp) - Number(game.pet.hp || coralStats.hp));
+    game.pet.maxHp = coralStats.hp;
+    game.pet.hp = Math.max(1, coralStats.hp - missingHp);
+  }
+
+  if (game.pet.alive === false || game.pet.hp <= 0) {
+    game.pet.alive = false;
+    game.pet.respawnTimerMs = Math.max(0, Number(game.pet.respawnTimerMs || 0) - deltaMs);
+    game.pet.castTimerMsSecondary = 0;
+    game.pet.coralPulseTimerMs = 0;
+    game.pet.targetId = null;
+
+    if (game.pet.respawnTimerMs <= 0) {
+      game.pet.alive = true;
+      game.pet.maxHp = coralStats.hp;
+      game.pet.hp = coralStats.hp;
+      game.pet.x = game.player.x + 70;
+      game.pet.y = game.player.y + 34;
+      spawnFloatingText(game.pet.x, game.pet.y - 74, "CORAL WRACA!", "heal");
+    }
+
+    return;
+  }
+
+  const target = findNearestCoralTarget(game.pet.x, game.pet.y, coralStats);
+  updateCoralMovement(deltaSeconds, deltaMs, target);
+  getCoralTargets(game.pet.x, game.pet.y, coralStats, 3).forEach((robot) => {
+    applyCoralBlind(robot, coralStats);
+  });
+  game.pet.coralPulseTimerMs = Math.max(0, Number(game.pet.coralPulseTimerMs || 0) + deltaMs);
+
+  while (game.pet.coralPulseTimerMs >= Number(coralStats.pulseIntervalMs || CORAL_PET_STATS.pulseIntervalMs)) {
+    game.pet.coralPulseTimerMs -= Number(coralStats.pulseIntervalMs || CORAL_PET_STATS.pulseIntervalMs);
+    applyCoralPulseDamage(coralStats);
+  }
+}
+
+function findNearestCoralTarget(x, y, coralStats = getCoralPowerStats()) {
+  return getCoralTargets(x, y, coralStats, 1)[0] || null;
+}
+
+function getCoralTargets(x, y, coralStats = getCoralPowerStats(), limit = 3) {
+  const threshold = Number(coralStats.damagedThreshold || CORAL_PET_STATS.damagedThreshold);
+  const maxTargets = Math.max(1, Number(limit || 1));
+
+  return game.robots
+    .filter((robot) => (
+      robot &&
+      !robot.dead &&
+      Number(robot.blindTimerMs || 0) <= 0 &&
+      Number(robot.hp || 0) < Number(robot.maxHp || robot.hp || 1) * threshold
+    ))
+    .map((robot) => ({
+      robot,
+      distance: Math.hypot(Number(robot.x || 0) - x, Number(robot.y || 0) - y),
+    }))
+    .sort((first, second) => first.distance - second.distance)
+    .slice(0, maxTargets)
+    .map((entry) => entry.robot);
+}
+
+function getCoralDamageTargets(x, y, limit = 3) {
+  const maxTargets = Math.max(1, Number(limit || 1));
+
+  return game.robots
+    .filter((robot) => robot && !robot.dead)
+    .map((robot) => ({
+      robot,
+      distance: Math.hypot(Number(robot.x || 0) - x, Number(robot.y || 0) - y),
+    }))
+    .sort((first, second) => first.distance - second.distance)
+    .slice(0, maxTargets)
+    .map((entry) => entry.robot);
+}
+
+function applyCoralPulseDamage(coralStats = getCoralPowerStats()) {
+  const targets = getCoralDamageTargets(game.pet.x, game.pet.y, 3);
+
+  if (targets.length === 0) {
+    return;
+  }
+
+  playOneShotSound("coralFlash", 0.58, 0.92, 500);
+  targets.forEach((robot, index) => {
+    spawnCoralPulseStrike(game.pet.x, game.pet.y - 8, robot.x, robot.y - 10, index);
+    damageRobot(robot, Number(coralStats.pulseDamage || CORAL_PET_STATS.pulseDamage), "coral");
+  });
+}
+
+function updateCoralMovement(deltaSeconds, deltaMs, target) {
+  if (target) {
+    const orbitAngle = (performance.now() / 900) % (Math.PI * 2);
+    const orbitRadius = 150;
+    movePetTowardsWithSpeed(
+      clamp(target.x + Math.cos(orbitAngle) * orbitRadius, 48, Math.max(48, game.width - 48)),
+      clamp(target.y + Math.sin(orbitAngle) * 64, 90, Math.max(90, game.height - 48)),
+      deltaSeconds,
+      GAME_RULES.dogSpeed * 0.92
+    );
+    return;
+  }
+
+  game.pet.coralRoamTimerMs = Math.max(0, Number(game.pet.coralRoamTimerMs || 0) - deltaMs);
+  const hasRoamTarget =
+    Number.isFinite(Number(game.pet.coralRoamX)) &&
+    Number.isFinite(Number(game.pet.coralRoamY));
+  const distanceToRoam = hasRoamTarget
+    ? Math.hypot(Number(game.pet.coralRoamX) - game.pet.x, Number(game.pet.coralRoamY) - game.pet.y)
+    : Infinity;
+
+  if (!hasRoamTarget || distanceToRoam < 18 || game.pet.coralRoamTimerMs <= 0) {
+    game.pet.coralRoamX = randomBetween(70, Math.max(70, Math.round(game.width - 70)));
+    game.pet.coralRoamY = randomBetween(110, Math.max(110, Math.round(game.height - 58)));
+    game.pet.coralRoamTimerMs = randomBetween(1800, 3600);
+  }
+
+  movePetTowardsWithSpeed(
+    Number(game.pet.coralRoamX || game.player.x),
+    Number(game.pet.coralRoamY || game.player.y),
+    deltaSeconds,
+    GAME_RULES.dogSpeed * 0.62
+  );
+}
+
+function updateFlaroPet(deltaSeconds, deltaMs) {
+  const flaroStats = getFlaroPowerStats();
+
+  if (game.pet.maxHp !== flaroStats.hp && game.pet.alive !== false) {
+    const missingHp = Math.max(0, Number(game.pet.maxHp || flaroStats.hp) - Number(game.pet.hp || flaroStats.hp));
+    game.pet.maxHp = flaroStats.hp;
+    game.pet.hp = Math.max(1, flaroStats.hp - missingHp);
+  }
+
+  if (game.pet.alive === false || game.pet.hp <= 0) {
+    game.pet.alive = false;
+    game.pet.respawnTimerMs = Math.max(0, Number(game.pet.respawnTimerMs || 0) - deltaMs);
+    game.pet.flaroDamageHits = 0;
+
+    if (game.pet.respawnTimerMs <= 0) {
+      game.pet.alive = true;
+      game.pet.maxHp = flaroStats.hp;
+      game.pet.hp = flaroStats.hp;
+      game.pet.x = game.player.x + 68;
+      game.pet.y = game.player.y + 32;
+      spawnFloatingText(game.pet.x, game.pet.y - 74, "FLARO WRACA!", "heal");
+    }
+
+    return;
+  }
+
+  movePetTowards(game.player.x + 66, game.player.y + 34, deltaSeconds);
+}
+
+function handleFlaroPlayerDamageTaken(amount) {
+  const pet = getEquippedPet();
+
+  if (!pet || pet.id !== HIGH_TOWER_FLARO_ID || game.mode !== "solo" || game.pet.alive === false || Number(game.pet.hp || 0) <= 0) {
+    return;
+  }
+
+  game.pet.flaroDamageHits = Math.max(0, Number(game.pet.flaroDamageHits || 0)) + 1;
+
+  if (game.pet.flaroDamageHits < 2) {
+    return;
+  }
+
+  game.pet.flaroDamageHits = 0;
+  triggerFlaroRetaliation(Math.max(1, Math.round(Number(amount || 0))));
+}
+
+function triggerFlaroRetaliation(amount) {
+  const flaroStats = getFlaroPowerStats();
+  const burnMs = Math.max(0, Number(flaroStats.burnSeconds || 2) * 1000);
+  const targets = game.robots.filter((robot) => robot && !robot.dead);
+
+  if (!targets.length) {
+    return;
+  }
+
+  playOneShotSound("flaroFire", 0.78, 1, 900);
+  spawnFloatingText(game.pet.x, game.pet.y - 94, "ZIANIE!", "hit");
+
+  targets.forEach((robot, index) => {
+    spawnFlaroFireBreath(game.pet.x, game.pet.y - 16, robot.x, robot.y - 10, index);
+    damageRobot(robot, amount, HIGH_TOWER_FLARO_ID);
+
+    if (!robot.dead && burnMs > 0) {
+      robot.flaroBurnMs = Math.max(Number(robot.flaroBurnMs || 0), burnMs);
+      robot.flaroBurnTickMs = Math.min(Number(robot.flaroBurnTickMs || 100), 100);
+    }
+  });
+}
+
+function spawnFlaroFireBreath(startX, startY, targetX, targetY, index = 0) {
+  if (!effectsLayer) {
+    return;
+  }
+
+  const dx = targetX - startX;
+  const dy = targetY - startY;
+  const distance = Math.max(92, Math.hypot(dx, dy));
+  const angle = Math.atan2(dy, dx);
+  const node = document.createElement("div");
+  node.className = "flaro-fire-breath";
+  node.style.left = `${startX}px`;
+  node.style.top = `${startY}px`;
+  node.style.width = `${distance}px`;
+  node.style.setProperty("--flaro-fire-angle", `${angle}rad`);
+  node.style.setProperty("--flaro-fire-delay", `${index * 22}ms`);
+  node.innerHTML = "<span></span><span></span><span></span><span></span><span></span><span></span>";
+  effectsLayer.appendChild(node);
+
+  window.setTimeout(() => {
+    node.remove();
+  }, 760 + index * 22);
+}
+
+function applyCoralBlind(robot, coralStats = getCoralPowerStats()) {
+  if (!robot || robot.dead) {
+    return;
+  }
+
+  spawnCoralFlash(game.pet.x, game.pet.y - 10, robot.x, robot.y - 14);
+  playOneShotSound("coralFlash", 0.78, 1, 700);
+  damageRobot(robot, Number(coralStats.damage || CORAL_PET_STATS.damage), "coral");
+
+  if (robot.dead) {
+    return;
+  }
+
+  robot.blindTimerMs = Math.max(Number(robot.blindTimerMs || 0), Number(coralStats.blindMs || CORAL_PET_STATS.blindMs));
+  robot.blindSpinAngle = Math.random() * Math.PI * 2;
+  robot.attackTimer = 0;
+  robot.rangedAttackTimerMs = 0;
+}
+
+function spawnCoralFlash(startX, startY, targetX, targetY) {
+  if (!effectsLayer) {
+    return;
+  }
+
+  const dx = targetX - startX;
+  const dy = targetY - startY;
+  const distance = Math.max(70, Math.hypot(dx, dy));
+  const angle = Math.atan2(dy, dx);
+  const node = document.createElement("div");
+  node.className = "coral-blind-flash";
+  node.style.left = `${startX}px`;
+  node.style.top = `${startY}px`;
+  node.style.width = `${distance}px`;
+  node.style.setProperty("--coral-flash-angle", `${angle}rad`);
+  node.innerHTML = "<span></span><span></span><span></span>";
+  effectsLayer.appendChild(node);
+
+  window.setTimeout(() => {
+    node.remove();
+  }, 520);
+}
+
+function spawnCoralPulseStrike(startX, startY, targetX, targetY, index = 0) {
+  if (!effectsLayer) {
+    return;
+  }
+
+  const dx = targetX - startX;
+  const dy = targetY - startY;
+  const distance = Math.max(58, Math.hypot(dx, dy));
+  const angle = Math.atan2(dy, dx);
+  const node = document.createElement("div");
+  node.className = "coral-damage-pulse";
+  node.style.left = `${startX}px`;
+  node.style.top = `${startY}px`;
+  node.style.width = `${distance}px`;
+  node.style.setProperty("--coral-pulse-angle", `${angle}rad`);
+  node.style.setProperty("--coral-pulse-delay", `${index * 54}ms`);
+  node.innerHTML = "<span></span><span></span>";
+  effectsLayer.appendChild(node);
+
+  window.setTimeout(() => {
+    node.remove();
+  }, 620 + index * 54);
+}
+
+function spawnDogFireBreath(startX, startY, targetX, targetY) {
+  if (!effectsLayer) {
+    return;
+  }
+
+  const dx = targetX - startX;
+  const dy = targetY - startY;
+  const distance = Math.max(76, Math.hypot(dx, dy));
+  const angle = Math.atan2(dy, dx);
+  const node = document.createElement("div");
+  node.className = "dog-fire-breath";
+  node.style.left = `${startX}px`;
+  node.style.top = `${startY}px`;
+  node.style.width = `${Math.min(215, distance + 48)}px`;
+  node.style.setProperty("--dog-fire-angle", `${angle}rad`);
+  node.innerHTML = "<span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>";
+  effectsLayer.appendChild(node);
+
+  window.setTimeout(() => {
+    node.remove();
+  }, 620);
+}
+
 function updateParrotPet(deltaSeconds, deltaMs) {
   movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
   game.pet.castTimerMsSecondary += deltaMs;
+  const castIntervalMs = getParrotCastIntervalMs();
 
-  while (game.pet.castTimerMsSecondary >= GAME_RULES.parrotCastIntervalMs) {
-    game.pet.castTimerMsSecondary -= GAME_RULES.parrotCastIntervalMs;
+  while (game.pet.castTimerMsSecondary >= castIntervalMs) {
+    game.pet.castTimerMsSecondary -= castIntervalMs;
     const target = findNearestRobot(game.pet.x, game.pet.y);
 
     if (!target) {
-      continue;
-    }
-
-    const range = getParrotRange();
-    const distance = Math.hypot(target.x - game.pet.x, target.y - game.pet.y);
-
-    if (distance > range) {
-      const angle = Math.atan2(target.y - game.pet.y, target.x - game.pet.x);
-      spawnProjectile({
-        x: game.pet.x,
-        y: game.pet.y - 10,
-        targetX: game.pet.x + Math.cos(angle) * range,
-        targetY: game.pet.y - 10 + Math.sin(angle) * range,
-        kind: "papuga-miss",
-      });
       continue;
     }
 
@@ -14990,6 +28613,7 @@ function updateParrotPet(deltaSeconds, deltaMs) {
       y: game.pet.y - 10,
       targetId: target.id,
       kind: "papuga",
+      petId: getEquippedPet()?.id || "papuga-manipulantka",
     });
   }
 }
@@ -14997,9 +28621,10 @@ function updateParrotPet(deltaSeconds, deltaMs) {
 function updateLpsotkaPet(deltaSeconds, deltaMs) {
   movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
   game.pet.castTimerMsSecondary += deltaMs;
+  const castIntervalMs = Number(getLpsotkaPowerStats().castIntervalSeconds || 5) * 1000;
 
-  while (game.pet.castTimerMsSecondary >= GAME_RULES.lpsotkaCastIntervalMs) {
-    game.pet.castTimerMsSecondary -= GAME_RULES.lpsotkaCastIntervalMs;
+  while (game.pet.castTimerMsSecondary >= castIntervalMs) {
+    game.pet.castTimerMsSecondary -= castIntervalMs;
     const target = findNearestRobot(game.pet.x, game.pet.y);
 
     if (!target) {
@@ -15016,22 +28641,89 @@ function updateLpsotkaPet(deltaSeconds, deltaMs) {
 }
 
 function updateElKrukPet(deltaSeconds, deltaMs) {
-  movePetTowards(game.player.x + 70, game.player.y + 34, deltaSeconds);
+  const ozzyStats = getOzzyPowerStats();
 
-  if (game.player.hp >= getPlayerMaxHp()) {
+  if (game.pet.maxHp !== ozzyStats.hp && game.pet.alive !== false) {
+    const missingHp = Math.max(0, Number(game.pet.maxHp || ozzyStats.hp) - Number(game.pet.hp || ozzyStats.hp));
+    game.pet.maxHp = ozzyStats.hp;
+    game.pet.hp = Math.max(1, ozzyStats.hp - missingHp);
+  }
+
+  if (game.pet.alive === false || game.pet.hp <= 0) {
+    game.pet.alive = false;
+    game.pet.respawnTimerMs = Math.max(0, Number(game.pet.respawnTimerMs || 0) - deltaMs);
+    game.pet.healTimerMs = 0;
+
+    if (game.pet.respawnTimerMs <= 0) {
+      game.pet.alive = true;
+      game.pet.maxHp = ozzyStats.hp;
+      game.pet.hp = ozzyStats.hp;
+      game.pet.x = game.player.x + 68;
+      game.pet.y = game.player.y + 32;
+      spawnFloatingText(game.pet.x, game.pet.y - 74, "OZZY WRACA!", "heal");
+    }
+
+    return;
+  }
+
+  const nearestRobot = findNearestRobot(game.pet.x, game.pet.y);
+  const safeDistance = nearestRobot
+    ? Math.hypot(nearestRobot.x - game.pet.x, nearestRobot.y - game.pet.y)
+    : Infinity;
+
+  if (nearestRobot && safeDistance < 230) {
+    const dx = game.pet.x - nearestRobot.x;
+    const dy = game.pet.y - nearestRobot.y;
+    const distance = Math.hypot(dx, dy) || 1;
+    const step = GAME_RULES.dogSpeed * 1.08 * deltaSeconds;
+    game.pet.x = clamp(game.pet.x + (dx / distance) * step, 36, Math.max(36, game.width - 36));
+    game.pet.y = clamp(game.pet.y + (dy / distance) * step, 72, Math.max(72, game.height - 36));
+  } else {
+    const idleX = game.player.x + Math.sin(performance.now() / 640) * 96;
+    const idleY = game.player.y + 44 + Math.cos(performance.now() / 820) * 52;
+    movePetTowardsWithSpeed(idleX, idleY, deltaSeconds, GAME_RULES.dogSpeed * 0.72);
+  }
+
+  if (game.player.hp > 2500 || game.player.hp >= getPlayerMaxHp()) {
     game.pet.healTimerMs = 0;
     return;
   }
 
   game.pet.healTimerMs += deltaMs;
 
-  while (game.pet.healTimerMs >= 5000) {
-    game.pet.healTimerMs -= 5000;
-    healPlayer(500);
+  while (game.pet.healTimerMs >= 1000) {
+    game.pet.healTimerMs -= 1000;
+    healPlayer(ozzyStats.healPerSecond);
   }
 }
 
 function updateMonkeyMagePet(deltaSeconds) {
+  const monkeyStats = getMonkeyMagePowerStats();
+
+  if (game.pet.maxHp !== monkeyStats.hp && game.pet.alive !== false) {
+    const missingHp = Math.max(0, Number(game.pet.maxHp || monkeyStats.hp) - Number(game.pet.hp || monkeyStats.hp));
+    game.pet.maxHp = monkeyStats.hp;
+    game.pet.hp = Math.max(1, monkeyStats.hp - missingHp);
+  }
+
+  if (game.pet.alive === false || game.pet.hp <= 0) {
+    game.pet.alive = false;
+    game.pet.respawnTimerMs = Math.max(0, Number(game.pet.respawnTimerMs || 0) - (deltaSeconds * 1000));
+    game.pet.targetId = null;
+    game.pet.attackTimer = 0;
+
+    if (game.pet.respawnTimerMs <= 0) {
+      game.pet.alive = true;
+      game.pet.maxHp = monkeyStats.hp;
+      game.pet.hp = monkeyStats.hp;
+      game.pet.x = game.player.x + 66;
+      game.pet.y = game.player.y + 30;
+      spawnFloatingText(game.pet.x, game.pet.y - 74, "OSMO WRACA!", "heal");
+    }
+
+    return;
+  }
+
   let target = game.robots.find((robot) => robot.id === game.pet.targetId && !robot.dead);
   const playerNeedsHeal = game.player.hp < getPlayerMaxHp();
 
@@ -15054,7 +28746,7 @@ function updateMonkeyMagePet(deltaSeconds) {
 
     while (game.pet.attackTimer >= 1 && game.player.hp < getPlayerMaxHp()) {
       game.pet.attackTimer -= 1;
-      healPlayer(GAME_RULES.monkeyHealPerSecond);
+      healPlayer(monkeyStats.power);
     }
 
     if (game.player.hp >= getPlayerMaxHp()) {
@@ -15085,7 +28777,7 @@ function updateMonkeyMagePet(deltaSeconds) {
   const dy = target.y - game.pet.y;
   const distance = Math.hypot(dx, dy) || 1;
 
-  if (distance > 58) {
+  if (distance > 88) {
     const step = GAME_RULES.monkeyLeapSpeed * deltaSeconds;
     game.pet.x += (dx / distance) * Math.min(step, distance);
     game.pet.y += (dy / distance) * Math.min(step, distance);
@@ -15097,7 +28789,7 @@ function updateMonkeyMagePet(deltaSeconds) {
 
   while (game.pet.attackTimer >= 1) {
     game.pet.attackTimer -= 1;
-    damageRobot(target, GAME_RULES.monkeyDamagePerSecond, "malpka-jasnoksieznik");
+    damageRobot(target, monkeyStats.power, "malpka-jasnoksieznik");
 
     if (target.dead) {
       game.pet.targetId = null;
@@ -15156,21 +28848,24 @@ function damagePlayer(amount) {
     return;
   }
 
-  if (isSnowflakeShieldActive() || isOwlShieldActive()) {
+  if (isOwlShieldActive()) {
     return;
   }
 
-  const reducedAmount = isCatShieldActive()
-    ? Math.max(1, Math.round(amount * (1 - GAME_RULES.catShieldDamageReduction)))
+  const snowflakeReduction = isSnowflakeShieldActive()
+    ? Number(getSnowflakePowerStats().damageReduction || 0)
+    : 0;
+  const catReduction = isCatShieldActive() ? GAME_RULES.catShieldDamageReduction : 0;
+  const appleReduction = isAppleShieldActive() ? 0.25 : 0;
+  const totalReduction = clamp(Math.max(snowflakeReduction, catReduction, appleReduction), 0, 0.9);
+  const reducedAmount = totalReduction > 0
+    ? Math.max(1, Math.round(amount * (1 - totalReduction)))
     : amount;
 
   game.player.hp = Math.max(0, game.player.hp - reducedAmount);
   spawnFloatingText(game.player.x, game.player.y - 120, `-${reducedAmount}`, "hurt");
 
-  if (game.player.hp > 0 && getEquippedPet()?.id === "papuga-dzungli") {
-    healPlayer(Math.max(1, Math.round(reducedAmount * GAME_RULES.jungleParrotHealMultiplier)));
-  }
-
+  handleFlaroPlayerDamageTaken(reducedAmount);
   maybeTriggerPascalEmergency();
 }
 
@@ -15180,18 +28875,49 @@ function awardCoins(amount) {
   saveState();
 }
 
-function awardTrophies(amount) {
-  game.trophiesEarnedRun += amount;
-  const missionProgress = getBookMissionProgressState();
-  missionProgress.trophiesEarnedSinceMissions += Math.max(0, Number(amount || 0));
+function awardSilver(amount) {
+  const silverAmount = Math.max(0, Math.floor(Number(amount || 0)));
 
-  if (isCoopMatchActive()) {
-    return;
+  if (silverAmount <= 0 || !isMagiciansSilverBridgeActive()) {
+    return 0;
   }
 
-  state.trophies += amount;
+  state.silver = Math.max(0, Number(state.silver || 0) + silverAmount);
+  game.silverEarnedRun = Math.max(0, Number(game.silverEarnedRun || 0) + silverAmount);
   updateBalanceDisplays();
   saveState();
+  return silverAmount;
+}
+
+function awardTrophies(amount) {
+  const trophyAmount = Number(amount || 0);
+
+  if (isMagiciansSilverBridgeActive()) {
+    return 0;
+  }
+
+  const currentTrophies = Number(state.trophies || 0);
+  const appliedTrophyAmount = !hasClaimedWinterUnlockReward() && trophyAmount > 0
+    ? Math.min(trophyAmount, Math.max(0, MAGICIANS_SILVER_GATE_TROPHIES - currentTrophies))
+    : trophyAmount;
+
+  if (appliedTrophyAmount === 0) {
+    return 0;
+  }
+
+  game.trophiesEarnedRun += appliedTrophyAmount;
+  updatePortalMissionProgressForEvent("trophies", appliedTrophyAmount);
+
+  if (isCoopMatchActive()) {
+    return appliedTrophyAmount;
+  }
+
+  addPetRankTrophies(game.runPetId || state.equippedPet, appliedTrophyAmount);
+  state.trophies = Math.max(0, Number(state.trophies || 0) + appliedTrophyAmount);
+  updateBalanceDisplays();
+  updateStreakDisplays();
+  saveState();
+  return appliedTrophyAmount;
 }
 
 function getRobotKillReward() {
@@ -15208,23 +28934,8 @@ function healPlayer(amount) {
   }
 
   game.player.hp += realHeal;
+  updatePortalMissionProgressForEvent("heal", realHeal);
   spawnFloatingText(game.player.x, game.player.y - 120, `+${realHeal}`, "heal");
-}
-
-function updateBookMissionProgressAfterRound(status, options = {}) {
-  const progress = getBookMissionProgressState();
-  const wasVictory = status === "Zwyciestwo";
-  const robotsKilledTotal = Math.max(0, Number(options.robotsKilledTotal || 0));
-  const damageDealtRun = Math.max(0, Number(options.damageDealtRun || 0));
-  const petId = String(options.petId || "");
-
-  progress.totalRobotDamage += damageDealtRun;
-  progress.currentRunRobots = robotsKilledTotal;
-  progress.fullClearStreak = wasVictory ? progress.fullClearStreak + 1 : 0;
-
-  if (isJungleBookPetId(petId)) {
-    progress.junglePetRoundsPlayed += 1;
-  }
 }
 
 function damageRobot(robot, amount, source = "generic") {
@@ -15236,23 +28947,36 @@ function damageRobot(robot, amount, source = "generic") {
 
   if (source === "player") {
     boostedAmount += getTigerDamageBonus();
-
-    if (getEquippedPet()?.id === "malpa-dzungli" && robot.monkeyMarked) {
-      boostedAmount = Math.round(boostedAmount * GAME_RULES.jungleMonkeyDamageMultiplier);
-    }
   }
 
   const appliedDamage = Math.min(boostedAmount, robot.hp);
   robot.hp = Math.max(0, robot.hp - boostedAmount);
   game.damageDealtRun += appliedDamage;
-  spawnFloatingText(robot.x, robot.y - 92, `-${appliedDamage}`, "hit");
+  updatePortalMissionProgressForEvent("damage", appliedDamage);
+  if (isPetMiniAlleyPetId(source)) {
+    updatePetMiniAlleyMissionProgress("damage", appliedDamage, source);
+  }
+  if (source !== "flaro-burn" || Math.random() < 0.18) {
+    spawnFloatingText(robot.x, robot.y - 92, `-${appliedDamage}`, source === "flaro-burn" ? "hurt" : "hit");
+  }
 
   if (robot.hp <= 0) {
     robot.dead = true;
+    if (robot.kind === "tower-bot") {
+      game.towerBotKills = Math.max(0, Number(game.towerBotKills || 0)) + 1;
+      game.robotsKilledTotal += 1;
+      updatePortalMissionProgressForEvent("robot-kill", 1);
+      spawnFloatingText(robot.x, robot.y - 124, "+1", "heal");
+      return;
+    }
     game.robotsKilledTotal += 1;
-    const missionProgress = getBookMissionProgressState();
-    missionProgress.robotsDefeatedSinceMissions += 1;
-    awardTrophies(getRobotKillReward());
+    updatePortalMissionProgressForEvent("robot-kill", 1);
+    if (isMagiciansSilverBridgeActive()) {
+      awardCoins(MAGICIANS_BRIDGE_ROBOT_COIN_REWARD);
+      spawnFloatingText(robot.x, robot.y - 132, `+${MAGICIANS_BRIDGE_ROBOT_COIN_REWARD} MONET`, "heal");
+    } else {
+      awardTrophies(getRobotKillReward());
+    }
   }
 }
 
@@ -15284,7 +29008,7 @@ function rememberRobotPosition(robot, deltaMs) {
     entry.ageMs += deltaMs;
   });
   history.push({ x: robot.x, y: robot.y, ageMs: 0 });
-  robot.history = history.filter((entry) => entry.ageMs <= GAME_RULES.lpsotkaBubbleRewindMs + 250);
+  robot.history = history.filter((entry) => entry.ageMs <= getLpsotkaMaxBubbleDurationMs() + 250);
 }
 
 function getRobotPastPosition(robot, lookbackMs) {
@@ -15314,16 +29038,30 @@ function applyLpsotkaBubble(robot) {
     return;
   }
 
-  const pastPosition = getRobotPastPosition(robot, GAME_RULES.lpsotkaBubbleRewindMs);
-  robot.bubbleTimerMs = Math.max(robot.bubbleTimerMs || 0, GAME_RULES.lpsotkaBubbleRewindMs);
+  const bubbleDurationMs = getLpsotkaBubbleDurationMs();
+  const pastPosition = getRobotPastPosition(robot, bubbleDurationMs);
+  robot.bubbleTimerMs = Math.max(robot.bubbleTimerMs || 0, bubbleDurationMs);
   robot.rewindFromX = robot.x;
   robot.rewindFromY = robot.y;
   robot.rewindTargetX = pastPosition.x;
   robot.rewindTargetY = pastPosition.y;
   robot.rewindElapsedMs = 0;
-  robot.rewindDurationMs = GAME_RULES.lpsotkaBubbleRewindMs;
-  robot.stunTimerMs = Math.max(robot.stunTimerMs || 0, GAME_RULES.lpsotkaBubbleRewindMs);
+  robot.rewindDurationMs = bubbleDurationMs;
+  robot.stunTimerMs = Math.max(robot.stunTimerMs || 0, bubbleDurationMs);
   spawnFloatingText(robot.x, robot.y - 118, "PSOTKA", "heal");
+}
+
+function applyParrotManipulation(robot) {
+  if (!robot || robot.dead) {
+    return;
+  }
+
+  const durationMs = getParrotManipulateDurationMs();
+  robot.parrotManipulatedMs = Math.max(robot.parrotManipulatedMs || 0, durationMs);
+  robot.parrotMarkMs = Math.max(robot.parrotMarkMs || 0, durationMs);
+  robot.attackTimer = 0;
+  updatePetMiniAlleyMissionProgress("damage", 200, "papuga-manipulantka");
+  spawnFloatingText(robot.x, robot.y - 118, "MANIPULACJA", "heal");
 }
 
 function poisonRobot(robot, durationMs) {
@@ -15344,20 +29082,6 @@ function slowRobot(robot, durationMs, speedMultiplier = 0.5) {
   robot.slowTimerMs = Math.max(robot.slowTimerMs || 0, durationMs);
   robot.slowMultiplier = Math.min(robot.slowMultiplier || 1, speedMultiplier);
   spawnFloatingText(robot.x, robot.y - 118, "SLOW", "heal");
-}
-
-function applyJungleSnakeVenom(robot) {
-  if (!robot || robot.dead) {
-    return;
-  }
-
-  slowRobot(robot, GAME_RULES.jungleSnakeDurationMs, GAME_RULES.jungleSnakeSlowMultiplier);
-  robot.snakeVenomTimerMs = Math.max(robot.snakeVenomTimerMs || 0, GAME_RULES.jungleSnakeDurationMs);
-  robot.snakeDamageMultiplier = Math.min(
-    robot.snakeDamageMultiplier || 1,
-    GAME_RULES.jungleSnakeDamageMultiplier
-  );
-  spawnFloatingText(robot.x, robot.y - 118, "JAD", "heal");
 }
 
 function updateBarriers(deltaMs) {
@@ -15460,7 +29184,15 @@ function finishGameLoss() {
 
   const defeatReward = getDefeatTrophyReward();
 
-  if (defeatReward > 0) {
+  if (!game.wave4StreakApplied && !isCoopMatchActive()) {
+    state.trophyStreak = 0;
+    game.streakReachedRun = 0;
+    game.streakBonusEarnedRun = 0;
+    updateStreakDisplays();
+    saveState();
+  }
+
+  if (defeatReward !== 0) {
     awardTrophies(defeatReward);
   }
 
@@ -15478,6 +29210,12 @@ function finishGameLoss() {
 function finishGameVictory() {
   if (!game.active || game.coopResultApplied) {
     return;
+  }
+
+  updatePortalMissionProgressForEvent("full-waves", 1);
+  const runPetBaseId = getPetBaseId(game.runPetId || state.equippedPet);
+  if (isPetMiniAlleyPetId(runPetBaseId)) {
+    updatePetMiniAlleyMissionProgress("full-waves", 1, runPetBaseId);
   }
 
   if (isCoopMatchActive()) {
@@ -15585,11 +29323,11 @@ function concludeGameSession(status, note) {
     game.statsCounted = true;
     state.completedGamesTotal += 1;
     state.robotsDefeatedTotal += Math.max(0, Number(game.robotsKilledTotal || 0));
-    updateBookMissionProgressAfterRound(status, {
-      robotsKilledTotal: game.robotsKilledTotal,
-      damageDealtRun: game.damageDealtRun,
-      petId: game.runPetId,
-    });
+    updatePortalMissionProgressForEvent("game-played", 1);
+    const runPetBaseId = getPetBaseId(game.runPetId || state.equippedPet);
+    if (isPetMiniAlleyPetId(runPetBaseId)) {
+      updatePetMiniAlleyMissionProgress("play", 1, runPetBaseId);
+    }
     saveState();
   }
 
@@ -15627,11 +29365,11 @@ function concludeCoopGameSession(status, note, overrides = {}) {
     game.statsCounted = true;
     state.completedGamesTotal += 1;
     state.robotsDefeatedTotal += robotsKilledTotal;
-    updateBookMissionProgressAfterRound(status, {
-      robotsKilledTotal,
-      damageDealtRun: overrides.damageDealtRun ?? game.damageDealtRun,
-      petId: overrides.petId ?? game.runPetId,
-    });
+    updatePortalMissionProgressForEvent("game-played", 1);
+    const runPetBaseId = getPetBaseId(game.runPetId || state.equippedPet);
+    if (isPetMiniAlleyPetId(runPetBaseId)) {
+      updatePetMiniAlleyMissionProgress("play", 1, runPetBaseId);
+    }
   }
 
   if (trophiesEarnedRun > 0) {
@@ -15703,7 +29441,10 @@ function findNearestRobotExcluding(x, y, excludedRobotId) {
 }
 
 function getEquippedPet() {
-  return getOwnedItem("pets", state.equippedPet);
+  const rankingPetId = game?.mode === "ranking-ship"
+    ? (game.rankingShip?.activePetId || ui.rankingGameActivePetId)
+    : "";
+  return getOwnedItem("pets", rankingPetId || state.equippedPet);
 }
 
 function getEquippedCharacter() {
@@ -15721,85 +29462,72 @@ function getWaveConfig(waveNumber) {
     1: {
       wave: 1,
       robotCount: 10,
-      robotHp: 200,
-      robotDamage: 10,
+      robotHp: 400,
+      robotDamage: 250,
       robotAttackIntervalMs: 100,
       killReward: 0,
       completionReward: 0,
-      defeatReward: 10,
-      spawnIntervalMs: 1500,
-      spawnBatch: 3,
-      initialBatch: 3,
+      defeatReward: -10,
+      durationMs: WAVE_DURATION_MS,
+      spawnIntervalMs: 5000,
+      spawnBatch: 1,
+      initialBatch: 1,
     },
     2: {
       wave: 2,
       robotCount: 8,
-      robotHp: 500,
-      robotDamage: 15,
+      robotHp: 800,
+      robotDamage: 360,
       robotAttackIntervalMs: 100,
       killReward: 0,
       completionReward: 0,
-      defeatReward: 10,
-      spawnIntervalMs: 2000,
+      defeatReward: 5,
+      durationMs: WAVE_DURATION_MS,
+      spawnIntervalMs: 5000,
       spawnBatch: 1,
       initialBatch: 1,
     },
     3: {
       wave: 3,
       robotCount: 7,
-      robotHp: 700,
-      robotDamage: 30,
+      robotHp: 1000,
+      robotDamage: 500,
       robotAttackIntervalMs: 100,
       killReward: 0,
       completionReward: 0,
-      defeatReward: 20,
-      spawnIntervalMs: 2500,
+      defeatReward: 5,
+      durationMs: WAVE_DURATION_MS,
+      spawnIntervalMs: 5000,
       spawnBatch: 1,
       initialBatch: 1,
     },
     4: {
       wave: 4,
       robotCount: 5,
-      robotHp: 1000,
-      robotDamage: 40,
+      robotHp: 1600,
+      robotDamage: 400,
       robotAttackIntervalMs: 100,
       killReward: 0,
       completionReward: 0,
-      defeatReward: 35,
-      spawnIntervalMs: 2000,
+      defeatReward: 10,
+      durationMs: WAVE_DURATION_MS,
+      spawnIntervalMs: 5000,
       spawnBatch: 1,
       initialBatch: 1,
     },
     5: {
       wave: 5,
       robotCount: 3,
-      robotHp: 1500,
-      robotDamage: 100,
+      robotHp: 2400,
+      robotDamage: 500,
       robotAttackIntervalMs: 300,
       killReward: 0,
-      completionReward: 50,
-      defeatReward: 35,
-      spawnStages: [
-        {
-          count: 2,
-          batch: 2,
-          intervalMs: 1000,
-          initialBatch: 0,
-          robotHp: 1500,
-          robotDamage: 100,
-          robotAttackIntervalMs: 300,
-        },
-        {
-          count: 1,
-          batch: 1,
-          intervalMs: 0,
-          initialBatch: 0,
-          waitForClear: true,
-          robotHp: 2500,
-          robotDamage: 20,
-          robotAttackIntervalMs: 100,
-        },
-      ],
+      completionReward: 20,
+      defeatReward: 15,
+      durationMs: WAVE_DURATION_MS,
+      spawnIntervalMs: 5000,
+      spawnBatch: 1,
+      initialBatch: 1,
     },
   };
 
@@ -15861,12 +29589,16 @@ function spawnProjectile(projectileConfig) {
 }
 
 function playProjectileSound(projectile) {
+  if (projectile.kind === "shulla-shot") {
+    playOneShotSound("shotShulla", getBoostedAttackSoundVolume(0.76));
+    return;
+  }
+
   const visual = getProjectileVisual(projectile);
 
   if (
     visual.src === "./assets/attacks/atak_elfie.jpeg" ||
-    visual.src === "./assets/attacks/atak_wojowniczka.jpeg" ||
-    visual.src === "./assets/attacks/atak_elinda.jpeg"
+    visual.src === "./assets/attacks/atak_wojowniczka.jpeg"
   ) {
     playOneShotSound("shotElfie", getBoostedAttackSoundVolume(0.76));
     return;
@@ -15902,33 +29634,38 @@ function playProjectileSound(projectile) {
     return;
   }
 
-  if (visual.src === "./assets/attacks/atak_ivy.jpeg") {
-    playOneShotSound("shotIvy", getBoostedAttackSoundVolume(0.76));
+  if (visual.src === "./grifos.atak.png") {
+    playOneShotSound("shotGrifos", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
-  if (visual.src === "./assets/attacks/coco_atak.jpeg") {
-    playOneShotSound("shotCoco", getBoostedAttackSoundVolume(0.76));
+  if (visual.src === "./atakmycelia.png") {
+    playOneShotSound("shotMycelia", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
-  if (visual.src === "./assets/attacks/atakk.jpeg") {
-    playOneShotSound("shotAslan", getBoostedAttackSoundVolume(0.76));
+  if (visual.src === "./sylasatak.png") {
+    playOneShotSound("shotSylas", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
-  if (visual.src === "./assets/attacks/koraa.jpeg") {
-    playOneShotSound("shotKora", getBoostedAttackSoundVolume(0.76));
+  if (visual.src === "./ataknerissa.png") {
+    playOneShotSound("shotNerissa", getBoostedAttackSoundVolume(0.76), 1, 500);
     return;
   }
 
-  if (visual.src === "./assets/attacks/wodza.jpeg") {
-    playOneShotSound("shotWodzu", getBoostedAttackSoundVolume(0.76));
+  if (visual.src === "./hookie.png") {
+    playOneShotSound("shotHookcrab", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
-  if (visual.src === "./assets/attacks/aslan_atak.jpeg") {
-    playOneShotSound("shotAslan", getBoostedAttackSoundVolume(0.76));
+  if (visual.src === "./lunka.png") {
+    playOneShotSound("shotLunella", getBoostedAttackSoundVolume(0.76));
+    return;
+  }
+
+  if (visual.src === "./tha.png") {
+    playOneShotSound("shotThalia", getBoostedAttackSoundVolume(0.76));
     return;
   }
 
@@ -15979,10 +29716,6 @@ function getPlayerProjectileKind(ammoIndex) {
     return "elfie-shot";
   }
 
-  if (character?.id === "millo-jako-elfie") {
-    return "millo-elfie-shot";
-  }
-
   if (character?.id === "nora") {
     return "nora-shot";
   }
@@ -15995,44 +29728,36 @@ function getPlayerProjectileKind(ammoIndex) {
     return "ann-shot";
   }
 
-  if (character?.id === "ivy") {
-    return "ivy-shot";
+  if (character?.id === "grifos") {
+    return "grifos-shot";
   }
 
-  if (character?.id === "ozdobiona-ivy" || character?.id === "ivy-obronczyni-dzungli") {
-    return "ivy-shot";
+  if (character?.id === "mycelia" || character?.id === "lazurowa-mycelia") {
+    return "mycelia-shot";
   }
 
-  if (character?.id === "coco-nkosi") {
-    return "coco-shot";
+  if (character?.id === "sylas" || character?.id === "elegancki-sylias") {
+    return "sylas-shot";
   }
 
-  if (character?.id === "roco-nkosi") {
-    return "coco-shot";
+  if (character?.id === "nerissa") {
+    return "nerissa-shot";
   }
 
-  if (character?.id === "aslan") {
-    return "aslan-shot";
+  if (character?.id === "hookcrab") {
+    return "hookcrab-shot";
   }
 
-  if (character?.id === "aslan-za-mlodu" || character?.id === "naomi") {
-    return "aslan-shot";
+  if (character?.id === "lunella") {
+    return "lunella-shot";
   }
 
-  if (character?.id === "wojownik-aslan") {
-    return "aslan-shot";
+  if (character?.id === "thalia") {
+    return "thalia-shot";
   }
 
-  if (character?.id === "kora" || character?.id === "krolowa-kora") {
-    return "kora-shot";
-  }
-
-  if (character?.id === "kira") {
-    return "kira-shot";
-  }
-
-  if (character?.id === "wodzu") {
-    return "wodzu-shot";
+  if (character?.id === "shulla") {
+    return "shulla-shot";
   }
 
   if (character?.id === "zlotowlosa") {
@@ -16056,9 +29781,7 @@ function getPlayerProjectileKind(ammoIndex) {
 
   if (
     character?.id === "linda" ||
-    character?.id === "roslinna-krolowa-linda" ||
-    character?.id === "elfie-jako-linda" ||
-    character?.id === "linda-wojownicza-ksiezniczka"
+    character?.id === "roslinna-krolowa-linda"
   ) {
     return "linda-shot";
   }
@@ -16082,9 +29805,10 @@ function getPlayerProjectileKind(ammoIndex) {
 }
 
 function getPlayerSpeedMultiplier() {
-  return getEquippedPet()?.id === "chomik-olimpijczyk"
+  const petMultiplier = getEquippedPet()?.id === "chomik-olimpijczyk"
     ? GAME_RULES.olympianSpeedMultiplier
     : 1;
+  return petMultiplier * getAppleSpeedBoostMultiplier();
 }
 
 function getPetFollowSpeedMultiplier() {
@@ -16102,35 +29826,8 @@ function getParrotRange() {
   return Math.sqrt(area / Math.PI);
 }
 
-function updateJungleMonkeyMarks() {
-  game.robots.forEach((robot) => {
-    robot.monkeyMarked = false;
-  });
-
-  if (getEquippedPet()?.id !== "malpa-dzungli") {
-    return;
-  }
-
-  findNearestRobots(
-    game.player.x,
-    game.player.y,
-    GAME_RULES.jungleMonkeyMarkedTargets
-  ).forEach((robot) => {
-    robot.monkeyMarked = true;
-  });
-}
-
-function isSlothSlowActive() {
-  return Boolean(getEquippedPet()?.id === "leniwiec-dzungli" && game.pet.castTimerMs > 0);
-}
-
 function getTigerDamageBonus() {
-  if (getEquippedPet()?.id !== "tygrys-dzungli") {
-    return 0;
-  }
-
-  const missingHp = Math.max(0, getPlayerMaxHp() - Math.max(0, Number(game.player.hp || 0)));
-  return Math.floor(missingHp / GAME_RULES.tigerDamageStepHp) * GAME_RULES.tigerDamagePerStep;
+  return 0;
 }
 
 function getRobotSlowMultiplier(robot) {
@@ -16144,8 +29841,8 @@ function getRobotSlowMultiplier(robot) {
     multiplier = Math.min(multiplier, 0.75);
   }
 
-  if (isSlothSlowActive()) {
-    multiplier = Math.min(multiplier, GAME_RULES.slothSlowMultiplier);
+  if (Number(game.playerBuffs?.robotSlowMs || 0) > 0) {
+    multiplier = Math.min(multiplier, 0.8);
   }
 
   return multiplier;
@@ -16160,7 +29857,10 @@ function getRobotDamageMultiplier(robot) {
 }
 
 function isPascalInvisibilityActive() {
-  return Boolean(getEquippedPet()?.id === "pascal" && game.pet.pascalInvisibleMs > 0);
+  return Boolean(
+    (getEquippedPet()?.id === "pascal" && game.pet.pascalInvisibleMs > 0) ||
+      Number(game.playerBuffs?.invisibleMs || 0) > 0
+  );
 }
 
 function maybeTriggerPascalEmergency() {
@@ -16185,36 +29885,34 @@ function getPetCooldownState() {
     return null;
   }
 
-  if (pet.id === "papuga-manipulantka") {
-    return {
-      progress: clamp(game.pet.castTimerMsSecondary / GAME_RULES.parrotCastIntervalMs, 0, 1),
-      kind: "papuga",
-    };
-  }
+  const basePetId = getPetBaseId(pet.id);
 
   if (pet.id === "l-psotka") {
     return {
-      progress: clamp(game.pet.castTimerMsSecondary / GAME_RULES.lpsotkaCastIntervalMs, 0, 1),
+      progress: clamp(game.pet.castTimerMsSecondary / (Number(getLpsotkaPowerStats().castIntervalSeconds || 5) * 1000), 0, 1),
       kind: "lpsotka",
     };
   }
 
   if (pet.id === "sniezynka") {
     return {
-      progress: game.pet.shieldActive
-        ? clamp(game.pet.shieldTimerMs / GAME_RULES.snowflakeShieldDurationMs, 0, 1)
-        : clamp(1 - (game.pet.shieldCooldownMs / GAME_RULES.snowflakeShieldCooldownMs), 0, 1),
+      progress: 1,
       kind: "sniezynka",
     };
   }
 
   if (pet.id === "sowa") {
+    const sleepDurationMs = Math.round(Number(getOwlPowerStats().sleepSeconds || 2) * 1000);
     return {
       progress: game.pet.shieldActive
-        ? clamp(game.pet.shieldTimerMs / GAME_RULES.owlShieldDurationMs, 0, 1)
+        ? clamp(game.pet.shieldTimerMs / sleepDurationMs, 0, 1)
         : clamp(1 - (game.pet.shieldCooldownMs / GAME_RULES.owlShieldCooldownMs), 0, 1),
       kind: "sowa",
     };
+  }
+
+  if (pet.id === "coral") {
+    return null;
   }
 
   return null;
@@ -16240,22 +29938,6 @@ function getWaterFieldEffect(x, y) {
   };
 }
 
-function getJungleFieldEffect(x, y) {
-  return {
-    insideField: game.jungleFields.some(
-      (field) => field.kind !== "frog" && Math.hypot(field.x - x, field.y - y) <= field.radius
-    ),
-  };
-}
-
-function getFrogPuddleEffect(x, y) {
-  return {
-    fields: game.jungleFields.filter(
-      (field) => field.kind === "frog" && Math.hypot(field.x - x, field.y - y) <= field.radius
-    ),
-  };
-}
-
 function updateWaterFields(deltaSeconds) {
   const pet = getEquippedPet();
 
@@ -16271,15 +29953,6 @@ function updateWaterFields(deltaSeconds) {
   }
 
   game.waterFields = [];
-}
-
-function updateJungleFields(deltaMs) {
-  game.jungleFields = (game.jungleFields || [])
-    .map((field) => ({
-      ...field,
-      ttlMs: Number(field.ttlMs || 0) - deltaMs,
-    }))
-    .filter((field) => field.ttlMs > 0);
 }
 
 function healCoopPlayer(profileId, amount) {
@@ -16301,46 +29974,6 @@ function healCoopPlayer(profileId, amount) {
     game.player.hp = player.hp;
   }
   spawnFloatingText(player.x, player.y - 120, `+${realHeal}`, "heal");
-}
-
-function updateJungleSupportFields(deltaMs, deltaSeconds) {
-  const pet = getEquippedPet();
-
-  if (!pet || pet.id !== "zaba-dzungli") {
-    return;
-  }
-
-  const frogFields = game.jungleFields.filter((field) => field.kind === "frog");
-
-  frogFields.forEach((field) => {
-    const localInside = Math.hypot(field.x - game.player.x, field.y - game.player.y) <= field.radius;
-    field.playerHealTimerMs = localInside ? Number(field.playerHealTimerMs || 0) + deltaMs : 0;
-
-    while (field.playerHealTimerMs >= GAME_RULES.frogPuddleHealIntervalMs) {
-      field.playerHealTimerMs -= GAME_RULES.frogPuddleHealIntervalMs;
-      healPlayer(GAME_RULES.frogPuddleHealAmount);
-    }
-
-    if (!isCoopMatchActive() || !game.coopIsHost) {
-      return;
-    }
-
-    getRemoteCoopPlayers().forEach((player) => {
-      const profileId = sanitizeProfileId(player.profileId);
-      const inside = Math.hypot(field.x - Number(player.x || 0), field.y - Number(player.y || 0)) <= field.radius;
-      const currentTimer = Number(field.coopHealTimers?.[profileId] || 0);
-      const nextTimer = inside ? currentTimer + deltaMs : 0;
-      field.coopHealTimers = {
-        ...(field.coopHealTimers || {}),
-        [profileId]: nextTimer,
-      };
-
-      while (field.coopHealTimers[profileId] >= GAME_RULES.frogPuddleHealIntervalMs) {
-        field.coopHealTimers[profileId] -= GAME_RULES.frogPuddleHealIntervalMs;
-        healCoopPlayer(profileId, GAME_RULES.frogPuddleHealAmount);
-      }
-    });
-  });
 }
 
 function buildMultiplayerRemotePlayerMarkup(player) {
@@ -16413,26 +30046,527 @@ function buildMultiplayerShowcaseCardMarkup(player) {
   `;
 }
 
+function syncWaveBannerCharacter(showCharacter) {
+  if (!waveBannerCharacterFrame) {
+    return;
+  }
+
+  waveBannerCharacterFrame.hidden = !showCharacter;
+
+  if (!showCharacter) {
+    return;
+  }
+
+  const character = getEquippedCharacter() || CATALOG.characters[0];
+  const characterId = character?.id || "";
+
+  if (waveBannerCharacterFrame.dataset.characterId === characterId) {
+    return;
+  }
+
+  waveBannerCharacterFrame.dataset.characterId = characterId;
+  renderPreviewAssetIntoFrame(waveBannerCharacterFrame, character, {
+    imageClass: "wave-banner-character-image asset-image",
+    videoClass: "wave-banner-character-image asset-video",
+    fallbackText: character?.name || "POSTAC",
+    alt: character?.name || "Postać",
+  });
+}
+
+function syncWaveBannerTone(isWaveIntroActive) {
+  if (!waveBannerTitleFrame) {
+    return;
+  }
+
+  if (!isWaveIntroActive) {
+    waveBannerTitleFrame.dataset.waveTone = "";
+    return;
+  }
+
+  const waveNumber = Math.max(1, Number(game.pendingWave || 1));
+  const toneKey = `${game.currentWave || 0}:${waveNumber}`;
+
+  if (game.waveBannerToneKey !== toneKey || !game.waveBannerTone) {
+    game.waveBannerTone = getRandomWaveBannerTone();
+    game.waveBannerToneKey = toneKey;
+  }
+
+  waveBannerTitleFrame.dataset.waveTone = game.waveBannerTone;
+}
+
+function syncWaveCountdownVisual(value, useImage) {
+  const safeValue = clamp(Math.ceil(Number(value || 1)), 1, 99);
+  const canUseImage = Boolean(useImage && safeValue >= 1 && safeValue <= 3);
+
+  if (waveBannerCountdownImage) {
+    waveBannerCountdownImage.hidden = !canUseImage;
+    if (canUseImage) {
+      waveBannerCountdownImage.src = `./${safeValue}.png`;
+      waveBannerCountdownImage.alt = String(safeValue);
+      waveBannerCountdownImage.dataset.fallbackText = String(safeValue);
+    }
+  }
+
+  if (waveBannerCountdownText) {
+    waveBannerCountdownText.hidden = canUseImage;
+    waveBannerCountdownText.textContent = String(safeValue);
+  } else if (waveBannerCountdown) {
+    waveBannerCountdown.textContent = String(safeValue);
+  }
+}
+
+function buildGameTreeBaseMarkup(tree) {
+  const zoneX = Number(tree.zoneRadiusX || TREE_CONFIG.zoneRadiusX);
+  const zoneY = Number(tree.zoneRadiusY || TREE_CONFIG.zoneRadiusY);
+
+  return `
+    <div
+      class="game-tree-eat-zone"
+      style="left:${tree.x}px; top:${tree.y - 10}px; width:${zoneX * 2}px; height:${zoneY * 2}px;"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="game-tree-trunk"
+      style="left:${tree.x}px; top:${tree.y}px; width:${tree.width}px; height:${tree.height}px;"
+      aria-hidden="true"
+    >
+      <img class="game-tree-image game-tree-trunk-image asset-image" src="${TREE_CONFIG.image}" alt="" data-fallback-text="DRZEWO" />
+    </div>
+  `;
+}
+
+function buildTreeAppleMarkup(tree, apple) {
+  const config = TREE_APPLE_TYPES[apple.type] || TREE_APPLE_TYPES.red;
+  const left = Number(tree.x || 0) + Number(apple.xOffset || 0);
+  const top = Number(tree.y || 0) + Number(apple.yOffset || 0);
+  const eating = game.appleEating && String(game.appleEating.appleId) === String(apple.id);
+  const swayTime = (performance.now() + Number(apple.swayDelayMs || 0)) / 1000;
+  const swayY = eating ? 0 : Math.sin(swayTime * 2.4) * 3;
+  const swayRotation = eating ? 0 : Math.sin(swayTime * 1.9) * 4;
+  const scale = eating ? 0.9 : 1;
+
+  return `
+    <button
+      class="game-tree-apple ${apple.type}${eating ? " eating" : ""}"
+      type="button"
+      data-tree-id="${escapeHtml(tree.id)}"
+      data-tree-apple="${escapeHtml(apple.id)}"
+      style="left:${left}px; top:${top}px; transform: translate(-50%, -50%) translateY(${swayY.toFixed(2)}px) rotate(${swayRotation.toFixed(2)}deg) scale(${scale});"
+      aria-label="Zjedz ${escapeHtml(config.label)} jablko"
+    >
+      <img class="game-tree-apple-image asset-image" src="${config.image}" alt="" data-fallback-text="J" />
+    </button>
+  `;
+}
+
+function buildGameTreeCanopyMarkup(tree) {
+  return `
+    <div
+      class="game-tree-canopy"
+      style="left:${tree.x}px; top:${tree.y}px; width:${tree.width}px; height:${tree.height}px;"
+      aria-hidden="true"
+    >
+      <img class="game-tree-image game-tree-canopy-image asset-image" src="${TREE_CONFIG.image}" alt="" data-fallback-text="DRZEWO" />
+    </div>
+    ${tree.apples.map((apple) => buildTreeAppleMarkup(tree, apple)).join("")}
+  `;
+}
+
+function buildTreeLeafMarkup(leaf) {
+  const swingX = Math.sin(Number(leaf.swingPhase || 0)) * Number(leaf.swingAmount || 0);
+  const opacity = clamp(1 - Number(leaf.ageMs || 0) / Math.max(1, Number(leaf.lifeMs || 1)), 0, 1);
+
+  return `
+    <img
+      class="game-tree-leaf asset-image"
+      src="${leaf.image}"
+      alt=""
+      data-fallback-text="L"
+      style="
+        left:${Number(leaf.x || 0) + swingX}px;
+        top:${Number(leaf.y || 0)}px;
+        width:${leaf.size}px;
+        height:${leaf.size}px;
+        opacity:${opacity.toFixed(3)};
+        transform: translate(-50%, -50%) rotate(${Number(leaf.rotation || 0).toFixed(2)}deg);
+      "
+    />
+  `;
+}
+
+function buildAppleEatingCountdownMarkup() {
+  if (!game.appleEating) {
+    return "";
+  }
+
+  const secondsLeft = Math.max(1, Math.ceil(Number(game.appleEating.remainingMs || 0) / 1000));
+  const progress = clamp(
+    1 - Number(game.appleEating.remainingMs || 0) / Math.max(1, Number(game.appleEating.totalMs || TREE_CONFIG.appleEatMs)),
+    0,
+    1
+  );
+
+  return `
+    <div
+      class="apple-eat-countdown"
+      style="left:${game.player.x}px; top:${game.player.y - 146}px; --apple-eat-progress:${(progress * 100).toFixed(2)}%;"
+    >
+      ${secondsLeft}
+    </div>
+  `;
+}
+
+function renderGameTreeLayers() {
+  if (treeBaseLayer) {
+    treeBaseLayer.innerHTML = game.trees.map((tree) => buildGameTreeBaseMarkup(tree)).join("");
+  }
+
+  if (treeCanopyLayer) {
+    treeCanopyLayer.innerHTML = [
+      ...game.trees.map((tree) => buildGameTreeCanopyMarkup(tree)),
+      ...game.fallingLeaves.map((leaf) => buildTreeLeafMarkup(leaf)),
+      buildAppleEatingCountdownMarkup(),
+    ].join("");
+  }
+}
+
+function buildSpecialPetCopyMarkup() {
+  return game.specialPetCopies
+    .map((copy) => {
+      const pet = CATALOG.pets.find((item) => item.id === copy.petId) || null;
+      const image = pet?.image || "./assets/pets/platoya_1.png";
+      const fallbackText = pet?.name || "PLATOYA";
+
+      return `
+        <div class="special-pet-copy" style="left:${copy.x}px; top:${copy.y}px;">
+          <img class="special-pet-copy-image asset-image" src="${image}" alt="" data-fallback-text="${escapeHtml(fallbackText)}" />
+          <span class="special-pet-copy-timer" style="--copy-life:${clamp(Number(copy.ttlMs || 0) / TREE_CONFIG.specialCopyMs, 0, 1).toFixed(3)};"></span>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function getTowerSpawnWarningState(tower) {
+  if (
+    !tower ||
+    game.mode !== "solo" ||
+    game.waveIntroMs > 0 ||
+    game.currentWave <= 0 ||
+    game.waveRobotsRemaining <= 0
+  ) {
+    return { active: false, progress: 0 };
+  }
+
+  const towers = getGameTowers();
+  const towerIndex = towers.findIndex((nextTower) => nextTower.id === tower.id);
+
+  if (towerIndex < 0 || towerIndex !== Math.abs(Number(game.nextTowerSpawnIndex || 0)) % Math.max(1, towers.length)) {
+    return { active: false, progress: 0 };
+  }
+
+  const waveConfig = game.currentWaveConfig || getWaveConfig(game.currentWave || 1);
+  const currentStage = game.waveStages[game.currentWaveStageIndex] || null;
+  const intervalMs = Math.max(1, Number(currentStage?.intervalMs ?? waveConfig.spawnIntervalMs ?? TOWER_CONFIG.spawnIntervalMs));
+  const elapsedMs = clamp(Number(game.waveSpawnTimerMs || 0), 0, intervalMs);
+  const timeLeftMs = Math.max(0, intervalMs - elapsedMs);
+  const warningMs = 1300;
+  const progress = clamp(1 - timeLeftMs / warningMs, 0, 1);
+
+  return {
+    active: progress > 0,
+    progress,
+  };
+}
+
+function buildTowerMarkup(tower) {
+  const warning = getTowerSpawnWarningState(tower);
+  const alertSize = 34 + 36 * warning.progress;
+  const alertOpacity = 0.16 + 0.72 * warning.progress;
+  return `
+    <div
+      class="game-tower ${tower.id}${warning.active ? " is-charging" : ""}"
+      style="left:${tower.x}px; top:${tower.y}px; width:${tower.width}px; height:${tower.height}px; --tower-alert-progress:${warning.progress.toFixed(3)}; --tower-alert-size:${alertSize.toFixed(1)}px; --tower-alert-opacity:${alertOpacity.toFixed(3)};"
+      aria-hidden="true"
+    >
+      <div class="pixel-tower">
+        <span class="pixel-tower-antenna antenna-left"></span>
+        <span class="pixel-tower-antenna antenna-right"></span>
+        <span class="pixel-tower-roof roof-left"></span>
+        <span class="pixel-tower-roof roof-center"></span>
+        <span class="pixel-tower-roof roof-right"></span>
+        <span class="pixel-tower-light"></span>
+        <span class="pixel-tower-light-core"></span>
+        <span class="pixel-tower-side-light side-left"></span>
+        <span class="pixel-tower-side-light side-right"></span>
+        <span class="pixel-tower-head"></span>
+        <span class="pixel-tower-neck"></span>
+        <span class="pixel-tower-body body-top"></span>
+        <span class="pixel-tower-body body-mid"></span>
+        <span class="pixel-tower-body body-low"></span>
+        <span class="pixel-tower-door"></span>
+        <span class="pixel-tower-base base-left"></span>
+        <span class="pixel-tower-base base-center"></span>
+        <span class="pixel-tower-base base-right"></span>
+        <span class="pixel-tower-window window-one"></span>
+        <span class="pixel-tower-window window-two"></span>
+        <span class="pixel-tower-brick brick-one"></span>
+        <span class="pixel-tower-brick brick-two"></span>
+        <span class="pixel-tower-brick brick-three"></span>
+        <span class="pixel-tower-brick brick-four"></span>
+        <span class="pixel-tower-brick brick-five"></span>
+        <span class="pixel-tower-bolt bolt-one"></span>
+        <span class="pixel-tower-bolt bolt-two"></span>
+        <span class="pixel-tower-bolt bolt-three"></span>
+        <span class="pixel-tower-panel panel-main"></span>
+        <span class="pixel-tower-button button-red"></span>
+        <span class="pixel-tower-button button-yellow"></span>
+        <span class="pixel-tower-button button-blue"></span>
+        <span class="pixel-tower-vent vent-one"></span>
+        <span class="pixel-tower-vent vent-two"></span>
+        <span class="pixel-tower-vent vent-three"></span>
+      </div>
+    </div>
+  `;
+}
+
+function buildTowerBotCounterMarkup() {
+  return `
+    <div class="tower-bot-counter" aria-label="Zabite małe roboty">
+      <img class="tower-bot-counter-icon asset-image" src="${TOWER_CONFIG.killIcon}" alt="" data-fallback-text="R" />
+      <span class="tower-bot-counter-value">${Math.max(0, Number(game.towerBotKills || 0))}</span>
+    </div>
+  `;
+}
+
+function buildRankingShipMarkup() {
+  const ship = game.rankingShip;
+
+  if (!ship) {
+    return "";
+  }
+
+  return `
+    <div class="ranking-ship-target" style="left:${ship.shipX}px; top:${ship.shipY}px; --ship-hp:${getRankingShipPercent("self").toFixed(2)}%;">
+      <div class="ranking-ship-shadow"></div>
+      <div class="ranking-ship-pixel" aria-label="Statek piracki">
+        <span class="ranking-ship-mast"></span>
+        <span class="ranking-ship-sail sail-main"></span>
+        <span class="ranking-ship-sail sail-small"></span>
+        <span class="ranking-ship-flag"></span>
+        <span class="ranking-ship-deck"></span>
+        <span class="ranking-ship-hull"></span>
+        <span class="ranking-ship-bow"></span>
+        <span class="ranking-ship-window window-one"></span>
+        <span class="ranking-ship-window window-two"></span>
+      </div>
+      <div class="ranking-ship-health">
+        <span></span>
+      </div>
+    </div>
+  `;
+}
+
+function buildRankingShipSelectedPetsMarkup() {
+  const selectedPetIds = game.rankingShip?.selectedPetIds || [];
+
+  return new Array(4).fill(null)
+    .map((_, index) => {
+      const pet = selectedPetIds[index] ? getOwnedItem("pets", selectedPetIds[index]) : null;
+      return `
+        <div class="ranking-ship-pet-slot${pet ? " filled" : ""}">
+          ${pet ? `
+            <img class="asset-image" src="${pet.image}" alt="${escapeHtml(pet.name)}" data-fallback-text="P" />
+          ` : `<span>+</span>`}
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function buildRankingShipPetAlliesMarkup() {
+  const allies = game.rankingShip?.petAllies || [];
+
+  return allies
+    .map((ally, index) => {
+      const pet = getOwnedItem("pets", ally.petId) || CATALOG.pets.find((item) => item.id === ally.petId) || null;
+      const image = pet?.image || "./assets/pets/platoya_1.png";
+      const name = pet?.name || "PlatoYA";
+
+      return `
+        <div class="ranking-ship-ally-pet" data-pet-index="${index}" style="left:${ally.x}px; top:${ally.y}px;">
+          <img class="ranking-ship-ally-pet-image asset-image" src="${image}" alt="${escapeHtml(name)}" data-fallback-text="P" />
+          <span class="ranking-ship-ally-pet-name">${escapeHtml(name)}</span>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function buildRankingOpponentPreviewMarkup() {
+  const ship = game.rankingShip;
+
+  if (!ship?.previewOpen) {
+    return "";
+  }
+
+  const opponentPetIds = Array.isArray(ship.opponentPetIds) ? ship.opponentPetIds : [];
+  const opponentPercent = Math.round(getRankingShipPercent("opponent"));
+
+  return `
+    <section class="ranking-opponent-preview" aria-label="Podgląd przeciwnika">
+      <div class="ranking-opponent-preview-title">
+        <span>${escapeHtml(ship.opponent?.name || "Gracz")}</span>
+        <strong>${opponentPercent}%</strong>
+      </div>
+      <div class="ranking-opponent-preview-map">
+        <div class="ranking-opponent-preview-ship">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="ranking-opponent-preview-robots">
+          <i></i><i></i><i></i>
+        </div>
+      </div>
+      <div class="ranking-opponent-preview-pets">
+        ${new Array(4).fill(null).map((_, index) => {
+          const pet = opponentPetIds[index] ? CATALOG.pets.find((item) => item.id === opponentPetIds[index]) : null;
+          return `
+            <div class="ranking-opponent-preview-pet${pet ? " filled" : ""}">
+              ${pet ? `<img class="asset-image" src="${pet.image}" alt="${escapeHtml(pet.name)}" data-fallback-text="P" />` : `<span>+</span>`}
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function buildRankingShipHudMarkup() {
+  const ship = game.rankingShip;
+
+  if (!ship) {
+    return "";
+  }
+
+  const secondsLeft = Math.max(0, Math.ceil((RANKING_SHIP_MATCH_DURATION_MS - Number(ship.elapsedMs || 0)) / 1000));
+  const minutes = Math.floor(secondsLeft / 60);
+  const seconds = String(secondsLeft % 60).padStart(2, "0");
+  const ownPercent = Math.round(getRankingShipPercent("self"));
+  const opponentPercent = Math.round(getRankingShipPercent("opponent"));
+
+  return `
+    <div class="ranking-ship-hud">
+      <div class="ranking-ship-percent ranking-ship-percent-self">
+        <span>TWÓJ STATEK</span>
+        <strong>${ownPercent}%</strong>
+      </div>
+      <div class="ranking-ship-pet-slots-hud">
+        ${buildRankingShipSelectedPetsMarkup()}
+      </div>
+      <div class="ranking-ship-timer">${minutes}:${seconds}</div>
+      <button class="ranking-ship-percent ranking-ship-percent-opponent" type="button" data-ranking-opponent-preview aria-pressed="${ship.previewOpen ? "true" : "false"}">
+        <span class="ranking-ship-percent-ship-icon" aria-hidden="true"><i></i><i></i></span>
+        <span>${escapeHtml(ship.opponent?.name || "PRZECIWNIK")}</span>
+        <strong>${opponentPercent}%</strong>
+      </button>
+      ${buildRankingOpponentPreviewMarkup()}
+    </div>
+  `;
+}
+
+function renderTowerLayer() {
+  if (isRankingShipMatchActive()) {
+    if (towerLayer) {
+      towerLayer.innerHTML = buildRankingShipMarkup();
+    }
+    if (towerHudLayer) {
+      towerHudLayer.innerHTML = buildRankingShipHudMarkup();
+    }
+    return;
+  }
+
+  if (game.mode !== "solo") {
+    if (towerLayer) {
+      towerLayer.innerHTML = "";
+    }
+    if (towerHudLayer) {
+      towerHudLayer.innerHTML = "";
+    }
+    return;
+  }
+
+  if (towerLayer) {
+    towerLayer.innerHTML = getGameTowers().map((tower) => buildTowerMarkup(tower)).join("");
+  }
+
+  if (towerHudLayer) {
+    towerHudLayer.innerHTML = buildTowerBotCounterMarkup();
+  }
+}
+
+function buildTowerBotRobotMarkup(robot) {
+  const walkFrameActive = robot.isWalking && Math.floor(Number(robot.walkAnimMs || 0) / 180) % 2 === 1;
+  const image = walkFrameActive ? TOWER_CONFIG.robotWalkImage : TOWER_CONFIG.robotIdleImage;
+  const blindStyle = `--robot-blind-rotate:${Number(robot.blindSpinAngle || 0).toFixed(3)}rad;`;
+
+  return `
+    <div class="robot-entity tower-bot-entity${robot.poisonTimerMs > 0 ? " poisoned" : ""}${robot.snakeVenomTimerMs > 0 ? " venomed" : ""}${robot.monkeyMarked ? " monkey-marked" : ""}${robot.blindTimerMs > 0 ? " blinded" : ""}${robot.flaroBurnMs > 0 ? " flaro-burning" : ""}" style="left:${robot.x}px; top:${robot.y}px;${blindStyle}">
+      <p class="robot-health tower-bot-health" style="--health-fill:${getHealthFillPercent(robot.hp, robot.maxHp || robot.hp || 1)};">
+        <span class="health-label-text">${Math.ceil(robot.hp)}</span>
+      </p>
+      <div class="tower-bot-sprite-frame">
+        <img
+          class="entity-image asset-image tower-bot-image"
+          src="${image}"
+          alt="Mały robocik"
+          data-fallback-text="ROBO"
+        />
+        <div class="asset-fallback">ROBO</div>
+        ${robot.stunTimerMs > 0 ? `<div class="robot-stun-dots"><span></span><span></span><span></span></div>` : ""}
+        ${robot.blindTimerMs > 0 ? `<div class="robot-coral-blind-mark"><span></span><span></span><span></span></div>` : ""}
+      </div>
+        ${robot.bubbleTimerMs > 0 ? `<div class="robot-bubble tower-bot-bubble"></div>` : ""}
+    </div>
+  `;
+}
+
 function renderGameScene() {
+  syncGameSurfaceLayout();
   refreshAmmoConfig();
   gameMap.dataset.worldTheme = getGlobalVisualWorldTheme();
   const multiplayerMode = game.mode === "multiplayer";
   const coopMode = game.mode === "coop";
+  const rankingShipMode = game.mode === "ranking-ship";
   const multiplayerCountdownActive = multiplayerMode && game.multiplayerStartCountdownMs > 0;
   const pauseResumeCountdownActive = !multiplayerMode && game.pauseResumeCountdownMs > 0;
-  const showFirstRobotTutorial = isFirstRobotTutorialPaused();
+  const waveIntroActive = !multiplayerCountdownActive && !pauseResumeCountdownActive && game.waveIntroMs > 0;
+  const fullWaveIntroActive = waveIntroActive && Math.max(1, Number(game.pendingWave || 1)) <= 1;
+  const compactWaveIntroActive = waveIntroActive && !fullWaveIntroActive;
+  const miniRobotRainIntroActive =
+    waveIntroActive &&
+    !multiplayerCountdownActive &&
+    !pauseResumeCountdownActive &&
+    Math.max(1, Number(game.pendingWave || 1)) === 1;
+  const showFirstRobotTutorial = shouldShowFirstRobotTutorialPrompt();
   gameMap.classList.toggle("multiplayer-ffa", multiplayerMode);
+  gameMap.classList.toggle("ranking-ship-mode", rankingShipMode);
   gameMap.classList.toggle("first-robot-tutorial", showFirstRobotTutorial);
   playerEntity.classList.toggle("tutorial-focus", showFirstRobotTutorial);
+  waveBanner.classList.toggle("wave-intro-mode", waveIntroActive);
+  waveBanner.classList.toggle("wave-compact-mode", compactWaveIntroActive);
+  waveBanner.classList.toggle("mini-robot-rain-mode", miniRobotRainIntroActive);
   waveBanner.hidden =
     (!multiplayerCountdownActive && !pauseResumeCountdownActive && game.waveIntroMs <= 0) ||
     (multiplayerMode && !multiplayerCountdownActive);
+  syncWaveBannerTone(waveIntroActive);
   syncBackgroundMusicVolume(0.18);
   waveBannerTitle.textContent = multiplayerCountdownActive
     ? "GRACZE GOTOWI"
     : pauseResumeCountdownActive
       ? `KONTYNUACJA FALI ${getCurrentWaveDisplayNumber()}`
-      : `FALA ${game.pendingWave}`;
+      : miniRobotRainIntroActive
+        ? "DESZCZ MINI - ROBOTÓW!"
+        : `FALA ${game.pendingWave}`;
   const robotsLeftText = `${Math.max(0, Number(game.pauseResumeRobotsLeft || 0))} ROBOTÓW ZOSTAŁO`;
   const bannerLabelText = pauseResumeCountdownActive ? robotsLeftText : "Start za";
   const bannerCountdownValue = Math.max(
@@ -16450,9 +30584,11 @@ function renderGameScene() {
   if (waveBannerLabel) {
     waveBannerLabel.textContent = bannerLabelText;
   }
-  waveBannerCountdown.textContent = String(
-    bannerCountdownValue
-  );
+  syncWaveBannerCharacter(fullWaveIntroActive);
+  if (waveBannerCountdown) {
+    waveBannerCountdown.hidden = waveIntroActive && !fullWaveIntroActive;
+  }
+  syncWaveCountdownVisual(bannerCountdownValue, fullWaveIntroActive);
   if (waveBannerPlayers) {
     waveBannerPlayers.hidden = !multiplayerCountdownActive;
     waveBannerPlayers.innerHTML = multiplayerCountdownActive
@@ -16467,13 +30603,16 @@ function renderGameScene() {
   playerHealthLabel.innerHTML = `<span class="health-label-text">${Math.ceil(game.player.hp)}</span>`;
   playerHealthLabel.style.setProperty("--health-fill", getHealthFillPercent(game.player.hp, getPlayerMaxHp()));
   const winterShieldActive = isSnowflakeShieldActive() || isOwlShieldActive();
-  playerShield.hidden = !isCatShieldActive() && !winterShieldActive;
-  playerShield.dataset.kind = winterShieldActive ? "winter" : "default";
+  const appleShieldActive = isAppleShieldActive();
+  playerShield.hidden = !isCatShieldActive() && !winterShieldActive && !appleShieldActive;
+  playerShield.dataset.kind = winterShieldActive ? "winter" : appleShieldActive ? "apple" : "default";
   playerShield.classList.toggle(
     "blinking",
     (isCatShieldActive() && game.pet.shieldTimerMs <= 2000) ||
-      (winterShieldActive && game.pet.shieldTimerMs <= 800)
+      (isOwlShieldActive() && game.pet.shieldTimerMs <= 800) ||
+      (appleShieldActive && Number(game.playerBuffs?.shieldMs || 0) <= 1800)
   );
+  playerEntity.classList.toggle("winter-sleep-blink", isOwlShieldActive());
 
   ammoFills.forEach((fill, index) => {
     fill.style.transform = `scaleX(${clamp(game.ammo[index] ?? 0, 0, 1)})`;
@@ -16481,23 +30620,64 @@ function renderGameScene() {
 
   const pet = getEquippedPet();
   const petCooldownState = getPetCooldownState();
+  const mortalPetRespawning = isMortalPetId(pet?.id) && game.pet.alive === false;
+  const specialPetCopyMarkup = buildSpecialPetCopyMarkup();
 
-  if (pet) {
+  if (rankingShipMode) {
+    gamePetEntity.hidden = true;
+    delete gamePetEntity.dataset.petId;
+    syncPetSkinSparkles(gamePetImage?.closest?.(".pet-sprite-frame"), "");
+    gamePetEntity.classList.remove("winter-sleep-blink");
+    petCooldownBar.hidden = true;
+    petCooldownBar.dataset.kind = "";
+    if (petHealthLabel) {
+      petHealthLabel.hidden = true;
+    }
+    petPackLayer.innerHTML = buildRankingShipPetAlliesMarkup();
+    if (playerShield.hidden) {
+      delete playerShield.dataset.kind;
+    }
+  } else if (pet && !mortalPetRespawning) {
     gamePetEntity.hidden = false;
     gamePetEntity.style.left = `${game.pet.x}px`;
     gamePetEntity.style.top = `${game.pet.y}px`;
     gamePetEntity.dataset.petId = pet.id;
+    syncPetSkinSparkles(gamePetImage?.closest?.(".pet-sprite-frame"), pet.id);
+    gamePetEntity.classList.toggle("winter-sleep-blink", isOwlShieldActive());
     petCooldownBar.hidden = multiplayerMode || petCooldownState === null;
     petCooldownBar.dataset.kind = !multiplayerMode && petCooldownState?.kind ? petCooldownState.kind : "";
     petCooldownFill.style.transform = `scaleY(${multiplayerMode || petCooldownState === null ? 0 : petCooldownState.progress})`;
-    petPackLayer.innerHTML = "";
+    if (petHealthLabel && petHealthText) {
+      const showPetHealth = isMortalPetId(pet.id) && !multiplayerMode;
+      petHealthLabel.hidden = !showPetHealth;
+      if (showPetHealth) {
+        petHealthLabel.style.setProperty("--health-fill", getHealthFillPercent(game.pet.hp, game.pet.maxHp || 1));
+        petHealthText.textContent = String(Math.ceil(game.pet.hp));
+      }
+    }
+    petPackLayer.innerHTML = specialPetCopyMarkup;
   } else {
     gamePetEntity.hidden = true;
     delete gamePetEntity.dataset.petId;
+    syncPetSkinSparkles(gamePetImage?.closest?.(".pet-sprite-frame"), "");
+    gamePetEntity.classList.remove("winter-sleep-blink");
     petCooldownBar.hidden = true;
     petCooldownBar.dataset.kind = "";
-    petPackLayer.innerHTML = "";
-    delete playerShield.dataset.kind;
+    if (petHealthLabel) {
+      petHealthLabel.hidden = true;
+    }
+    const respawnMarkup = pet && mortalPetRespawning
+      ? `
+        <div class="pet-respawn-marker" style="left:${Number(game.pet.respawnX || game.pet.x)}px; top:${Number(game.pet.respawnY || game.pet.y)}px;">
+          <img class="pet-respawn-image asset-image" src="./odrodzenie.png" alt="Odrodzenie" data-fallback-text="ODR" />
+          <span class="pet-respawn-countdown">${Math.max(1, Math.ceil(Number(game.pet.respawnTimerMs || 0) / 1000))}</span>
+        </div>
+      `
+      : "";
+    petPackLayer.innerHTML = `${respawnMarkup}${specialPetCopyMarkup}`;
+    if (playerShield.hidden) {
+      delete playerShield.dataset.kind;
+    }
   }
 
   if (opponentEntity) {
@@ -16560,27 +30740,27 @@ function renderGameScene() {
         ></div>
       `
     )
-    .join("");
-
-  if (jungleFieldsLayer) {
-    jungleFieldsLayer.innerHTML = game.jungleFields
+    .join("") + (game.towerHazards || [])
       .map(
-        (field) => `
+        (hazard) => `
           <div
-            class="jungle-field${field.kind === "frog" ? " frog-puddle" : ""}"
-            style="left:${field.x}px; top:${field.y}px; width:${field.radius * 2}px; height:${field.radius * 2}px;"
+            class="tower-hazard-field"
+            style="left:${hazard.x}px; top:${hazard.y}px; width:${hazard.radius * 2}px; height:${hazard.radius * 2}px; --hazard-life:${clamp(1 - Number(hazard.ageMs || 0) / Number(hazard.ttlMs || TOWER_CONFIG.hazardTtlMs), 0, 1).toFixed(3)};"
           ></div>
         `
       )
       .join("");
-  }
+  renderTowerLayer();
+  renderGameTreeLayers();
 
   const robotVisual = getRobotVisual();
 
   robotsLayer.innerHTML = game.robots
     .map(
-      (robot) => `
-        <div class="robot-entity${robot.sizeClass === "final-wave" ? " final-wave-robot" : ""}${robot.poisonTimerMs > 0 ? " poisoned" : ""}${robot.snakeVenomTimerMs > 0 ? " venomed" : ""}${robot.monkeyMarked ? " monkey-marked" : ""}${isFirstRobotTutorialPaused() && robot.id === getFirstRobotTutorialTarget()?.id ? " tutorial-focus" : ""}" style="left:${robot.x}px; top:${robot.y}px;">
+      (robot) => robot.kind === "tower-bot"
+        ? buildTowerBotRobotMarkup(robot)
+        : `
+        <div class="robot-entity${robot.sizeClass === "final-wave" ? " final-wave-robot" : ""}${robot.poisonTimerMs > 0 ? " poisoned" : ""}${robot.snakeVenomTimerMs > 0 ? " venomed" : ""}${robot.monkeyMarked ? " monkey-marked" : ""}${robot.blindTimerMs > 0 ? " blinded" : ""}${robot.flaroBurnMs > 0 ? " flaro-burning" : ""}${showFirstRobotTutorial && robot.id === getFirstRobotTutorialTarget()?.id ? " tutorial-focus" : ""}" style="left:${robot.x}px; top:${robot.y}px;--robot-blind-rotate:${Number(robot.blindSpinAngle || 0).toFixed(3)}rad;">
           <p class="robot-health" style="--health-fill:${getHealthFillPercent(robot.hp, robot.maxHp || robot.hp || 1)};">
             <span class="health-label-text">${Math.ceil(robot.hp)}</span>
           </p>
@@ -16593,6 +30773,7 @@ function renderGameScene() {
             />
             <div class="asset-fallback">${robotVisual.fallbackText}</div>
             ${robot.stunTimerMs > 0 ? `<div class="robot-stun-dots"><span></span><span></span><span></span></div>` : ""}
+            ${robot.blindTimerMs > 0 ? `<div class="robot-coral-blind-mark"><span></span><span></span><span></span></div>` : ""}
           </div>
           ${robot.bubbleTimerMs > 0 ? `<div class="robot-bubble"></div>` : ""}
         </div>
@@ -16621,8 +30802,39 @@ function renderGameScene() {
     .map(
       (projectile) => {
         const visual = getProjectileVisual(projectile);
-        const projectileBody = projectile.kind === "jungle-venom-shot"
-          ? `<div class="jungle-venom-core" aria-hidden="true"></div>`
+        const isTowerShot = projectile.kind === "tower-bot-shot";
+        const towerShotAge = Math.max(0, Number(projectile.ageMs || 0));
+        const towerShotBirth = clamp(towerShotAge / 180, 0, 1);
+        const towerShotPulse = Math.sin(towerShotAge / 96);
+        const towerShotScaleX = isTowerShot
+          ? (1 + (1 - towerShotBirth) * 0.34 + 0.12 * Math.max(0, towerShotPulse)).toFixed(3)
+          : "1";
+        const towerShotScaleY = isTowerShot
+          ? (1 + (1 - towerShotBirth) * 0.2 - 0.06 * Math.max(0, towerShotPulse)).toFixed(3)
+          : "1";
+        const towerShotGlow = isTowerShot
+          ? (0.52 + (1 - towerShotBirth) * 0.34 + 0.18 * Math.max(0, towerShotPulse)).toFixed(3)
+          : "0";
+        const projectileShellStyle = `--projectile-angle:${Number(projectile.angle || 0)}rad; --tower-shot-scale-x:${towerShotScaleX}; --tower-shot-scale-y:${towerShotScaleY}; --tower-shot-glow:${towerShotGlow}; --tower-shot-spark-shift:${(Math.sin(towerShotAge / 70) * 6).toFixed(2)}px;`;
+        const projectileBody = visual.cards?.length
+          ? `
+            <div class="shulla-card-fan" aria-label="${visual.alt}">
+              ${visual.cards.map((src, cardIndex) => `
+                <span class="shulla-card-shot" style="--shulla-card-index:${cardIndex};">
+                  <span class="shulla-card-spinner">
+                    <img
+                      class="asset-image"
+                      src="${src}"
+                      alt=""
+                      data-fallback-src="${visual.src}"
+                      data-fallback-text="${visual.fallbackText}"
+                    />
+                    <span class="asset-fallback">${visual.fallbackText}</span>
+                  </span>
+                </span>
+              `).join("")}
+            </div>
+          `
           : `
             <img
               class="projectile-image asset-image"
@@ -16634,7 +30846,7 @@ function renderGameScene() {
           `;
         return `
         <div class="projectile" style="left:${projectile.x}px; top:${projectile.y}px;">
-          <div class="projectile-shell${projectile.kind === "snake-shot" ? " snake-shot" : projectile.kind === "jungle-venom-shot" ? " jungle-venom-shot" : projectile.kind === "elfie-shot" ? " elfie-shot" : projectile.kind === "millo-elfie-shot" ? " millo-elfie-shot" : projectile.kind === "lpsotka" ? " lpsotka-shot" : projectile.kind === "linda-shot" ? " linda-shot" : projectile.kind === "lily-shot" ? " lily-shot" : projectile.kind === "nora-shot" ? " nora-shot" : projectile.kind === "cloud-shot" ? " cloud-shot" : projectile.kind === "ann-shot" ? " ann-shot" : projectile.kind === "polar-bear-shot" ? " polar-bear-shot" : projectile.kind === "tricky-shot" ? " tricky-shot" : ""}">
+          <div class="projectile-shell${projectile.kind === "snake-shot" ? " snake-shot" : projectile.kind === "elfie-shot" ? " elfie-shot" : projectile.kind === "lpsotka" ? " lpsotka-shot" : projectile.kind === "linda-shot" ? " linda-shot" : projectile.kind === "lily-shot" ? " lily-shot" : projectile.kind === "nora-shot" ? " nora-shot" : projectile.kind === "cloud-shot" ? " cloud-shot" : projectile.kind === "ann-shot" ? " ann-shot" : projectile.kind === "grifos-shot" ? " grifos-shot" : projectile.kind === "mycelia-shot" ? " mycelia-shot" : projectile.kind === "sylas-shot" ? " sylas-shot" : projectile.kind === "nerissa-shot" ? " nerissa-shot" : projectile.kind === "hookcrab-shot" ? " hookcrab-shot" : projectile.kind === "lunella-shot" ? " lunella-shot" : projectile.kind === "thalia-shot" ? " thalia-shot" : projectile.kind === "shulla-shot" ? " shulla-shot" : projectile.kind === "polar-bear-shot" ? " polar-bear-shot" : projectile.kind === "tricky-shot" ? " tricky-shot" : projectile.kind === "tower-bot-shot" ? " tower-bot-shot" : ""}" style="${projectileShellStyle}">
             ${projectileBody}
           </div>
         </div>
@@ -16662,15 +30874,28 @@ function showGameResult() {
   gameResultWave.textContent = "0";
   gameResultRobots.textContent = "0";
   gameResultTrophies.textContent = "0";
+  const rankingPointsEarnedRun = Number(game.rankingPointsEarnedRun || 0);
+  const resultCurrencyIsRanking = game.mode === "ranking-ship";
+  const silverEarnedRun = Math.max(0, Number(game.silverEarnedRun || 0));
+  const resultCurrencyIsSilver = !resultCurrencyIsRanking && silverEarnedRun > 0 && Number(game.trophiesEarnedRun || 0) <= 0;
+  if (gameResultTrophyLabel) {
+    gameResultTrophyLabel.textContent = resultCurrencyIsRanking ? "Punkty Rankingu" : resultCurrencyIsSilver ? "Esencja" : "Puchary";
+  }
   gameResultButton.hidden = true;
+  updateStreakDisplays();
   gameResultOverlay.hidden = false;
   playOneShotSound(resultSoundEffect, 0.82);
   syncBrokenAssets(gameResultOverlay);
 
   const survivedWaves = Math.max(0, game.currentWave);
+  const resultCurrencyAmount = resultCurrencyIsRanking
+    ? rankingPointsEarnedRun
+    : resultCurrencyIsSilver
+      ? silverEarnedRun
+      : game.trophiesEarnedRun;
   animateResultCounter(gameResultWave, survivedWaves, 0, () => {
     animateResultCounter(gameResultRobots, game.robotsKilledTotal, 500, () => {
-      animateResultCounter(gameResultTrophies, game.trophiesEarnedRun, 1000, () => {
+      animateResultCounter(gameResultTrophies, resultCurrencyAmount, 1000, () => {
         gameResultButton.hidden = false;
       });
     });
@@ -16731,6 +30956,8 @@ async function returnToLobbyFromResult() {
   try {
     const wasMultiplayer = game.mode === "multiplayer";
     const wasCoop = game.mode === "coop";
+    const wasRankingShip = game.mode === "ranking-ship";
+    const wasVictory = game.resultStatus === "Zwyciestwo";
     const earnedTrophies = game.trophiesEarnedRun;
     hideGameResult();
     showView("lobby");
@@ -16750,17 +30977,32 @@ async function returnToLobbyFromResult() {
       await resetPartyAfterCoopResult();
     }
 
+    if (wasRankingShip) {
+      ui.nextGameMode = "solo";
+      ui.rankingGameSelectedPetIds = [];
+      ui.rankingGameOpponent = null;
+      ui.rankingGameActivePetId = "";
+    }
+
     if (earnedTrophies > 0) {
       await wait(60);
-      await showTrophyRewardScene(earnedTrophies, {
-        title: game.resultStatus === "Zwyciestwo" ? "Puchary za zwyciestwo" : "Puchary z rundy",
-        autoCloseMs: 2300,
-      });
-      await animateTrophiesToBalance();
+      await animateTrophiesToAlley(earnedTrophies);
     }
+
+    if (wasVictory && !wasMultiplayer && !wasCoop && !wasRankingShip) {
+      const awardedHighTowerChest = awardHighTowerVictoryChestIfEligible();
+      if (awardedHighTowerChest) {
+        showTrophyNotice("SKRZYNIA NA PASKU ODBLOKOWANA");
+      }
+      renderHighTowerChallenge();
+    }
+
+    await maybeShowDailyGift();
+    queueCharacterVoice(state.equippedCharacter, 220, 0.72);
   } finally {
     resultReturnBusy = false;
     gameResultButton.disabled = false;
+    syncTrophyRoadGuide();
   }
 }
 
@@ -16807,8 +31049,7 @@ function isElfieSkinEquipped() {
   return (
     characterId === "elfie" ||
     characterId === "elfie-wojowniczka" ||
-    characterId === "elfie-w-swojej-naturze" ||
-    characterId === "elfie-jako-linda"
+    characterId === "elfie-w-swojej-naturze"
   );
 }
 
@@ -16828,7 +31069,7 @@ function isCatShieldActive() {
 
 function isSnowflakeShieldActive() {
   const pet = getEquippedPet();
-  return Boolean(pet && pet.id === "sniezynka" && game.pet.shieldActive);
+  return Boolean(pet && pet.id === "sniezynka" && game.mode === "solo");
 }
 
 function updateCatShield(deltaMs) {
@@ -16857,13 +31098,43 @@ function updateCatShield(deltaMs) {
   }
 }
 
-function updateSnowflakeShield(deltaMs) {
+function isOwlShieldActive() {
+  const pet = getEquippedPet();
+  return Boolean(pet && pet.id === "sowa" && game.pet.shieldActive);
+}
+
+function tryActivateOwlAbility() {
+  activateOwlWinterSleep();
+}
+
+function activateOwlWinterSleep() {
+  const pet = getEquippedPet();
+
+  if (
+    !pet ||
+    pet.id !== "sowa" ||
+    game.mode !== "solo" ||
+    game.pet.shieldActive ||
+    game.pet.shieldCooldownMs > 0 ||
+    ui.currentView !== "game" ||
+    !game.active
+  ) {
+    return;
+  }
+
+  const power = getOwlPowerStats();
+  game.pet.shieldActive = true;
+  game.pet.shieldTimerMs = Math.round(Number(power.sleepSeconds || 2) * 1000);
+  game.pet.shieldCooldownMs = 0;
+}
+
+function updateOwlShield(deltaMs) {
   if (game.pet.shieldActive) {
     game.pet.shieldTimerMs = Math.max(0, game.pet.shieldTimerMs - deltaMs);
 
     if (game.pet.shieldTimerMs === 0) {
       game.pet.shieldActive = false;
-      game.pet.shieldCooldownMs = GAME_RULES.snowflakeShieldCooldownMs;
+      game.pet.shieldCooldownMs = GAME_RULES.owlShieldCooldownMs;
     }
 
     return;
@@ -16874,57 +31145,7 @@ function updateSnowflakeShield(deltaMs) {
   }
 
   if (game.pet.shieldCooldownMs === 0) {
-    game.pet.shieldActive = true;
-    game.pet.shieldTimerMs = GAME_RULES.snowflakeShieldDurationMs;
-  }
-}
-
-function isOwlShieldActive() {
-  const pet = getEquippedPet();
-  return Boolean(pet && pet.id === "sowa" && game.pet.shieldActive);
-}
-
-function tryActivateOwlAbility() {
-  const pet = getEquippedPet();
-
-  if (
-    !pet ||
-    pet.id !== "sowa" ||
-    game.mode === "multiplayer" ||
-    game.pet.shieldActive ||
-    game.pet.shieldCooldownMs > 0 ||
-    ui.currentView !== "game" ||
-    !game.active
-  ) {
-    return;
-  }
-
-  game.pet.shieldActive = true;
-  game.pet.shieldTimerMs = GAME_RULES.owlShieldDurationMs;
-  game.pet.shieldCooldownMs = 0;
-  syncWalkingLoop();
-}
-
-function updateOwlShield(deltaMs) {
-  if (game.pet.shieldActive) {
-    game.pet.shieldTimerMs = Math.max(0, game.pet.shieldTimerMs - deltaMs);
-
-    if (game.pet.shieldTimerMs === 0) {
-      game.pet.shieldActive = false;
-      game.pet.shieldCooldownMs = GAME_RULES.owlShieldCooldownMs;
-
-      if (game.player.hp < GAME_RULES.playerMaxHp) {
-        healPlayer(GAME_RULES.owlHealAmount);
-      }
-
-      syncWalkingLoop();
-    }
-
-    return;
-  }
-
-  if (game.pet.shieldCooldownMs > 0) {
-    game.pet.shieldCooldownMs = Math.max(0, game.pet.shieldCooldownMs - deltaMs);
+    activateOwlWinterSleep();
   }
 }
 
@@ -16983,6 +31204,11 @@ function renderGameModeInfo() {
     return;
   }
 
+  if (game.mode === "ranking-ship") {
+    gameModeInfo.textContent = `Aleja Rankingowa: broń statku przez 3 minuty. Punkty porównują procent życia statków.`;
+    return;
+  }
+
   if (game.mode === "coop") {
     const allyCount = getRemoteCoopPlayers().filter((player) => player.alive !== false).length;
     gameModeInfo.textContent = allyCount > 0
@@ -17019,30 +31245,32 @@ function renderGameModeInfo() {
     }
 
     if (pet && pet.id === "malpka-jasnoksieznik") {
+      const power = getMonkeyMagePowerStats();
       gameModeInfo.textContent = game.player.hp < getPlayerMaxHp()
-        ? "Małpka Jasnoksiężnik: po walce wróci do ciebie i leczy cię o 200 pz na sekundę."
-        : "Małpka Jasnoksiężnik: skacze po najbliższych robotach i zadaje 200 pz na sekundę.";
+        ? `Osmo: po walce wróci do ciebie i leczy cię o ${power.power} pz na sekundę.`
+        : `Osmo: skacze po najbliższych robotach i zadaje ${power.power} pz na sekundę.`;
       return;
     }
 
     if (pet && pet.id === "niedzwiedz-polarny") {
-      gameModeInfo.textContent = "Niedźwiedź Polarny: co 4 s wypuszcza dwa strzaly po 50 pz z opoznieniem 0,5 s.";
+      const power = getPolarBearPowerStats();
+      gameModeInfo.textContent = `Nimbo: co 4 s wypuszcza dwie śnieżki po ${power.snowballDamage} pz z opoznieniem 0,5 s.`;
       return;
     }
 
     if (pet && pet.id === "sniezynka") {
-      gameModeInfo.textContent = game.pet.shieldActive
-        ? `Śnieżynka: zimowa tarcza aktywna jeszcze ${(game.pet.shieldTimerMs / 1000).toFixed(1)} s.`
-        : `Śnieżynka: kolejna zimowa tarcza za ${(game.pet.shieldCooldownMs / 1000).toFixed(1)} s.`;
+      const power = getSnowflakePowerStats();
+      gameModeInfo.textContent = `Śnieżynka: tarcza zmniejsza obrażenia robotów o ${Math.round(power.damageReduction * 100)}%.`;
       return;
     }
 
     if (pet && pet.id === "sowa") {
+      const power = getOwlPowerStats();
       gameModeInfo.textContent = game.pet.shieldActive
-        ? `Sowa: tarcza aktywna jeszcze ${(game.pet.shieldTimerMs / 1000).toFixed(1)} s. Po niej odzyskasz 20% zycia.`
+        ? `Vivi: sen zimowy jeszcze ${(game.pet.shieldTimerMs / 1000).toFixed(1)} s. Roboty atakują siebie.`
         : game.pet.shieldCooldownMs > 0
-          ? `Sowa: moc laduje sie ${(game.pet.shieldCooldownMs / 1000).toFixed(1)} s.`
-          : "Sowa: wcisnij W, aby na 3 s zatrzymac ruch, wlaczyc tarcze i odzyskac 20% zycia.";
+          ? `Vivi: sen zimowy za ${(game.pet.shieldCooldownMs / 1000).toFixed(1)} s.`
+          : `Vivi: przechodzisz w sen zimowy na ${formatNumberForUi(power.sleepSeconds)} s.`;
       return;
     }
 
@@ -17065,74 +31293,25 @@ function renderGameModeInfo() {
       return;
     }
 
-    if (pet && pet.id === "jaguar") {
-      const nextThreshold = Math.max(0, Number(game.pet.jaguarNextTriggerHp || 0));
-      gameModeInfo.textContent = nextThreshold > 0
-        ? `Jaguar: kolejny zielony krąg pojawi się przy ${nextThreshold} pz lub niżej.`
-        : "Jaguar: wykorzystał już wszystkie progi życia w tej rundzie.";
-      return;
-    }
-
-    if (pet && pet.id === "papuga-dzungli") {
-      gameModeInfo.textContent = "Papuga: po każdym trafieniu od robota oddaje ci 10% zadanych obrażeń jako leczenie.";
-      return;
-    }
-
-    if (pet && pet.id === "malpa-dzungli") {
-      gameModeInfo.textContent = "Małpa: dwa najbliższe roboty są oznaczone na zielono i dostają od ciebie o 50% więcej obrażeń.";
-      return;
-    }
-
-    if (pet && pet.id === "waz-dzungli") {
-      const secondsLeft = Math.max(0, (GAME_RULES.jungleSnakeCastIntervalMs - game.pet.castTimerMsSecondary) / 1000);
-      gameModeInfo.textContent = `Wąż: kolejny zielony jad poleci w dwa najbliższe roboty za ${secondsLeft.toFixed(1)} s.`;
-      return;
-    }
-
-    if (pet && pet.id === "slon-dzungli") {
-      if (game.pet.targetId && game.pet.castTimerMs > 0) {
-        gameModeInfo.textContent = `Słoń: trwa przejażdżka z robotem, koniec za ${(game.pet.castTimerMs / 1000).toFixed(1)} s.`;
-      } else {
-        const secondsLeft = Math.max(0, (GAME_RULES.elephantRideCooldownMs - game.pet.castTimerMsSecondary) / 1000);
-        gameModeInfo.textContent = `Słoń: kolejny robot poleci na przejażdżkę za ${secondsLeft.toFixed(1)} s.`;
-      }
-      return;
-    }
-
-    if (pet && pet.id === "zaba-dzungli") {
-      const secondsLeft = Math.max(0, (GAME_RULES.frogPuddleIntervalMs - game.pet.castTimerMsSecondary) / 1000);
-      gameModeInfo.textContent = `Żaba: kolejna toksyczna kałuża pojawi się pod tobą za ${secondsLeft.toFixed(1)} s.`;
-      return;
-    }
-
-    if (pet && pet.id === "leniwiec-dzungli") {
-      gameModeInfo.textContent = isSlothSlowActive()
-        ? `Leniwiec: wszystko poza graczami jest spowolnione jeszcze ${(game.pet.castTimerMs / 1000).toFixed(1)} s.`
-        : `Leniwiec: kolejna fala spowolnienia za ${Math.max(0, (GAME_RULES.slothSlowCooldownMs - game.pet.castTimerMsSecondary) / 1000).toFixed(1)} s.`;
-      return;
-    }
-
-    if (pet && pet.id === "tygrys-dzungli") {
-      gameModeInfo.textContent = `Tygrys: twój obecny bonus obrażeń to +${getTigerDamageBonus()} pz.`;
-      return;
-    }
-
-    if (pet && pet.id === "krokodyl-dzungli") {
-      gameModeInfo.textContent = game.pet.targetId && game.pet.castTimerMs > 0
-        ? `Krokodyl: jest pod ziemią i wyskoczy za ${(game.pet.castTimerMs / 1000).toFixed(1)} s.`
-        : `Krokodyl: po ${Math.max(0, (GAME_RULES.crocodileSurfaceDurationMs - game.pet.castTimerMsSecondary) / 1000).toFixed(1)} s ruszy po kolejnego robota.`;
-      return;
-    }
-
     if (pet && pet.id === "l-psotka") {
-      gameModeInfo.textContent = "L'Psotka: co 5 s wypuszcza bańkę, zabiera 150 pz i cofa robota o 2 s wstecz.";
+      const power = getLpsotkaPowerStats();
+      gameModeInfo.textContent = `Psotka: co ${formatNumberForUi(power.castIntervalSeconds)} s wypuszcza bańkę, która zatrzymuje robota na ${formatNumberForUi(power.bubbleSeconds)} s.`;
+      return;
+    }
+
+    if (pet && pet.id === "papuga-manipulantka") {
+      gameModeInfo.textContent = `Emerald: manipuluje robota co ${formatNumberForUi(getParrotPowerStats().castIntervalSeconds)} s.`;
       return;
     }
 
     if (pet && pet.id === "el-kruk") {
-      gameModeInfo.textContent = isElKrukElfieSkinBoostActive()
-        ? "El Kruk: leczy o 500 co 5 s i daje zielona amunicje z przeladowaniem szybszym o 0,7 s."
-        : "El Kruk: po utracie zycia leczy o 500 co 5 s.";
+      gameModeInfo.textContent = `Ozzy: leczy o ${getOzzyPowerStats().healPerSecond}/s, gdy masz 2500 pz lub mniej.`;
+      return;
+    }
+
+    if (pet && pet.id === "coral") {
+      const power = getCoralPowerStats();
+      gameModeInfo.textContent = `Coral: oślepia roboty poniżej ${Math.round(Number(power.damagedThreshold || 0.8) * 100)}% życia.`;
       return;
     }
 
@@ -17183,6 +31362,10 @@ function syncTabs() {
     button.classList.toggle("active", button.dataset.tab === ui.inventoryTab);
   });
 
+  document.querySelectorAll("[data-tab-group='inventory-world']").forEach((button) => {
+    button.classList.toggle("active", button.dataset.tab === ui.inventoryWorldFilter);
+  });
+
   document.querySelectorAll("[data-tab-group='friends']").forEach((button) => {
     button.classList.toggle("active", button.dataset.tab === ui.friendsTab);
   });
@@ -17195,6 +31378,12 @@ function syncBrokenAssets(scope) {
     };
 
     image.onerror = () => {
+      const fallbackSrc = image.dataset.fallbackSrc;
+      if (fallbackSrc && image.getAttribute("src") !== fallbackSrc) {
+        image.src = fallbackSrc;
+        return;
+      }
+
       image.classList.add("broken");
     };
 
@@ -17238,12 +31427,17 @@ function syncAnimatedAssets(scope) {
 }
 
 function getProjectileVisual(projectile) {
-  if (projectile.kind && projectile.kind.startsWith("papuga")) {
-    return { src: "./assets/attacks/atak_2.png", alt: "Gwiazdy papugi", fallbackText: "GWIAZDY" };
+  if (projectile.kind === "tower-bot-shot") {
+    return { src: TOWER_CONFIG.projectileImage, alt: "Energetyczna kula robocika", fallbackText: "KULA" };
   }
 
-  if (projectile.kind === "jungle-venom-shot") {
-    return { src: "./assets/attacks/atak_3.png", alt: "Jad Węża", fallbackText: "JAD" };
+  if (projectile.kind && projectile.kind.startsWith("papuga")) {
+    const projectilePetId = sanitizeStoredId(projectile.petId);
+    if (projectilePetId === STORE_EMERALD_SKIN_OFFER.skinPetId || projectilePetId === "astralny-mag-emerald") {
+      return { src: "./mistykk.png", alt: "Mistyczny atak Emeralda", fallbackText: "MISTYK" };
+    }
+
+    return { src: "./papugga.png", alt: "Strzał Papugi Manipulantki", fallbackText: "PAPUGA" };
   }
 
   if (projectile.kind === "elfie-shot") {
@@ -17262,25 +31456,11 @@ function getProjectileVisual(projectile) {
     };
   }
 
-  if (projectile.kind === "millo-elfie-shot") {
-    return { src: "./assets/attacks/atak_2.png", alt: "Atak Millo jako Elfie", fallbackText: "MILLO ELFIE" };
-  }
-
   if (projectile.kind === "lpsotka") {
     return { src: "./assets/attacks/atak_3.png", alt: "Atak L'Psotki", fallbackText: "PSOTKA" };
   }
 
   if (projectile.kind === "linda-shot") {
-    const projectileCharacterId = projectile.characterId || getEquippedCharacter()?.id;
-
-    if (projectileCharacterId === "elfie-jako-linda") {
-      return {
-        src: "./assets/attacks/atak_elinda.jpeg",
-        alt: "Atak Elfie jako Lindy",
-        fallbackText: "E LINDA",
-      };
-    }
-
     return { src: "./assets/attacks/atak_3.png", alt: "Atak Lindy", fallbackText: "LINDA" };
   }
 
@@ -17340,51 +31520,68 @@ function getProjectileVisual(projectile) {
     };
   }
 
-  if (projectile.kind === "ivy-shot") {
+  if (projectile.kind === "grifos-shot") {
     return {
-      src: "./assets/attacks/atak_ivy.jpeg",
-      alt: "Atak Ivy",
-      fallbackText: "IVY",
+      src: "./grifos.atak.png",
+      alt: "Atak Grifosa",
+      fallbackText: "GRIFOS",
     };
   }
 
-  if (projectile.kind === "coco-shot") {
+  if (projectile.kind === "mycelia-shot") {
     return {
-      src: "./assets/attacks/coco_atak.jpeg",
-      alt: "Atak Coco N'Kosi",
-      fallbackText: "COCO",
+      src: "./atakmycelia.png",
+      alt: "Atak Mycelii",
+      fallbackText: "MYCELIA",
     };
   }
 
-  if (projectile.kind === "aslan-shot") {
+  if (projectile.kind === "sylas-shot") {
     return {
-      src: "./assets/attacks/aslan_atak.jpeg",
-      alt: "Atak Aslana",
-      fallbackText: "ASLAN",
+      src: "./sylasatak.png",
+      alt: "Atak Sylasa",
+      fallbackText: "SYLAS",
     };
   }
 
-  if (projectile.kind === "kira-shot") {
+  if (projectile.kind === "nerissa-shot") {
     return {
-      src: "./assets/attacks/atakk.jpeg",
-      alt: "Atak Kiry",
-      fallbackText: "KIRA",
+      src: "./ataknerissa.png",
+      alt: "Atak Nerissy",
+      fallbackText: "NERISSA",
     };
   }
 
-  if (projectile.kind === "kora-shot") {
+  if (projectile.kind === "hookcrab-shot") {
     return {
-      src: "./assets/attacks/koraa.jpeg",
-      alt: "Atak Kory",
-      fallbackText: "KORA",
+      src: "./hookie.png",
+      alt: "Atak Hookcraba",
+      fallbackText: "HOOK",
     };
   }
 
-  if (projectile.kind === "wodzu-shot") {
+  if (projectile.kind === "lunella-shot") {
     return {
-      src: "./assets/attacks/wodza.jpeg",
-      alt: "Atak Wodzu",
-      fallbackText: "WODZU",
+      src: "./lunka.png",
+      alt: "Atak Lunelli",
+      fallbackText: "LUNELLA",
+    };
+  }
+
+  if (projectile.kind === "thalia-shot") {
+    return {
+      src: "./tha.png",
+      alt: "Atak Thalii",
+      fallbackText: "THALIA",
+    };
+  }
+
+  if (projectile.kind === "shulla-shot") {
+    return {
+      src: "./shulla.atak.png",
+      cards: SHULLA_ATTACK_CARD_IMAGES,
+      alt: "Atak Shulli",
+      fallbackText: "SHULLA",
     };
   }
 
@@ -17428,8 +31625,8 @@ function getProjectileVisual(projectile) {
   if (projectile.kind === "polar-bear-shot") {
     return {
       src: "./assets/attacks/atak_4.png",
-      alt: "Atak Niedźwiedzia Polarnego",
-      fallbackText: "NIEDZWIEDZ",
+      alt: "Atak Nimbo",
+      fallbackText: "NIMBO",
     };
   }
 
@@ -17449,23 +31646,11 @@ function getProjectileVisual(projectile) {
     return { src: "./assets/attacks/atak_2.png", alt: "Atak Magika Millo", fallbackText: "MILLO" };
   }
 
-  if (character?.id === "magiczna-lidsay") {
-    return { src: "./assets/attacks/atak_2.png", alt: "Atak Magicznej Lidsay", fallbackText: "LIDSAY" };
-  }
-
   const weapon = getOwnedItem("weapons", state.equippedWeapon) || CATALOG.weapons[0];
   return { src: weapon.image, alt: weapon.name, fallbackText: weapon.name };
 }
 
 function getRobotVisualForWorldId(worldId = getGlobalVisualWorldTheme()) {
-  if (worldId === "tower") {
-    return {
-      src: "./assets/robots/robot_wieza.jpeg",
-      alt: "Robot Dżungli",
-      fallbackText: "ROBOT",
-    };
-  }
-
   if (worldId === "winter") {
     return {
       src: "./assets/robots/robot_zimowy.jpeg",
@@ -17487,6 +31672,11 @@ function getRobotVisual() {
 
 function loadState() {
   try {
+    LEGACY_STORAGE_KEYS.forEach((key) => {
+      if (key !== STORAGE_KEY) {
+        window.localStorage.removeItem(key);
+      }
+    });
     const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY));
     return hydrateSavedState(saved);
   } catch (error) {
@@ -17502,25 +31692,41 @@ function saveState() {
 
 function defaultState() {
   return {
-    coins: 0,
+    coins: 300,
     trophies: 0,
     diamonds: 0,
+    elixirs: 0,
+    silver: 0,
+    highTowerSparkles: 0,
+    highTowerChestCostumePity: 0,
+    highTowerLastFreeChestAt: 0,
+    highTowerVictoryChestsToday: 0,
+    highTowerVictoryChestsClaimedToday: 0,
+    highTowerDailyChestDateKey: "",
     platoKeys: 0,
     magicMachineFirstPurchaseDone: false,
-    seenIntro: false,
+    seenIntro: true,
     playedFirstGame: false,
     seenFirstRobotTutorial: false,
-    seenJungleBookGuide: false,
     seenTrophyRoadIntro: false,
+    seenHighTowerStoryIntro: false,
     superAlleyActive: false,
     superAlleyWinterActive: false,
-    superAlleyTowerActive: false,
+    rankingPoints: 0,
+    rankingTickets: 1,
+    rankingLossStreak: 0,
+    rankingAlleyUnlocked: false,
+    rankingPremiumActive: false,
     phoneModeEnabled: false,
-    introStep: 0,
+    musicVolumePercent: SETTINGS_VOLUME_MAX,
+    soundVolumePercent: SETTINGS_VOLUME_MAX,
+    introStep: 3,
     seenWinterWorldIntro: false,
-    seenTowerWorldIntro: false,
     playerNickname: "",
     nicknamePromptSeen: false,
+    isContentCreator: false,
+    contentCreatorWelcomeClaimed: false,
+    contentCreatorMachineClaimed: false,
     profileId: "",
     publicId: "",
     profileCreatedAt: 0,
@@ -17528,51 +31734,68 @@ function defaultState() {
     nicknameChangeCount: 0,
     ownedProfilePhotos: [],
     selectedProfilePhotoId: "",
+    profileVisualKind: "character",
     favoriteCharacterId: "",
     favoritePetId: "",
     completedGamesTotal: 0,
+    trophyStreak: 0,
+    petTrophies: {},
+    petMiniAlleys: getDefaultPetMiniAlleyState(),
+    claimedPetRankRewards: {},
+    petPowerLevels: {},
+    dailyGiftClaimedDateKey: "",
     robotsDefeatedTotal: 0,
-    bookMissionProgress: {
-      totalRobotDamage: 0,
-      fullClearStreak: 0,
-      currentRunRobots: 0,
-      junglePetRoundsPlayed: 0,
-      robotsDefeatedSinceMissions: 0,
-      trophiesEarnedSinceMissions: 0,
-    },
-    claimedBookMissionIds: [],
+    storeStarterPackPurchased: false,
+    supportedCreatorCode: "",
     accountPasswordSet: false,
     accountPasswordHash: "",
     accountPasswordSalt: "",
     accountSaveSecret: "",
-    ownedCharacters: [],
+    ownedCharacters: ["magik-millo"],
     ownedPets: [],
     ownedWeapons: ["atak-1"],
-    equippedCharacter: null,
+    equippedCharacter: "magik-millo",
     equippedPet: null,
     equippedWeapon: "atak-1",
     crateInventory: {
       "drewniana-skrzynia": 0,
-      "dzunglowa-skrzynia": 0,
     },
     openedCrates: {
       "drewniana-skrzynia": 0,
-      "dzunglowa-skrzynia": 0,
     },
     freeCrates: {
       "drewniana-skrzynia": 0,
-      "dzunglowa-skrzynia": 0,
     },
     claimedTrophyRewards: {
       alley: [],
       winter: [],
-      tower: [],
+    },
+    claimedRankingRewards: {
+      premium: [],
+      free: [],
     },
     activeTrophyWorld: "alley",
+    portalMissions: getDefaultPortalMissionState(),
     storeOffers: {
       characterIds: [],
       petIds: [],
+      petSkinOfferIds: {
+        [STORE_OFFER_TAB_MAGIC]: [],
+        [STORE_OFFER_TAB_PIRATE]: [],
+      },
+      specialCurrencyOfferId: "",
+      specialCurrencyPurchasedId: "",
+      platoKeyOfferId: "",
+      platoKeyPurchasedId: "",
+      premiumAlleyOfferId: "",
+      maxPlatoyaPurchasedCycleKey: "",
+      cardDeckPurchasedCycleKey: "",
+      highTowerClimbPackPurchasedCycleKey: "",
+      highTowerLuckPackPurchasedCycleKey: "",
+      highTowerCoinLuckPackPurchasedCycleKey: "",
+      highTowerSparkPackPurchased: false,
       nextRefreshAt: 0,
+      nextPetSkinRefreshAt: 0,
     },
   };
 }
@@ -17585,10 +31808,19 @@ function hydrateSavedState(saved) {
     return baseState;
   }
 
+  const legacyCharacterReplacements = new Map([
+    [["elfie", "jako", "linda"].join("-"), "sylas"],
+    ["millo-jako-elfie", "magik-millo"],
+  ]);
+  const migrateRemovedCharacterId = (characterId) => legacyCharacterReplacements.get(characterId) || characterId;
+  const savedOwnedCharacters = Array.isArray(saved.ownedCharacters)
+    ? saved.ownedCharacters.map((characterId) => migrateRemovedCharacterId(characterId))
+    : [];
+
   const merged = {
     ...baseState,
     ...saved,
-    ownedCharacters: Array.isArray(saved.ownedCharacters) ? saved.ownedCharacters : [],
+    ownedCharacters: savedOwnedCharacters,
     ownedProfilePhotos: Array.isArray(saved.ownedProfilePhotos) ? saved.ownedProfilePhotos : [],
     ownedPets: Array.isArray(saved.ownedPets) ? saved.ownedPets : [],
     ownedWeapons: Array.isArray(saved.ownedWeapons) ? saved.ownedWeapons : ["atak-1"],
@@ -17604,56 +31836,118 @@ function hydrateSavedState(saved) {
       saved.freeCrates && typeof saved.freeCrates === "object"
         ? { ...baseState.freeCrates, ...saved.freeCrates }
         : { ...baseState.freeCrates },
-    bookMissionProgress:
-      saved.bookMissionProgress && typeof saved.bookMissionProgress === "object"
-        ? { ...baseState.bookMissionProgress, ...saved.bookMissionProgress }
-        : { ...baseState.bookMissionProgress },
+    petTrophies:
+      saved.petTrophies && typeof saved.petTrophies === "object"
+        ? { ...saved.petTrophies }
+        : {},
+    petMiniAlleys: sanitizePetMiniAlleyState(saved.petMiniAlleys),
+    claimedPetRankRewards:
+      saved.claimedPetRankRewards && typeof saved.claimedPetRankRewards === "object"
+        ? { ...saved.claimedPetRankRewards }
+        : {},
+    petPowerLevels:
+      saved.petPowerLevels && typeof saved.petPowerLevels === "object"
+        ? { ...saved.petPowerLevels }
+        : {},
     claimedTrophyRewards:
       saved.claimedTrophyRewards && typeof saved.claimedTrophyRewards === "object"
         ? { ...baseState.claimedTrophyRewards, ...saved.claimedTrophyRewards }
         : { ...baseState.claimedTrophyRewards },
+    claimedRankingRewards:
+      saved.claimedRankingRewards && typeof saved.claimedRankingRewards === "object"
+        ? { ...baseState.claimedRankingRewards, ...saved.claimedRankingRewards }
+        : { ...baseState.claimedRankingRewards },
+    portalMissions: sanitizePortalMissionState(saved.portalMissions),
     storeOffers:
       saved.storeOffers && typeof saved.storeOffers === "object"
         ? { ...baseState.storeOffers, ...saved.storeOffers }
         : { ...baseState.storeOffers },
   };
 
+  merged.equippedCharacter = migrateRemovedCharacterId(merged.equippedCharacter);
   merged.claimedTrophyRewards = migrateClaimedTrophyRewards(saved.claimedTrophyRewards);
   merged.activeTrophyWorld = normalizeTrophyWorldId(saved.activeTrophyWorld);
+  merged.trophies = Math.max(0, Math.floor(Number(saved.trophies || 0)));
+  if (merged.activeTrophyWorld !== "winter") {
+    merged.trophies = Math.min(merged.trophies, MAGICIANS_SILVER_GATE_TROPHIES);
+  }
   merged.superAlleyActive = Boolean(saved.superAlleyActive);
   merged.superAlleyWinterActive = Boolean(saved.superAlleyWinterActive);
-  merged.superAlleyTowerActive = Boolean(saved.superAlleyTowerActive);
+  merged.rankingPoints = Math.max(0, Math.floor(Number(saved.rankingPoints || 0)));
+  merged.rankingTickets = Object.prototype.hasOwnProperty.call(saved, "rankingTickets")
+    ? Math.max(0, Math.floor(Number(saved.rankingTickets || 0)))
+    : baseState.rankingTickets;
+  merged.rankingLossStreak = Math.max(0, Math.floor(Number(saved.rankingLossStreak || 0)));
+  merged.rankingAlleyUnlocked = Boolean(
+    saved.rankingAlleyUnlocked ||
+    (Array.isArray(merged.claimedTrophyRewards?.alley) && merged.claimedTrophyRewards.alley.includes("alley-base-500"))
+  );
+  merged.rankingPremiumActive = Boolean(saved.rankingPremiumActive);
   merged.platoKeys = Math.max(0, Number(saved.platoKeys || 0));
+  merged.elixirs = Math.max(0, Number(saved.elixirs || 0));
+  merged.silver = merged.activeTrophyWorld === "winter" ? 0 : Math.max(0, Math.floor(Number(saved.silver || 0)));
+  merged.highTowerSparkles = Math.max(0, Math.floor(Number(saved.highTowerSparkles || 0)));
+  merged.highTowerChestCostumePity = Math.max(0, Math.floor(Number(saved.highTowerChestCostumePity || 0)));
+  merged.highTowerLastFreeChestAt = Math.max(0, Math.floor(Number(saved.highTowerLastFreeChestAt || 0)));
+  merged.highTowerVictoryChestsToday = Math.max(0, Math.floor(Number(saved.highTowerVictoryChestsToday || 0)));
+  merged.highTowerVictoryChestsClaimedToday = Math.max(0, Math.floor(Number(saved.highTowerVictoryChestsClaimedToday || 0)));
+  merged.highTowerDailyChestDateKey = sanitizeDateKey(saved.highTowerDailyChestDateKey);
   merged.magicMachineFirstPurchaseDone = Boolean(saved.magicMachineFirstPurchaseDone);
   merged.phoneModeEnabled = Boolean(saved.phoneModeEnabled);
+  merged.musicVolumePercent = normalizeSettingsVolumePercent(saved.musicVolumePercent, SETTINGS_VOLUME_MAX);
+  merged.soundVolumePercent = normalizeSettingsVolumePercent(saved.soundVolumePercent, SETTINGS_VOLUME_MAX);
   merged.seenWinterWorldIntro = Boolean(saved.seenWinterWorldIntro);
-  merged.seenTowerWorldIntro = Boolean(saved.seenTowerWorldIntro);
+  merged.seenHighTowerStoryIntro = Boolean(saved.seenHighTowerStoryIntro);
   merged.playerNickname = sanitizePlayerNickname(saved.playerNickname);
   merged.nicknamePromptSeen = Boolean(saved.nicknamePromptSeen);
+  merged.isContentCreator = Boolean(saved.isContentCreator) || isContentCreatorNickname(merged.playerNickname);
+  merged.contentCreatorWelcomeClaimed = Boolean(saved.contentCreatorWelcomeClaimed);
+  merged.contentCreatorMachineClaimed = Boolean(saved.contentCreatorMachineClaimed);
   merged.profileId = sanitizeProfileId(saved.profileId);
   merged.publicId = sanitizePublicPlayerId(saved.publicId);
   merged.profileCreatedAt = Math.max(0, Number(saved.profileCreatedAt || 0));
   merged.profileThemeWorldId = normalizeTrophyWorldId(saved.profileThemeWorldId);
   merged.nicknameChangeCount = Math.max(0, Number(saved.nicknameChangeCount || 0));
+  merged.supportedCreatorCode = String(saved.supportedCreatorCode || "").trim().toLowerCase() === "natix" ? "NATIX" : "";
   merged.selectedProfilePhotoId = sanitizeStoredId(saved.selectedProfilePhotoId);
+  merged.profileVisualKind = saved.profileVisualKind === "pet" ? "pet" : "character";
   merged.completedGamesTotal = Math.max(0, Number(saved.completedGamesTotal || 0));
+  merged.trophyStreak = Math.max(0, Number(saved.trophyStreak || 0));
+  merged.dailyGiftClaimedDateKey = sanitizeDateKey(saved.dailyGiftClaimedDateKey);
   merged.robotsDefeatedTotal = Math.max(0, Number(saved.robotsDefeatedTotal || 0));
-  merged.bookMissionProgress = {
-    ...baseState.bookMissionProgress,
-    ...(saved.bookMissionProgress && typeof saved.bookMissionProgress === "object"
-      ? saved.bookMissionProgress
-      : {}),
+  merged.storeStarterPackPurchased = Boolean(saved.storeStarterPackPurchased);
+  merged.petTrophies = Object.fromEntries(
+    Object.entries(merged.petTrophies || {})
+      .map(([petId, trophies]) => [sanitizeStoredId(petId), Math.max(0, Math.floor(Number(trophies || 0)))])
+      .filter(([petId, trophies]) => CATALOG.pets.some((pet) => pet.id === petId) && trophies > 0)
+  );
+  merged.claimedPetRankRewards = Object.fromEntries(
+    Object.entries(merged.claimedPetRankRewards || {})
+      .map(([petId, rewardIds]) => [
+        sanitizeStoredId(petId),
+        Array.isArray(rewardIds)
+          ? rewardIds.map((rewardId) => String(rewardId || "")).filter((rewardId) => PET_RANK_REWARDS.some((reward) => reward.id === rewardId))
+          : [],
+      ])
+      .filter(([petId, rewardIds]) => CATALOG.pets.some((pet) => pet.id === petId) && rewardIds.length > 0)
+  );
+  const allowedRankingRewardIds = new Set(getRankingAlleyRewards().map((reward) => reward.id));
+  merged.claimedRankingRewards = {
+    premium: (Array.isArray(merged.claimedRankingRewards?.premium) ? merged.claimedRankingRewards.premium : [])
+      .filter((rewardId, index, rewards) => allowedRankingRewardIds.has(rewardId) && rewards.indexOf(rewardId) === index),
+    free: (Array.isArray(merged.claimedRankingRewards?.free) ? merged.claimedRankingRewards.free : [])
+      .filter((rewardId, index, rewards) => allowedRankingRewardIds.has(rewardId) && rewards.indexOf(rewardId) === index),
   };
-  merged.bookMissionProgress.totalRobotDamage = Math.max(0, Number(merged.bookMissionProgress.totalRobotDamage || 0));
-  merged.bookMissionProgress.fullClearStreak = Math.max(0, Number(merged.bookMissionProgress.fullClearStreak || 0));
-  merged.bookMissionProgress.currentRunRobots = Math.max(0, Number(merged.bookMissionProgress.currentRunRobots || 0));
-  merged.bookMissionProgress.junglePetRoundsPlayed = Math.max(0, Number(merged.bookMissionProgress.junglePetRoundsPlayed || 0));
-  merged.bookMissionProgress.robotsDefeatedSinceMissions = Math.max(0, Number(merged.bookMissionProgress.robotsDefeatedSinceMissions || 0));
-  merged.bookMissionProgress.trophiesEarnedSinceMissions = Math.max(0, Number(merged.bookMissionProgress.trophiesEarnedSinceMissions || 0));
-  merged.claimedBookMissionIds = Array.isArray(saved.claimedBookMissionIds)
-    ? saved.claimedBookMissionIds.map((entry) => String(entry || "")).filter(Boolean)
-    : [];
-  merged.favoriteCharacterId = sanitizeStoredId(saved.favoriteCharacterId);
+  merged.petPowerLevels = Object.fromEntries(
+    Object.entries(merged.petPowerLevels || {})
+      .map(([petId, level]) => {
+        const normalizedPetId = sanitizeStoredId(petId);
+        const levels = getPetPowerLevels(normalizedPetId);
+        return [normalizedPetId, clamp(Math.floor(Number(level || 1)), 1, Math.max(1, levels.length || 1))];
+      })
+      .filter(([petId, level]) => getPetPowerLevels(petId).length > 0 && level > 1)
+  );
+  merged.favoriteCharacterId = sanitizeStoredId(migrateRemovedCharacterId(saved.favoriteCharacterId));
   merged.favoritePetId = sanitizeStoredId(saved.favoritePetId);
   merged.accountPasswordHash = sanitizeStoredToken(saved.accountPasswordHash);
   merged.accountPasswordSalt = sanitizeStoredToken(saved.accountPasswordSalt);
@@ -17667,10 +31961,15 @@ function hydrateSavedState(saved) {
   merged.seenFirstRobotTutorial = Object.prototype.hasOwnProperty.call(saved, "seenFirstRobotTutorial")
     ? Boolean(saved.seenFirstRobotTutorial)
     : Boolean(saved.playedFirstGame);
-  merged.seenJungleBookGuide = Boolean(saved.seenJungleBookGuide);
   merged.ownedCharacters = sanitizeOwnedIds(merged.ownedCharacters, CATALOG.characters);
   merged.ownedProfilePhotos = sanitizeOwnedIds(merged.ownedProfilePhotos, CATALOG.profilePhotos);
   merged.ownedPets = sanitizeOwnedIds(merged.ownedPets, CATALOG.pets);
+  merged.ownedPets.forEach((petId) => {
+    const basePetId = getPetBaseId(petId);
+    if (basePetId !== petId && !merged.ownedPets.includes(basePetId)) {
+      merged.ownedPets.push(basePetId);
+    }
+  });
   merged.ownedWeapons = sanitizeOwnedIds(merged.ownedWeapons, CATALOG.weapons);
 
   if (!merged.ownedWeapons.includes("atak-1")) {
@@ -17681,7 +31980,13 @@ function hydrateSavedState(saved) {
     merged.ownedCharacters.unshift("magik-millo");
   }
 
-  if (!merged.ownedCharacters.includes(merged.equippedCharacter)) {
+  if (
+    !merged.ownedCharacters.includes(merged.equippedCharacter) ||
+    (
+      isCharacterSkinId(merged.equippedCharacter) &&
+      !merged.ownedCharacters.includes(getCharacterBaseId(merged.equippedCharacter))
+    )
+  ) {
     merged.equippedCharacter = null;
   }
 
@@ -17739,9 +32044,7 @@ function ensureStateProfileDefaults(targetState) {
   }
 
   const unlockedThemeIds = ["alley"];
-  if (normalizeTrophyWorldId(targetState.activeTrophyWorld) === "tower") {
-    unlockedThemeIds.push("winter", "tower");
-  } else if (normalizeTrophyWorldId(targetState.activeTrophyWorld) === "winter") {
+  if (normalizeTrophyWorldId(targetState.activeTrophyWorld) === "winter") {
     unlockedThemeIds.push("winter");
   }
 
@@ -17753,6 +32056,14 @@ function ensureStateProfileDefaults(targetState) {
     targetState.favoritePetId = targetState.equippedPet && targetState.ownedPets.includes(targetState.equippedPet)
       ? targetState.equippedPet
       : targetState.ownedPets[0] || "";
+  }
+
+  if (targetState.profileVisualKind === "pet" && !targetState.favoritePetId) {
+    targetState.profileVisualKind = "character";
+  }
+
+  if (targetState.profileVisualKind !== "pet") {
+    targetState.profileVisualKind = "character";
   }
 
   targetState.nicknameChangeCount = Math.max(0, Number(targetState.nicknameChangeCount || 0));
@@ -17860,24 +32171,46 @@ function sanitizeOwnedIds(ids, catalog) {
 
 function migrateClaimedTrophyRewards(savedRewards) {
   const allowedRewardIds = new Set(
-    TROPHY_WORLDS.flatMap((world) => world.rewards.map((reward) => reward.id))
+    TROPHY_WORLDS.flatMap((world) => getTrophyWorldRewards(world).map((reward) => reward.id))
   );
+  const mapLegacyAlleyRewardClaim = (rewardToken) => {
+    if (typeof rewardToken === "string" && allowedRewardIds.has(rewardToken)) {
+      return rewardToken;
+    }
+
+    const numericThreshold = Number(rewardToken);
+    if (Number.isFinite(numericThreshold) && numericThreshold > 0) {
+      const rewardLane = LEGACY_ALLEY_SUPER_REWARD_THRESHOLDS.has(numericThreshold) ? "super" : "base";
+      return `alley-${rewardLane}-${numericThreshold}`;
+    }
+
+    const match = /^alley-(\d+)-/.exec(String(rewardToken || ""));
+    if (!match) {
+      return "";
+    }
+
+    const threshold = Number(match[1]);
+    if (!Number.isFinite(threshold) || threshold <= 0) {
+      return "";
+    }
+
+    const rewardLane = LEGACY_ALLEY_SUPER_REWARD_THRESHOLDS.has(threshold) ? "super" : "base";
+    return `alley-${rewardLane}-${threshold}`;
+  };
   const alleyRewards = [
     ...(Array.isArray(savedRewards?.alley) ? savedRewards.alley : []),
     ...(Array.isArray(savedRewards?.magicians) ? savedRewards.magicians : []),
     ...(Array.isArray(savedRewards?.lovers) ? savedRewards.lovers : []),
-  ].filter((rewardId) => allowedRewardIds.has(rewardId));
+  ]
+    .map((rewardId) => mapLegacyAlleyRewardClaim(rewardId))
+    .filter((rewardId) => allowedRewardIds.has(rewardId));
   const winterRewards = [
     ...(Array.isArray(savedRewards?.winter) ? savedRewards.winter : []),
-  ].filter((rewardId) => allowedRewardIds.has(rewardId));
-  const towerRewards = [
-    ...(Array.isArray(savedRewards?.tower) ? savedRewards.tower : []),
   ].filter((rewardId) => allowedRewardIds.has(rewardId));
 
   return {
     alley: alleyRewards.filter((rewardId, index) => alleyRewards.indexOf(rewardId) === index),
     winter: winterRewards.filter((rewardId, index) => winterRewards.indexOf(rewardId) === index),
-    tower: towerRewards.filter((rewardId, index) => towerRewards.indexOf(rewardId) === index),
   };
 }
 

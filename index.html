@@ -2,21 +2,11 @@
 <html lang="pl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pixel PlatoYA</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div class="orientation-lock-overlay" id="orientation-lock-overlay" hidden aria-hidden="true">
-      <div class="orientation-lock-card">
-        <div class="orientation-lock-phone" aria-hidden="true">
-          <span class="orientation-lock-phone-notch"></span>
-        </div>
-        <p class="orientation-lock-kicker">TRYB POZIOMY</p>
-        <h2 class="orientation-lock-title">OBRÓĆ TELEFON</h2>
-        <p class="orientation-lock-copy">Ta gra działa w poziomie. Obróć urządzenie, aby wrócić do gry.</p>
-      </div>
-    </div>
     <main class="app-shell">
       <section class="screen loading-screen" id="loading-screen" aria-hidden="true" hidden>
         <div class="loading-stage">
@@ -82,23 +72,15 @@
         <section class="screen-view active" id="lobby-view">
           <div class="panel lobby-panel">
             <div class="lobby-topbar">
-              <div class="lobby-topbar-left">
-                <button
-                  class="lobby-profile-button"
-                  id="lobby-profile-button"
-                  type="button"
-                  aria-label="Profil"
-                >
-                  <span class="lobby-profile-icon" aria-hidden="true">
-                    <span class="lobby-profile-icon-head"></span>
-                    <span class="lobby-profile-icon-body"></span>
-                  </span>
-                </button>
-                <div class="lobby-topbar-copy">
-                  <h2 class="section-title">Lobby</h2>
-                  <p class="lobby-nickname" id="lobby-nickname">Nick: Gracz0000</p>
-                </div>
-              </div>
+              <button
+                class="lobby-corner-icon-button lobby-settings-button"
+                id="lobby-settings-button"
+                type="button"
+                aria-label="Ustawienia"
+              >
+                <img class="lobby-corner-icon asset-image" src="./ustawienia.png" alt="" data-fallback-text="USTAWIENIA" />
+                <span class="asset-fallback">UST</span>
+              </button>
               <div class="lobby-resource-strip" aria-label="Saldo">
                 <div class="lobby-resource-chip" id="lobby-balance-target">
                   <div class="lobby-resource-icon-frame">
@@ -125,29 +107,81 @@
                   </div>
                   <p class="lobby-resource-value" id="lobby-diamond-balance">0</p>
                 </div>
+                <div class="lobby-resource-divider" aria-hidden="true"></div>
+                <div class="lobby-resource-chip">
+                  <div class="lobby-resource-icon-frame">
+                    <img
+                      class="lobby-resource-icon asset-image"
+                      src="./eliksir.png"
+                      alt="Eliksiry"
+                      data-fallback-text="E"
+                    />
+                    <div class="asset-fallback">E</div>
+                  </div>
+                  <p class="lobby-resource-value" id="lobby-elixir-balance">0</p>
+                </div>
+                <div class="lobby-resource-divider" id="lobby-silver-divider" aria-hidden="true" hidden></div>
+                <div class="lobby-resource-chip lobby-silver-chip" id="lobby-silver-chip" hidden>
+                  <div class="lobby-resource-icon-frame">
+                    <img
+                      class="lobby-resource-icon lobby-silver-icon asset-image"
+                      src="./esencja.png"
+                      alt="Esencja"
+                      data-fallback-text="E"
+                    />
+                    <div class="asset-fallback">E</div>
+                  </div>
+                  <p class="lobby-resource-value" id="lobby-silver-balance">0</p>
+                </div>
               </div>
               <button
-                class="circle-icon-button lobby-settings-button"
-                id="lobby-settings-button"
+                class="ranking-alley-entry"
+                id="ranking-alley-entry"
+                data-open-ranking-alley
                 type="button"
-                aria-label="Ustawienia"
+                aria-label="Aleja Rankingowa"
               >
-                &#9881;
+                <img
+                  class="ranking-alley-entry-image asset-image"
+                  src="./ranking.png"
+                  alt="Aleja Rankingowa"
+                  data-fallback-text="RANKING"
+                />
+                <span class="ranking-alley-entry-lock" aria-hidden="true">
+                  <img class="asset-image" src="./klodka.png" alt="" data-fallback-text="LOCK" />
+                </span>
+                <div class="asset-fallback">RANKING</div>
               </button>
             </div>
 
             <div class="lobby-layout">
-              <button class="pixel-button lobby-nav-button bottom-button" id="lobby-play-button" type="button">
-                GRAJ
-              </button>
-
-              <button class="pixel-button lobby-nav-button top-secondary-button" id="lobby-friends-button" data-view="friends" type="button">
-                ZNAJOMI
-              </button>
-
-              <button class="pixel-button lobby-nav-button left-button" data-view="store">
-                SKLEP
-              </button>
+              <div class="lobby-left-controls">
+                <button
+                  class="high-tower-entry"
+                  id="high-tower-entry"
+                  data-view="tower-challenge"
+                  type="button"
+                  aria-label="Wyzwanie Wysokiej Wieży"
+                >
+                  <img
+                    class="high-tower-entry-image asset-image"
+                    src="./wiea.png"
+                    alt="Wyzwanie Wysokiej Wieży"
+                    data-fallback-text="WIEŻA"
+                  />
+                  <span class="high-tower-entry-countdown" id="high-tower-entry-countdown">--</span>
+                  <div class="asset-fallback">WIEŻA</div>
+                </button>
+                <button class="lobby-action-button lobby-shop-button lobby-nav-button" data-view="store" type="button">
+                  <span>SKLEP</span>
+                </button>
+                <button class="lobby-action-button lobby-alley-button lobby-nav-button" data-view="trophies" type="button">
+                  <div class="lobby-alley-header">
+                    <img class="lobby-action-icon lobby-menu-trophy-icon asset-image" src="./assets/currencies/monety_2.png" alt="" data-fallback-text="PUCHARY" />
+                    <span>ALEJA</span>
+                  </div>
+                </button>
+              </div>
 
               <div class="showcase-stage">
                 <div class="avatar-wrapper">
@@ -174,6 +208,22 @@
                       data-fallback-text="PLATOYA"
                     />
                     <div class="pet-fallback asset-fallback">PLATOYA</div>
+                  </div>
+                  <div class="pet-rank-widget" id="lobby-pet-rank" hidden>
+                    <img
+                      class="pet-rank-emblem asset-image"
+                      id="lobby-pet-rank-image"
+                      src=""
+                      alt=""
+                      data-fallback-text=""
+                    />
+                    <div class="pet-rank-track" id="lobby-pet-rank-track">
+                      <span class="pet-rank-fill" id="lobby-pet-rank-fill"></span>
+                      <span class="pet-rank-value">
+                        <img class="pet-rank-trophy asset-image" src="./assets/currencies/monety_2.png" alt="" />
+                        <span id="lobby-pet-rank-value">0</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -208,17 +258,36 @@
                 </div>
               </div>
 
-              <button class="pixel-button lobby-nav-button right-button" data-view="inventory">
-                SZAFA
-              </button>
+              <div class="lobby-right-controls">
+                <div class="lobby-mini-actions">
+                  <button class="lobby-action-button lobby-mini-button lobby-nav-button" id="lobby-friends-button" data-view="friends" type="button" aria-label="Znajomi">
+                    <span>ZNAJOMI</span>
+                  </button>
+                  <button
+                    class="lobby-action-button lobby-mini-button lobby-profile-button"
+                    id="lobby-profile-button"
+                    type="button"
+                    aria-label="Edytuj profil"
+                  >
+                    <span>PROFIL</span>
+                  </button>
+                </div>
+                <button class="lobby-action-button lobby-wardrobe-button lobby-nav-button" data-view="inventory" type="button">
+                  <span>SZAFA</span>
+                </button>
+              </div>
 
-              <button class="pixel-button lobby-nav-button top-button" data-view="trophies">
-                ALEJA PUCHARÓW
-              </button>
+              <div class="lobby-play-zone">
+                <div class="lobby-streak-badge" id="lobby-streak-badge" hidden aria-label="Passa">
+                  <span class="streak-fire-glow" aria-hidden="true"></span>
+                  <img class="streak-fire-image asset-image" src="./ogien.png" alt="" data-fallback-text="OGIEŃ" />
+                  <span class="streak-fire-count" id="lobby-streak-count">1</span>
+                </div>
+                <button class="lobby-play-button" id="lobby-play-button" type="button">
+                  <span id="lobby-play-label">GRAJ</span>
+                </button>
+              </div>
 
-              <button class="pixel-button lobby-nav-button bottom-secondary-button" id="lobby-book-button" data-view="book" hidden>
-                KSIĘGA
-              </button>
             </div>
           </div>
         </section>
@@ -230,7 +299,7 @@
                 <span class="store-close-glyph" aria-hidden="true">X</span>
               </button>
               <div class="store-title-banner">
-                <h2 class="store-title">SKLEP</h2>
+                <h2 class="store-title">SKLEP MAGIKÓW</h2>
               </div>
               <div class="store-balance-strip" aria-label="Saldo sklepu">
                 <div class="store-balance-chip" id="store-balance-target">
@@ -253,6 +322,12 @@
               </div>
             </div>
 
+            <div class="store-offer-tabs" aria-label="Rodzaj ofert sklepu">
+              <button class="store-offer-tab active" data-store-offer-tab="magic" type="button">MAGICZNE OFERTY</button>
+              <button class="store-offer-tab" data-store-offer-tab="high-tower" type="button">OFERTY Z WYSOKIEJ WIEŻY</button>
+              <button class="store-offer-tab" data-store-offer-tab="pirate" type="button">PIRACKIE OFERTY</button>
+            </div>
+
             <div class="store-grid-wrap" id="store-grid-wrap">
               <div class="store-grid-track">
                 <div class="card-grid" id="store-grid"></div>
@@ -261,55 +336,84 @@
           </div>
         </section>
 
+        <section class="screen-view" id="rarity-view" aria-hidden="true">
+          <div class="panel section-panel rarity-panel">
+            <button class="store-close-button rarity-close-button" data-view="lobby" type="button" aria-label="Wróć">
+              <span class="store-close-glyph" aria-hidden="true">X</span>
+            </button>
+            <div class="portal-missions-shell" id="portal-missions-shell"></div>
+          </div>
+        </section>
+
         <section class="screen-view" id="inventory-view" aria-hidden="true">
           <div class="panel section-panel">
-            <div class="section-header">
-              <div>
-                <h2 class="section-title">Szafa</h2>
-                <p class="section-subtitle">Tutaj zakladasz postac, PlatoYasa i bron.</p>
+            <div class="section-header wardrobe-topbar">
+              <button class="pixel-button small-button wardrobe-close-button" data-view="lobby" aria-label="Wróć do lobby">X</button>
+            </div>
+
+            <div class="wardrobe-layout">
+              <aside class="wardrobe-equipped-panel" aria-label="Założone elementy">
+                <div class="wardrobe-overview" id="wardrobe-overview"></div>
+              </aside>
+
+              <div class="wardrobe-collection-panel">
+                <div class="tab-row wardrobe-tab-row">
+                  <button
+                    class="pixel-button tab-button active wardrobe-tab-button wardrobe-tab-characters"
+                    data-tab-group="inventory"
+                    data-tab="characters"
+                  >
+                    POSTACIE
+                  </button>
+                  <button class="pixel-button tab-button wardrobe-tab-button wardrobe-tab-pets" data-tab-group="inventory" data-tab="pets">
+                    PLATOYE
+                  </button>
+                </div>
+                <div class="wardrobe-world-filter-row" aria-label="Świat w szafie">
+                  <button class="wardrobe-world-filter wardrobe-world-filter-magicians active" data-tab-group="inventory-world" data-tab="magicians" type="button">ŚWIAT MAGIKÓW</button>
+                  <button class="wardrobe-world-filter wardrobe-world-filter-winter" data-tab-group="inventory-world" data-tab="winter" type="button">ŚWIAT ZIMOWY</button>
+                  <button class="wardrobe-world-filter wardrobe-world-filter-ranking" data-tab-group="inventory-world" data-tab="ranking" type="button">RANKINGOWE</button>
+                </div>
+
+                <div class="card-grid" id="inventory-grid"></div>
               </div>
-              <button class="pixel-button small-button" data-view="lobby">WROC</button>
             </div>
-
-            <div class="wardrobe-overview" id="wardrobe-overview"></div>
-
-            <div class="tab-row">
-              <button
-                class="pixel-button tab-button active"
-                data-tab-group="inventory"
-                data-tab="characters"
-              >
-                Postacie
-              </button>
-              <button class="pixel-button tab-button" data-tab-group="inventory" data-tab="pets">
-                PlatoYas
-              </button>
-              <button class="pixel-button tab-button" data-tab-group="inventory" data-tab="weapons">
-                Bronie
-              </button>
-            </div>
-
-            <div class="card-grid" id="inventory-grid"></div>
           </div>
         </section>
 
         <section class="screen-view" id="friends-view" aria-hidden="true">
           <div class="panel section-panel">
-            <div class="section-header">
-              <div>
-                <h2 class="section-title">Znajomi</h2>
-                <p class="section-subtitle">Tutaj zobaczysz znajomych, sugestie i zaproszenia.</p>
+            <div class="section-header friends-section-header">
+              <div class="friends-header-actions">
+                <div class="friends-icon-tools">
+                  <button class="friends-id-tip-button" id="friends-id-tip-button" type="button" aria-label="Pokaż moje ID">
+                    <img class="friends-id-tip-icon asset-image" src="./zarowka.png" alt="" data-fallback-text="ID" />
+                    <div class="asset-fallback">ID</div>
+                  </button>
+                  <button class="friends-add-id-button" id="friends-add-id-button" type="button" aria-label="Zaproś po ID">
+                    <img class="friends-add-id-icon asset-image" src="./plusik.png" alt="" data-fallback-text="+" />
+                    <div class="asset-fallback">+</div>
+                  </button>
+                  <div class="friends-add-id-tooltip" id="friends-add-id-tooltip" hidden>
+                    <p class="friends-add-id-title">ZAPROŚ PRZY UŻYCIU ID GRACZA</p>
+                    <input class="friends-add-id-input" id="friends-add-id-input" type="text" maxlength="5" inputmode="text" autocomplete="off" />
+                    <p class="friends-add-id-status" id="friends-add-id-status"></p>
+                  </div>
+                </div>
+                <button class="pixel-button small-button friends-close-button" data-view="lobby" type="button" aria-label="Zamknij">X</button>
+                <div class="friends-id-tooltip" id="friends-id-tooltip" hidden>
+                  TWOJE ID: <span id="friends-id-tooltip-value">-</span>
+                </div>
               </div>
-              <button class="pixel-button small-button" data-view="lobby">WROC</button>
+            </div>
+
+            <div class="tab-row friends-tab-row">
+              <button class="pixel-button tab-button active friends-tab-button friends-tab-main" data-tab-group="friends" data-tab="friends"><span>Znajomi</span></button>
+              <button class="pixel-button tab-button friends-tab-button friends-tab-suggested" data-tab-group="friends" data-tab="suggested"><span>PROPONOWANI GRACZE</span></button>
+              <button class="pixel-button tab-button friends-tab-button friends-tab-invites" data-tab-group="friends" data-tab="invites"><span>Zaproszenia</span></button>
             </div>
 
             <div class="friends-toolbar">
-              <div class="friends-self-id-card">
-                <p class="friends-toolbar-label">Moje ID</p>
-                <p class="friends-self-id-value" id="friends-self-id">-</p>
-                <button class="pixel-button small-button" id="friends-copy-id-button" type="button">KOPIUJ</button>
-              </div>
-
               <div class="friends-invite-form">
                 <label class="settings-field friends-invite-field" for="friends-invite-id-input">
                   <span class="settings-field-label">Zaproś po ID</span>
@@ -321,27 +425,7 @@
               </div>
             </div>
 
-            <div class="tab-row">
-              <button class="pixel-button tab-button active" data-tab-group="friends" data-tab="friends">Znajomi</button>
-              <button class="pixel-button tab-button" data-tab-group="friends" data-tab="suggested">Sugerowani Gracze</button>
-              <button class="pixel-button tab-button" data-tab-group="friends" data-tab="invites">Zaproszenia</button>
-            </div>
-
             <div class="friends-content" id="friends-content"></div>
-          </div>
-        </section>
-
-        <section class="screen-view" id="book-view" aria-hidden="true">
-          <div class="panel section-panel">
-            <div class="section-header">
-              <div>
-                <h2 class="section-title">Księga</h2>
-                <p class="section-subtitle">Tutaj odblokujesz zwierzęta ze Świata Dżungli i sprawdzisz postęp Księgi oraz misji.</p>
-              </div>
-              <button class="pixel-button small-button" data-view="lobby">WROC</button>
-            </div>
-
-            <div class="book-content" id="book-content"></div>
           </div>
         </section>
 
@@ -352,16 +436,23 @@
                 <button class="pixel-button small-button game-pause-button" id="game-back-button" type="button">PAUZA</button>
                 <div class="wave-banner" id="wave-banner" hidden>
                   <div class="wave-banner-box">
-                    <p class="wave-banner-title" id="wave-banner-title">FALA 1</p>
+                    <div class="wave-banner-character-frame" id="wave-banner-character-frame" hidden></div>
+                    <div class="wave-banner-title-frame">
+                      <p class="wave-banner-title" id="wave-banner-title">DESZCZ MINI - ROBOTÓW!</p>
+                    </div>
                     <p class="wave-banner-label" id="wave-banner-label">Start za</p>
-                    <p class="wave-banner-countdown" id="wave-banner-countdown">3</p>
+                    <p class="wave-banner-countdown" id="wave-banner-countdown">
+                      <img class="wave-banner-countdown-image asset-image" id="wave-banner-countdown-image" src="./3.png" alt="3" data-fallback-text="3" hidden />
+                      <span id="wave-banner-countdown-text">3</span>
+                    </p>
                     <div class="wave-banner-players" id="wave-banner-players" hidden></div>
                   </div>
                 </div>
-                <div class="jungle-fields-layer" id="jungle-fields-layer"></div>
                 <div class="water-fields-layer" id="water-fields-layer"></div>
+                <div class="tree-base-layer" id="tree-base-layer"></div>
+                <div class="tower-layer" id="tower-layer"></div>
                 <div class="entity player-entity" id="player-entity">
-                  <p class="entity-health player-health" id="player-health-label"><span class="health-label-text">3000</span></p>
+                  <p class="entity-health player-health" id="player-health-label"><span class="health-label-text">1000</span></p>
                   <div class="player-visual">
                     <div class="player-shield" id="player-shield" hidden></div>
                     <div class="player-sprite-frame">
@@ -382,6 +473,9 @@
                   <div class="pet-cooldown-bar" id="pet-cooldown-bar" hidden>
                     <div class="pet-cooldown-fill" id="pet-cooldown-fill"></div>
                   </div>
+                  <p class="pet-health" id="pet-health" hidden>
+                    <span class="health-label-text" id="pet-health-text">500</span>
+                  </p>
                   <div class="pet-sprite-frame">
                     <img
                       id="game-pet-image"
@@ -400,7 +494,9 @@
                 <div class="pickups-layer" id="pickups-layer"></div>
                 <div class="projectiles-layer" id="projectiles-layer"></div>
                 <div class="robots-layer" id="robots-layer"></div>
+                <div class="tree-canopy-layer" id="tree-canopy-layer"></div>
                 <div class="effects-layer" id="effects-layer"></div>
+                <div class="tower-hud-layer" id="tower-hud-layer"></div>
                 <div class="game-tutorial-overlay" id="game-tutorial-overlay" hidden>
                   <div class="game-tutorial-spotlight" id="game-tutorial-spotlight" aria-hidden="true"></div>
                   <p class="game-tutorial-message" id="game-tutorial-message">
@@ -454,7 +550,18 @@
                         <p class="game-result-stat-value" id="game-result-robots">0</p>
                       </article>
 
-                      <article class="game-result-stat-card">
+                      <article class="game-result-stat-card game-result-stat-card-trophies">
+                        <div class="game-result-streak" id="game-result-streak" hidden>
+                          <div class="lobby-streak-badge result-streak-badge" aria-label="Passa">
+                            <span class="streak-fire-glow" aria-hidden="true"></span>
+                            <img class="streak-fire-image asset-image" src="./ogien.png" alt="" data-fallback-text="OGIEŃ" />
+                            <span class="streak-fire-count" id="game-result-streak-count">1</span>
+                          </div>
+                          <div class="game-result-streak-bonus">
+                            <span id="game-result-streak-bonus">+0</span>
+                            <img class="game-result-streak-trophy asset-image" src="./assets/currencies/monety_2.png" alt="" />
+                          </div>
+                        </div>
                         <p class="game-result-stat-label">Puchary</p>
                         <p class="game-result-stat-value" id="game-result-trophies">0</p>
                       </article>
@@ -481,7 +588,8 @@
             <div class="panel world-header-panel" id="world-header-panel" data-world-theme="alley">
               <button class="pixel-button small-button trophy-road-back-button" data-view="lobby">WROC</button>
               <div class="trophy-road-title-badge" id="trophy-road-title-badge" data-world-theme="alley" aria-label="Aleja Pucharów">
-                <span class="trophy-road-title-badge-text">ALEJA PUCHARÓW</span>
+                <span class="trophy-road-title-badge-text">ALEJA</span>
+                <span class="trophy-road-title-badge-subtext" id="trophy-road-title-badge-subtext" hidden>SUPER</span>
               </div>
               <div class="world-header-actions" id="world-header-actions" hidden>
                 <button class="world-header-machine-button" id="world-header-machine-button" type="button" hidden aria-label="Automat PlatoYI">
@@ -508,47 +616,140 @@
             <div class="trophy-road-grid" id="trophy-grid"></div>
           </div>
         </section>
+
+        <section class="screen-view" id="ranking-view" aria-hidden="true">
+          <div class="ranking-alley-panel">
+            <button class="ranking-alley-close" id="ranking-alley-close" type="button" aria-label="Wróć do Alei">X</button>
+            <div class="ranking-alley-header">
+              <div class="ranking-alley-title-frame">
+                <span>ALEJA RANKINGOWA</span>
+              </div>
+              <div class="ranking-alley-points">
+                <img class="ranking-alley-points-image asset-image" src="./punktyrankingu.png" alt="" data-fallback-text="PR" />
+                <span id="ranking-alley-points-value">0</span>
+              </div>
+            </div>
+            <div class="ranking-alley-grid" id="ranking-alley-grid"></div>
+          </div>
+        </section>
+
+        <section class="screen-view" id="tower-challenge-view" aria-hidden="true">
+          <img
+            class="high-tower-background-tower asset-image"
+            src="./high-tower-stone-tower-cropped.png"
+            alt=""
+            data-fallback-text="WIEŻA"
+            aria-hidden="true"
+          />
+          <div class="high-tower-panel">
+            <button class="ranking-alley-close high-tower-close" data-view="lobby" type="button" aria-label="Wróć do lobby">X</button>
+            <header class="high-tower-header">
+              <div class="ranking-alley-title-frame high-tower-title-frame">
+                <span>WYZWANIE WYSOKIEJ WIEŻY</span>
+              </div>
+              <div class="high-tower-limited-frame">
+                <span>WYZWANIE LIMITOWANE</span>
+                <strong>POZOSTAŁO: <em id="high-tower-countdown">--</em></strong>
+              </div>
+              <div class="high-tower-owned-counter" aria-live="polite">
+                <img class="high-tower-owned-counter-icon asset-image" src="./haczyk.png" alt="" data-fallback-text="OK" />
+                <span id="high-tower-owned-counter">0/5</span>
+              </div>
+              <div class="high-tower-sparkle-counter" aria-live="polite">
+                <img class="high-tower-sparkle-counter-icon asset-image" src="./blyskotki.png" alt="" data-fallback-text="B" />
+                <span id="high-tower-sparkle-counter">0</span>
+              </div>
+            </header>
+            <div class="high-tower-content">
+              <div class="high-tower-left-column">
+                <div class="high-tower-rewards" id="high-tower-rewards"></div>
+                <div class="high-tower-flaro-panel" id="high-tower-flaro-panel"></div>
+              </div>
+              <aside
+                class="high-tower-chest-card"
+                data-open-high-tower-chest
+                role="button"
+                tabindex="0"
+                aria-label="Otwórz skrzynię Wysokiej Wieży"
+              >
+                <div class="high-tower-chest-bubble">
+                  Otwieraj skrzynię, i odblokuj wszystkie limitowane nagrody!
+                </div>
+                <img class="high-tower-chest-image asset-image" src="./skrzynia.png" alt="Skrzynia wyzwania" data-fallback-text="SKRZYNIA" />
+                <div class="high-tower-chest-counter" id="high-tower-chest-counter" aria-live="polite"></div>
+                <div class="asset-fallback">SKRZYNIA</div>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen-view" id="pet-ranks-view" aria-hidden="true">
+          <div class="pet-mini-alley-panel">
+            <button class="ranking-alley-close pet-mini-alley-close" data-view="lobby" type="button" aria-label="Wróć do lobby">X</button>
+            <div class="pet-mini-alley-shell" id="pet-mini-alley-shell"></div>
+          </div>
+        </section>
       </section>
     </main>
 
     <div class="first-game-guide" id="first-game-guide" hidden>
-      <p class="first-game-guide-message">ROZEGRAJ SWOJĄ PIERWSZĄ GRĘ!</p>
-    </div>
-
-    <div class="book-guide-prompt" id="book-guide-prompt" hidden>
-      <p class="book-guide-prompt-message">ODKRYJ NOWĄ KSIĘGĘ DŻUNGLI!</p>
-    </div>
-
-    <div class="super-alley-backdrop book-guide-backdrop" id="book-guide-backdrop" hidden>
-      <div class="super-alley-scene book-guide-scene" id="book-guide-scene" data-theme="tower" role="dialog" aria-modal="true" aria-label="Przewodnik Księgi Dżungli">
-        <div class="alley-intro-lights" aria-hidden="true">
-          <span class="alley-intro-ray ray-1"></span>
-          <span class="alley-intro-ray ray-2"></span>
-          <span class="alley-intro-ray ray-3"></span>
-          <span class="alley-intro-ray ray-4"></span>
-          <span class="alley-intro-ray ray-5"></span>
-          <span class="alley-intro-ray ray-6"></span>
-        </div>
-        <div class="alley-intro-glow" aria-hidden="true"></div>
-
-        <div class="super-alley-card book-guide-card" id="book-guide-card">
-          <div class="item-art alley-intro-art super-alley-art" id="book-guide-art-frame">
-            <img
-              id="book-guide-image"
-              class="modal-image asset-image"
-              src="./assets/alley/księga.jpeg"
-              alt="Księga Dżungli"
-              data-fallback-text="KSIEGA"
-            />
-            <div class="asset-fallback">KSIEGA</div>
+      <div class="first-game-guide-card" id="first-game-guide-card">
+        <section class="first-game-choice-card" data-first-game-panel="choice" aria-label="Wybór konta">
+          <h3 class="first-game-guide-title">
+            <span>ZACZYNASZ CZY CHCESZ</span>
+            <span>SIĘ ZALOGOWAĆ?</span>
+          </h3>
+          <div class="first-game-choice-actions">
+            <button class="pixel-button first-game-choice-button" id="first-create-choice" type="button">
+              STWÓRZ KONTO
+            </button>
+            <button class="pixel-button first-game-choice-button" id="first-login-choice" type="button">
+              ZALOGUJ SIĘ
+            </button>
           </div>
-          <p class="alley-intro-title super-alley-title" id="book-guide-title">Księga Dżungli</p>
-          <p class="super-alley-copy book-guide-copy" id="book-guide-copy">Zbieraj zwierzęta, aby odblokować specjalną nagrodę.</p>
-          <div class="super-alley-actions book-guide-actions">
-            <button class="pixel-button super-alley-option" id="book-guide-confirm-button" type="button">KONTYNUUJ</button>
+        </section>
+
+        <section class="first-game-account-card" data-first-game-panel="form" aria-label="Konto gracza">
+          <h3 class="first-game-guide-title" id="first-auth-title">STWÓRZ KONTO</h3>
+          <label class="first-game-account-field" for="first-login-name">
+            <span>Nazwa</span>
+            <input id="first-login-name" type="text" maxlength="18" autocomplete="username" placeholder="Twoja nazwa" />
+          </label>
+          <label class="first-game-account-field" for="first-login-password">
+            <span>Hasło</span>
+            <span class="first-game-password-row">
+              <input id="first-login-password" type="password" autocomplete="current-password" placeholder="Hasło" minlength="4" />
+              <button class="first-game-password-toggle" id="first-password-toggle" type="button" aria-label="Pokaż hasło">
+                <img src="./zarowka.png" alt="" />
+              </button>
+            </span>
+          </label>
+          <div class="first-game-account-actions">
+            <button class="pixel-button small-button" id="first-login-save" type="button">ROZEGRAJ PIERWSZĄ GRĘ</button>
+            <button class="pixel-button small-button" id="first-login-button" type="button">ZALOGUJ SIĘ</button>
           </div>
-        </div>
+          <button class="first-game-back-button" id="first-auth-back" type="button">WRÓĆ</button>
+          <p class="first-game-account-note" id="first-login-note"></p>
+        </section>
       </div>
+    </div>
+
+    <div class="offline-backdrop" id="offline-backdrop" data-world-theme="alley" hidden>
+      <div class="offline-panel" id="offline-panel" data-world-theme="alley" role="dialog" aria-modal="true" aria-label="Brak internetu">
+        <div class="settings-title-frame offline-title-frame" aria-hidden="true">
+          <p class="settings-title-text offline-title-text">BRAK INTERNETU</p>
+        </div>
+        <p class="offline-copy">
+          Aby grać w Pixel PlatoYA i móc korzystać z wszystkich funkcji, wymagane jest połączenie z internetem
+        </p>
+        <button class="settings-logout-button offline-refresh-button" id="offline-refresh-button" type="button">
+          <span>ODŚWIEŻ</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="trophy-road-guide" id="trophy-road-guide" hidden>
+      <p class="trophy-road-guide-message">CZAS SPRAWDZIĆ ALEJĘ NAGRÓD!</p>
     </div>
 
     <div class="alley-intro-backdrop" id="alley-intro-backdrop" hidden>
@@ -607,6 +808,9 @@
         <div class="alley-intro-glow" aria-hidden="true"></div>
 
         <div class="super-alley-card">
+          <button class="store-close-button super-alley-close-button" id="super-alley-close-button" type="button" aria-label="Zamknij aktywację">
+            <span class="store-close-glyph" aria-hidden="true">X</span>
+          </button>
           <p class="super-alley-kicker">Aleja Super</p>
           <div class="item-art alley-intro-art super-alley-art">
             <img
@@ -617,9 +821,33 @@
               data-fallback-text="SUPER"
             />
             <div class="asset-fallback">SUPER</div>
+            <div class="super-alley-reward-preview coin" aria-hidden="true">
+              <img
+                id="super-alley-preview-coin"
+                class="super-alley-reward-preview-image asset-image"
+                src="./assets/currencies/wymiatanie.png"
+                alt=""
+              />
+            </div>
+            <div class="super-alley-reward-preview diamond" aria-hidden="true">
+              <img
+                id="super-alley-preview-diamond"
+                class="super-alley-reward-preview-image asset-image"
+                src="./assets/currencies/wypaddanie.png"
+                alt=""
+              />
+            </div>
+            <div class="super-alley-reward-preview key" id="super-alley-preview-key-wrap" aria-hidden="true">
+              <img
+                id="super-alley-preview-key"
+                class="super-alley-reward-preview-image asset-image"
+                src="./klucz.magikow.png"
+                alt=""
+              />
+            </div>
           </div>
           <p class="alley-intro-title super-alley-title" id="super-alley-title">Aktywuj Aleję Super</p>
-          <p class="super-alley-copy" id="super-alley-copy">
+          <p class="super-alley-copy" id="super-alley-copy" hidden>
             Odblokuj specjalne nagrody premium i odbieraj je z różowym błyskiem.
           </p>
           <div class="super-alley-actions" id="super-alley-actions">
@@ -630,6 +858,50 @@
               </span>
             </button>
             <button class="pixel-button super-alley-option" id="super-alley-cash-button">19,99zł</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="super-alley-backdrop ranking-premium-backdrop" id="ranking-premium-backdrop" hidden>
+      <div class="super-alley-scene ranking-premium-scene" id="ranking-premium-scene" role="dialog" aria-modal="true" aria-label="Aktywacja Rankingowej Premium">
+        <div class="alley-intro-lights" aria-hidden="true">
+          <span class="alley-intro-ray ray-1"></span>
+          <span class="alley-intro-ray ray-2"></span>
+          <span class="alley-intro-ray ray-3"></span>
+          <span class="alley-intro-ray ray-4"></span>
+          <span class="alley-intro-ray ray-5"></span>
+          <span class="alley-intro-ray ray-6"></span>
+        </div>
+        <div class="alley-intro-glow" aria-hidden="true"></div>
+
+        <div class="super-alley-card ranking-premium-card">
+          <button class="store-close-button super-alley-close-button" id="ranking-premium-close-button" type="button" aria-label="Zamknij aktywację">
+            <span class="store-close-glyph" aria-hidden="true">X</span>
+          </button>
+          <p class="super-alley-kicker ranking-premium-kicker">Rankingowa Premium</p>
+          <div class="item-art alley-intro-art super-alley-art ranking-premium-art">
+            <img
+              id="ranking-premium-image"
+              class="modal-image asset-image"
+              src="./bilett.png"
+              alt="Rankingowa Premium"
+              data-fallback-text="BILET"
+            />
+            <div class="asset-fallback">BILET</div>
+          </div>
+          <p class="alley-intro-title super-alley-title ranking-premium-title" id="ranking-premium-title">Odblokuj Rankingową Premium</p>
+          <p class="super-alley-copy ranking-premium-copy" id="ranking-premium-copy">
+            Odblokuj wszystkie nagrody premium rankingu.
+          </p>
+          <div class="super-alley-actions ranking-premium-actions-modal" id="ranking-premium-actions">
+            <button class="pixel-button super-alley-option ranking-premium-option" id="ranking-premium-diamonds-button" type="button">
+              <span class="price-inline" data-currency="diamonds">
+                <span class="price-amount">249 x</span>
+                <img class="price-icon" src="./assets/currencies/diamenty_.png" alt="Diamenty" />
+              </span>
+            </button>
+            <button class="pixel-button super-alley-option ranking-premium-option" id="ranking-premium-cash-button" type="button">33,99zł</button>
           </div>
         </div>
       </div>
@@ -683,7 +955,10 @@
         <div class="alley-intro-glow" aria-hidden="true"></div>
 
         <div class="super-alley-card store-character-purchase-card">
-          <p class="super-alley-kicker" id="store-character-purchase-kicker">Dzisiejsza postac sklepu</p>
+          <button class="store-close-button store-character-purchase-close" id="store-character-purchase-close-button" type="button" aria-label="Zamknij ofertę">
+            <span class="store-close-glyph" aria-hidden="true">X</span>
+          </button>
+          <p class="super-alley-kicker" id="store-character-purchase-kicker">DZIENNA OFERTA</p>
           <div class="item-art alley-intro-art super-alley-art">
             <img
               id="store-character-purchase-image"
@@ -768,142 +1043,251 @@
 
     <div class="settings-backdrop" id="settings-backdrop" hidden>
       <div class="panel settings-panel" id="settings-panel" role="dialog" aria-modal="true" aria-label="Ustawienia">
-        <div class="settings-panel-header">
-          <div class="settings-heading">
-            <p class="settings-kicker">Pixel PlatoYA</p>
-            <h3 class="modal-title">Ustawienia</h3>
-          </div>
-          <button
-            class="circle-icon-button settings-close-button"
-            id="settings-close-button"
-            type="button"
-            aria-label="Zamknij ustawienia"
-          >
-            X
-          </button>
+        <button
+          class="settings-close-button"
+          id="settings-close-button"
+          type="button"
+          aria-label="Zamknij ustawienia"
+        >
+          X
+        </button>
+
+        <div class="settings-title-frame" aria-hidden="true">
+          <p class="settings-title-text">USTAWIENIA</p>
         </div>
 
-        <p class="settings-copy">Tutaj wlaczysz tryb telefonowy, ustawisz haslo i zalogujesz sie na inne konto.</p>
-
-        <div class="settings-option">
-          <div class="settings-option-copy">
-            <p class="settings-option-title">Tryb telefonowy</p>
-            <p class="settings-option-text" id="settings-phone-status">
-              Wylaczony. Sterowanie zostaje na strzalkach i spacji.
-            </p>
-          </div>
-          <button class="pixel-button small-button settings-toggle-button" id="phone-mode-toggle" type="button">
-            WLACZ
-          </button>
-        </div>
-
-        <div class="settings-option settings-option-stack">
-          <div class="settings-option-copy">
-            <p class="settings-option-title">Konto</p>
-            <p class="settings-option-text" id="settings-account-status">
-              Profil lokalny. Ustaw haslo, aby logowac sie na tym koncie na innych urzadzeniach.
-            </p>
-          </div>
-        </div>
-
-        <div class="settings-auth-grid">
-          <label class="settings-field" for="settings-new-password">
-            <span class="settings-field-label">Ustaw hasło do tego konta</span>
-            <input class="settings-input" id="settings-new-password" type="password" maxlength="32" placeholder="Wpisz hasło" />
+        <div class="settings-volume-stack">
+          <label class="settings-volume-control" for="settings-music-range">
+            <span class="settings-volume-label">MUZYKA</span>
+            <span class="settings-volume-shell">
+              <input class="settings-volume-range" id="settings-music-range" type="range" min="1" max="100" step="1" value="100" />
+            </span>
+            <span class="settings-volume-value" id="settings-music-value">100%</span>
           </label>
-          <button class="pixel-button small-button settings-action-button" id="settings-set-password-button" type="button">
-            USTAW HASŁO
-          </button>
+
+          <label class="settings-volume-control" for="settings-sound-range">
+            <span class="settings-volume-label">DŹWIĘKI</span>
+            <span class="settings-volume-shell">
+              <input class="settings-volume-range" id="settings-sound-range" type="range" min="1" max="100" step="1" value="100" />
+            </span>
+            <span class="settings-volume-value" id="settings-sound-value">100%</span>
+          </label>
         </div>
 
-        <div class="settings-auth-grid">
-          <label class="settings-field" for="settings-login-nickname">
-            <span class="settings-field-label">Nick istniejącego konta</span>
-            <input class="settings-input" id="settings-login-nickname" type="text" maxlength="18" placeholder="Gracz1234" />
-          </label>
-          <label class="settings-field" for="settings-login-password">
-            <span class="settings-field-label">Hasło</span>
-            <input class="settings-input" id="settings-login-password" type="password" maxlength="32" placeholder="Hasło" />
-          </label>
-          <button class="pixel-button small-button settings-action-button" id="settings-login-button" type="button">
-            ZALOGUJ
-          </button>
-        </div>
-
-        <button class="pixel-button settings-reset-button" id="account-reset-button" data-account-reset type="button">
-          RESET KONTA
+        <button class="settings-logout-button" id="settings-logout-button" type="button">
+          <span>WYLOGUJ SIĘ</span>
         </button>
       </div>
     </div>
 
     <div class="settings-backdrop" id="profile-backdrop" hidden>
-      <div class="panel profile-panel" id="profile-panel" role="dialog" aria-modal="true" aria-label="Profil gracza">
-        <div class="settings-panel-header">
-          <div class="settings-heading">
-            <p class="settings-kicker">Pixel PlatoYA</p>
-            <h3 class="modal-title">Profil</h3>
-          </div>
-          <button
-            class="circle-icon-button settings-close-button"
-            id="profile-close-button"
-            type="button"
-            aria-label="Zamknij profil"
-          >
-            X
-          </button>
+      <div class="profile-panel" id="profile-panel" role="dialog" aria-modal="true" aria-label="Profil gracza">
+        <button
+          class="settings-close-button profile-close-button"
+          id="profile-close-button"
+          type="button"
+          aria-label="Zamknij profil"
+        >
+          X
+        </button>
+
+        <div class="settings-title-frame profile-title-frame" aria-hidden="true">
+          <p class="settings-title-text">PROFIL</p>
         </div>
 
         <div class="profile-tab-panel profile-tab-panel-single" id="profile-tab-panel-me">
           <div class="profile-main-card profile-main-card-simple" id="profile-main-card" data-world-theme="alley">
-            <div class="profile-hero-column profile-hero-column-simple">
+            <div class="profile-layout">
               <button
-                class="avatar-frame profile-preview-frame profile-hero-frame profile-avatar-action"
+                class="profile-avatar-action"
                 id="profile-character-button"
                 type="button"
-                aria-label="Zmień ulubioną postać"
+                aria-label="Zmień zdjęcie profilowe"
               >
-                <img
-                  id="profile-favorite-character-image"
-                  class="avatar-image asset-image"
-                  src="./assets/characters/postac_1.png"
-                  alt="Ulubiona postać"
-                  data-fallback-text="POSTAĆ"
-                />
-                <div class="avatar-fallback asset-fallback">POSTAĆ</div>
+                <span class="avatar-frame profile-preview-frame profile-hero-frame" id="profile-favorite-character-frame">
+                  <img
+                    id="profile-favorite-character-image"
+                    class="avatar-image asset-image"
+                    src="./assets/characters/postac_1.png"
+                    alt="Zdjęcie profilowe"
+                    data-fallback-text="PROFIL"
+                  />
+                  <span class="avatar-fallback asset-fallback">PROFIL</span>
+                </span>
+                <span class="profile-edit-image-chip" aria-hidden="true">
+                  <img class="profile-pencil-icon asset-image" src="./ołówek.png" alt="" data-fallback-text="EDYTUJ" />
+                  <span class="asset-fallback">✎</span>
+                </span>
               </button>
 
-              <button class="profile-name-action" id="profile-name-button" type="button" aria-label="Zmień nazwę profilu">
-                <h4 class="profile-name-heading profile-name-heading-left" id="profile-name-heading">Gracz0000</h4>
-              </button>
+              <div class="profile-info-column">
+                <button class="profile-name-action" id="profile-name-button" type="button" aria-label="Zmień nazwę profilu">
+                  <span class="profile-name-heading profile-name-heading-left" id="profile-name-heading">Gracz0000</span>
+                  <span class="profile-name-edit-chip" aria-hidden="true">
+                    <img class="profile-pencil-icon asset-image" src="./ołówek.png" alt="" data-fallback-text="EDYTUJ" />
+                    <span class="asset-fallback">✎</span>
+                  </span>
+                </button>
 
-              <button class="profile-world-bar-shell profile-world-bar-shell-action" id="profile-theme-button" type="button" aria-label="Zmień kolor profilu">
-                <div class="profile-world-bar profile-world-bar-full" id="profile-world-bar" data-world-theme="alley" aria-hidden="true"></div>
-              </button>
+                <div
+                  class="profile-world-bar-shell profile-world-bar-shell-action"
+                  id="profile-world-bar-shell"
+                  role="button"
+                  tabindex="0"
+                  aria-label="Postęp świata"
+                >
+                  <div class="profile-world-bar profile-world-bar-full" id="profile-world-bar" data-world-theme="alley">
+                    <div class="profile-world-bar-fill" id="profile-world-bar-fill"></div>
+                    <div class="profile-world-bar-content">
+                      <span class="profile-trophy-value" id="profile-stat-trophies">0</span>
+                      <img class="profile-trophy-icon profile-trophy-icon-plain" src="./assets/currencies/monety_2.png" alt="Pucharki" />
+                    </div>
+                  </div>
+                  <div class="profile-world-tip-bubble" id="profile-world-tip-bubble" hidden>
+                    <span class="profile-world-tip-text" id="profile-world-tip-text">Ten gracz znajduje się w Świecie Magików i do ukończenia go brakuje mu</span>
+                    <span class="profile-world-tip-count-row">
+                      <span id="profile-world-tip-count">0</span>
+                      <img class="profile-world-tip-icon" src="./assets/currencies/monety_2.png" alt="Puchary" />
+                    </span>
+                  </div>
+                </div>
 
-              <div class="profile-trophy-line profile-trophy-line-plain">
-                <img class="profile-trophy-icon profile-trophy-icon-plain" src="./assets/currencies/monety_2.png" alt="Pucharki" />
-                <p class="profile-trophy-value" id="profile-stat-trophies">0</p>
+                <div class="profile-theme-picker" id="profile-theme-picker"></div>
               </div>
-
-              <div class="profile-theme-picker" id="profile-theme-picker"></div>
             </div>
-          </div>
 
-          <div class="profile-edit-card" id="profile-edit-card" hidden>
-            <div class="profile-edit-top">
-              <p class="profile-edit-kicker" id="profile-edit-kicker">Profil</p>
-              <button
-                class="circle-icon-button settings-close-button"
-                id="profile-edit-close-button"
-                type="button"
-                aria-label="Zamknij edycję profilu"
-              >
-                X
-              </button>
+            <div class="profile-stats-section" aria-label="Statystyki profilu">
+              <p class="profile-stats-title">STATYSTKI</p>
+              <div class="profile-stats-grid">
+                <div class="profile-stat-box">
+                  <span class="profile-stat-label">DATA UTWORZENIA</span>
+                  <span class="profile-stat-value" id="profile-stat-created">--.--.----</span>
+                </div>
+                <div class="profile-stat-box">
+                  <span class="profile-stat-label">POSIADANE POSTACIE</span>
+                  <span class="profile-stat-value" id="profile-stat-characters-owned">0</span>
+                </div>
+                <div class="profile-stat-box">
+                  <span class="profile-stat-label">POSIADANE PLATOYE</span>
+                  <span class="profile-stat-value" id="profile-stat-pets-owned">0</span>
+                </div>
+              </div>
             </div>
-            <div class="profile-edit-panel profile-edit-panel-dynamic" id="profile-edit-panel"></div>
           </div>
         </div>
+      </div>
+
+      <div class="profile-edit-card" id="profile-edit-card" hidden>
+        <div class="profile-edit-top">
+          <p class="profile-edit-kicker" id="profile-edit-kicker">Profil</p>
+          <button
+            class="circle-icon-button settings-close-button"
+            id="profile-edit-close-button"
+            type="button"
+            aria-label="Zamknij edycję profilu"
+          >
+            X
+          </button>
+        </div>
+        <div class="profile-edit-panel profile-edit-panel-dynamic" id="profile-edit-panel"></div>
+      </div>
+    </div>
+
+    <div class="pet-detail-backdrop" id="pet-detail-backdrop" hidden>
+      <div class="pet-detail-panel" id="pet-detail-panel" data-pet-theme="magicians" role="dialog" aria-modal="true" aria-label="Szczegóły PlatoYA">
+        <button class="pet-detail-close-button" id="pet-detail-close-button" type="button" aria-label="Zamknij">X</button>
+        <div class="pet-detail-layout">
+          <section class="pet-detail-info">
+            <h3 class="pet-detail-name" id="pet-detail-name">PlatoYA</h3>
+            <p class="pet-detail-power" id="pet-detail-power">POZIOM MOCY 1</p>
+            <div class="pet-detail-rank-slot" id="pet-detail-rank-slot"></div>
+            <div class="pet-detail-description" id="pet-detail-description"></div>
+          </section>
+
+          <section class="pet-detail-showcase">
+            <div class="pet-detail-art" id="pet-detail-art">
+              <img id="pet-detail-image" class="pet-detail-image asset-image" src="" alt="PlatoYA" data-fallback-text="PLATOYA" />
+              <div class="asset-fallback">PLATOYA</div>
+            </div>
+            <button class="pixel-button pet-detail-upgrade-button" id="pet-detail-upgrade-button" type="button">ULEPSZ POSTAĆ</button>
+            <div class="pet-detail-upgrade-track" id="pet-detail-upgrade-track" hidden></div>
+            <button class="pixel-button pet-detail-equip-button" id="pet-detail-equip-button" type="button">WYBIERZ PLATOYĘ</button>
+          </section>
+
+          <section class="pet-detail-stats">
+            <p class="pet-detail-stats-title">STATYSTYKI</p>
+            <div class="pet-detail-stat-card">
+              <img class="pet-detail-stat-icon asset-image" src="./serce.png" alt="" data-fallback-text="HP" />
+              <div class="asset-fallback">HP</div>
+              <p class="pet-detail-stat-delta" id="pet-detail-health-delta" hidden></p>
+              <div class="pet-detail-stat-copy">
+                <p class="pet-detail-stat-label">PUNKTY ŻYCIA</p>
+                <p class="pet-detail-stat-value" id="pet-detail-health">-</p>
+              </div>
+            </div>
+            <div class="pet-detail-stat-card">
+              <img class="pet-detail-stat-icon asset-image" src="./atakkk.png" alt="" data-fallback-text="ATK" />
+              <div class="asset-fallback">ATK</div>
+              <p class="pet-detail-stat-delta" id="pet-detail-attack-delta" hidden></p>
+              <div class="pet-detail-stat-copy">
+                <p class="pet-detail-stat-label">ATAK</p>
+                <p class="pet-detail-stat-value" id="pet-detail-attack">-</p>
+              </div>
+            </div>
+            <div class="pet-detail-stat-card">
+              <img class="pet-detail-stat-icon asset-image" src="./odrodzenie.png" alt="" data-fallback-text="ODR" />
+              <div class="asset-fallback">ODR</div>
+              <p class="pet-detail-stat-delta" id="pet-detail-respawn-delta" hidden></p>
+              <div class="pet-detail-stat-copy">
+                <p class="pet-detail-stat-label">CZAS ODRODZENIA</p>
+                <p class="pet-detail-stat-value" id="pet-detail-respawn">-</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="pet-detail-tip" id="pet-detail-tip">
+          <button class="pet-detail-tip-button" id="pet-detail-tip-button" type="button" aria-label="Podpowiedź ulepszeń">
+            <img class="pet-detail-tip-icon asset-image" src="./zarowka.png" alt="" data-fallback-text="!" />
+            <div class="asset-fallback">!</div>
+          </button>
+          <p class="pet-detail-tip-bubble" id="pet-detail-tip-bubble" hidden>Zbieraj Monety oraz Eliksiry, aby ulepszać PlatoYE!</p>
+        </div>
+        <div class="pet-upgrade-celebration" id="pet-upgrade-celebration" hidden>
+          <div class="pet-upgrade-glow" aria-hidden="true"></div>
+          <img class="pet-upgrade-image asset-image" id="pet-upgrade-image" src="" alt="" data-fallback-text="UP" />
+          <div class="asset-fallback">UP</div>
+          <p class="pet-upgrade-title" id="pet-upgrade-title">PIES MAGIK</p>
+          <p class="pet-upgrade-level" id="pet-upgrade-level">POZIOM 2</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="character-detail-backdrop" id="character-detail-backdrop" hidden>
+      <div class="character-detail-panel" id="character-detail-panel" role="dialog" aria-modal="true" aria-label="Szczegóły postaci">
+        <button class="character-detail-close-button" id="character-detail-close-button" type="button" aria-label="Zamknij">X</button>
+        <div class="character-detail-layout">
+          <section class="character-detail-showcase">
+            <div class="character-detail-art" id="character-detail-art">
+              <img id="character-detail-image" class="character-detail-image asset-image" src="" alt="Postać" data-fallback-text="POSTAC" />
+              <div class="asset-fallback">POSTAC</div>
+            </div>
+            <h3 class="character-detail-name" id="character-detail-name">Postać</h3>
+            <p class="character-detail-description" id="character-detail-description"></p>
+            <div class="character-detail-actions">
+              <button class="pixel-button character-detail-equip-button" id="character-detail-equip-button" type="button">WYBIERZ POSTAĆ</button>
+              <button class="character-detail-hanger-button" id="character-detail-hanger-button" type="button" aria-label="Skiny postaci">
+                <img class="character-detail-hanger-icon asset-image" src="./wieszak.png" alt="" data-fallback-text="SKIN" />
+                <div class="asset-fallback">SKIN</div>
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <section class="character-skin-tray" id="character-skin-tray" hidden aria-label="Skiny postaci">
+          <button class="character-skin-tray-close" id="character-skin-tray-close" type="button" aria-label="Zamknij skiny">X</button>
+          <div class="character-skin-list" id="character-skin-list"></div>
+        </section>
       </div>
     </div>
 
@@ -991,6 +1375,7 @@
         <div class="alley-reward-burst-layer" id="alley-reward-burst-layer" aria-hidden="true"></div>
 
         <div class="alley-reward-card" id="alley-reward-card">
+          <p class="alley-reward-kicker" id="alley-reward-kicker" hidden>NAGRODA</p>
           <div class="item-art alley-reward-art">
             <img
               id="alley-reward-image"
@@ -1003,6 +1388,7 @@
           </div>
           <p class="alley-reward-name" id="alley-reward-name">Nagroda</p>
           <p class="alley-reward-count" id="alley-reward-count" hidden></p>
+          <button class="pixel-button alley-reward-claim-button" id="alley-reward-claim-button" type="button" hidden>ODBIERZ</button>
         </div>
       </div>
     </div>
@@ -1050,6 +1436,16 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="pet-rank-reward-backdrop" id="pet-rank-reward-backdrop" hidden>
+      <div class="pet-rank-reward-panel" id="pet-rank-reward-panel" role="dialog" aria-modal="true" aria-label="Nagrody rangi PlatoYA">
+        <button class="pet-rank-reward-close" id="pet-rank-reward-close" type="button" aria-label="Zamknij">X</button>
+        <p class="pet-rank-reward-kicker">MINI ALEJA</p>
+        <h3 class="pet-rank-reward-title" id="pet-rank-reward-title">Rangi PlatoYA</h3>
+        <p class="pet-rank-reward-subtitle" id="pet-rank-reward-subtitle">Zbieraj puchary na tej PlatoYA i odbieraj nagrody.</p>
+        <div class="pet-rank-reward-track" id="pet-rank-reward-track"></div>
       </div>
     </div>
 
