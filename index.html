@@ -11,13 +11,20 @@
       <section class="screen loading-screen" id="loading-screen" aria-hidden="true" hidden>
         <div class="loading-stage">
           <h1 class="game-title loading-title">Pixel PlatoYA</h1>
+          <p class="game-start-loading-title" id="game-start-loading-title">PIXEL PLATOYA</p>
 
           <div class="loading-panel">
             <p class="loading-fill-text" id="loading-fill-text">Ladowanie... 0%</p>
+            <p class="game-start-loading-status" id="game-start-loading-status">Łączenie z chmurą<span class="loading-status-dots"><span></span><span></span><span></span></span></p>
             <div class="loading-progress-shell" aria-hidden="true">
               <div class="loading-progress-fill" id="loading-progress-fill"></div>
             </div>
             <p class="progress-value" id="progress-value">0%</p>
+          </div>
+
+          <div class="game-start-loading-tip" id="game-start-loading-tip" aria-live="polite">
+            <img class="game-start-loading-tip-icon asset-image" src="./zarowka.png" alt="" aria-hidden="true" data-fallback-text="!" />
+            <p class="game-start-loading-tip-text" id="game-start-loading-tip-text">Wskazówka: zbieraj puchary i odblokowuj nagrody z alei!</p>
           </div>
         </div>
       </section>
@@ -348,6 +355,25 @@
         <section class="screen-view" id="inventory-view" aria-hidden="true">
           <div class="panel section-panel">
             <div class="section-header wardrobe-topbar">
+              <h2 class="wardrobe-title">SZAFA</h2>
+              <div class="wardrobe-top-tabs" aria-label="Zakładki szafy">
+                <button
+                  class="pixel-button tab-button active wardrobe-tab-button wardrobe-tab-characters"
+                  data-tab-group="inventory"
+                  data-tab="characters"
+                >
+                  POSTACIE
+                </button>
+                <button class="pixel-button tab-button wardrobe-tab-button wardrobe-tab-pets" data-tab-group="inventory" data-tab="pets">
+                  PLATOYE
+                </button>
+                <button class="pixel-button tab-button wardrobe-tab-button wardrobe-tab-loading-screens" data-tab-group="inventory" data-tab="loadingScreens">
+                  EKRANY
+                </button>
+                <button class="pixel-button tab-button wardrobe-tab-button wardrobe-tab-music" data-tab-group="inventory" data-tab="musicTracks">
+                  MUZYKA
+                </button>
+              </div>
               <button class="pixel-button small-button wardrobe-close-button" data-view="lobby" aria-label="Wróć do lobby">X</button>
             </div>
 
@@ -357,25 +383,23 @@
               </aside>
 
               <div class="wardrobe-collection-panel">
-                <div class="tab-row wardrobe-tab-row">
-                  <button
-                    class="pixel-button tab-button active wardrobe-tab-button wardrobe-tab-characters"
-                    data-tab-group="inventory"
-                    data-tab="characters"
-                  >
-                    POSTACIE
-                  </button>
-                  <button class="pixel-button tab-button wardrobe-tab-button wardrobe-tab-pets" data-tab-group="inventory" data-tab="pets">
-                    PLATOYE
-                  </button>
-                </div>
-                <div class="wardrobe-world-filter-row" aria-label="Świat w szafie">
-                  <button class="wardrobe-world-filter wardrobe-world-filter-magicians active" data-tab-group="inventory-world" data-tab="magicians" type="button">ŚWIAT MAGIKÓW</button>
-                  <button class="wardrobe-world-filter wardrobe-world-filter-winter" data-tab-group="inventory-world" data-tab="winter" type="button">ŚWIAT ZIMOWY</button>
-                  <button class="wardrobe-world-filter wardrobe-world-filter-ranking" data-tab-group="inventory-world" data-tab="ranking" type="button">RANKINGOWE</button>
+                <div class="wardrobe-tools" aria-label="Sortowanie i wyszukiwanie">
+                  <label class="wardrobe-sort-control">
+                    <span>SORTUJ</span>
+                    <select id="inventory-sort-select">
+                      <option value="default">DOMYŚLNIE</option>
+                      <option value="obtained">KOLEJNOŚĆ OTRZYMANIA</option>
+                      <option value="played">CZĘSTOTLIWOŚĆ GRY</option>
+                    </select>
+                  </label>
+                  <label class="wardrobe-search-control">
+                    <span>SZUKAJ</span>
+                    <input id="inventory-search-input" type="search" autocomplete="off" placeholder="Nazwa lub świat" />
+                  </label>
                 </div>
 
                 <div class="card-grid" id="inventory-grid"></div>
+                <div class="wardrobe-pagination" id="inventory-pagination" aria-label="Strony szafy"></div>
               </div>
             </div>
           </div>
@@ -588,6 +612,7 @@
             <div class="panel world-header-panel" id="world-header-panel" data-world-theme="alley">
               <button class="pixel-button small-button trophy-road-back-button" data-view="lobby">WROC</button>
               <div class="trophy-road-title-badge" id="trophy-road-title-badge" data-world-theme="alley" aria-label="Aleja Pucharów">
+                <span class="trophy-road-title-shine" aria-hidden="true"></span>
                 <span class="trophy-road-title-badge-text">ALEJA</span>
                 <span class="trophy-road-title-badge-subtext" id="trophy-road-title-badge-subtext" hidden>SUPER</span>
               </div>
@@ -1272,6 +1297,7 @@
               <img id="character-detail-image" class="character-detail-image asset-image" src="" alt="Postać" data-fallback-text="POSTAC" />
               <div class="asset-fallback">POSTAC</div>
             </div>
+            <div class="character-detail-skin-switcher" id="character-detail-skin-switcher" aria-label="Przebrania postaci"></div>
             <h3 class="character-detail-name" id="character-detail-name">Postać</h3>
             <p class="character-detail-description" id="character-detail-description"></p>
             <div class="character-detail-actions">

@@ -281,6 +281,307 @@ body.game-view-active #game-view.active {
   display: grid;
 }
 
+.loading-screen.game-start-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  min-height: 100dvh;
+  height: 100dvh;
+  background: #f8faff var(--game-start-loading-image, url("./assets/backgrounds/ładowanie_1.png")) center / cover no-repeat;
+}
+
+.loading-screen.game-start-loading .loading-title {
+  display: none;
+}
+
+.loading-screen.game-start-loading .loading-panel {
+  top: auto;
+  bottom: clamp(86px, 16vh, 150px);
+  width: min(82vw, 500px);
+  padding: 0;
+  gap: 11px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.loading-screen.game-start-loading .loading-fill-text {
+  display: none;
+}
+
+.game-start-loading-title,
+.game-start-loading-status,
+.game-start-loading-tip {
+  display: none;
+}
+
+.loading-screen.game-start-loading .game-start-loading-title {
+  position: absolute;
+  left: 50%;
+  top: clamp(20px, 7vh, 74px);
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  min-width: min(86vw, 430px);
+  margin: 0;
+  padding: 12px 26px;
+  transform: translateX(-50%) skewX(-8deg);
+  border: 4px solid #231639;
+  background: #ffd3ec;
+  box-shadow:
+    inset 0 -5px 0 rgba(229, 113, 175, 0.36),
+    7px 7px 0 rgba(17, 17, 17, 0.62),
+    0 0 22px rgba(255, 150, 224, 0.48);
+  color: #111111;
+  font-family: "Press Start 2P", monospace;
+  font-size: clamp(0.86rem, 2.4vw, 1.46rem);
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.loading-screen.game-start-loading .game-start-loading-title::after {
+  content: "";
+  position: absolute;
+  inset: 5px -18px;
+  pointer-events: none;
+  background:
+    linear-gradient(105deg, transparent 0 38%, rgba(255, 255, 255, 0.78) 46%, transparent 55% 100%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: loading-title-shine 3.7s ease-in-out infinite;
+}
+
+.loading-screen.game-start-loading .game-start-loading-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 22px;
+  margin: 0;
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  -webkit-text-stroke: 1.15px #111111;
+  paint-order: stroke fill;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-size: clamp(0.78rem, 1.9vw, 1.08rem);
+  font-weight: 1000;
+  line-height: 1.35;
+  text-align: center;
+  text-shadow:
+    2px 2px 0 #111111,
+    0 0 14px rgba(229, 217, 255, 0.72);
+}
+
+.loading-status-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 2px;
+}
+
+.loading-status-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.82);
+  animation: loading-status-dot-pulse 0.9s ease-in-out infinite;
+}
+
+.loading-status-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.loading-status-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.loading-screen.game-start-loading .loading-progress-shell {
+  height: clamp(22px, 3.8vw, 32px);
+  border: 4px solid #1c1024;
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, #33204c 0%, #1f1433 100%);
+  box-shadow:
+    5px 5px 0 rgba(17, 17, 17, 0.5),
+    0 0 0 3px rgba(229, 217, 255, 0.48),
+    0 0 22px rgba(157, 124, 226, 0.48);
+}
+
+.loading-screen.game-start-loading .loading-progress-fill {
+  border-radius: 0;
+  background: #e5d9ff;
+  box-shadow:
+    inset 0 4px 0 rgba(255, 255, 255, 0.32),
+    inset 0 -4px 0 rgba(65, 38, 112, 0.26);
+}
+
+.loading-screen.game-start-loading .progress-value {
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  -webkit-text-stroke: 1.25px #111111;
+  paint-order: stroke fill;
+  text-shadow:
+    3px 3px 0 #1c1024,
+    0 0 14px rgba(255, 150, 231, 0.72);
+  font-size: clamp(1rem, 2.7vw, 1.42rem);
+  letter-spacing: 0.04em;
+}
+
+.loading-screen.game-start-loading .game-start-loading-tip {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(20px, 5vh, 54px);
+  z-index: 2;
+  width: min(88vw, 720px);
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.loading-screen.game-start-loading .game-start-loading-tip-icon {
+  position: relative;
+  z-index: 2;
+  width: clamp(34px, 7vw, 52px);
+  height: clamp(34px, 7vw, 52px);
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 10px rgba(255, 246, 167, 0.9))
+    drop-shadow(4px 5px 0 rgba(17, 17, 17, 0.22));
+  animation: loading-tip-bulb-idle 1.8s ease-in-out infinite;
+}
+
+.loading-screen.game-start-loading .game-start-loading-tip-text {
+  position: relative;
+  z-index: 1;
+  max-width: min(76vw, 640px);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  margin: 0 0 0 -8px;
+  padding: 10px 16px 10px 22px;
+  border: 4px solid #231639;
+  background: #e5d9ff;
+  box-shadow:
+    inset 0 -5px 0 rgba(157, 124, 226, 0.36),
+    6px 6px 0 rgba(17, 17, 17, 0.58),
+    0 0 18px rgba(157, 124, 226, 0.45);
+  color: #111111;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-size: clamp(0.68rem, 1.65vw, 0.98rem);
+  font-weight: 1000;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.loading-screen.game-start-loading .game-start-loading-tip.is-switching .game-start-loading-tip-icon {
+  animation: loading-tip-bulb-slide 1.36s cubic-bezier(0.18, 0.92, 0.2, 1.12) both;
+}
+
+.loading-screen.game-start-loading .game-start-loading-tip.is-switching .game-start-loading-tip-text {
+  animation: loading-tip-box-reveal 1.36s cubic-bezier(0.18, 0.92, 0.2, 1.12) both;
+}
+
+@keyframes loading-title-shine {
+  0%,
+  52% {
+    opacity: 0;
+    transform: translateX(-42%);
+  }
+
+  64% {
+    opacity: 0.86;
+  }
+
+  82%,
+  100% {
+    opacity: 0;
+    transform: translateX(42%);
+  }
+}
+
+@keyframes loading-status-dot-pulse {
+  0%,
+  100% {
+    opacity: 0.36;
+    transform: translateY(0) scale(0.82);
+  }
+
+  45% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.08);
+  }
+}
+
+@keyframes loading-tip-bulb-idle {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+
+  50% {
+    transform: translateY(-4px) rotate(2deg);
+  }
+}
+
+@keyframes loading-tip-bulb-slide {
+  0% {
+    opacity: 0;
+    transform: translateX(min(38vw, 305px)) scale(0.68) rotate(8deg);
+  }
+
+  18% {
+    opacity: 1;
+    transform: translateX(min(38vw, 305px)) scale(1) rotate(-4deg);
+  }
+
+  42% {
+    opacity: 1;
+    transform: translateX(min(38vw, 305px)) scale(1.05) rotate(3deg);
+  }
+
+  72% {
+    opacity: 1;
+    transform: translateX(-12px) scale(1.12) rotate(-8deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1) rotate(0);
+  }
+}
+
+@keyframes loading-tip-box-reveal {
+  0% {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    transform: translateX(-18px) scaleX(0.68);
+  }
+
+  42% {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    transform: translateX(-18px) scaleX(0.68);
+  }
+
+  76% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: translateX(4px) scaleX(1.03);
+  }
+
+  100% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: translateX(0) scaleX(1);
+  }
+}
+
 .game-launch-backdrop {
   position: fixed;
   inset: 0;
@@ -1165,6 +1466,606 @@ body.store-view-active #store-view .section-panel::-webkit-scrollbar-thumb {
 
   50% {
     transform: scale(1.08);
+  }
+}
+
+/* Wardrobe softness pass: lighter cards, no clipped art, pressable controls. */
+#inventory-view .wardrobe-topbar,
+#inventory-view .wardrobe-collection-panel {
+  background: rgba(255, 255, 255, 0.62) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.64),
+    0 12px 28px rgba(82, 91, 145, 0.13) !important;
+}
+
+#inventory-view .wardrobe-collection-panel {
+  min-height: min(72vh, 670px) !important;
+  overflow: visible !important;
+}
+
+#inventory-view .wardrobe-tab-button,
+#inventory-view .wardrobe-page-button,
+#inventory-view .wardrobe-character-open,
+#inventory-view .wardrobe-pet-open,
+#inventory-view #inventory-sort-select,
+#inventory-view #inventory-search-input {
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease !important;
+}
+
+#inventory-view .wardrobe-tab-button:active {
+  transform: translate(4px, 5px) !important;
+  box-shadow:
+    inset 0 -2px 0 rgba(17, 17, 17, 0.14),
+    1px 1px 0 rgba(17, 17, 17, 0.78) !important;
+}
+
+#inventory-view .wardrobe-page-button:active:not(:disabled) {
+  transform: translate(3px, 4px);
+  box-shadow:
+    inset 0 -2px 0 rgba(17, 17, 17, 0.14),
+    1px 1px 0 rgba(17, 17, 17, 0.78);
+}
+
+#inventory-view .wardrobe-character-open,
+#inventory-view .wardrobe-pet-open {
+  overflow: visible !important;
+}
+
+#inventory-view .wardrobe-character-open:active,
+#inventory-view .wardrobe-pet-open:active {
+  transform: translate(4px, 5px) !important;
+  box-shadow:
+    inset 0 -2px 0 rgba(17, 17, 17, 0.11),
+    1px 1px 0 rgba(17, 17, 17, 0.68) !important;
+}
+
+#inventory-view .wardrobe-paged-grid {
+  overflow: visible !important;
+  grid-auto-rows: clamp(184px, 22vh, 210px) !important;
+  align-content: start !important;
+}
+
+#inventory-view .wardrobe-character-open,
+#inventory-view .wardrobe-pet-open {
+  grid-template-rows: minmax(104px, 1fr) auto auto !important;
+  background: #ffeaf4 !important;
+}
+
+#inventory-view .wardrobe-character-tile[data-wardrobe-world="winter"] .wardrobe-character-open,
+#inventory-view .wardrobe-pet-tile[data-wardrobe-world="winter"] .wardrobe-pet-open {
+  background: #e9f8ff !important;
+}
+
+#inventory-view .wardrobe-character-tile[data-wardrobe-world="ranking"] .wardrobe-character-open,
+#inventory-view .wardrobe-pet-tile[data-wardrobe-world="ranking"] .wardrobe-pet-open {
+  background: #d7fbf8 !important;
+}
+
+#inventory-view [data-wardrobe-world="magicians"] .wardrobe-equipped-world-badge,
+#inventory-view [data-wardrobe-world="magicians"] .wardrobe-item-world-badge {
+  background: #ffe4f1 !important;
+}
+
+#inventory-view [data-wardrobe-world="winter"] .wardrobe-equipped-world-badge,
+#inventory-view [data-wardrobe-world="winter"] .wardrobe-item-world-badge {
+  background: #e2f6ff !important;
+}
+
+#inventory-view [data-wardrobe-world="ranking"] .wardrobe-equipped-world-badge,
+#inventory-view [data-wardrobe-world="ranking"] .wardrobe-item-world-badge {
+  background: #c9f5f2 !important;
+}
+
+#inventory-view .wardrobe-character-art,
+#inventory-view .wardrobe-pet-art {
+  min-height: 106px !important;
+  overflow: visible !important;
+}
+
+#inventory-view .wardrobe-character-art .item-image,
+#inventory-view .wardrobe-character-art .asset-video,
+#inventory-view .wardrobe-pet-art .item-image,
+#inventory-view .wardrobe-pet-art .asset-video {
+  width: 88% !important;
+  height: 88% !important;
+  object-position: center center !important;
+}
+
+#inventory-view .wardrobe-equipped-card {
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  overflow: visible !important;
+}
+
+#inventory-view .wardrobe-slot-art .item-image,
+#inventory-view .wardrobe-slot-art .asset-video,
+#inventory-view .wardrobe-equipped-pets .wardrobe-slot-art .item-image,
+#inventory-view .wardrobe-equipped-pets .wardrobe-slot-art .asset-video,
+#inventory-view .wardrobe-equipped-characters .wardrobe-slot-art .item-image,
+#inventory-view .wardrobe-equipped-characters .wardrobe-slot-art .asset-video {
+  width: 86% !important;
+  height: 86% !important;
+  object-position: center center !important;
+}
+
+#inventory-view .wardrobe-layout {
+  align-items: start !important;
+}
+
+#inventory-view .wardrobe-overview {
+  min-height: clamp(370px, 58vh, 520px) !important;
+  align-content: start !important;
+}
+
+/* Final music shop and wardrobe overrides. */
+#inventory-view .wardrobe-tab-music {
+  background: #dff4ff !important;
+}
+
+.music-album-visual {
+  position: relative;
+  width: clamp(96px, 16vw, 142px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.music-album-disc {
+  position: absolute;
+  right: -18%;
+  top: 9%;
+  z-index: 0;
+  width: 82%;
+  height: 82%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #ececff 0 9%, #111111 10% 34%, #2b2b35 35% 58%, #050507 59% 100%);
+  box-shadow:
+    inset -8px -8px 0 rgba(255, 255, 255, 0.08),
+    0 8px 12px rgba(17, 17, 17, 0.26);
+  clip-path: inset(0 0 0 42%);
+}
+
+.music-album-cover-frame {
+  position: relative;
+  z-index: 1;
+  width: 78%;
+  height: 78%;
+  display: grid;
+  place-items: center;
+  border: 3px solid #111111;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow:
+    inset 0 -5px 0 rgba(17, 17, 17, 0.08),
+    5px 6px 0 rgba(17, 17, 17, 0.45);
+  overflow: hidden;
+}
+
+.music-album-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: auto;
+}
+
+.store-music-offer {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.94), rgba(232, 240, 255, 0.5) 38%, transparent 72%),
+    linear-gradient(135deg, #eef1fb 0%, #e6ebfa 52%, #d9e2f6 100%) !important;
+}
+
+.store-music-offer::before {
+  background-image: url("./różdżka-lobby-pattern.png") !important;
+  background-repeat: repeat !important;
+  background-size: 1680px 945px !important;
+  opacity: 0.54 !important;
+  animation: lobby-stars-drift-reference 52s linear infinite !important;
+}
+
+.store-music-offer-art {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-height: 118px;
+  margin-top: 22px;
+}
+
+.store-music-offer .store-music-album-visual {
+  width: clamp(104px, 15vw, 136px);
+}
+
+.store-music-offer-title {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: min(88%, 160px);
+  margin: -2px auto 0;
+  color: #111111;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-size: clamp(0.66rem, 1.25vw, 0.86rem);
+  font-weight: 1000;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.92);
+}
+
+.store-character-purchase-scene[data-purchase-kind="music-track"] .store-character-purchase-card {
+  background:
+    radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.9), rgba(238, 242, 253, 0.5) 34%, transparent 72%),
+    linear-gradient(135deg, #eef1fb 0%, #e6ebfa 52%, #d9e2f6 100%) !important;
+}
+
+.store-character-purchase-scene[data-purchase-kind="music-track"] .store-character-purchase-card::before {
+  background-image: url("./różdżka-lobby-pattern.png") !important;
+  background-repeat: repeat !important;
+  background-size: 1680px 945px !important;
+  opacity: 0.66 !important;
+  animation: lobby-stars-drift-reference 52s linear infinite !important;
+}
+
+.store-character-purchase-scene[data-purchase-kind="music-track"] .store-character-purchase-card .super-alley-art.store-offer-modal-bundle-art {
+  display: grid !important;
+  place-items: center !important;
+  height: min(44vh, 260px) !important;
+}
+
+.store-offer-modal-music-visual {
+  width: clamp(138px, 28vw, 212px);
+}
+
+.store-character-purchase-actions .store-music-preview-button {
+  background: #dff4ff !important;
+  box-shadow:
+    inset 0 -3px 0 rgba(74, 144, 255, 0.28),
+    4px 4px 0 var(--shadow) !important;
+}
+
+#inventory-view .wardrobe-music-grid {
+  grid-template-columns: repeat(3, minmax(180px, 1fr)) !important;
+  grid-auto-rows: minmax(248px, auto) !important;
+}
+
+#inventory-view .wardrobe-music-tile {
+  min-height: 0;
+  display: grid;
+  opacity: 0;
+  animation: wardrobe-item-pop 0.32s cubic-bezier(0.18, 0.92, 0.2, 1.12) forwards;
+}
+
+#inventory-view .wardrobe-music-open {
+  width: 100%;
+  height: 100%;
+  min-height: 238px;
+  display: grid;
+  grid-template-rows: minmax(116px, 1fr) auto auto auto;
+  justify-items: center;
+  gap: 8px;
+  padding: 14px 12px 12px;
+  border: 0;
+  border-radius: 15px;
+  background: #e9f8ff;
+  color: #111111;
+  box-shadow:
+    inset 0 -7px 0 rgba(74, 144, 255, 0.12),
+    6px 7px 0 rgba(17, 17, 17, 0.64),
+    0 0 18px rgba(122, 203, 255, 0.2);
+}
+
+#inventory-view .wardrobe-music-tile.active .wardrobe-music-open {
+  background: #d9f2ff;
+  box-shadow:
+    inset 0 -7px 0 rgba(74, 144, 255, 0.18),
+    6px 7px 0 rgba(17, 17, 17, 0.64),
+    0 0 24px rgba(122, 203, 255, 0.42);
+}
+
+#inventory-view .wardrobe-music-art {
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+
+#inventory-view .wardrobe-music-visual {
+  width: clamp(116px, 18vw, 160px);
+}
+
+#inventory-view .wardrobe-music-name {
+  margin: 0;
+  color: #111111;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-size: clamp(0.72rem, 1.2vw, 0.94rem);
+  font-weight: 1000;
+  line-height: 1.08;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#inventory-view .wardrobe-music-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+#inventory-view .wardrobe-music-action {
+  min-height: 31px !important;
+  padding: 5px 10px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+  box-shadow:
+    inset 0 -3px 0 rgba(17, 17, 17, 0.1),
+    3px 4px 0 rgba(17, 17, 17, 0.58) !important;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif !important;
+  font-size: clamp(0.6rem, 1vw, 0.76rem) !important;
+  font-weight: 1000 !important;
+  letter-spacing: 0 !important;
+  text-transform: uppercase;
+}
+
+#inventory-view .wardrobe-music-action:active:not(:disabled) {
+  transform: translate(2px, 3px) !important;
+  box-shadow:
+    inset 0 -1px 0 rgba(17, 17, 17, 0.1),
+    1px 1px 0 rgba(17, 17, 17, 0.58) !important;
+}
+
+#inventory-view .wardrobe-music-action:disabled {
+  background: #b8ffca !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 720px) {
+  #inventory-view .wardrobe-music-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .store-music-offer .store-music-album-visual {
+    width: clamp(96px, 34vw, 126px);
+  }
+}
+
+/* Music tracks: shop offers, preview modal and wardrobe tab. */
+#inventory-view .wardrobe-tab-music {
+  background: #dff4ff !important;
+}
+
+.music-album-visual {
+  position: relative;
+  width: clamp(96px, 16vw, 142px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.music-album-disc {
+  position: absolute;
+  right: -18%;
+  top: 9%;
+  z-index: 0;
+  width: 82%;
+  height: 82%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #ececff 0 9%, #111111 10% 34%, #2b2b35 35% 58%, #050507 59% 100%);
+  box-shadow:
+    inset -8px -8px 0 rgba(255, 255, 255, 0.08),
+    0 8px 12px rgba(17, 17, 17, 0.26);
+  clip-path: inset(0 0 0 42%);
+}
+
+.music-album-cover-frame {
+  position: relative;
+  z-index: 1;
+  width: 78%;
+  height: 78%;
+  display: grid;
+  place-items: center;
+  border: 3px solid #111111;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow:
+    inset 0 -5px 0 rgba(17, 17, 17, 0.08),
+    5px 6px 0 rgba(17, 17, 17, 0.45);
+  overflow: hidden;
+}
+
+.music-album-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: auto;
+}
+
+.store-music-offer {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.94), rgba(232, 240, 255, 0.5) 38%, transparent 72%),
+    linear-gradient(135deg, #eef1fb 0%, #e6ebfa 52%, #d9e2f6 100%) !important;
+}
+
+.store-music-offer::before {
+  background-image: url("./różdżka-lobby-pattern.png") !important;
+  background-repeat: repeat !important;
+  background-size: 1680px 945px !important;
+  opacity: 0.54 !important;
+  animation: lobby-stars-drift-reference 52s linear infinite !important;
+}
+
+.store-music-offer-art {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-height: 118px;
+  margin-top: 22px;
+}
+
+.store-music-offer .store-music-album-visual {
+  width: clamp(104px, 15vw, 136px);
+}
+
+.store-music-offer-title {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: min(88%, 160px);
+  margin: -2px auto 0;
+  color: #111111;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-size: clamp(0.66rem, 1.25vw, 0.86rem);
+  font-weight: 1000;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.92);
+}
+
+.store-character-purchase-scene[data-purchase-kind="music-track"] .store-character-purchase-card {
+  background:
+    radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.9), rgba(238, 242, 253, 0.5) 34%, transparent 72%),
+    linear-gradient(135deg, #eef1fb 0%, #e6ebfa 52%, #d9e2f6 100%) !important;
+}
+
+.store-character-purchase-scene[data-purchase-kind="music-track"] .store-character-purchase-card::before {
+  background-image: url("./różdżka-lobby-pattern.png") !important;
+  background-repeat: repeat !important;
+  background-size: 1680px 945px !important;
+  opacity: 0.66 !important;
+  animation: lobby-stars-drift-reference 52s linear infinite !important;
+}
+
+.store-offer-modal-music-visual {
+  width: clamp(138px, 28vw, 212px);
+}
+
+.store-character-purchase-scene[data-purchase-kind="music-track"] .store-character-purchase-card .super-alley-art.store-offer-modal-bundle-art {
+  display: grid !important;
+  place-items: center !important;
+  height: min(44vh, 260px) !important;
+}
+
+.store-character-purchase-actions .store-music-preview-button {
+  background: #dff4ff !important;
+  box-shadow:
+    inset 0 -3px 0 rgba(74, 144, 255, 0.28),
+    4px 4px 0 var(--shadow) !important;
+}
+
+#inventory-view .wardrobe-music-grid {
+  grid-template-columns: repeat(3, minmax(180px, 1fr)) !important;
+  grid-auto-rows: minmax(248px, auto) !important;
+}
+
+#inventory-view .wardrobe-music-tile {
+  min-height: 0;
+  display: grid;
+  opacity: 0;
+  animation: wardrobe-item-pop 0.32s cubic-bezier(0.18, 0.92, 0.2, 1.12) forwards;
+}
+
+#inventory-view .wardrobe-music-open {
+  width: 100%;
+  height: 100%;
+  min-height: 238px;
+  display: grid;
+  grid-template-rows: minmax(116px, 1fr) auto auto auto;
+  justify-items: center;
+  gap: 8px;
+  padding: 14px 12px 12px;
+  border: 0;
+  border-radius: 15px;
+  background: #e9f8ff;
+  color: #111111;
+  box-shadow:
+    inset 0 -7px 0 rgba(74, 144, 255, 0.12),
+    6px 7px 0 rgba(17, 17, 17, 0.64),
+    0 0 18px rgba(122, 203, 255, 0.2);
+}
+
+#inventory-view .wardrobe-music-tile.active .wardrobe-music-open {
+  background: #d9f2ff;
+  box-shadow:
+    inset 0 -7px 0 rgba(74, 144, 255, 0.18),
+    6px 7px 0 rgba(17, 17, 17, 0.64),
+    0 0 24px rgba(122, 203, 255, 0.42);
+}
+
+#inventory-view .wardrobe-music-art {
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+
+#inventory-view .wardrobe-music-visual {
+  width: clamp(116px, 18vw, 160px);
+}
+
+#inventory-view .wardrobe-music-name {
+  margin: 0;
+  color: #111111;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-size: clamp(0.72rem, 1.2vw, 0.94rem);
+  font-weight: 1000;
+  line-height: 1.08;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#inventory-view .wardrobe-music-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+#inventory-view .wardrobe-music-action {
+  min-height: 31px !important;
+  padding: 5px 10px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+  box-shadow:
+    inset 0 -3px 0 rgba(17, 17, 17, 0.1),
+    3px 4px 0 rgba(17, 17, 17, 0.58) !important;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif !important;
+  font-size: clamp(0.6rem, 1vw, 0.76rem) !important;
+  font-weight: 1000 !important;
+  letter-spacing: 0 !important;
+  text-transform: uppercase;
+}
+
+#inventory-view .wardrobe-music-action:active:not(:disabled) {
+  transform: translate(2px, 3px) !important;
+  box-shadow:
+    inset 0 -1px 0 rgba(17, 17, 17, 0.1),
+    1px 1px 0 rgba(17, 17, 17, 0.58) !important;
+}
+
+#inventory-view .wardrobe-music-action:disabled {
+  background: #b8ffca !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 720px) {
+  #inventory-view .wardrobe-music-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .store-music-offer .store-music-album-visual {
+    width: clamp(96px, 34vw, 126px);
   }
 }
 
@@ -2137,7 +3038,7 @@ body.store-view-active #store-view .section-panel::-webkit-scrollbar-thumb {
   bottom: 7px;
   width: 18px;
   border: 4px solid var(--ink);
-  z-index: -1;
+  z-index: 0;
 }
 
 .trophy-road-title-badge::before {
@@ -2809,6 +3710,67 @@ body.store-view-active #store-view .section-panel::-webkit-scrollbar-thumb {
   background: linear-gradient(90deg, #ff84ce 0%, #ffc5e9 45%, #ff76c4 100%);
 }
 
+.trophy-current-progress-bubble {
+  position: absolute;
+  left: calc(var(--trophy-current-progress, 0%) + 46px);
+  top: 14px;
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 52px;
+  min-height: 30px;
+  padding: 7px 12px 6px 15px;
+  border: 4px solid var(--ink);
+  border-radius: 8px;
+  background: #fff8cf;
+  box-shadow:
+    6px 6px 0 var(--shadow),
+    inset 0 -5px 0 rgba(234, 200, 87, 0.32),
+    0 0 14px rgba(255, 229, 91, 0.45);
+  color: #171018;
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.5rem;
+  line-height: 1;
+  pointer-events: none;
+  isolation: isolate;
+  transform: translateY(-50%) scale(1);
+  animation: trophy-current-bubble-pop 0.32s 0.28s cubic-bezier(0.18, 0.86, 0.18, 1) both;
+}
+
+.trophy-current-progress-bubble::after {
+  content: "";
+  position: absolute;
+  left: -13px;
+  top: 50%;
+  z-index: -1;
+  width: 18px;
+  height: 18px;
+  border-left: 4px solid var(--ink);
+  border-bottom: 4px solid var(--ink);
+  background: #fff8cf;
+  box-shadow: -3px 3px 0 rgba(17, 17, 17, 0.18);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.trophy-current-progress-value {
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  transform: translateY(1px);
+}
+
+.trophy-current-progress-icon {
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(1px 2px 0 rgba(17, 17, 17, 0.22));
+}
+
 .trophy-world-progress[data-world-theme="winter"] .trophy-world-progress-fill {
   background: linear-gradient(90deg, #54bdf4 0%, #bff1ff 45%, #6bd0ff 100%);
 }
@@ -2857,6 +3819,23 @@ body.store-view-active #store-view .section-panel::-webkit-scrollbar-thumb {
 
 .trophy-world-progress-value {
   display: block;
+}
+
+@keyframes trophy-current-bubble-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(-50% + 8px)) scale(0.72);
+  }
+
+  70% {
+    opacity: 1;
+    transform: translateY(calc(-50% - 2px)) scale(1.06);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
 }
 
 .trophy-stage-rewards-magicians {
@@ -3007,6 +3986,24 @@ body.store-view-active #store-view .section-panel::-webkit-scrollbar-thumb {
     0 0 12px rgba(117, 234, 142, 0.42);
 }
 
+.trophy-node-magicians[data-bundle-theme="lily"] .trophy-node-magicians-bundle-label {
+  border-color: #4d8ccc;
+  background: #dff4ff;
+  color: #174d7d;
+  box-shadow:
+    3px 3px 0 rgba(15, 54, 92, 0.24),
+    0 0 12px rgba(117, 213, 255, 0.48);
+}
+
+.trophy-node-magicians[data-bundle-theme="zoya"] .trophy-node-magicians-bundle-label {
+  border-color: #5069b6;
+  background: #e1e8ff;
+  color: #1f3470;
+  box-shadow:
+    3px 3px 0 rgba(18, 34, 83, 0.24),
+    0 0 12px rgba(135, 160, 255, 0.5);
+}
+
 .trophy-node-magicians-cycle-media .trophy-node-magicians-cycle-image {
   position: absolute;
   inset: 0;
@@ -3043,6 +4040,14 @@ body.store-view-active #store-view .section-panel::-webkit-scrollbar-thumb {
 
 .trophy-node-magicians[data-bundle-theme="sylas"] .trophy-node-magicians-cycle-media::after {
   background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(168, 245, 174, 0.56) 34%, rgba(255, 255, 255, 0) 68%);
+}
+
+.trophy-node-magicians[data-bundle-theme="lily"] .trophy-node-magicians-cycle-media::after {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(160, 229, 255, 0.62) 34%, rgba(255, 255, 255, 0) 68%);
+}
+
+.trophy-node-magicians[data-bundle-theme="zoya"] .trophy-node-magicians-cycle-media::after {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(156, 176, 255, 0.6) 34%, rgba(255, 255, 255, 0) 68%);
 }
 
 .trophy-node-magicians-cycle-count {
@@ -3132,6 +4137,38 @@ body.store-view-active #store-view .section-panel::-webkit-scrollbar-thumb {
   filter:
     drop-shadow(0 0 8px rgba(255, 231, 128, 0.76))
     drop-shadow(3px 4px 0 rgba(17, 17, 17, 0.18));
+}
+
+.trophy-node-magicians[data-reward-type="loading-screen"] .trophy-node-magicians-media {
+  width: 168px;
+  height: 106px;
+  flex-basis: 106px;
+  margin-top: 2px;
+  cursor: default;
+}
+
+.trophy-node-magicians[data-reward-type="loading-screen"] .trophy-node-magicians-media::before {
+  inset: -10px -14px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.92), rgba(255, 164, 238, 0.58) 38%, rgba(255, 255, 255, 0) 72%);
+  opacity: 0.86;
+  filter: blur(3px);
+  box-shadow: 0 0 24px rgba(255, 126, 229, 0.38);
+}
+
+.trophy-node-magicians[data-reward-type="loading-screen"] .trophy-node-magicians-media .item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 9px;
+  filter:
+    drop-shadow(0 0 10px rgba(255, 221, 250, 0.92))
+    drop-shadow(0 8px 8px rgba(17, 17, 17, 0.16));
+}
+
+.trophy-node-magicians[data-reward-type="loading-screen"] .trophy-node-magicians-count {
+  display: none;
 }
 
 .trophy-node-magicians[data-reward-type="diamonds"] .trophy-node-magicians-media .item-image {
@@ -3447,6 +4484,10 @@ body.store-view-active #store-view .section-panel::-webkit-scrollbar-thumb {
   box-shadow: 5px 5px 0 var(--shadow);
   overflow: hidden;
   position: relative;
+}
+
+.trophy-stage-magicians .trophy-current-progress-bubble {
+  top: 24px;
 }
 
 .trophy-stage-magicians .trophy-world-progress-fill {
@@ -5892,6 +6933,75 @@ body.game-view-active #game-view .touch-controls {
   animation: flaroRobotBurn 0.32s steps(2, end) infinite;
 }
 
+.grifos-jar-shatter {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 92px;
+  height: 92px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 12;
+}
+
+.grifos-jar-shatter::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 50px;
+  height: 50px;
+  transform: translate(-50%, -50%) scale(0.25);
+  border: 3px solid rgba(255, 238, 126, 0.95);
+  border-radius: 44% 52% 48% 56%;
+  background:
+    radial-gradient(circle at 42% 38%, rgba(255, 255, 255, 0.94), rgba(255, 224, 91, 0.56) 32%, rgba(231, 154, 31, 0.12) 60%, transparent 70%);
+  box-shadow:
+    0 0 16px rgba(255, 255, 230, 0.76),
+    0 0 20px rgba(255, 195, 55, 0.6);
+  clip-path: polygon(12% 18%, 42% 12%, 50% 30%, 68% 14%, 88% 28%, 72% 50%, 86% 74%, 54% 68%, 38% 88%, 28% 60%, 8% 72%, 22% 44%);
+  opacity: 0;
+  animation: grifosJarPop 0.46s cubic-bezier(0.17, 1.18, 0.32, 1) forwards;
+}
+
+.grifos-jar-shatter::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 68px;
+  height: 68px;
+  transform: translate(-50%, -50%) scale(0.2);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(255, 220, 74, 0.46) 44%, transparent 68%);
+  opacity: 0;
+  animation: grifosJarFlash 0.42s ease-out forwards;
+}
+
+.grifos-jar-shatter span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 12px;
+  border-radius: 3px 5px 4px 2px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 231, 100, 0.82) 52%, rgba(216, 144, 25, 0.32));
+  box-shadow:
+    0 0 6px rgba(255, 255, 235, 0.76),
+    0 0 9px rgba(255, 203, 64, 0.5);
+  opacity: 0;
+  animation: grifosJarShard 0.62s ease-out forwards;
+}
+
+.grifos-jar-shatter span:nth-child(1) { --shard-x: -36px; --shard-y: -22px; --shard-r: -46deg; animation-delay: 30ms; }
+.grifos-jar-shatter span:nth-child(2) { --shard-x: -16px; --shard-y: -38px; --shard-r: 24deg; animation-delay: 44ms; }
+.grifos-jar-shatter span:nth-child(3) { --shard-x: 20px; --shard-y: -34px; --shard-r: 58deg; animation-delay: 26ms; }
+.grifos-jar-shatter span:nth-child(4) { --shard-x: 38px; --shard-y: -8px; --shard-r: 104deg; animation-delay: 58ms; }
+.grifos-jar-shatter span:nth-child(5) { --shard-x: 30px; --shard-y: 26px; --shard-r: 142deg; animation-delay: 38ms; }
+.grifos-jar-shatter span:nth-child(6) { --shard-x: -6px; --shard-y: 40px; --shard-r: 184deg; animation-delay: 52ms; }
+.grifos-jar-shatter span:nth-child(7) { --shard-x: -34px; --shard-y: 20px; --shard-r: 226deg; animation-delay: 34ms; }
+
 @keyframes dogFireBreathFade {
   0% {
     opacity: 0;
@@ -5949,6 +7059,56 @@ body.game-view-active #game-view .touch-controls {
 
   to {
     transform: translateX(-50%) translateY(-4px) scaleY(1.06);
+  }
+}
+
+@keyframes grifosJarFlash {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.12);
+  }
+
+  28% {
+    opacity: 0.92;
+    transform: translate(-50%, -50%) scale(0.86);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.22);
+  }
+}
+
+@keyframes grifosJarPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.18) rotate(-16deg);
+  }
+
+  32% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05) rotate(5deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.2) rotate(18deg);
+  }
+}
+
+@keyframes grifosJarShard {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35) rotate(0deg);
+  }
+
+  24% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--shard-x, 0px)), calc(-50% + var(--shard-y, 0px))) scale(0.82) rotate(var(--shard-r, 0deg));
   }
 }
 
@@ -7856,6 +9016,13 @@ body.game-view-active #game-view .touch-controls {
 .projectile-shell.elfie-shot {
   border-color: transparent;
   box-shadow: none;
+  filter:
+    drop-shadow(0 0 9px rgba(114, 232, 128, 0.42))
+    drop-shadow(0 0 5px rgba(255, 255, 255, 0.38));
+}
+
+.projectile-shell.elfie-shot .projectile-image {
+  z-index: 1;
 }
 
 .projectile-shell.lpsotka-shot {
@@ -7866,11 +9033,26 @@ body.game-view-active #game-view .touch-controls {
 .projectile-shell.linda-shot {
   border-color: transparent;
   box-shadow: none;
+  filter:
+    drop-shadow(0 0 12px rgba(156, 232, 255, 0.45))
+    drop-shadow(0 0 7px rgba(255, 255, 255, 0.48));
+}
+
+.projectile-shell.linda-shot .projectile-image {
+  z-index: 1;
 }
 
 .projectile-shell.lily-shot {
   border-color: transparent;
   box-shadow: none;
+  filter:
+    drop-shadow(0 0 10px rgba(255, 245, 178, 0.42))
+    drop-shadow(0 0 7px rgba(124, 211, 255, 0.36));
+}
+
+.projectile-shell.lily-shot .projectile-image {
+  transform-origin: center center;
+  animation: none !important;
 }
 
 .projectile-shell.nora-shot {
@@ -7891,34 +9073,146 @@ body.game-view-active #game-view .touch-controls {
 .projectile-shell.grifos-shot {
   border-color: transparent;
   box-shadow: none;
+  filter:
+    drop-shadow(0 0 7px rgba(255, 255, 255, 0.46))
+    drop-shadow(0 0 8px rgba(148, 216, 255, 0.34));
 }
 
 .projectile-shell.mycelia-shot {
   border-color: transparent;
   box-shadow: none;
-}
-
-.projectile-shell.mycelia-shot::before {
-  content: "";
-  position: absolute;
-  left: -38px;
-  top: 50%;
-  width: 68px;
-  height: 18px;
-  transform: translateY(-50%) rotate(-8deg);
-  border-radius: 999px;
-  background:
-    linear-gradient(90deg, rgba(117, 221, 255, 0), rgba(117, 221, 255, 0.74), rgba(255, 151, 221, 0.76), rgba(255, 151, 221, 0));
-  filter: blur(5px);
-  opacity: 0.86;
-  z-index: 0;
-  pointer-events: none;
-  animation: myceliaProjectileFlare 0.34s ease-in-out infinite alternate;
+  filter:
+    drop-shadow(0 0 10px rgba(255, 158, 226, 0.34))
+    drop-shadow(0 0 9px rgba(116, 223, 255, 0.34));
 }
 
 .projectile-shell.mycelia-shot .projectile-image,
 .projectile-shell.sylas-shot .projectile-image {
   z-index: 1;
+}
+
+.projectile-trail {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1px;
+  height: 1px;
+  transform: rotate(var(--projectile-angle, 0rad));
+  transform-origin: center center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.projectile-trail span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+}
+
+.projectile-trail-ella span,
+.projectile-trail-linda span {
+  width: var(--bubble-size, 10px);
+  height: var(--bubble-size, 10px);
+  border: 2px solid var(--bubble-ring, rgba(104, 232, 115, 0.66));
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.95) 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 50%, var(--bubble-core, rgba(230, 255, 216, 0.86)) 0 42%, transparent 58%);
+  box-shadow:
+    0 0 7px var(--bubble-glow, rgba(124, 255, 130, 0.52)),
+    inset 0 0 5px rgba(255, 255, 255, 0.72);
+  opacity: var(--bubble-render-opacity, 0);
+  transform: translate(var(--bubble-render-x, -40px), var(--bubble-render-y, 0px)) scale(var(--bubble-render-scale, 1));
+}
+
+.projectile-trail-ella span {
+  --bubble-ring: rgba(92, 224, 96, 0.72);
+  --bubble-core: rgba(226, 255, 208, 0.9);
+  --bubble-glow: rgba(110, 255, 116, 0.58);
+}
+
+.projectile-trail-ella span:nth-child(1) { --bubble-size: 13px; --bubble-x: -20px; --bubble-y: -11px; --bubble-drift-x: -78px; --bubble-drift-y: -18px; --bubble-delay: -0.08s; --bubble-time: 0.88s; }
+.projectile-trail-ella span:nth-child(2) { --bubble-size: 8px; --bubble-x: -10px; --bubble-y: 10px; --bubble-drift-x: -62px; --bubble-drift-y: 20px; --bubble-delay: -0.28s; --bubble-time: 0.78s; }
+.projectile-trail-ella span:nth-child(3) { --bubble-size: 10px; --bubble-x: -31px; --bubble-y: 4px; --bubble-drift-x: -92px; --bubble-drift-y: 8px; --bubble-delay: -0.48s; --bubble-time: 0.92s; }
+.projectile-trail-ella span:nth-child(4) { --bubble-size: 6px; --bubble-x: -4px; --bubble-y: -4px; --bubble-drift-x: -48px; --bubble-drift-y: -2px; --bubble-delay: -0.62s; --bubble-time: 0.72s; }
+.projectile-trail-ella span:nth-child(5) { --bubble-size: 9px; --bubble-x: -21px; --bubble-y: 16px; --bubble-drift-x: -82px; --bubble-drift-y: 26px; --bubble-delay: -0.76s; --bubble-time: 0.98s; }
+
+.projectile-trail-linda span {
+  --bubble-ring: rgba(255, 148, 224, 0.76);
+  --bubble-core: rgba(232, 247, 255, 0.92);
+  --bubble-glow: rgba(255, 151, 229, 0.54);
+}
+
+.projectile-shell.wata-cukrowa-linda-shot {
+  filter:
+    drop-shadow(0 0 14px rgba(255, 242, 252, 0.62))
+    drop-shadow(0 0 10px rgba(255, 151, 229, 0.5));
+}
+
+.projectile-shell.wata-cukrowa-linda-shot .projectile-trail-linda span {
+  --bubble-ring: rgba(255, 190, 235, 0.86);
+  --bubble-core: rgba(255, 248, 252, 0.96);
+  --bubble-glow: rgba(255, 190, 235, 0.64);
+}
+
+.projectile-shell.wata-cukrowa-linda-shot .projectile-trail-linda::before {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 242, 252, 0.52), rgba(255, 164, 224, 0.44), rgba(255, 255, 255, 0));
+}
+
+.projectile-trail-linda::before {
+  content: "";
+  position: absolute;
+  left: calc(-112px + var(--linda-mist-shift, 0px));
+  top: -12px;
+  width: 118px;
+  height: 24px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(158, 235, 255, 0), rgba(143, 226, 255, 0.36), rgba(255, 162, 230, 0.42), rgba(255, 255, 255, 0));
+  filter: blur(5px);
+  opacity: var(--linda-mist-opacity, 0);
+}
+
+.projectile-trail-linda span:nth-child(1) { --bubble-size: 16px; --bubble-x: -26px; --bubble-y: -12px; --bubble-drift-x: -108px; --bubble-drift-y: -20px; --bubble-delay: -0.04s; --bubble-time: 1s; }
+.projectile-trail-linda span:nth-child(2) { --bubble-size: 11px; --bubble-x: -13px; --bubble-y: 12px; --bubble-drift-x: -78px; --bubble-drift-y: 24px; --bubble-delay: -0.22s; --bubble-time: 0.82s; }
+.projectile-trail-linda span:nth-child(3) { --bubble-size: 13px; --bubble-x: -48px; --bubble-y: 4px; --bubble-drift-x: -132px; --bubble-drift-y: 6px; --bubble-delay: -0.38s; --bubble-time: 1.08s; }
+.projectile-trail-linda span:nth-child(4) { --bubble-size: 8px; --bubble-x: -4px; --bubble-y: -1px; --bubble-drift-x: -58px; --bubble-drift-y: -5px; --bubble-delay: -0.54s; --bubble-time: 0.8s; }
+.projectile-trail-linda span:nth-child(5) { --bubble-size: 10px; --bubble-x: -34px; --bubble-y: 19px; --bubble-drift-x: -104px; --bubble-drift-y: 30px; --bubble-delay: -0.7s; --bubble-time: 0.96s; }
+.projectile-trail-linda span:nth-child(6) { --bubble-size: 7px; --bubble-x: -62px; --bubble-y: -16px; --bubble-drift-x: -142px; --bubble-drift-y: -30px; --bubble-delay: -0.86s; --bubble-time: 0.9s; }
+
+.projectile-trail-mycelia {
+  width: 1px;
+  height: 1px;
+  transform: rotate(calc(var(--projectile-angle, 0rad) + 3.14159rad));
+}
+
+.projectile-trail-mycelia .mycelia-trail-core {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: var(--mycelia-trail-length, 80px);
+  height: 38px;
+  transform: translateY(-50%);
+  transform-origin: left center;
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse at 94% 50%, rgba(255, 255, 255, 0.76), rgba(255, 151, 221, 0.4) 28%, transparent 58%),
+    linear-gradient(90deg, rgba(117, 221, 255, 0), rgba(117, 221, 255, 0.48), rgba(255, 151, 221, 0.76), rgba(255, 255, 255, 0.52), rgba(255, 151, 221, 0));
+  filter: blur(5.5px);
+  opacity: var(--mycelia-trail-opacity, 0);
+}
+
+.projectile-trail-mycelia span:not(.mycelia-trail-core) {
+  left: 0;
+  top: 50%;
+  height: 9px;
+  width: 86px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(141, 232, 255, 0.78), rgba(255, 173, 235, 0.82), rgba(255, 255, 255, 0));
+  filter: blur(1.8px);
+  opacity: var(--mycelia-ribbon-opacity, 0);
+  transform: translate(var(--mycelia-ribbon-x, 70px), calc(-50% + var(--mycelia-ribbon-y, 0px))) scaleX(var(--mycelia-ribbon-scale, 1));
+  transform-origin: left center;
 }
 
 .projectile-shell.sylas-shot {
@@ -7931,9 +9225,12 @@ body.game-view-active #game-view .touch-controls {
   box-shadow: none;
 }
 
-.projectile-shell.tricky-shot {
+.projectile-shell.blizzy-shot {
   border-color: transparent;
   box-shadow: none;
+  filter:
+    drop-shadow(0 0 12px rgba(126, 217, 255, 0.5))
+    drop-shadow(0 0 7px rgba(255, 255, 255, 0.42));
 }
 
 .projectile-shell.tower-bot-shot {
@@ -7990,6 +9287,47 @@ body.game-view-active #game-view .touch-controls {
   filter:
     drop-shadow(0 0 10px rgba(70, 224, 220, 0.45))
     drop-shadow(0 0 6px rgba(255, 255, 255, 0.38));
+}
+
+.projectile-shell.zoya-shot {
+  width: 58px;
+  height: 58px;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  filter:
+    drop-shadow(0 0 10px rgba(145, 102, 230, 0.48))
+    drop-shadow(0 0 6px rgba(255, 255, 255, 0.38));
+}
+
+.projectile-shell.zoya-shot .projectile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transform-origin: center center;
+  animation: none !important;
+}
+
+.projectile-shell.finley-shot {
+  width: 62px;
+  height: 62px;
+  transform: rotate(var(--projectile-angle, 0rad));
+  transform-origin: center center;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  filter:
+    drop-shadow(0 0 10px rgba(114, 216, 255, 0.5))
+    drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+}
+
+.projectile-shell.finley-shot .projectile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  animation: finleyProjectileSpin 0.62s linear infinite;
 }
 
 .shulla-card-fan {
@@ -8089,14 +9427,195 @@ body.game-view-active #game-view .touch-controls {
   }
 }
 
-@keyframes myceliaProjectileFlare {
-  from {
-    opacity: 0.55;
-    transform: translateY(-50%) rotate(-8deg) scaleX(0.84);
+@keyframes zoyaProjectileWobble {
+  0%,
+  100% {
+    transform: rotate(-8deg) scale(0.96);
   }
+
+  50% {
+    transform: rotate(10deg) scale(1.06);
+  }
+}
+
+@keyframes zoyaProjectileSlowSpin {
+  from {
+    transform: rotate(0deg);
+  }
+
   to {
-    opacity: 0.95;
-    transform: translateY(-50%) rotate(-8deg) scaleX(1.08);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lilyProjectilePulse {
+  0%,
+  100% {
+    transform: scaleX(0.86) scaleY(1.1);
+    filter:
+      brightness(1.02)
+      drop-shadow(0 0 5px rgba(255, 255, 255, 0.4))
+      drop-shadow(0 0 7px rgba(135, 216, 255, 0.28));
+  }
+
+  50% {
+    transform: scaleX(1.2) scaleY(0.84);
+    filter:
+      brightness(1.16)
+      drop-shadow(0 0 9px rgba(255, 255, 255, 0.74))
+      drop-shadow(0 0 14px rgba(255, 236, 137, 0.5));
+  }
+}
+
+@keyframes finleyProjectileSpin {
+  from {
+    transform: rotate(0deg) scale(0.98);
+  }
+
+  to {
+    transform: rotate(360deg) scale(0.98);
+  }
+}
+
+@keyframes myceliaProjectileFlare {
+  0% {
+    opacity: 0.42;
+    transform: translateY(-50%) scaleX(0.56);
+  }
+
+  48% {
+    opacity: 0.92;
+    transform: translateY(-50%) scaleX(1.08);
+  }
+
+  100% {
+    opacity: 0.36;
+    transform: translateY(-50%) scaleX(0.7);
+  }
+}
+
+@keyframes myceliaProjectileSparkTrail {
+  0% {
+    opacity: 0.35;
+    transform: translateY(-50%) scaleX(0.52);
+  }
+
+  50% {
+    opacity: 0.92;
+    transform: translateY(-50%) scaleX(1.18);
+  }
+
+  100% {
+    opacity: 0.42;
+    transform: translateY(-50%) scaleX(0.62);
+  }
+}
+
+@keyframes elfieBubbleTrail {
+  0% {
+    opacity: 0.18;
+    transform: translateY(-50%) translateX(16px) scale(0.72);
+  }
+
+  42% {
+    opacity: 0.94;
+    transform: translateY(-50%) translateX(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-22px) scale(0.58);
+  }
+}
+
+@keyframes lindaBubbleTrail {
+  0% {
+    opacity: 0.2;
+    transform: translateY(-50%) translateX(20px) scale(0.72);
+  }
+
+  44% {
+    opacity: 0.9;
+    transform: translateY(-50%) translateX(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-26px) scale(0.66);
+  }
+}
+
+@keyframes projectileBubblePop {
+  0% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--bubble-x, 0px)), calc(-50% + var(--bubble-y, 0px))) scale(0.12);
+  }
+
+  24% {
+    opacity: 0.92;
+    transform: translate(calc(-50% + var(--bubble-x, 0px) - 8px), calc(-50% + var(--bubble-y, 0px))) scale(0.74);
+  }
+
+  68% {
+    opacity: 0.72;
+    transform: translate(calc(-50% + var(--bubble-drift-x, -70px)), calc(-50% + var(--bubble-drift-y, 0px))) scale(1.05);
+  }
+
+  100% {
+    opacity: 0;
+    border-width: 1px;
+    transform: translate(calc(-50% + var(--bubble-drift-x, -70px)), calc(-50% + var(--bubble-drift-y, 0px))) scale(1.46);
+  }
+}
+
+@keyframes lindaBubbleMist {
+  0% {
+    opacity: 0;
+    transform: translateX(30px) scaleX(0.32);
+  }
+
+  42% {
+    opacity: 0.9;
+    transform: translateX(0) scaleX(0.96);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-26px) scaleX(1.15);
+  }
+}
+
+@keyframes myceliaTrailBirth {
+  0% {
+    opacity: 0;
+    clip-path: inset(0 82% 0 0);
+  }
+
+  38% {
+    opacity: 0.9;
+    clip-path: inset(0 8% 0 0);
+  }
+
+  100% {
+    opacity: 0;
+    clip-path: inset(0 0 0 58%);
+  }
+}
+
+@keyframes myceliaTrailRibbon {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + var(--trail-y, 0px))) scaleX(0.12);
+  }
+
+  42% {
+    opacity: 0.86;
+    transform: translate(calc(-50% - 42px), calc(-50% + var(--trail-y, 0px))) scaleX(0.86);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% - 116px), calc(-50% + var(--trail-y, 0px))) scaleX(1.22);
   }
 }
 
@@ -9062,6 +10581,83 @@ body.game-view-active #game-view .touch-controls {
   height: 36px;
   object-fit: contain;
   image-rendering: pixelated;
+}
+
+.character-detail-skin-switcher {
+  position: absolute;
+  right: clamp(12px, 3vw, 28px);
+  top: clamp(74px, 15vh, 126px);
+  z-index: 5;
+  display: grid;
+  gap: 10px;
+  max-height: min(54vh, 360px);
+  overflow-y: auto;
+  padding: 8px;
+  border: 3px solid var(--ink);
+  background: rgba(229, 217, 255, 0.92);
+  box-shadow:
+    5px 5px 0 var(--shadow),
+    inset 0 3px 0 rgba(255, 255, 255, 0.72);
+}
+
+.character-detail-skin-switcher[hidden] {
+  display: none;
+}
+
+.character-detail-skin-choice {
+  width: 58px;
+  height: 58px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--ink);
+  background: #ffffff;
+  box-shadow: 3px 3px 0 rgba(17, 17, 17, 0.25);
+  cursor: pointer;
+  image-rendering: pixelated;
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease,
+    filter 0.14s ease;
+}
+
+.character-detail-skin-choice.active {
+  background: #dff4ff;
+  box-shadow:
+    3px 3px 0 rgba(17, 17, 17, 0.25),
+    0 0 0 4px rgba(122, 210, 255, 0.44),
+    0 0 18px rgba(122, 210, 255, 0.48);
+  transform: translate(-1px, -1px);
+}
+
+.character-detail-skin-choice:hover {
+  transform: translateY(-2px);
+}
+
+.character-detail-skin-choice:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 rgba(17, 17, 17, 0.25);
+}
+
+.character-detail-skin-choice-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+@media (max-width: 720px) {
+  .character-detail-skin-switcher {
+    right: 8px;
+    top: 66px;
+    gap: 7px;
+    padding: 6px;
+  }
+
+  .character-detail-skin-choice {
+    width: 50px;
+    height: 50px;
+  }
 }
 
 .character-skin-tray {
@@ -11311,6 +12907,43 @@ body.game-view-active #game-view .touch-controls {
   animation: magic-machine-machine-exit 1.02s cubic-bezier(0.18, 0.84, 0.2, 1) forwards;
 }
 
+.magic-machine-scene[data-theme="winter"]::before {
+  background:
+    radial-gradient(circle at center, rgba(119, 211, 255, 0.42), rgba(17, 28, 54, 0.82) 74%);
+}
+
+.magic-machine-scene[data-theme="winter"] .magic-machine-art .magic-machine-stage-glow {
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.98) 0%, rgba(123, 217, 255, 0.9) 24%, rgba(255, 255, 255, 0) 72%);
+}
+
+.magic-machine-scene[data-theme="winter"] .magic-machine-art .magic-machine-stage-lights .alley-reward-ray {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(100, 194, 255, 0.92), rgba(255, 255, 255, 0));
+}
+
+.magic-machine-scene[data-theme="winter"] .magic-machine-label {
+  background: #d8f2ff;
+  box-shadow:
+    0 0 0 4px rgba(182, 229, 255, 0.62),
+    7px 7px 0 var(--shadow);
+}
+
+.magic-machine-scene[data-theme="winter"] .magic-machine-launch-ball,
+.magic-machine-scene[data-theme="winter"] .magic-machine-ball-half {
+  filter:
+    drop-shadow(0 16px 14px rgba(9, 22, 45, 0.2))
+    drop-shadow(0 0 18px rgba(205, 241, 255, 0.98))
+    drop-shadow(0 0 40px rgba(88, 190, 255, 0.6));
+}
+
+.magic-machine-scene[data-theme="winter"][data-machine-stage="rolling"] #magic-machine-image {
+  filter:
+    drop-shadow(0 0 16px rgba(214, 244, 255, 0.98))
+    drop-shadow(0 0 38px rgba(90, 190, 255, 0.74))
+    drop-shadow(0 14px 16px rgba(17, 17, 17, 0.14));
+}
+
 .magic-machine-art.blink {
   animation: magic-machine-ready-pulse 0.92s steps(2, end) infinite;
 }
@@ -12266,12 +13899,10 @@ body.game-view-active #game-view .touch-controls {
   position: relative;
   width: min(36vw, 190px);
   aspect-ratio: 1 / 1;
-  background: rgba(255, 255, 255, 0.88);
-  border: 4px solid var(--ink);
-  box-shadow:
-    8px 8px 0 rgba(17, 17, 17, 0.34),
-    0 0 24px var(--character-unlock-color);
-  overflow: hidden;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
 }
 
 .alley-reward-bundle-image-frame .alley-reward-bundle-image {
@@ -12609,6 +14240,22 @@ body.game-view-active #game-view .touch-controls {
   box-shadow: 12px 12px 0 var(--shadow);
 }
 
+.alley-reward-backdrop.magic-mode[data-super-theme="alley"] .alley-reward-art,
+.alley-reward-backdrop.crate-mode[data-super-theme="alley"] .alley-reward-art {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.alley-reward-backdrop.crate-mode[data-super-theme="alley"] .crate-showcase-image,
+.alley-reward-backdrop.crate-mode[data-super-theme="alley"] .crate-showcase-half-image {
+  filter:
+    drop-shadow(0 0 18px rgba(255, 220, 244, 0.9))
+    drop-shadow(0 0 34px rgba(255, 115, 203, 0.58))
+    drop-shadow(0 14px 14px rgba(17, 17, 17, 0.12));
+}
+
 .alley-reward-backdrop[data-super-theme="winter"] .alley-reward-glow {
   background:
     radial-gradient(circle, rgba(255, 255, 255, 0.98) 0%, rgba(96, 206, 255, 0.92) 24%, rgba(255, 255, 255, 0) 72%);
@@ -12620,7 +14267,66 @@ body.game-view-active #game-view .touch-controls {
 }
 
 .alley-reward-backdrop[data-super-theme="winter"] .alley-reward-art {
-  box-shadow: 12px 12px 0 var(--shadow);
+  box-shadow: none;
+}
+
+.alley-reward-backdrop.magic-mode[data-super-theme="winter"],
+.alley-reward-backdrop.crate-mode[data-super-theme="winter"],
+.alley-reward-backdrop.diamond-mode[data-super-theme="winter"] {
+  background:
+    radial-gradient(circle at center, rgba(132, 221, 255, 0.38), rgba(17, 17, 17, 0.84) 74%);
+}
+
+.alley-reward-backdrop.magic-mode[data-super-theme="winter"] .alley-reward-glow,
+.alley-reward-backdrop.crate-mode[data-super-theme="winter"] .alley-reward-glow,
+.alley-reward-backdrop.diamond-mode[data-super-theme="winter"] .alley-reward-glow {
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(96, 206, 255, 0.94) 26%, rgba(255, 255, 255, 0) 72%);
+}
+
+.alley-reward-backdrop.magic-mode[data-super-theme="winter"] .alley-reward-ray,
+.alley-reward-backdrop.crate-mode[data-super-theme="winter"] .alley-reward-ray,
+.alley-reward-backdrop.diamond-mode[data-super-theme="winter"] .alley-reward-ray {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(96, 206, 255, 0.96), rgba(255, 255, 255, 0));
+}
+
+.alley-reward-backdrop.magic-mode[data-super-theme="winter"] .alley-reward-art,
+.alley-reward-backdrop.crate-mode[data-super-theme="winter"] .alley-reward-art,
+.alley-reward-backdrop.diamond-mode[data-super-theme="winter"] .alley-reward-art {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.alley-reward-backdrop.magic-mode[data-super-theme="winter"] .alley-reward-art .modal-image,
+.alley-reward-backdrop.magic-mode[data-super-theme="winter"] .alley-reward-art .asset-video,
+.alley-reward-backdrop.diamond-mode[data-super-theme="winter"] .alley-reward-art .modal-image,
+.alley-reward-backdrop.diamond-mode[data-super-theme="winter"] .alley-reward-art .asset-video,
+.alley-reward-backdrop.crate-mode[data-super-theme="winter"] .crate-showcase-image,
+.alley-reward-backdrop.crate-mode[data-super-theme="winter"] .crate-showcase-half-image {
+  filter:
+    drop-shadow(0 0 18px rgba(220, 246, 255, 0.98))
+    drop-shadow(0 0 38px rgba(96, 206, 255, 0.7))
+    drop-shadow(0 14px 16px rgba(17, 17, 17, 0.14));
+}
+
+.alley-reward-backdrop.magic-mode[data-super-theme="winter"] .alley-reward-name,
+.alley-reward-backdrop.magic-mode[data-super-theme="winter"] .alley-reward-count,
+.alley-reward-backdrop.crate-mode[data-super-theme="winter"] .alley-reward-name,
+.alley-reward-backdrop.crate-mode[data-super-theme="winter"] .alley-reward-count,
+.alley-reward-backdrop.diamond-mode[data-super-theme="winter"] .alley-reward-name,
+.alley-reward-backdrop.diamond-mode[data-super-theme="winter"] .alley-reward-count {
+  background: #dff4ff;
+  box-shadow:
+    0 0 0 4px rgba(190, 235, 255, 0.58),
+    7px 7px 0 var(--shadow);
+}
+
+.alley-reward-backdrop.crate-mode[data-super-theme="winter"] .crate-showcase-glint {
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.96), rgba(154, 225, 255, 0.42) 42%, transparent 72%);
 }
 
 .alley-reward-backdrop.coin-mode[data-super-theme] .alley-reward-glow {
@@ -12637,17 +14343,17 @@ body.game-view-active #game-view .touch-controls {
   box-shadow: none;
 }
 
-.alley-reward-backdrop.diamond-mode[data-super-theme] .alley-reward-glow {
+.alley-reward-backdrop.diamond-mode[data-super-theme]:not([data-super-theme="winter"]) .alley-reward-glow {
   background:
     radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(179, 92, 255, 0.92) 26%, rgba(255, 255, 255, 0) 72%);
 }
 
-.alley-reward-backdrop.diamond-mode[data-super-theme] .alley-reward-ray {
+.alley-reward-backdrop.diamond-mode[data-super-theme]:not([data-super-theme="winter"]) .alley-reward-ray {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(183, 96, 255, 0.96), rgba(255, 255, 255, 0));
 }
 
-.alley-reward-backdrop.diamond-mode[data-super-theme] .alley-reward-art {
+.alley-reward-backdrop.diamond-mode[data-super-theme]:not([data-super-theme="winter"]) .alley-reward-art {
   box-shadow: none;
 }
 
@@ -15896,7 +17602,7 @@ body.friends-view-active #friends-view .section-panel > *,
   height: 46px;
   transform-origin: 50% 50%;
   filter: drop-shadow(0 0 9px rgba(125, 226, 255, 0.72));
-  animation: nerissa-projectile-spin 0.42s linear infinite;
+  animation: none !important;
 }
 
 @keyframes nerissa-projectile-spin {
@@ -19286,7 +20992,106 @@ button.ranking-ship-percent {
   -webkit-text-fill-color: #111111;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
   box-shadow:
-    0 0 0 4px rgba(66, 222, 210, 0.34),
+	    0 0 0 4px rgba(66, 222, 210, 0.34),
+	    7px 7px 0 var(--shadow);
+}
+
+.alley-reward-backdrop.ranking-profile-photo-mode[data-super-theme="alley"] {
+  background:
+    radial-gradient(circle at center, rgba(255, 212, 243, 0.34), rgba(201, 90, 178, 0.22) 46%, rgba(0, 0, 0, 0.46) 78%);
+}
+
+.alley-reward-backdrop.ranking-profile-photo-mode[data-super-theme="alley"] .alley-reward-glow {
+  background: radial-gradient(circle, rgba(255, 247, 252, 0.98), rgba(255, 145, 226, 0.84) 30%, rgba(194, 75, 171, 0.42) 54%, rgba(255, 255, 255, 0) 74%);
+}
+
+.alley-reward-backdrop.ranking-profile-photo-mode[data-super-theme="alley"] .alley-reward-ray {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 121, 214, 0.96), rgba(255, 255, 255, 0));
+}
+
+.alley-reward-backdrop.ranking-profile-photo-mode[data-super-theme="alley"] .alley-reward-art {
+  background: #ffe3f7;
+  border-color: #7f2f72;
+  box-shadow:
+    inset 0 0 0 5px rgba(255, 255, 255, 0.72),
+    0 0 0 5px rgba(255, 144, 224, 0.3),
+    8px 8px 0 rgba(17, 17, 17, 0.28),
+    0 0 42px rgba(255, 121, 214, 0.58);
+}
+
+.alley-reward-backdrop.ranking-profile-photo-mode[data-super-theme="alley"] .alley-reward-art .modal-image,
+.alley-reward-backdrop.ranking-profile-photo-mode[data-super-theme="alley"] .alley-reward-art .asset-video {
+  filter:
+    drop-shadow(0 0 14px rgba(255, 235, 250, 0.9))
+    drop-shadow(0 12px 12px rgba(17, 17, 17, 0.18));
+}
+
+.alley-reward-backdrop.ranking-profile-photo-mode[data-super-theme="alley"] .alley-reward-name,
+.alley-reward-backdrop.ranking-profile-photo-mode[data-super-theme="alley"] .alley-reward-count {
+  border-color: #6d275e;
+  background: #ffd7f1;
+  box-shadow:
+    0 0 0 4px rgba(255, 144, 224, 0.34),
+    7px 7px 0 var(--shadow);
+}
+
+.alley-reward-backdrop.loading-screen-reward-mode {
+  background:
+    radial-gradient(circle at center, rgba(255, 215, 249, 0.36), rgba(210, 78, 184, 0.22) 48%, rgba(0, 0, 0, 0.48) 78%);
+}
+
+.alley-reward-backdrop.loading-screen-reward-mode .alley-reward-glow {
+  width: min(90vw, 560px);
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 165, 239, 0.9) 29%, rgba(213, 77, 184, 0.42) 54%, rgba(255, 255, 255, 0) 76%);
+  filter: blur(11px);
+}
+
+.alley-reward-backdrop.loading-screen-reward-mode .alley-reward-ray {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 137, 230, 0.92), rgba(255, 255, 255, 0));
+}
+
+.alley-reward-backdrop.loading-screen-reward-mode .alley-reward-card.show .alley-reward-art,
+.alley-reward-backdrop.loading-screen-reward-mode .alley-reward-card.manual-show .alley-reward-art {
+  animation:
+    alley-reward-art-pop 0.62s cubic-bezier(0.18, 0.86, 0.12, 1.18) both,
+    alley-reward-art-float 1.1s ease-in-out 0.62s infinite alternate;
+}
+
+.alley-reward-backdrop.loading-screen-reward-mode .alley-reward-art {
+  width: min(82vw, 540px);
+  aspect-ratio: 16 / 9;
+  margin-top: 18px;
+  background: transparent;
+  border: none;
+  border-radius: 16px;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.alley-reward-backdrop.loading-screen-reward-mode .alley-reward-art .modal-image,
+.alley-reward-backdrop.loading-screen-reward-mode .alley-reward-art .asset-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 16px;
+  filter:
+    drop-shadow(0 0 16px rgba(255, 233, 252, 0.95))
+    drop-shadow(0 0 46px rgba(255, 129, 230, 0.78))
+    drop-shadow(0 14px 16px rgba(17, 17, 17, 0.18));
+}
+
+.alley-reward-backdrop.loading-screen-reward-mode .alley-reward-name,
+.alley-reward-backdrop.loading-screen-reward-mode .alley-reward-count {
+  border-color: #9e4d91;
+  background: #ffe4fb;
+  color: #111111;
+  -webkit-text-fill-color: #111111;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 0 0 4px rgba(255, 164, 239, 0.34),
     7px 7px 0 var(--shadow);
 }
 
@@ -19466,6 +21271,7 @@ button.ranking-ship-percent {
     8px 8px 0 var(--shadow);
   transform: skewX(-11deg);
   color: #111111;
+  overflow: hidden;
 }
 
 .trophy-road-title-badge::before,
@@ -19486,6 +21292,54 @@ button.ranking-ship-percent {
   font-weight: 1000;
   line-height: 1;
   letter-spacing: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.trophy-road-title-shine {
+  position: absolute;
+  inset: -18px -70px;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.trophy-road-title-shine::before {
+  content: "";
+  position: absolute;
+  top: -14px;
+  bottom: -14px;
+  left: -42%;
+  width: 28%;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.78) 48%, rgba(255, 255, 255, 0));
+  filter: blur(1px);
+  transform: skewX(-18deg);
+  opacity: 0;
+  animation: trophyRoadTitleShineSweep 5.6s ease-in-out infinite;
+}
+
+@keyframes trophyRoadTitleShineSweep {
+  0%,
+  62% {
+    left: -42%;
+    opacity: 0;
+  }
+
+  68% {
+    opacity: 0.84;
+  }
+
+  82% {
+    left: 116%;
+    opacity: 0.72;
+  }
+
+  88%,
+  100% {
+    left: 116%;
+    opacity: 0;
+  }
 }
 
 .trophy-node-magicians-bundle-label {
@@ -19530,8 +21384,41 @@ button.ranking-ship-percent {
   border-color: var(--ink);
   color: #111111;
   box-shadow:
+	    inset 0 -4px 0 var(--bundle-label-shade),
+	    5px 5px 0 var(--shadow);
+}
+
+.trophy-node-magicians[data-bundle-theme="linda"] .trophy-node-magicians-bundle-label {
+  --bundle-label-bg: #ffe2f4;
+  --bundle-label-shade: rgba(238, 122, 197, 0.34);
+  border-color: var(--ink);
+  color: #111111;
+  box-shadow:
     inset 0 -4px 0 var(--bundle-label-shade),
-    5px 5px 0 var(--shadow);
+    5px 5px 0 var(--shadow),
+    0 0 14px rgba(255, 173, 229, 0.42);
+}
+
+.trophy-node-magicians[data-bundle-theme="lily"] .trophy-node-magicians-bundle-label {
+  --bundle-label-bg: #cfeeff;
+  --bundle-label-shade: rgba(87, 177, 231, 0.38);
+  border-color: var(--ink);
+  color: #111111;
+  box-shadow:
+    inset 0 -4px 0 var(--bundle-label-shade),
+    5px 5px 0 var(--shadow),
+    0 0 14px rgba(128, 216, 255, 0.46);
+}
+
+.trophy-node-magicians[data-bundle-theme="zoya"] .trophy-node-magicians-bundle-label {
+  --bundle-label-bg: #dce5ff;
+  --bundle-label-shade: rgba(89, 114, 210, 0.36);
+  border-color: var(--ink);
+  color: #111111;
+  box-shadow:
+    inset 0 -4px 0 var(--bundle-label-shade),
+    5px 5px 0 var(--shadow),
+    0 0 14px rgba(143, 166, 255, 0.48);
 }
 
 .alley-reward-backdrop.bundle-character-mode .alley-reward-art.alley-reward-bundle-art {
@@ -22706,7 +24593,7 @@ body.store-view-active #store-view.active,
 }
 
 .projectile-shell.nerissa-shot .projectile-image {
-  animation: nerissa-projectile-spin-full 0.42s linear infinite;
+  animation: none !important;
 }
 
 @keyframes nerissa-projectile-spin-full {
@@ -30821,4 +32708,790 @@ body.inventory-view-active #inventory-view .section-panel::before {
     transform: translateX(-50%) skewX(-7deg) translateY(0) scale(0.96);
     filter: drop-shadow(0 0 6px rgba(197, 162, 255, 0.34));
   }
+}
+
+/* Wardrobe grid redesign and unified character projectile sizing. */
+.projectile-shell.elfie-shot,
+.projectile-shell.lpsotka-shot,
+.projectile-shell.linda-shot,
+.projectile-shell.lily-shot,
+.projectile-shell.nora-shot,
+.projectile-shell.cloud-shot,
+.projectile-shell.ann-shot,
+.projectile-shell.grifos-shot,
+.projectile-shell.mycelia-shot,
+.projectile-shell.sylas-shot,
+.projectile-shell.polar-bear-shot,
+.projectile-shell.blizzy-shot,
+.projectile-shell.zoya-shot,
+.projectile-shell.finley-shot,
+.projectile-shell.nerissa-shot,
+.projectile-shell.hookcrab-shot,
+.projectile-shell.lunella-shot {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.projectile-shell.elfie-shot .projectile-image,
+.projectile-shell.lpsotka-shot .projectile-image,
+.projectile-shell.linda-shot .projectile-image,
+.projectile-shell.lily-shot .projectile-image,
+.projectile-shell.nora-shot .projectile-image,
+.projectile-shell.cloud-shot .projectile-image,
+.projectile-shell.ann-shot .projectile-image,
+.projectile-shell.grifos-shot .projectile-image,
+.projectile-shell.mycelia-shot .projectile-image,
+.projectile-shell.sylas-shot .projectile-image,
+.projectile-shell.polar-bear-shot .projectile-image,
+.projectile-shell.blizzy-shot .projectile-image,
+.projectile-shell.zoya-shot .projectile-image,
+.projectile-shell.finley-shot .projectile-image,
+.projectile-shell.nerissa-shot .projectile-image,
+.projectile-shell.hookcrab-shot .projectile-image,
+.projectile-shell.lunella-shot .projectile-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  image-rendering: pixelated;
+}
+
+.projectile-shell.sylas-shot .projectile-image {
+  transform-origin: center center !important;
+  animation: none !important;
+}
+
+#inventory-view .section-panel {
+  padding: clamp(14px, 2.4vw, 24px) !important;
+}
+
+#inventory-view .wardrobe-topbar {
+  position: relative;
+  z-index: 2;
+  min-height: 58px !important;
+  display: grid !important;
+  grid-template-columns: minmax(110px, 1fr) auto auto;
+  gap: clamp(10px, 2vw, 18px);
+  align-items: center !important;
+  margin-bottom: clamp(18px, 3vh, 28px) !important;
+  padding: 8px 10px !important;
+  border: 0;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: 0 10px 26px rgba(82, 91, 145, 0.12);
+  border-radius: 18px;
+  backdrop-filter: blur(6px);
+}
+
+#inventory-view .wardrobe-title {
+  margin: 0;
+  color: #111111;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-size: clamp(1.5rem, 4vw, 2.6rem);
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+#inventory-view .wardrobe-top-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+#inventory-view .wardrobe-tab-button {
+  min-width: clamp(104px, 13vw, 148px) !important;
+  min-height: 46px !important;
+  padding: 8px 12px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  color: #111111 !important;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif !important;
+  font-size: clamp(0.82rem, 1.35vw, 1.02rem) !important;
+  font-weight: 1000 !important;
+  letter-spacing: 0 !important;
+  line-height: 1 !important;
+  text-transform: uppercase;
+  transform: none !important;
+  box-shadow:
+    inset 0 -5px 0 rgba(17, 17, 17, 0.12),
+    5px 6px 0 rgba(17, 17, 17, 0.78) !important;
+}
+
+#inventory-view .wardrobe-tab-characters {
+  background: #ffe98f !important;
+}
+
+#inventory-view .wardrobe-tab-pets {
+  background: #e5d9ff !important;
+}
+
+#inventory-view .wardrobe-tab-loading-screens {
+  background: #ffd7f4 !important;
+}
+
+#inventory-view .wardrobe-tab-button.active {
+  filter: brightness(1.05) !important;
+  box-shadow:
+    inset 0 -5px 0 rgba(17, 17, 17, 0.16),
+    5px 6px 0 rgba(17, 17, 17, 0.78),
+    0 0 0 4px rgba(255, 255, 255, 0.52) !important;
+}
+
+#inventory-view .wardrobe-close-button {
+  justify-self: end;
+  border-radius: 8px !important;
+}
+
+#inventory-view .wardrobe-layout {
+  grid-template-columns: minmax(210px, 260px) minmax(0, 1fr) !important;
+  gap: clamp(18px, 3vw, 34px) !important;
+  align-items: stretch !important;
+}
+
+#inventory-view .wardrobe-equipped-panel {
+  padding-top: 0 !important;
+}
+
+#inventory-view .wardrobe-overview {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: clamp(18px, 3vh, 26px) !important;
+}
+
+#inventory-view .wardrobe-equipped-slot {
+  display: grid !important;
+  justify-items: center !important;
+  gap: 7px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  animation: wardrobe-equipped-pop 0.34s cubic-bezier(0.18, 0.92, 0.2, 1.12) forwards !important;
+}
+
+#inventory-view .wardrobe-equipped-card {
+  width: min(100%, 238px);
+  height: clamp(154px, 24vh, 218px);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    inset 0 -7px 0 rgba(17, 17, 17, 0.08),
+    8px 9px 0 rgba(17, 17, 17, 0.72);
+  overflow: visible;
+}
+
+#inventory-view .wardrobe-equipped-empty .wardrobe-equipped-card {
+  opacity: 0.72;
+}
+
+#inventory-view .wardrobe-equipped-platform,
+#inventory-view .wardrobe-equipped-platform::before,
+#inventory-view .wardrobe-equipped-platform::after,
+#inventory-view .wardrobe-character-art::before,
+#inventory-view .wardrobe-character-art::after,
+#inventory-view .wardrobe-pet-art::before,
+#inventory-view .wardrobe-pet-art::after {
+  display: none !important;
+}
+
+#inventory-view .wardrobe-slot-art {
+  width: 100% !important;
+  height: 100% !important;
+  display: grid !important;
+  place-items: center !important;
+  transform: none !important;
+}
+
+#inventory-view .wardrobe-equipped-pets .wardrobe-slot-art,
+#inventory-view .wardrobe-equipped-characters .wardrobe-slot-art {
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
+}
+
+#inventory-view .wardrobe-slot-art .item-image,
+#inventory-view .wardrobe-slot-art .asset-video,
+#inventory-view .wardrobe-equipped-pets .wardrobe-slot-art .item-image,
+#inventory-view .wardrobe-equipped-pets .wardrobe-slot-art .asset-video,
+#inventory-view .wardrobe-equipped-characters .wardrobe-slot-art .item-image,
+#inventory-view .wardrobe-equipped-characters .wardrobe-slot-art .asset-video {
+  width: 92% !important;
+  height: 92% !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  transform: translate(var(--wardrobe-art-x, 0), var(--wardrobe-art-y, 0)) scale(var(--wardrobe-art-scale, 1)) !important;
+  transform-origin: center bottom !important;
+  filter: drop-shadow(0 8px 10px rgba(17, 17, 17, 0.16)) !important;
+}
+
+#inventory-view .wardrobe-equipped-title {
+  margin: 0 !important;
+  max-width: min(100%, 218px) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #111111 !important;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif !important;
+  font-size: clamp(0.78rem, 1.3vw, 1.02rem) !important;
+  font-weight: 1000 !important;
+  line-height: 1.05 !important;
+  text-transform: uppercase;
+  transform: none !important;
+}
+
+#inventory-view .wardrobe-equipped-title::after {
+  display: none !important;
+}
+
+#inventory-view .wardrobe-equipped-world-badge,
+#inventory-view .wardrobe-item-world-badge {
+  margin: 0 !important;
+  padding: 5px 9px !important;
+  border-radius: 5px !important;
+  color: #111111 !important;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif !important;
+  font-size: clamp(0.52rem, 0.95vw, 0.68rem) !important;
+  font-weight: 1000 !important;
+  line-height: 1.05 !important;
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow:
+    inset 0 -3px 0 rgba(17, 17, 17, 0.1),
+    3px 3px 0 rgba(17, 17, 17, 0.72);
+}
+
+#inventory-view [data-wardrobe-world="magicians"] .wardrobe-equipped-world-badge,
+#inventory-view [data-wardrobe-world="magicians"] .wardrobe-item-world-badge {
+  background: #ffd6ee !important;
+}
+
+#inventory-view [data-wardrobe-world="winter"] .wardrobe-equipped-world-badge,
+#inventory-view [data-wardrobe-world="winter"] .wardrobe-item-world-badge {
+  background: #cfeeff !important;
+}
+
+#inventory-view [data-wardrobe-world="ranking"] .wardrobe-equipped-world-badge,
+#inventory-view [data-wardrobe-world="ranking"] .wardrobe-item-world-badge {
+  background: #94dfdc !important;
+}
+
+#inventory-view .wardrobe-collection-panel {
+  min-height: min(70vh, 650px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: clamp(14px, 2vw, 20px) !important;
+  border: 0;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    inset 0 -8px 0 rgba(17, 17, 17, 0.08),
+    9px 10px 0 rgba(17, 17, 17, 0.72),
+    0 14px 28px rgba(83, 91, 145, 0.16);
+}
+
+#inventory-view .wardrobe-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#inventory-view .wardrobe-sort-control,
+#inventory-view .wardrobe-search-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  color: #111111;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+#inventory-view .wardrobe-sort-control span,
+#inventory-view .wardrobe-search-control span {
+  font-size: clamp(0.72rem, 1.2vw, 0.92rem);
+}
+
+#inventory-view #inventory-sort-select,
+#inventory-view #inventory-search-input {
+  min-height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: #f7f8ff;
+  color: #111111;
+  box-shadow:
+    inset 0 -3px 0 rgba(17, 17, 17, 0.08),
+    3px 4px 0 rgba(17, 17, 17, 0.7);
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-weight: 900;
+}
+
+#inventory-view #inventory-sort-select {
+  max-width: min(52vw, 250px);
+  padding: 6px 8px;
+}
+
+#inventory-view #inventory-search-input {
+  width: min(42vw, 255px);
+  padding: 6px 11px;
+}
+
+#inventory-view .wardrobe-paged-grid {
+  height: 100%;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  grid-auto-rows: minmax(178px, 1fr);
+  gap: clamp(10px, 1.5vw, 16px) !important;
+  align-content: start;
+  overflow: hidden;
+}
+
+#inventory-view .wardrobe-character-tile,
+#inventory-view .wardrobe-pet-tile {
+  min-height: 0 !important;
+  display: grid;
+  opacity: 0;
+  animation: wardrobe-item-pop 0.32s cubic-bezier(0.18, 0.92, 0.2, 1.12) forwards !important;
+}
+
+#inventory-view .wardrobe-character-open,
+#inventory-view .wardrobe-pet-open {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(92px, 1fr) auto auto;
+  justify-items: center;
+  gap: 5px;
+  padding: 10px 8px 9px;
+  border: 0;
+  border-radius: 15px;
+  background: #ffdcec;
+  color: #111111;
+  cursor: pointer;
+  box-shadow:
+    inset 0 -6px 0 rgba(17, 17, 17, 0.08),
+    5px 6px 0 rgba(17, 17, 17, 0.68);
+  transition: transform 0.14s ease, filter 0.14s ease;
+}
+
+#inventory-view .wardrobe-character-tile[data-wardrobe-world="winter"] .wardrobe-character-open,
+#inventory-view .wardrobe-pet-tile[data-wardrobe-world="winter"] .wardrobe-pet-open {
+  background: #d8f2ff;
+}
+
+#inventory-view .wardrobe-character-tile[data-wardrobe-world="ranking"] .wardrobe-character-open,
+#inventory-view .wardrobe-pet-tile[data-wardrobe-world="ranking"] .wardrobe-pet-open {
+  background: #b9efec;
+}
+
+#inventory-view .wardrobe-character-open:hover,
+#inventory-view .wardrobe-pet-open:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.03);
+}
+
+#inventory-view .wardrobe-character-open:active,
+#inventory-view .wardrobe-pet-open:active {
+  transform: translateY(2px);
+}
+
+#inventory-view .wardrobe-character-art,
+#inventory-view .wardrobe-pet-art {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 92px;
+  aspect-ratio: auto !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+#inventory-view .wardrobe-character-art .item-image,
+#inventory-view .wardrobe-character-art .asset-video,
+#inventory-view .wardrobe-pet-art .item-image,
+#inventory-view .wardrobe-pet-art .asset-video {
+  width: 95% !important;
+  height: 95% !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  transform: translate(var(--wardrobe-art-x, 0), var(--wardrobe-art-y, 0)) scale(var(--wardrobe-art-scale, 1)) !important;
+  transform-origin: center bottom !important;
+  filter: drop-shadow(0 7px 8px rgba(17, 17, 17, 0.16)) !important;
+}
+
+#inventory-view .wardrobe-character-name,
+#inventory-view .wardrobe-pet-name {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #111111 !important;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif !important;
+  font-size: clamp(0.68rem, 1.05vw, 0.86rem) !important;
+  font-weight: 1000 !important;
+  line-height: 1.02 !important;
+  text-align: center;
+  text-transform: uppercase;
+  transform: none !important;
+}
+
+#inventory-view .wardrobe-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 44px;
+}
+
+#inventory-view .wardrobe-page-button {
+  width: 44px;
+  height: 38px;
+  border: 0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111111;
+  box-shadow:
+    inset 0 -4px 0 rgba(17, 17, 17, 0.12),
+    4px 5px 0 rgba(17, 17, 17, 0.78);
+  font-size: 1.7rem;
+  font-weight: 1000;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#inventory-view .wardrobe-page-button:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+#inventory-view .wardrobe-page-label {
+  min-width: 62px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #e5d9ff;
+  color: #111111;
+  box-shadow:
+    inset 0 -3px 0 rgba(17, 17, 17, 0.12),
+    3px 4px 0 rgba(17, 17, 17, 0.72);
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-weight: 1000;
+  text-align: center;
+}
+
+#inventory-view .wardrobe-empty-world-banner {
+  align-self: center;
+  justify-self: center;
+  grid-column: 1 / -1;
+  background: #e5d9ff !important;
+  border-radius: 10px;
+  transform: none !important;
+}
+
+#inventory-view .wardrobe-empty-world-banner[data-empty-world="ŚWIAT ZIMOWY"] {
+  background: #cfeeff !important;
+}
+
+#inventory-view .wardrobe-empty-world-banner[data-empty-world="PIRACKIE PODBOJE"] {
+  background: #94dfdc !important;
+}
+
+@media (max-width: 960px) {
+  #inventory-view .wardrobe-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  #inventory-view .wardrobe-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #inventory-view .wardrobe-paged-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  #inventory-view .wardrobe-topbar {
+    grid-template-columns: 1fr auto;
+  }
+
+  #inventory-view .wardrobe-top-tabs {
+    grid-column: 1 / -1;
+    justify-content: center;
+    order: 3;
+  }
+
+  #inventory-view .wardrobe-tools {
+    justify-content: center;
+  }
+
+  #inventory-view #inventory-search-input {
+    width: min(72vw, 260px);
+  }
+
+  #inventory-view .wardrobe-paged-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-rows: minmax(168px, 1fr);
+  }
+
+  #inventory-view .wardrobe-loading-screen-grid {
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: minmax(220px, auto) !important;
+  }
+}
+
+/* Final wardrobe visual pass: lighter glass, stable cards, press-in buttons. */
+#inventory-view .wardrobe-topbar,
+#inventory-view .wardrobe-collection-panel {
+  background: rgba(255, 255, 255, 0.62) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.64),
+    0 12px 28px rgba(82, 91, 145, 0.13) !important;
+}
+
+#inventory-view .wardrobe-collection-panel {
+  min-height: min(72vh, 670px) !important;
+  overflow: visible !important;
+}
+
+#inventory-view .wardrobe-tab-button,
+#inventory-view .wardrobe-page-button,
+#inventory-view .wardrobe-character-open,
+#inventory-view .wardrobe-pet-open,
+#inventory-view #inventory-sort-select,
+#inventory-view #inventory-search-input {
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease !important;
+}
+
+#inventory-view .wardrobe-tab-button:active {
+  transform: translate(4px, 5px) !important;
+  box-shadow:
+    inset 0 -2px 0 rgba(17, 17, 17, 0.14),
+    1px 1px 0 rgba(17, 17, 17, 0.78) !important;
+}
+
+#inventory-view .wardrobe-page-button:active:not(:disabled) {
+  transform: translate(3px, 4px);
+  box-shadow:
+    inset 0 -2px 0 rgba(17, 17, 17, 0.14),
+    1px 1px 0 rgba(17, 17, 17, 0.78);
+}
+
+#inventory-view .wardrobe-character-open,
+#inventory-view .wardrobe-pet-open {
+  overflow: visible !important;
+  grid-template-rows: minmax(104px, 1fr) auto auto !important;
+  background: #ffeaf4 !important;
+}
+
+#inventory-view .wardrobe-character-open:active,
+#inventory-view .wardrobe-pet-open:active {
+  transform: translate(4px, 5px) !important;
+  box-shadow:
+    inset 0 -2px 0 rgba(17, 17, 17, 0.11),
+    1px 1px 0 rgba(17, 17, 17, 0.68) !important;
+}
+
+#inventory-view .wardrobe-paged-grid {
+  overflow: visible !important;
+  grid-auto-rows: clamp(184px, 22vh, 210px) !important;
+  align-content: start !important;
+}
+
+#inventory-view .wardrobe-loading-screen-grid {
+  grid-template-columns: repeat(2, minmax(220px, 1fr)) !important;
+  grid-auto-rows: minmax(236px, auto) !important;
+  align-content: start !important;
+  overflow: visible !important;
+}
+
+#inventory-view .wardrobe-loading-screen-tile {
+  min-height: 0;
+  display: grid;
+  opacity: 0;
+  animation: wardrobe-item-pop 0.32s cubic-bezier(0.18, 0.92, 0.2, 1.12) forwards;
+}
+
+#inventory-view .wardrobe-loading-screen-open {
+  width: 100%;
+  height: 100%;
+  min-height: 226px;
+  display: grid;
+  grid-template-rows: minmax(120px, 1fr) auto auto auto;
+  justify-items: center;
+  gap: 7px;
+  padding: 13px 12px 12px;
+  border: 0;
+  border-radius: 15px;
+  background: #ffe9fa;
+  color: #111111;
+  cursor: pointer;
+  box-shadow:
+    inset 0 -7px 0 rgba(152, 65, 141, 0.12),
+    6px 7px 0 rgba(17, 17, 17, 0.64),
+    0 0 18px rgba(255, 146, 230, 0.18);
+  transition: transform 0.14s ease, filter 0.14s ease, box-shadow 0.14s ease;
+}
+
+#inventory-view .wardrobe-loading-screen-open:hover:not(:disabled) {
+  transform: translateY(-3px);
+  filter: brightness(1.03);
+}
+
+#inventory-view .wardrobe-loading-screen-open:active:not(:disabled) {
+  transform: translate(4px, 5px);
+  box-shadow:
+    inset 0 -2px 0 rgba(152, 65, 141, 0.12),
+    1px 1px 0 rgba(17, 17, 17, 0.64);
+}
+
+#inventory-view .wardrobe-loading-screen-open:disabled {
+  cursor: default;
+}
+
+#inventory-view .wardrobe-loading-screen-tile.active .wardrobe-loading-screen-open {
+  background: #ffd4f2;
+  box-shadow:
+    inset 0 -7px 0 rgba(152, 65, 141, 0.16),
+    6px 7px 0 rgba(17, 17, 17, 0.64),
+    0 0 24px rgba(255, 134, 229, 0.42);
+}
+
+#inventory-view .wardrobe-loading-screen-art {
+  width: 100%;
+  max-width: 330px;
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  border: 4px solid #1c1024;
+  border-radius: 0;
+  background: #f8faff;
+  box-shadow:
+    5px 5px 0 rgba(17, 17, 17, 0.35),
+    0 0 0 4px rgba(255, 184, 239, 0.32);
+  overflow: hidden;
+}
+
+#inventory-view .wardrobe-loading-screen-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: auto;
+}
+
+#inventory-view .wardrobe-loading-screen-name,
+#inventory-view .wardrobe-loading-screen-status {
+  margin: 0;
+  color: #111111;
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-weight: 1000;
+  line-height: 1.08;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#inventory-view .wardrobe-loading-screen-name {
+  max-width: 100%;
+  font-size: clamp(0.72rem, 1.2vw, 0.94rem);
+}
+
+#inventory-view .wardrobe-loading-screen-status {
+  min-width: 92px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow:
+    inset 0 -3px 0 rgba(17, 17, 17, 0.1),
+    3px 4px 0 rgba(17, 17, 17, 0.58);
+  font-size: clamp(0.64rem, 1vw, 0.82rem);
+}
+
+#inventory-view .wardrobe-loading-screen-tile.active .wardrobe-loading-screen-status {
+  background: #b8ffca;
+}
+
+#inventory-view .wardrobe-character-tile[data-wardrobe-world="winter"] .wardrobe-character-open,
+#inventory-view .wardrobe-pet-tile[data-wardrobe-world="winter"] .wardrobe-pet-open {
+  background: #e9f8ff !important;
+}
+
+#inventory-view .wardrobe-character-tile[data-wardrobe-world="ranking"] .wardrobe-character-open,
+#inventory-view .wardrobe-pet-tile[data-wardrobe-world="ranking"] .wardrobe-pet-open {
+  background: #d7fbf8 !important;
+}
+
+#inventory-view [data-wardrobe-world="magicians"] .wardrobe-equipped-world-badge,
+#inventory-view [data-wardrobe-world="magicians"] .wardrobe-item-world-badge {
+  background: #ffe4f1 !important;
+}
+
+#inventory-view [data-wardrobe-world="winter"] .wardrobe-equipped-world-badge,
+#inventory-view [data-wardrobe-world="winter"] .wardrobe-item-world-badge {
+  background: #e2f6ff !important;
+}
+
+#inventory-view [data-wardrobe-world="ranking"] .wardrobe-equipped-world-badge,
+#inventory-view [data-wardrobe-world="ranking"] .wardrobe-item-world-badge {
+  background: #c9f5f2 !important;
+}
+
+#inventory-view .wardrobe-character-art,
+#inventory-view .wardrobe-pet-art {
+  min-height: 106px !important;
+  overflow: visible !important;
+}
+
+#inventory-view .wardrobe-character-art .item-image,
+#inventory-view .wardrobe-character-art .asset-video,
+#inventory-view .wardrobe-pet-art .item-image,
+#inventory-view .wardrobe-pet-art .asset-video {
+  width: 88% !important;
+  height: 88% !important;
+  object-position: center center !important;
+}
+
+#inventory-view .wardrobe-equipped-card {
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  overflow: visible !important;
+}
+
+#inventory-view .wardrobe-slot-art .item-image,
+#inventory-view .wardrobe-slot-art .asset-video,
+#inventory-view .wardrobe-equipped-pets .wardrobe-slot-art .item-image,
+#inventory-view .wardrobe-equipped-pets .wardrobe-slot-art .asset-video,
+#inventory-view .wardrobe-equipped-characters .wardrobe-slot-art .item-image,
+#inventory-view .wardrobe-equipped-characters .wardrobe-slot-art .asset-video {
+  width: 86% !important;
+  height: 86% !important;
+  object-position: center center !important;
+}
+
+#inventory-view .wardrobe-layout {
+  align-items: start !important;
+}
+
+#inventory-view .wardrobe-overview {
+  min-height: clamp(370px, 58vh, 520px) !important;
+  align-content: start !important;
 }

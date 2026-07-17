@@ -5,6 +5,7 @@ const STORAGE_KEY = "pixel-platoya-save-v2";
 const LEGACY_STORAGE_KEYS = ["pixel-platoya-save-v1"];
 const FIREBASE_MULTIPLAYER_CONFIG = null;
 const FIREBASE_SOCIAL_CONFIG = window.PIXEL_PLATOYA_FIREBASE_CONFIG || null;
+const PAYMENT_FUNCTIONS_REGION = "europe-west1";
 const PROFILE_SYNC_DEBOUNCE_MS = 900;
 const PROFILE_PRESENCE_HEARTBEAT_MS = 10000;
 const PROFILE_ACTIVE_WINDOW_MS = 20000;
@@ -14,8 +15,10 @@ const PARTY_INVITE_EXPIRY_MS = 5 * 60 * 1000;
 const PARTY_PLAYER_STALE_MS = 6000;
 const SUPER_ALLEY_DIAMOND_PRICE = 119;
 const SUPER_ALLEY_CASH_PRICE_LABEL = "19,99zł";
-const MAGICIANS_WORLD_END_TROPHIES = 2000;
-const WINTER_WORLD_START_TROPHIES = 2050;
+const MAGICIANS_ALLEY_LEGACY_END_TROPHIES = 2000;
+const MAGICIANS_WORLD_END_TROPHIES = 3000;
+const WINTER_WORLD_END_TROPHIES = MAGICIANS_WORLD_END_TROPHIES + MAGICIANS_ALLEY_LEGACY_END_TROPHIES;
+const WINTER_WORLD_START_TROPHIES = MAGICIANS_WORLD_END_TROPHIES + 50;
 const TOTAL_GAME_WAVES = 5;
 const MULTIPLAYER_QUEUE_DURATION_MS = 10000;
 const MULTIPLAYER_START_COUNTDOWN_MS = 5000;
@@ -27,13 +30,17 @@ const MULTIPLAYER_ROOM_STALE_MS = 45000;
 const TROPHY_NODE_WIDTH = 220;
 const TROPHY_NODE_GAP = 20;
 const MAGICIANS_TROPHY_NODE_WIDTH = 176;
-const MAGICIANS_ALLEY_PROGRESS_SLOTS = Array.from({ length: 40 }, (_, index) => (index + 1) * 50);
-const WINTER_ALLEY_PROGRESS_SLOTS = Array.from({ length: 40 }, (_, index) => WINTER_WORLD_START_TROPHIES + (index * 50));
+const MAGICIANS_ALLEY_PROGRESS_SLOTS = Array.from({ length: MAGICIANS_WORLD_END_TROPHIES / 50 }, (_, index) => (index + 1) * 50);
+const WINTER_ALLEY_PROGRESS_SLOTS = Array.from({ length: (WINTER_WORLD_END_TROPHIES - MAGICIANS_WORLD_END_TROPHIES) / 50 }, (_, index) => WINTER_WORLD_START_TROPHIES + (index * 50));
 const MAGICIANS_PORTAL_SPACER_WIDTH = 520;
 const MAGICIANS_PORTAL_SIZE = 240;
 const TROPHY_ICON_IMAGE = "./assets/currencies/monety_2.png";
 const PET_RANK_STEP_TROPHIES = 50;
 const PET_RANK_MAX_LEVEL = 10;
+const PET_RANK_MAX_LEVEL_BY_THEME = {
+  magicians: 30,
+  winter: PET_RANK_MAX_LEVEL,
+};
 const TROPHY_DIAMOND_IMAGE = "./assets/currencies/diamenty_.png";
 const COIN_REWARD_IMAGE = "./assets/currencies/wymiatanie.png";
 const DIAMOND_REWARD_IMAGE = "./assets/currencies/wypaddanie.png";
@@ -75,6 +82,7 @@ const STORE_MAX_PLATOYA_OFFER = {
   coins: 12600,
   elixirs: 20,
 };
+const STORE_MUSIC_OFFER_PRICE = 25000;
 const CONTENT_CREATOR_NICKNAMES = new Set(["kacper0", "hdisjf"]);
 const CONTENT_CREATOR_DIAMOND_REWARD = 299;
 const CONTENT_CREATOR_MACHINE_OFFER_ID = "content-creator-machine";
@@ -163,8 +171,81 @@ const MAGICIANS_SILVER_GATE_TROPHIES = MAGICIANS_WORLD_END_TROPHIES;
 const WINTER_WORLD_SILVER_REQUIREMENT = 200;
 const SILVER_TO_DIAMONDS_RATE = 2;
 const MAGICIANS_BRIDGE_ROBOT_COIN_REWARD = 20;
-const RANKING_ALLEY_UNLOCK_TROPHIES = 500;
+const RANKING_ALLEY_UNLOCK_TROPHIES = 1000;
+const GAME_START_LOADING_IMAGE = "./ekran_ładowania.png";
+const DEFAULT_GAME_START_LOADING_IMAGE = "./assets/backgrounds/ładowanie_1.png";
+const APP_START_LOADING_MIN_MS = 5200;
+const GAME_START_LOADING_MIN_MS = 15000;
+const GAME_START_LOADING_MAX_MS = 22000;
+const LOADING_SCREEN_ITEMS = [
+  {
+    id: "default",
+    name: "Klasyczny ekran",
+    image: DEFAULT_GAME_START_LOADING_IMAGE,
+    fallbackText: "LOAD",
+    worldLabel: "DOMYŚLNY",
+  },
+  {
+    id: "ekran-ladowania",
+    name: "Tajemnicza zielona maź",
+    image: GAME_START_LOADING_IMAGE,
+    fallbackText: "LOAD",
+    worldLabel: "ŚWIAT MAGIKÓW",
+  },
+  {
+    id: "zauroczenie-nad-strumykiem",
+    name: "Zauroczenie nad strumykiem",
+    image: "./ekran_ładowania2.png",
+    fallbackText: "LOAD",
+    worldLabel: "ALEJA SUPER",
+  },
+  {
+    id: "motyle-lazurowe-spotkanie",
+    name: "Motyle Lazurowe Spotkanie",
+    image: "./ekran_ładowania3.png",
+    fallbackText: "LOAD",
+    worldLabel: "ALEJA SUPER",
+  },
+  {
+    id: "elfia-sprawa",
+    name: "Elfia sprawa",
+    image: "./ekran_ładowania4.png",
+    fallbackText: "LOAD",
+    worldLabel: "ALEJA SUPER",
+  },
+  {
+    id: "krajobraz-magicznej-krainy",
+    name: "Krajobraz Magicznej Krainy",
+    image: "./ekran_ładowania5.png",
+    fallbackText: "LOAD",
+    worldLabel: "ŚWIAT MAGIKÓW",
+  },
+  {
+    id: "collegowa-linda-w-akcji",
+    name: "Collegowa Linda w akcji",
+    image: "./ekran_ładowania6.png",
+    fallbackText: "LOAD",
+    worldLabel: "ALEJA SUPER",
+  },
+  {
+    id: "ella-w-swoim-azylu",
+    name: "Ella w swoim azylu",
+    image: "./ekran_ładowania7.png",
+    fallbackText: "LOAD",
+    worldLabel: "ALEJA SUPER",
+  },
+];
 const RANKING_ALLEY_PREMIUM_DIAMOND_PRICE = 249;
+const GAME_START_LOADING_STATUS_MESSAGES = [
+  "Łączenie z chmurą",
+  "Testowanie serweru",
+  "Tresowanie PlatoYI",
+];
+const GAME_START_LOADING_TIPS = [
+  "Wskazówka: zbieraj puchary i odblokowuj nagrody z alei!",
+  "Wskazówka: każda PlatoYA to unikalny zwierzaczek z unikalną mocą. Możesz je odblokować z maszyny lub ze skrzyni",
+  "Wskazówka: zbieraj klucze PlatoYI i otwieraj maszyny (pierwsza maszyna wymaga dwóch kluczy, standardowa: dwóch)",
+];
 const RANKING_ALLEY_PREMIUM_CASH_PRICE_LABEL = "33,99zł";
 const RANKING_ALLEY_POINT_ICON = "./punktyrankingu.png";
 const RANKING_ALLEY_TICKET_IMAGE = "./bilett.png";
@@ -178,7 +259,7 @@ const HIGH_TOWER_SPARKLES_IMAGE = "./blyskotki.png";
 const HIGH_TOWER_SPARKLES_REWARD_IMAGE = "./wypadanko.png";
 const HIGH_TOWER_FLARO_ID = "flaro";
 const HIGH_TOWER_COSTUME_SPARKLE_PRICE = 15000;
-const HIGH_TOWER_FLARO_SPARKLE_PRICE = 250000;
+const HIGH_TOWER_FLARO_SPARKLE_PRICE = 20000;
 const HIGH_TOWER_CHEST_COSTUME_PITY_LIMIT = 20;
 const HIGH_TOWER_FREE_CHEST_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const HIGH_TOWER_DAILY_VICTORY_CHEST_LIMIT = 6;
@@ -500,11 +581,21 @@ const STORE_SPECIAL_CURRENCY_OFFERS = [
 const STORE_PLATOYA_MACHINE_OFFERS = [
   {
     id: "plato-machine-magicians",
+    worldId: "magicians",
     amount: 1,
     price: 89,
     name: "Maszyna Platoi",
     title: "MASZYNA PLATOI",
     image: "./automat.1.png",
+  },
+  {
+    id: "plato-machine-winter",
+    worldId: "winter",
+    amount: 1,
+    price: 89,
+    name: "Zimowa Maszyna Platoi",
+    title: "ZIMOWA MASZYNA PLATOI",
+    image: "./zimowka.png",
   },
 ];
 const STORE_PREMIUM_ALLEY_OFFERS = [
@@ -536,7 +627,9 @@ const STORE_WINTER_PREMIUM_BOOST_OFFER = {
 const MAGIC_MACHINE_PRICE = 2;
 const MAGIC_MACHINE_FIRST_PRICE = 1;
 const MAGIC_MACHINE_FIRST_REWARD_PET_ID = "pies-magik";
+const WINTER_MACHINE_FIRST_REWARD_PET_ID = "niedzwiedz-polarny";
 const MAGIC_MACHINE_IMAGE = "./automat.1.png";
+const WINTER_MAGIC_MACHINE_IMAGE = "./zimowka.png";
 const MAGIC_MACHINE_BALL_IMAGE = "./kulka.1.png";
 const SUPER_ALLEY_REWARD_THRESHOLDS = {
   alley: new Set([100, 250, 350, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1750, 1850, 1950]),
@@ -562,6 +655,9 @@ const SOUND_EFFECT_SOURCES = {
   shotLunella: ["./lunella.mp3"],
   shotThalia: ["./thalia.mp3", "./assets/sounds/attacks/thalia.mp3"],
   shotShulla: ["./shulla.mp3"],
+  shotZoya: ["./zoya.mp3"],
+  shotFinley: ["./fin.mp3"],
+  shotBlizzy: ["./blizz.mp3"],
   coralFlash: ["./flash.mp3", "./assets/sounds/pets/flash.mp3"],
   flaroFire: ["./zianie.mp3", "./assets/sounds/pets/zianie.mp3"],
   towerShot: ["./strzall.mp3", "./assets/sounds/game/strzall.mp3"],
@@ -594,6 +690,14 @@ const SOUND_EFFECT_SOURCES = {
   voiceThalia: ["./thaliavoice_1.mp3", "./thaliavoice_2.mp3", "./thaliavoice_3.mp3", "./thaliavoice.mp3"],
   voiceSylias: ["./syliasvoice_1.mp3", "./syliasvoice_2.mp3", "./syliasvoice_3.mp3", "./syliasvoice.mp3"],
   voiceShulla: ["./shullavoice_1.mp3", "./shullavoice_2.mp3", "./shullavoice_3.mp3", "./shullavoice.mp3"],
+  voiceLily: ["./lilyvoice_1.mp3", "./lilyvoice_2.mp3", "./lilyvoice_3.mp3"],
+  voiceZoya: ["./zoyavoice_1.mp3", "./zoyavoice_2.mp3", "./zoyavoice_3.mp3"],
+  voiceFinley: ["./finleyvoice_1.mp3", "./finleyvoice_2.mp3", "./finleyvoice_3.mp3"],
+  voiceBlizzy: ["./blizzyvoice_1.mp3", "./blizzyvoice_2.mp3", "./blizzyvoice_3.mp3"],
+  voiceLunella: ["./lunellavoice_1.mp3", "./lunellavoice_2.mp3", "./lunellavoice_3.mp3"],
+  voiceCloud: ["./cloudvoice_1.mp3", "./cloudvoice_2.mp3", "./cloudvoice_3.mp3"],
+  voiceNora: ["./noravoice_1.mp3", "./noravoice_2.mp3", "./noravoice_3.mp3"],
+  voiceAnn: ["./annvoice_1.mp3", "./annvoice_2.mp3", "./annvoice_3.mp3"],
   superIntro: ["./assets/sounds/game/super_1.mp3"],
   magicMachineRoll: ["./losowanie.mp3"],
   magicMachineOpen: ["./losowanie2.mp3"],
@@ -619,6 +723,42 @@ const BACKGROUND_MUSIC_SOURCES = {
   ranking: ["./piracci.mp3", "./assets/sounds/game/piracci.mp3"],
   tower: ["./wierzaa.mp3", "./assets/sounds/game/muzyka_1.mp3"],
 };
+const MUSIC_TRACK_ITEMS = [
+  {
+    id: "magiczna-kraina",
+    name: "Magiczna Kraina",
+    image: "./assets/backgrounds/ładowanie_1.png",
+    sources: BACKGROUND_MUSIC_SOURCES.alley,
+    worldLabel: "ŚWIAT MAGIKÓW",
+    defaultTrack: true,
+  },
+  {
+    id: "bialy-puch",
+    name: "Biały Puch",
+    image: "./assets/backgrounds/ładowanie_2.png",
+    sources: BACKGROUND_MUSIC_SOURCES.winter,
+    worldLabel: "ŚWIAT ZIMOWY",
+    winterTrack: true,
+  },
+  {
+    id: "grzybowe-plasy",
+    name: "Grzybowe Pląsy",
+    image: "./grzybowe.png",
+    sources: ["./grzybowe.mp3"],
+    worldLabel: "ŚWIAT MAGIKÓW",
+    storeOffer: true,
+    price: STORE_MUSIC_OFFER_PRICE,
+  },
+  {
+    id: "walc-osobliwosci",
+    name: "Walc Osobliwości",
+    image: "./walc.png",
+    sources: ["./walc.mp3"],
+    worldLabel: "ŚWIAT MAGIKÓW",
+    storeOffer: true,
+    price: STORE_MUSIC_OFFER_PRICE,
+  },
+];
 const GAMEPLAY_BACKGROUND_MUSIC_SOURCES = [
   "./gra_1.ogg",
   "./assets/sounds/game/gra_1.ogg",
@@ -855,13 +995,23 @@ const TOWER_CONFIG = {
 };
 
 const CATALOG = {
-  profilePhotos: [
-    {
-      id: "ranking-photo-11",
-      name: "Zdjęcie Profilu",
-      image: RANKING_PROFILE_PHOTO_IMAGE,
-    },
-  ],
+	  profilePhotos: [
+	    {
+	      id: "ranking-photo-11",
+	      name: "Zdjęcie Profilu",
+	      image: RANKING_PROFILE_PHOTO_IMAGE,
+	    },
+	    {
+	      id: "magicians-photo-2",
+	      name: "Zdjęcie Profilu",
+	      image: "./zdjęcie_profilowe2.png",
+	    },
+	    {
+	      id: "magicians-photo-3",
+	      name: "Zdjęcie Profilu",
+	      image: "./zdjęcie_profilu3.png",
+	    },
+	  ],
   characters: [
     {
           id: "magik-millo",
@@ -873,7 +1023,7 @@ const CATALOG = {
         },
     {
           id: "elfie",
-          name: "Elfie",
+          name: "Ella",
           price: 0,
           cashPriceLabel: "",
           image: "./assets/characters/postac_2.png",
@@ -889,30 +1039,48 @@ const CATALOG = {
           unlockWorld: "alley",
           storeNote: "Zdobadz na koncu Alei Pucharow.",
         },
-    {
-          id: "roslinna-krolowa-linda",
-          name: "Roslinna Krolowa Linda",
-          price: 0,
-          cashPriceLabel: "",
-          image: "./assets/characters/postac_4.png",
-          storeNote: "Skorka premium Lindy z królewskim atakiem natury.",
-        },
+	    {
+	          id: "roslinna-krolowa-linda",
+	          name: "Roslinna Krolowa Linda",
+	          price: 0,
+	          cashPriceLabel: "",
+	          image: "./assets/characters/postac_4.png",
+	          storeNote: "Skorka premium Lindy z królewskim atakiem natury.",
+	        },
+	    {
+	          id: "wata-cukrowa-linda",
+	          name: "Wata Cukrowa Linda",
+	          price: 0,
+	          cashPriceLabel: "",
+	          image: "./linda_przebranie.png",
+	          unlockWorld: "alley",
+	          storeNote: "Przebranie Lindy z przedłużonej Alei Magików.",
+	        },
     {
           id: "elfie-wojowniczka",
-          name: "Elfie Wojowniczka",
+          name: "Ella Wojowniczka",
           price: 0,
           cashPriceLabel: "",
           image: "./assets/characters/postac_5.png",
-          storeNote: "Skorka Elfie gotowa do walki.",
+          storeNote: "Skorka Elli gotowa do walki.",
         },
-    {
-          id: "elfie-w-swojej-naturze",
-          name: "Elfie w swojej naturze",
-          price: 0,
-          cashPriceLabel: "",
-          image: "./assets/characters/postac_6.png",
-          storeNote: "Naturalna wersja Elfie ze swoim atakiem.",
-        },
+	    {
+	          id: "elfie-w-swojej-naturze",
+	          name: "Ella w swojej naturze",
+	          price: 0,
+	          cashPriceLabel: "",
+	          image: "./assets/characters/postac_6.png",
+	          storeNote: "Naturalna wersja Elli ze swoim atakiem.",
+	        },
+	    {
+	          id: "pilna-studentka-ella",
+	          name: "Pilna Studentka Ella",
+	          price: 0,
+	          cashPriceLabel: "",
+	          image: "./przebranie_ella.png",
+	          unlockWorld: "alley",
+	          storeNote: "Przebranie Elli z przedłużonej Alei Magików.",
+	        },
     {
           id: "grifos",
           name: "Grifos",
@@ -989,6 +1157,7 @@ const CATALOG = {
           image: "./lunella.png",
           storeWorld: "magicians",
           storeNote: "Sklepowa postać z dziennej oferty.",
+          description: "Jedni uważają ją za wróżkę zębuszkę, inni za żabią księżniczkę, jednak jej pochodzenie wciąż pozostaje jej tajemnicą. Jedno jest pewne - to dobra wróżka.",
         },
     {
           id: "thalia",
@@ -1022,22 +1191,52 @@ const CATALOG = {
           storeNote: "Nagroda z konca Swiata Zimowego.",
         },
     {
-          id: "tricky",
-          name: "Tricky",
+          id: "przebranko-lily",
+          name: "Lily w Ciepłej Panterce",
           price: 0,
           cashPriceLabel: "",
-          image: "./assets/characters/postac_12.png",
+          image: "./przebranko.png",
           unlockWorld: "winter",
-          storeNote: "Nagroda z dalszego konca Swiata Zimowego.",
+          storeNote: "Przebranie Lily z zimowej Alei Super.",
         },
     {
-          id: "tricky-renifer",
-          name: "Tricky Renifer",
+          id: "zoya",
+          name: "Zoya",
           price: 0,
           cashPriceLabel: "",
-          image: "./assets/characters/postac_13.png",
+          image: "./zoya.png",
           unlockWorld: "winter",
-          storeNote: "Nagroda za sam koniec Swiata Zimowego.",
+          storeNote: "Nagroda z zimowej Alei Super.",
+          description: "Mała i nie śmiała dziewczynka, która nie rozstaje się z laleczką voodoo - Vhalith, uważa że to prawdziwe zwierzę",
+        },
+    {
+          id: "zoya-vhalith-zeberka",
+          name: "Zoya w Vhalith Zeberkę",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./zeberkę.png",
+          unlockWorld: "winter",
+          storeNote: "Przebranie Zoyi z zimowej Alei Super.",
+        },
+    {
+          id: "finley",
+          name: "Finley",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./fin.png",
+          unlockWorld: "winter",
+          storeNote: "Nagroda z zimowej Alei Super.",
+          description: "Nieśmiały chłopiec, który fascynuje się ptakami śnieżnymi - szczególnie sowami.",
+        },
+    {
+          id: "blizzy",
+          name: "Blizzy",
+          price: 0,
+          cashPriceLabel: "",
+          image: "./blizzy.png",
+          unlockWorld: "winter",
+          storeNote: "Nagroda z dalszego konca Swiata Zimowego.",
+          description: "Blizzy to przyjazny potwór śnieżny stworzony przez Lily i ożywiony przez Zoyę, jego zadaniem jest pilnowanie Finleya, aby się nie zgubił wśród puszystego białego puchu.",
         },
     {
           id: "leo",
@@ -1501,6 +1700,7 @@ const CATALOG = {
   weapons: [
     { id: "atak-1", name: "Atak 1", price: 0, image: "./assets/attacks/atak_2.png" },
   ],
+  musicTracks: MUSIC_TRACK_ITEMS,
 };
 
 const PET_CATEGORIES = [
@@ -1644,17 +1844,18 @@ const PET_RANK_REWARDS = [
 const INVENTORY_WORLD_GROUPS = [
     {
         id: "magicians",
-        label: "Swiat Magikow",
+        label: "ŚWIAT MAGIKÓW",
       },
     {
         id: "winter",
-        label: "Swiat Zimowy",
+        label: "ŚWIAT ZIMOWY",
       },
     {
         id: "ranking",
-        label: "Rankingowe",
+        label: "PIRACKIE PODBOJE",
       },
   ];
+const WARDROBE_ITEMS_PER_PAGE = 10;
 
 const MAGICIANS_ALLEY_STANDARD_REWARD_DATA = [
   { id: "alley-base-50", rewardLane: "base", trophies: 50, type: "coins", amount: 100, label: "100 monet" },
@@ -1666,7 +1867,7 @@ const MAGICIANS_ALLEY_STANDARD_REWARD_DATA = [
   { id: "alley-base-350", rewardLane: "base", trophies: 350, type: "coins", amount: 100, label: "100 monet" },
   { id: "alley-base-400", rewardLane: "base", trophies: 400, type: "diamonds", amount: 5, label: "5 klejnotów" },
   { id: "alley-base-450", rewardLane: "base", trophies: 450, type: "elixir", amount: 2, label: "2 eliksiry" },
-  { id: "alley-base-500", rewardLane: "base", trophies: 500, type: "ranking-unlock", amount: 1, label: "Odblokowanie Rankingu" },
+  { id: "alley-base-500", rewardLane: "base", trophies: 500, type: "loading-screen", amount: 1, label: "Tajemnicza zielona maź", itemId: "ekran-ladowania" },
   { id: "alley-base-550", rewardLane: "base", trophies: 550, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
   { id: "alley-base-600", rewardLane: "base", trophies: 600, type: "diamonds", amount: 3, label: "3 klejnoty" },
   { id: "alley-base-650", rewardLane: "base", trophies: 650, type: "coins", amount: 100, label: "100 monet" },
@@ -1676,9 +1877,9 @@ const MAGICIANS_ALLEY_STANDARD_REWARD_DATA = [
   { id: "alley-base-850", rewardLane: "base", trophies: 850, type: "diamonds", amount: 5, label: "5 klejnotów" },
   { id: "alley-base-900", rewardLane: "base", trophies: 900, type: "elixir", amount: 2, label: "2 eliksiry" },
   { id: "alley-base-950", rewardLane: "base", trophies: 950, type: "coins", amount: 100, label: "100 monet" },
-  { id: "alley-base-1000", rewardLane: "base", trophies: 1000, type: "plato-keys", amount: 1, label: "1 klucz", keyTheme: "magicians" },
+  { id: "alley-base-1000", rewardLane: "base", trophies: 1000, type: "ranking-unlock", amount: 1, label: "Odblokowanie Rankingu" },
   { id: "alley-base-1050", rewardLane: "base", trophies: 1050, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-  { id: "alley-base-1100", rewardLane: "base", trophies: 1100, type: "coins", amount: 500, label: "500 monet" },
+  { id: "alley-base-1100", rewardLane: "base", trophies: 1100, type: "plato-keys", amount: 1, label: "1 klucz", keyTheme: "magicians" },
   { id: "alley-base-1150", rewardLane: "base", trophies: 1150, type: "elixir", amount: 2, label: "2 eliksiry" },
   { id: "alley-base-1200", rewardLane: "base", trophies: 1200, type: "diamonds", amount: 3, label: "3 klejnoty" },
   { id: "alley-base-1250", rewardLane: "base", trophies: 1250, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
@@ -1697,10 +1898,25 @@ const MAGICIANS_ALLEY_STANDARD_REWARD_DATA = [
   { id: "alley-base-1900", rewardLane: "base", trophies: 1900, type: "elixir", amount: 15, label: "15 eliksirów" },
   { id: "alley-base-1950", rewardLane: "base", trophies: 1950, type: "coins", amount: 100, label: "100 monet" },
   { id: "alley-base-2000-diamonds", rewardLane: "base", trophies: 2000, type: "diamonds", amount: 60, label: "60 diamentów" },
+  { id: "alley-base-2050-crate", rewardLane: "base", trophies: 2050, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-base-2150-loading-screen", rewardLane: "base", trophies: 2150, type: "loading-screen", amount: 1, label: "Krajobraz Magicznej Krainy", itemId: "krajobraz-magicznej-krainy" },
+  { id: "alley-base-2200-diamonds", rewardLane: "base", trophies: 2200, type: "diamonds", amount: 3, label: "3 klejnoty" },
+  { id: "alley-base-2300-coins", rewardLane: "base", trophies: 2300, type: "coins", amount: 100, label: "100 monet" },
+  { id: "alley-base-2350-elixir", rewardLane: "base", trophies: 2350, type: "elixir", amount: 2, label: "2 eliksiry" },
+  { id: "alley-base-2450-coins", rewardLane: "base", trophies: 2450, type: "coins", amount: 500, label: "500 monet" },
+  { id: "alley-base-2500-diamonds", rewardLane: "base", trophies: 2500, type: "diamonds", amount: 3, label: "3 klejnoty" },
+  { id: "alley-base-2550-crate", rewardLane: "base", trophies: 2550, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-base-2650-coins", rewardLane: "base", trophies: 2650, type: "coins", amount: 100, label: "100 monet" },
+  { id: "alley-base-2700-diamonds", rewardLane: "base", trophies: 2700, type: "diamonds", amount: 3, label: "3 klejnoty" },
+  { id: "alley-base-2800-coins", rewardLane: "base", trophies: 2800, type: "coins", amount: 100, label: "100 monet" },
+  { id: "alley-base-2850-elixir", rewardLane: "base", trophies: 2850, type: "elixir", amount: 2, label: "2 eliksiry" },
+  { id: "alley-base-3000-diamonds", rewardLane: "base", trophies: 3000, type: "diamonds", amount: 3, label: "3 klejnoty" },
 ];
 
 const MAGICIANS_ALLEY_STANDARD_REWARDS = MAGICIANS_ALLEY_STANDARD_REWARD_DATA.filter((reward) => (
-  reward.trophies === 2000 || reward.trophies % 150 !== 0
+  reward.trophies === MAGICIANS_ALLEY_LEGACY_END_TROPHIES ||
+  reward.trophies > MAGICIANS_ALLEY_LEGACY_END_TROPHIES ||
+  reward.trophies % 150 !== 0
 ));
 
 const MAGICIANS_PREMIUM_LEAD_ROTATION = [
@@ -1709,7 +1925,7 @@ const MAGICIANS_PREMIUM_LEAD_ROTATION = [
   { image: MAGICIANS_PLATOYA_KEY_IMAGE, fallbackText: "KLUCZ", alt: "Klucz PlatoYA Magików" },
   { image: ELIXIR_REWARD_IMAGE, fallbackText: "ELIKSIR", alt: "Eliksiry premium" },
   { image: "./assets/characters/postac_1.png", fallbackText: "MILLO", alt: "Postać premium Magik Millo" },
-  { image: "./assets/characters/postac_2.png", fallbackText: "ELFIE", alt: "Postać premium Elfie" },
+  { image: "./assets/characters/postac_2.png", fallbackText: "ELLA", alt: "Postać premium Ella" },
   { image: "./assets/characters/postac_3.png", fallbackText: "LINDA", alt: "Postać premium Linda" },
   { image: "./mycelia.png", fallbackText: "MYCELIA", alt: "Postać premium Mycelia" },
   { image: "./lazorowa.png", fallbackText: "LAZUROWA", alt: "Skin premium Lazurowa Mycelia" },
@@ -1722,7 +1938,7 @@ const MAGICIANS_ALLEY_SUPER_REWARDS = [
   { id: "alley-super-50", rewardLane: "super", trophies: 50, type: "character", itemId: "mycelia", skinItemId: "lazurowa-mycelia", label: "Mycelia + skin" },
   { id: "alley-super-100", rewardLane: "super", trophies: 100, type: "diamonds", amount: 7, label: "7 klejnotów" },
   { id: "alley-super-150", rewardLane: "super", trophies: 150, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-  { id: "alley-super-200", rewardLane: "super", trophies: 200, type: "coins", amount: 800, label: "800 monet" },
+  { id: "alley-super-200", rewardLane: "super", trophies: 200, type: "loading-screen", amount: 1, label: "Zauroczenie nad strumykiem", itemId: "zauroczenie-nad-strumykiem" },
   { id: "alley-super-250", rewardLane: "super", trophies: 250, type: "elixir", amount: 6, label: "6 eliksirów" },
   { id: "alley-super-300", rewardLane: "super", trophies: 300, type: "plato-keys", amount: 1, label: "1 klucz", keyTheme: "magicians" },
   { id: "alley-super-350", rewardLane: "super", trophies: 350, type: "coins", amount: 500, label: "500 monet" },
@@ -1746,19 +1962,39 @@ const MAGICIANS_ALLEY_SUPER_REWARDS = [
   { id: "alley-super-1250", rewardLane: "super", trophies: 1250, type: "diamonds", amount: 7, label: "7 klejnotów" },
   { id: "alley-super-1300", rewardLane: "super", trophies: 1300, type: "elixir", amount: 6, label: "6 eliksirów" },
   { id: "alley-super-1350", rewardLane: "super", trophies: 1350, type: "coins", amount: 500, label: "500 monet" },
-  { id: "alley-super-1400", rewardLane: "super", trophies: 1400, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-1400", rewardLane: "super", trophies: 1400, type: "loading-screen", amount: 1, label: "Motyle Lazurowe Spotkanie", itemId: "motyle-lazurowe-spotkanie" },
   { id: "alley-super-1450", rewardLane: "super", trophies: 1450, type: "diamonds", amount: 5, label: "5 klejnotów" },
-  { id: "alley-super-1500", rewardLane: "super", trophies: 1500, type: "character", itemId: "elfie", label: "Elfie" },
+  { id: "alley-super-1500", rewardLane: "super", trophies: 1500, type: "character", itemId: "elfie", label: "Ella" },
   { id: "alley-super-1550", rewardLane: "super", trophies: 1550, type: "elixir", amount: 6, label: "6 eliksirów" },
   { id: "alley-super-1600", rewardLane: "super", trophies: 1600, type: "diamonds", amount: 7, label: "7 klejnotów" },
   { id: "alley-super-1650", rewardLane: "super", trophies: 1650, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
-  { id: "alley-super-1700", rewardLane: "super", trophies: 1700, type: "coins", amount: 800, label: "800 monet" },
+  { id: "alley-super-1700", rewardLane: "super", trophies: 1700, type: "loading-screen", amount: 1, label: "Elfia sprawa", itemId: "elfia-sprawa" },
   { id: "alley-super-1750", rewardLane: "super", trophies: 1750, type: "plato-keys", amount: 1, label: "1 klucz", keyTheme: "magicians" },
   { id: "alley-super-1800", rewardLane: "super", trophies: 1800, type: "elixir", amount: 10, label: "10 eliksirów" },
   { id: "alley-super-1850", rewardLane: "super", trophies: 1850, type: "diamonds", amount: 40, label: "40 klejnotów" },
   { id: "alley-super-1900", rewardLane: "super", trophies: 1900, type: "coins", amount: 5000, label: "5000 monet" },
   { id: "alley-super-1950", rewardLane: "super", trophies: 1950, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
   { id: "alley-super-2000", rewardLane: "super", trophies: 2000, type: "character", itemId: "grifos", label: "Grifos" },
+  { id: "alley-super-2050-elixir", rewardLane: "super", trophies: 2050, type: "elixir", amount: 6, label: "6 eliksirów" },
+  { id: "alley-super-2100-coins", rewardLane: "super", trophies: 2100, type: "coins", amount: 800, label: "800 monet" },
+  { id: "alley-super-2150-loading-screen", rewardLane: "super", trophies: 2150, type: "loading-screen", amount: 1, label: "Collegowa Linda w akcji", itemId: "collegowa-linda-w-akcji" },
+  { id: "alley-super-2200-key", rewardLane: "super", trophies: 2200, type: "plato-keys", amount: 1, label: "1 klucz", keyTheme: "magicians" },
+  { id: "alley-super-2250-crate", rewardLane: "super", trophies: 2250, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-2300-profile-photo", rewardLane: "super", trophies: 2300, type: "profile-photo", amount: 1, label: "Zdjęcie Profilu", itemId: "magicians-photo-2", bonusElixirs: 6 },
+  { id: "alley-super-2350-coins", rewardLane: "super", trophies: 2350, type: "coins", amount: 500, label: "500 monet" },
+  { id: "alley-super-2400-diamonds", rewardLane: "super", trophies: 2400, type: "diamonds", amount: 5, label: "5 klejnotów" },
+  { id: "alley-super-2450-crate", rewardLane: "super", trophies: 2450, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-2500-wata-cukrowa-linda", rewardLane: "super", trophies: 2500, type: "character", itemId: "wata-cukrowa-linda", label: "Wata Cukrowa Linda", countLabel: "PRZEBRANIE" },
+  { id: "alley-super-2550-elixir", rewardLane: "super", trophies: 2550, type: "elixir", amount: 6, label: "6 eliksirów" },
+  { id: "alley-super-2600-coins", rewardLane: "super", trophies: 2600, type: "coins", amount: 800, label: "800 monet" },
+  { id: "alley-super-2650-loading-screen", rewardLane: "super", trophies: 2650, type: "loading-screen", amount: 1, label: "Ella w swoim azylu", itemId: "ella-w-swoim-azylu" },
+  { id: "alley-super-2700-coins", rewardLane: "super", trophies: 2700, type: "coins", amount: 500, label: "500 monet" },
+  { id: "alley-super-2750-crate", rewardLane: "super", trophies: 2750, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-2800-profile-photo", rewardLane: "super", trophies: 2800, type: "profile-photo", amount: 1, label: "Zdjęcie Profilu", itemId: "magicians-photo-3" },
+  { id: "alley-super-2850-coins", rewardLane: "super", trophies: 2850, type: "coins", amount: 500, label: "500 monet" },
+  { id: "alley-super-2900-diamonds", rewardLane: "super", trophies: 2900, type: "diamonds", amount: 5, label: "5 klejnotów" },
+  { id: "alley-super-2950-crate", rewardLane: "super", trophies: 2950, type: "crate", crateId: "drewniana-skrzynia", amount: 1, label: "Drewniana Skrzynia" },
+  { id: "alley-super-3000-pilna-studentka-ella", rewardLane: "super", trophies: 3000, type: "character", itemId: "pilna-studentka-ella", label: "Pilna Studentka Ella", countLabel: "PRZEBRANIE" },
 ];
 
 const WINTER_PREMIUM_LEAD_ROTATION = [
@@ -1767,11 +2003,19 @@ const WINTER_PREMIUM_LEAD_ROTATION = [
   { image: WINTER_PLATOYA_KEY_IMAGE, fallbackText: "KLUCZ", alt: "Klucz PlatoYA Zimy" },
   { image: ELIXIR_REWARD_IMAGE, fallbackText: "ELIKSIR", alt: "Eliksiry premium zimy" },
   { image: "./assets/characters/postac_11.png", fallbackText: "LILY", alt: "Postać premium Lily" },
-  { image: "./assets/characters/postac_12.png", fallbackText: "TRICKY", alt: "Postać premium Tricky" },
+  { image: "./przebranko.png", fallbackText: "PRZEBRANKO", alt: "Przebranie premium Lily" },
+  { image: "./zoya.png", fallbackText: "ZOYA", alt: "Postać premium Zoya" },
+  { image: "./zeberkę.png", fallbackText: "VHALITH", alt: "Przebranie premium Zoyi" },
+  { image: "./fin.png", fallbackText: "FINLEY", alt: "Postać premium Finley" },
+  { image: "./blizzy.png", fallbackText: "BLIZZY", alt: "Postać premium Blizzy" },
   { image: "./assets/characters/postac_17.png", fallbackText: "LEO", alt: "Postać premium Leo" },
 ];
 
-const WINTER_ALLEY_STANDARD_REWARDS = MAGICIANS_ALLEY_STANDARD_REWARDS.map((reward) => {
+const WINTER_ALLEY_STANDARD_SOURCE_REWARDS = MAGICIANS_ALLEY_STANDARD_REWARDS.filter((reward) => (
+  reward.trophies <= MAGICIANS_ALLEY_LEGACY_END_TROPHIES
+));
+
+const WINTER_ALLEY_STANDARD_REWARDS = WINTER_ALLEY_STANDARD_SOURCE_REWARDS.map((reward) => {
   const trophies = reward.trophies + MAGICIANS_WORLD_END_TROPHIES;
 
   if (reward.type === "ranking-unlock") {
@@ -1797,13 +2041,51 @@ const WINTER_ALLEY_STANDARD_REWARDS = MAGICIANS_ALLEY_STANDARD_REWARDS.map((rewa
 });
 
 const WINTER_ALLEY_SUPER_CHARACTER_REPLACEMENTS = new Map([
-  [1000, { itemId: "lily", label: "Lily" }],
-  [1500, { itemId: "tricky", label: "Tricky" }],
+  [1500, { itemId: "blizzy", label: "Blizzy" }],
   [2000, { itemId: "leo", label: "Leo" }],
 ]);
 
-const WINTER_ALLEY_SUPER_REWARDS = MAGICIANS_ALLEY_SUPER_REWARDS.map((reward) => {
+const WINTER_ALLEY_SUPER_SOURCE_REWARDS = MAGICIANS_ALLEY_SUPER_REWARDS.filter((reward) => (
+  reward.trophies <= MAGICIANS_ALLEY_LEGACY_END_TROPHIES
+));
+
+const WINTER_ALLEY_SUPER_REWARDS = WINTER_ALLEY_SUPER_SOURCE_REWARDS.map((reward) => {
   const trophies = reward.trophies + MAGICIANS_WORLD_END_TROPHIES;
+
+  if (reward.type === "character" && reward.trophies === 50) {
+    return {
+      id: `winter-super-${trophies}-lily-przebranko`,
+      rewardLane: "super",
+      trophies,
+      type: "character",
+      itemId: "lily",
+      skinItemId: "przebranko-lily",
+      label: "Lily + przebranie",
+    };
+  }
+
+  if (reward.type === "character" && reward.trophies === 500) {
+    return {
+      id: `winter-super-${trophies}-zoya-zeberka`,
+      rewardLane: "super",
+      trophies,
+      type: "character",
+      itemId: "zoya",
+      skinItemId: "zoya-vhalith-zeberka",
+      label: "Zoya + przebranie",
+    };
+  }
+
+  if (reward.type === "character" && reward.trophies === 1000) {
+    return {
+      id: `winter-super-${trophies}-finley`,
+      rewardLane: "super",
+      trophies,
+      type: "character",
+      itemId: "finley",
+      label: "Finley",
+    };
+  }
 
   if (reward.type === "character" && reward.skinItemId) {
     return {
@@ -1861,12 +2143,12 @@ const TROPHY_WORLDS = [
   ];
 
 const CHARACTER_SKIN_GROUPS = {
-  elfie: ["elfie-wojowniczka", "elfie-w-swojej-naturze"],
-  linda: ["roslinna-krolowa-linda"],
+  elfie: ["elfie-wojowniczka", "elfie-w-swojej-naturze", "pilna-studentka-ella"],
+  linda: ["roslinna-krolowa-linda", "wata-cukrowa-linda"],
   mycelia: ["lazurowa-mycelia"],
   sylas: ["elegancki-sylias"],
-  lily: ["lyzwiarka-lily", "mistrzyni-lyzwiarstwa-lily"],
-  tricky: ["tricky-renifer"],
+  lily: ["przebranko-lily", "lyzwiarka-lily", "mistrzyni-lyzwiarstwa-lily"],
+  zoya: ["zoya-vhalith-zeberka"],
   leo: ["leo-skoczek-narciarski", "lyzwiarz-leo"],
 };
 
@@ -1955,7 +2237,11 @@ const WARDROBE_VISUAL_TUNING = {
     sylas: { leftScale: 0.9, leftY: -17, listScale: 0.8, listY: -13 },
     "elegancki-sylias": { leftScale: 0.9, leftY: -17, listScale: 0.8, listY: -13 },
     lily: { leftScale: 0.9, leftY: -15, listScale: 0.8, listY: -12 },
-    tricky: { leftScale: 0.92, leftY: -15, listScale: 0.82, listY: -12 },
+    "przebranko-lily": { leftScale: 0.9, leftY: -15, listScale: 0.8, listY: -12 },
+    zoya: { leftScale: 0.92, leftY: -16, listScale: 0.82, listY: -12 },
+    "zoya-vhalith-zeberka": { leftScale: 0.92, leftY: -16, listScale: 0.82, listY: -12 },
+    finley: { leftScale: 0.93, leftY: -16, listScale: 0.83, listY: -12 },
+    blizzy: { leftScale: 0.92, leftY: -15, listScale: 0.82, listY: -12 },
     leo: { leftScale: 0.93, leftY: -15, listScale: 0.83, listY: -12 },
     cloud: { leftScale: 0.9, leftY: -14, listScale: 0.8, listY: -11 },
     nora: { leftScale: 0.9, leftY: -15, listScale: 0.8, listY: -12 },
@@ -2028,17 +2314,20 @@ const CHARACTER_STORY_DESCRIPTIONS = {
   "magik-millo": "Bardzo nie śmiały początkujący magik, który non-stop na lekcje czarów zapomina wziąć najważniejszy przybór - różdżkę. Bez Psa Magika już dawno wyrzucono by go ze szkoły…",
   elfie: "Często ludzie pytają jej czy zjadła za dużo szpinaku albo może brokuła… ona ciągle musi im tłumaczyć że ma tak od urodzenia…",
   linda: "Księżniczka i maginii baniek, zresztą wystarczy na nią spojrzeć i nie trzeba nic więcej dodawać… klasa sama w sobie",
-  grifos: "Wiele plotek mówi, że jeśli któraś z magiń zdecydowałaby się dać mu buziaka, zmieniłby się w przystojnego księcia, ale żadna nie próbowała, nawet Elfie…",
-  mycelia: "Najwspanialsza wróżka, która oprócz tego, że może poruszać się latając lub jeżdżąc na wózku, uwielbia tańczyć ze swoim partnerem tanecznym Syliasem, próbowała kiedyś z Millem, no ale on… no cóż… wstydzi się chłopak",
+  grifos: "Wiele plotek mówi, że jeśli któraś z magiń zdecydowałaby się dać mu buziaka, zmieniłby się w przystojnego księcia, ale żadna nie próbowała, nawet Ella…",
+  mycelia: "Najwspanialsza wróżka, która oprócz tego, że może poruszać się latając lub jeżdżąc na wózku, uwielbia tańczyć ze swoim partnerem tanecznym Syliasem",
   sylas: "Pochodzi z tego samego rodu elfów co Mycelia, jednak nie łączą ich więzy krwi. Wierzy, że jego magiczna czterolistna koniczyna uprawnia go do bycia magikiem, cóż warto mieć marzenia",
   lily: "Uwielbia zabawy w śniegu, oraz jeżdżenie na łyżwach, chociaż ciężko stwierdzić czy faktycznie z niej taka mistrzyni",
-  tricky: "Kiedyś była nieśmiałą dziewczynką, teraz nadal jest dziewczynką ale nie jest już nie śmiała. Interesuje się życiem codziennym reniferów, wierzy, że kiedy Mikołaj przejdzie na emeryturę będzie mogla zajmować się jego stajnią",
+  zoya: "Mała i nie śmiała dziewczynka, która nie rozstaje się z laleczką voodoo - Vhalith, uważa że to prawdziwe zwierzę",
+  finley: "Nieśmiały chłopiec, który fascynuje się ptakami śnieżnymi - szczególnie sowami.",
+  blizzy: "Blizzy to przyjazny potwór śnieżny stworzony przez Lily i ożywiony przez Zoyę, jego zadaniem jest pilnowanie Finleya, aby się nie zgubił wśród puszystego białego puchu.",
   leo: "Jego główna pasja to narciarstwo, jednak Lily czasem zmusza go do wspólnej jazdy na łyżwach…",
   cloud: "Młodszy brat Lily, chociaż on bardziej wolałby aby jego sowa Vivi była jego siostrą…",
   nora: "Uwielbia ubierać się ciepło ale modnie, Lily czasem zazdrości jej czapki z uszami niedźwiadka polarnego",
   ann: "Jest przyjaciółką Nory, chociaż zwykle zamiast bawić się w śniegu, woli usiąść przy kominku i napić się cieplej czekolady",
   nerissa: "Niepowstrzymana Piratka i kapitanka statku wraz z Hookcrabem, która utrzymuje wszystko pod kontrolą... nie licząc Shulli, która karze losować jej jakieś dziwne karty",
   hookcrab: "Ahrrr agrr… klak-klak! Skrrrba gruuum, arghh-rak-rak! Muszelki!",
+  lunella: "Jedni uważają ją za wróżkę zębuszkę, inni za żabią księżniczkę, jednak jej pochodzenie wciąż pozostaje jej tajemnicą. Jedno jest pewne - to dobra wróżka.",
   thalia: "Kolekcjonerka pereł, nie dopuszcza nikogo do swojego sekretnego pokoju na statku, w którym pewnie nie znajduje się nic poza stertą błyskotek...",
   shulla: "Cóż... może chcesz wylosować kartę? Tak będzie dla Ciebie lepiej, jeśli chcesz wyjść cały spod macek tej piratko - kałamarnicy!",
 };
@@ -2052,6 +2341,9 @@ const ui = {
   storeScrollLeft: null,
   inventoryTab: "characters",
   inventoryWorldFilter: "magicians",
+  inventoryPage: 0,
+  inventorySort: "default",
+  inventorySearch: "",
   friendsTab: "friends",
   trophyWorldId: state.activeTrophyWorld || "alley",
   nextGameMode: "solo",
@@ -2088,6 +2380,9 @@ const appShell = document.querySelector(".app-shell");
 const loadingFillText = document.getElementById("loading-fill-text");
 const loadingProgressFill = document.getElementById("loading-progress-fill");
 const progressValue = document.getElementById("progress-value");
+const gameStartLoadingStatus = document.getElementById("game-start-loading-status");
+const gameStartLoadingTip = document.getElementById("game-start-loading-tip");
+const gameStartLoadingTipText = document.getElementById("game-start-loading-tip-text");
 const alleyIntroBackdrop = document.getElementById("alley-intro-backdrop");
 const alleyIntroScene = document.getElementById("alley-intro-scene");
 const alleyIntroImage = document.getElementById("alley-intro-image");
@@ -2240,6 +2535,7 @@ const characterDetailName = document.getElementById("character-detail-name");
 const characterDetailDescription = document.getElementById("character-detail-description");
 const characterDetailEquipButton = document.getElementById("character-detail-equip-button");
 const characterDetailHangerButton = document.getElementById("character-detail-hanger-button");
+const characterDetailSkinSwitcher = document.getElementById("character-detail-skin-switcher");
 const characterSkinTray = document.getElementById("character-skin-tray");
 const characterSkinTrayCloseButton = document.getElementById("character-skin-tray-close");
 const characterSkinList = document.getElementById("character-skin-list");
@@ -2339,6 +2635,9 @@ const storeGrid = document.getElementById("store-grid");
 const storeTitle = document.querySelector(".store-title");
 const storeOfferTabButtons = Array.from(document.querySelectorAll("[data-store-offer-tab]"));
 const inventoryGrid = document.getElementById("inventory-grid");
+const inventoryPagination = document.getElementById("inventory-pagination");
+const inventorySortSelect = document.getElementById("inventory-sort-select");
+const inventorySearchInput = document.getElementById("inventory-search-input");
 const wardrobeOverview = document.getElementById("wardrobe-overview");
 const trophyGrid = document.getElementById("trophy-grid");
 const worldHeaderPanel = document.getElementById("world-header-panel");
@@ -2569,6 +2868,9 @@ let activeWinterBundle = null;
 let storeCharacterPurchaseBusy = false;
 let activeStoreCharacterPurchase = null;
 let activeStoreOfferPurchase = null;
+let storeMusicPreviewAudio = null;
+let storeMusicPreviewTimeout = 0;
+let storeMusicPreviewDuckActive = false;
 let magicMachineBusy = false;
 let magicMachineStage = "buy";
 let magicMachineRewardPetId = "";
@@ -2597,6 +2899,7 @@ let nicknamePromptAfterSave = null;
 let remoteProfileSyncSuspendLevel = 0;
 let gameLaunchTransitionBusy = false;
 let gameLaunchTransitionToken = 0;
+let gameStartLoadingToken = 0;
 let lobbyViewTransitionTimer = 0;
 let dailyGiftCheckTimer = 0;
 let dailyGiftMidnightTimer = 0;
@@ -2692,6 +2995,7 @@ function bindEvents() {
 
       if (group === "inventory") {
         ui.inventoryTab = tab;
+        ui.inventoryPage = 0;
         renderInventory();
       }
 
@@ -2709,6 +3013,29 @@ function bindEvents() {
     });
   });
 
+  inventorySortSelect?.addEventListener("change", () => {
+    ui.inventorySort = inventorySortSelect.value || "default";
+    ui.inventoryPage = 0;
+    renderInventory();
+  });
+
+  inventorySearchInput?.addEventListener("input", () => {
+    ui.inventorySearch = inventorySearchInput.value || "";
+    ui.inventoryPage = 0;
+    renderInventory();
+  });
+
+  inventoryPagination?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-inventory-page]");
+    if (!button || button.disabled) {
+      return;
+    }
+
+    const page = Math.max(0, Math.floor(Number(button.dataset.inventoryPage || 0)));
+    ui.inventoryPage = page;
+    renderInventory();
+  });
+
   storeOfferTabButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const requestedTab = button.dataset.storeOfferTab;
@@ -2720,7 +3047,7 @@ function bindEvents() {
 
       if (requestedTab === STORE_OFFER_TAB_PIRATE && !isRankingAlleyUnlocked()) {
         triggerStorePirateOfferLockFeedback(button);
-        showTrophyNotice("WYMAGANE 500 PUCHARÓW");
+        showTrophyNotice(`WYMAGANE ${RANKING_ALLEY_UNLOCK_TROPHIES} PUCHARÓW`);
         return;
       }
 
@@ -3235,6 +3562,15 @@ function bindEvents() {
     });
   }
 
+  if (characterDetailSkinSwitcher) {
+    characterDetailSkinSwitcher.addEventListener("click", (event) => {
+      const skinButton = event.target.closest("[data-character-skin]");
+      if (skinButton) {
+        selectCharacterSkin(skinButton.dataset.characterSkin || "");
+      }
+    });
+  }
+
   if (petRankRewardClose) {
     petRankRewardClose.addEventListener("click", closePetRankRewardRoad);
   }
@@ -3314,6 +3650,24 @@ function bindEvents() {
   if (storeCharacterPurchaseConfirmButton) {
     storeCharacterPurchaseConfirmButton.addEventListener("click", () => {
       void confirmStorePurchase();
+    });
+  }
+
+  if (storeCharacterPurchaseActions) {
+    storeCharacterPurchaseActions.addEventListener("click", (event) => {
+      const previewButton = event.target.closest("[data-store-music-preview]");
+      if (!previewButton) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      const purchase = activeStoreOfferPurchase;
+      if (!purchase || purchase.id !== previewButton.dataset.storeMusicPreview) {
+        return;
+      }
+
+      playMusicTrackPreview(purchase.id, purchase.previewMaxMs || 15000);
     });
   }
 
@@ -3577,7 +3931,11 @@ function getCharacterVoiceEffect(characterId) {
     return "voiceMagikMillo";
   }
 
-  if (characterId === "elfie") {
+  if (
+    characterId === "elfie" ||
+    characterId === "elfie-wojowniczka" ||
+    characterId === "elfie-w-swojej-naturze"
+  ) {
     return "voiceElfie";
   }
 
@@ -3593,7 +3951,7 @@ function getCharacterVoiceEffect(characterId) {
     return "voiceNerissa";
   }
 
-  if (characterId === "linda") {
+  if (characterId === "linda" || characterId === "roslinna-krolowa-linda") {
     return "voiceLinda";
   }
 
@@ -3611,6 +3969,43 @@ function getCharacterVoiceEffect(characterId) {
 
   if (characterId === "shulla") {
     return "voiceShulla";
+  }
+
+  if (
+    characterId === "lily" ||
+    characterId === "przebranko-lily" ||
+    characterId === "lyzwiarka-lily" ||
+    characterId === "mistrzyni-lyzwiarstwa-lily"
+  ) {
+    return "voiceLily";
+  }
+
+  if (characterId === "zoya" || characterId === "zoya-vhalith-zeberka") {
+    return "voiceZoya";
+  }
+
+  if (characterId === "finley") {
+    return "voiceFinley";
+  }
+
+  if (characterId === "blizzy") {
+    return "voiceBlizzy";
+  }
+
+  if (characterId === "lunella") {
+    return "voiceLunella";
+  }
+
+  if (characterId === "cloud") {
+    return "voiceCloud";
+  }
+
+  if (characterId === "nora") {
+    return "voiceNora";
+  }
+
+  if (characterId === "ann") {
+    return "voiceAnn";
   }
 
   return null;
@@ -3736,6 +4131,71 @@ function isLobbyMusicKey(musicKey = "") {
   return String(musicKey || "").startsWith("lobby:");
 }
 
+function getMusicTrackById(trackId) {
+  const id = sanitizeStoredId(trackId);
+  return MUSIC_TRACK_ITEMS.find((track) => track.id === id) || null;
+}
+
+function getDefaultMusicTrackIdForWorld(worldId = getGlobalVisualWorldTheme()) {
+  return worldId === "winter" && isWinterWorldUnlocked()
+    ? "bialy-puch"
+    : "magiczna-kraina";
+}
+
+function isMusicTrackUnlockedForState(targetState, trackId) {
+  const id = sanitizeStoredId(trackId);
+
+  if (id === "magiczna-kraina") {
+    return true;
+  }
+
+  if (id === "bialy-puch") {
+    return normalizeTrophyWorldId(targetState?.activeTrophyWorld) === "winter";
+  }
+
+  return Array.isArray(targetState?.unlockedMusicTracks) && targetState.unlockedMusicTracks.includes(id);
+}
+
+function getUnlockedMusicTrackIds(targetState = state) {
+  const ids = new Set(["magiczna-kraina"]);
+
+  if (normalizeTrophyWorldId(targetState?.activeTrophyWorld) === "winter") {
+    ids.add("bialy-puch");
+  }
+
+  (Array.isArray(targetState?.unlockedMusicTracks) ? targetState.unlockedMusicTracks : []).forEach((trackId) => {
+    const normalizedId = sanitizeStoredId(trackId);
+    if (MUSIC_TRACK_ITEMS.some((track) => track.id === normalizedId)) {
+      ids.add(normalizedId);
+    }
+  });
+
+  return Array.from(ids);
+}
+
+function isMusicTrackUnlocked(trackId) {
+  return isMusicTrackUnlockedForState(state, trackId);
+}
+
+function getOwnedMusicTrackItems() {
+  const ownedIds = getUnlockedMusicTrackIds();
+  return MUSIC_TRACK_ITEMS.filter((track) => ownedIds.includes(track.id));
+}
+
+function getSelectedMusicTrackId(worldId = getGlobalVisualWorldTheme()) {
+  const selectedId = sanitizeStoredId(state.selectedMusicTrack);
+
+  if (selectedId && isMusicTrackUnlocked(selectedId)) {
+    return selectedId;
+  }
+
+  return getDefaultMusicTrackIdForWorld(worldId);
+}
+
+function getSelectedMusicTrack(worldId = getGlobalVisualWorldTheme()) {
+  return getMusicTrackById(getSelectedMusicTrackId(worldId)) || getMusicTrackById("magiczna-kraina") || MUSIC_TRACK_ITEMS[0];
+}
+
 function getBackgroundMusicConfig() {
   const worldId = getGlobalVisualWorldTheme();
 
@@ -3756,9 +4216,11 @@ function getBackgroundMusicConfig() {
     };
   }
 
+  const musicTrack = getSelectedMusicTrack(worldId);
+
   return {
-    key: `lobby:${worldId}`,
-    sources: BACKGROUND_MUSIC_SOURCES[worldId] || BACKGROUND_MUSIC_SOURCES.alley,
+    key: `lobby:${musicTrack?.id || worldId}`,
+    sources: musicTrack?.sources || BACKGROUND_MUSIC_SOURCES[worldId] || BACKGROUND_MUSIC_SOURCES.alley,
   };
 }
 
@@ -3956,6 +4418,105 @@ function duckBackgroundMusicForAudio(audio, fallbackMs = 3600) {
   window.setTimeout(releaseDuck, Math.max(600, Number(fallbackMs || 3600)));
 }
 
+function setStoreMusicPreviewDuck(active) {
+  const shouldDuck = Boolean(active);
+
+  if (shouldDuck === storeMusicPreviewDuckActive) {
+    return;
+  }
+
+  storeMusicPreviewDuckActive = shouldDuck;
+  backgroundMusicEffectDuckCount = Math.max(0, backgroundMusicEffectDuckCount + (shouldDuck ? 1 : -1));
+  syncBackgroundMusicVolume(getBackgroundMusicBaseVolume());
+}
+
+function stopMusicTrackPreview(fade = false) {
+  if (storeMusicPreviewTimeout) {
+    window.clearTimeout(storeMusicPreviewTimeout);
+    storeMusicPreviewTimeout = 0;
+  }
+
+  const audio = storeMusicPreviewAudio;
+  storeMusicPreviewAudio = null;
+  setStoreMusicPreviewDuck(false);
+
+  if (!audio) {
+    syncBackgroundMusic();
+    return;
+  }
+
+  const stopAudio = () => {
+    try {
+      audio.pause();
+      audio.currentTime = 0;
+    } catch (error) {
+      // Niektóre formaty audio chwilowo nie pozwalają przewinąć źródła.
+    }
+    syncBackgroundMusic();
+  };
+
+  if (!fade || audio.paused) {
+    stopAudio();
+    return;
+  }
+
+  const startVolume = Number(audio.volume || 0);
+  const startTime = performance.now();
+  const fadeMs = 420;
+  const fadeTick = (now) => {
+    const progress = clamp((now - startTime) / fadeMs, 0, 1);
+    audio.volume = startVolume * (1 - progress);
+    if (progress < 1 && !audio.paused) {
+      window.requestAnimationFrame(fadeTick);
+      return;
+    }
+    stopAudio();
+  };
+  window.requestAnimationFrame(fadeTick);
+}
+
+function playMusicTrackPreview(trackId, maxDurationMs = 15000) {
+  const track = getMusicTrackById(trackId);
+  const source = getFirstAvailableAudioSource(track?.sources || []);
+
+  if (!track || !source) {
+    return;
+  }
+
+  stopMusicTrackPreview();
+  const audio = new Audio(source);
+  storeMusicPreviewAudio = audio;
+  audio.preload = "auto";
+  audio.volume = 0.84 * getMusicVolumeFactor();
+  audio.addEventListener("error", () => {
+    unavailableSoundSources.add(source);
+    if (storeMusicPreviewAudio === audio) {
+      stopMusicTrackPreview();
+    }
+  }, { once: true });
+  audio.addEventListener("ended", () => {
+    if (storeMusicPreviewAudio === audio) {
+      storeMusicPreviewAudio = null;
+      setStoreMusicPreviewDuck(false);
+      syncBackgroundMusic();
+    }
+  }, { once: true });
+
+  setStoreMusicPreviewDuck(true);
+  audio.play().catch(() => {
+    if (storeMusicPreviewAudio === audio) {
+      stopMusicTrackPreview();
+    }
+  });
+
+  const durationMs = Math.max(0, Number(maxDurationMs || 0));
+  if (durationMs > 0) {
+    storeMusicPreviewTimeout = window.setTimeout(() => {
+      stopMusicTrackPreview(true);
+    }, durationMs);
+  }
+}
+
 function playOneShotSoundWithMusicDuck(soundName, volume = 0.8, playbackRate = 1, maxDurationMs = 0, fallbackMs = 3600) {
   const audio = playOneShotSound(soundName, volume, playbackRate, maxDurationMs);
   duckBackgroundMusicForAudio(audio, fallbackMs);
@@ -3980,6 +4541,232 @@ function updateProgress(value) {
   }
 }
 
+function showGameStartLoadingProgress(value) {
+  const percent = clamp(Math.round(Number(value || 0)), 0, 100);
+
+  if (loadingFillText) {
+    loadingFillText.textContent = `Ładowanie gry... ${percent}%`;
+  }
+
+  if (loadingProgressFill) {
+    loadingProgressFill.style.width = `${percent}%`;
+  }
+
+  if (progressValue) {
+    progressValue.textContent = `${percent}%`;
+  }
+}
+
+function formatLoadingStatusMessage(message) {
+  return `${escapeHtml(message)}<span class="loading-status-dots"><span></span><span></span><span></span></span>`;
+}
+
+function updateGameStartLoadingStatus(messageIndex = 0) {
+  if (!gameStartLoadingStatus) {
+    return;
+  }
+
+  const message = GAME_START_LOADING_STATUS_MESSAGES[
+    Math.abs(Math.floor(Number(messageIndex || 0))) % GAME_START_LOADING_STATUS_MESSAGES.length
+  ];
+  gameStartLoadingStatus.innerHTML = formatLoadingStatusMessage(message);
+}
+
+function updateGameStartLoadingTip(tipIndex = 0) {
+  if (!gameStartLoadingTip || !gameStartLoadingTipText) {
+    return;
+  }
+
+  const tip = GAME_START_LOADING_TIPS[
+    Math.abs(Math.floor(Number(tipIndex || 0))) % GAME_START_LOADING_TIPS.length
+  ];
+  gameStartLoadingTip.classList.remove("is-switching");
+  void gameStartLoadingTip.offsetWidth;
+  gameStartLoadingTipText.textContent = tip;
+  gameStartLoadingTip.classList.add("is-switching");
+}
+
+function calculateGameStartLoadingProgress(elapsed, duration) {
+  const safeDuration = Math.max(1, Number(duration || GAME_START_LOADING_MIN_MS));
+  const t = clamp(Number(elapsed || 0) / safeDuration, 0, 1);
+
+  if (t < 0.11) {
+    return 8 + (t / 0.11) * 24;
+  }
+
+  if (t < 0.28) {
+    const segmentT = (t - 0.11) / 0.17;
+    return 32 + Math.sin(segmentT * Math.PI * 0.5) * 24;
+  }
+
+  if (t < 0.43) {
+    return 56;
+  }
+
+  if (t < 0.66) {
+    const segmentT = (t - 0.43) / 0.23;
+    return 56 + Math.pow(segmentT, 0.72) * 31;
+  }
+
+  if (t < 0.84) {
+    const segmentT = (t - 0.66) / 0.18;
+    return 87 + Math.sin(segmentT * Math.PI * 0.5) * 12;
+  }
+
+  if (t < 0.98) {
+    return 99;
+  }
+
+  return 100;
+}
+
+function hideGameStartLoadingScreen() {
+  if (!loadingScreen) {
+    return;
+  }
+
+  loadingScreen.classList.remove("active", "game-start-loading");
+  loadingScreen.hidden = true;
+  loadingScreen.setAttribute("aria-hidden", "true");
+  loadingScreen.style.removeProperty("--game-start-loading-image");
+  gameStartLoadingTip?.classList.remove("is-switching");
+}
+
+function getLoadingScreenById(screenId) {
+  const normalizedId = sanitizeStoredId(screenId) || "default";
+  return LOADING_SCREEN_ITEMS.find((item) => item.id === normalizedId) || LOADING_SCREEN_ITEMS[0];
+}
+
+function getUnlockedLoadingScreenIds() {
+  const availableIds = new Set(LOADING_SCREEN_ITEMS.map((item) => item.id).filter((id) => id !== "default"));
+  const ids = new Set();
+  const savedIds = Array.isArray(state.unlockedLoadingScreens) ? state.unlockedLoadingScreens : [];
+
+  savedIds.forEach((screenId) => {
+    const normalizedId = sanitizeStoredId(screenId);
+    if (availableIds.has(normalizedId)) {
+      ids.add(normalizedId);
+    }
+  });
+
+  const legacyId = sanitizeStoredId(state.unlockedLoadingScreen);
+  if (availableIds.has(legacyId)) {
+    ids.add(legacyId);
+  }
+
+  return ids;
+}
+
+function isLoadingScreenUnlocked(screenId) {
+  const normalizedId = sanitizeStoredId(screenId) || "default";
+  return normalizedId === "default" || getUnlockedLoadingScreenIds().has(normalizedId);
+}
+
+function getOwnedLoadingScreenItems() {
+  return LOADING_SCREEN_ITEMS.filter((item) => isLoadingScreenUnlocked(item.id));
+}
+
+function getSelectedLoadingScreenId() {
+  const selectedId = sanitizeStoredId(state.selectedLoadingScreen || "default");
+  return isLoadingScreenUnlocked(selectedId) ? selectedId : "default";
+}
+
+function getActiveGameStartLoadingImage() {
+  return getLoadingScreenById(getSelectedLoadingScreenId()).image;
+}
+
+function showGameStartLoadingScreen(loadingImage = getActiveGameStartLoadingImage()) {
+  if (!loadingScreen) {
+    return;
+  }
+
+  if (loadingImage) {
+    loadingScreen.style.setProperty("--game-start-loading-image", `url("${loadingImage}")`);
+  } else {
+    loadingScreen.style.removeProperty("--game-start-loading-image");
+  }
+  loadingScreen.hidden = false;
+  loadingScreen.setAttribute("aria-hidden", "false");
+  loadingScreen.classList.add("active", "game-start-loading");
+}
+
+function runGameStartLoadingScreen() {
+  if (!loadingScreen) {
+    return Promise.resolve();
+  }
+
+  const token = ++gameStartLoadingToken;
+  const duration = randomBetween(GAME_START_LOADING_MIN_MS, GAME_START_LOADING_MAX_MS);
+  const startedAt = performance.now();
+  let lastTipIndex = -1;
+  let lastStatusIndex = -1;
+  let displayedProgress = 0;
+  let nextProgressUpdateAt = 0;
+
+  showGameStartLoadingScreen();
+  showGameStartLoadingProgress(0);
+  updateGameStartLoadingStatus(0);
+  updateGameStartLoadingTip(0);
+
+  return new Promise((resolve) => {
+    const finish = () => {
+      if (token !== gameStartLoadingToken) {
+        resolve();
+        return;
+      }
+
+      showGameStartLoadingProgress(100);
+      window.setTimeout(() => {
+        if (token === gameStartLoadingToken) {
+          hideGameStartLoadingScreen();
+        }
+        resolve();
+      }, 180);
+    };
+
+    const tick = () => {
+      if (token !== gameStartLoadingToken) {
+        resolve();
+        return;
+      }
+
+      const elapsed = performance.now() - startedAt;
+      const tipIndex = Math.floor(elapsed / 5000);
+      const statusIndex = Math.floor(elapsed / 4200);
+      if (tipIndex !== lastTipIndex) {
+        lastTipIndex = tipIndex;
+        updateGameStartLoadingTip(tipIndex);
+      }
+      if (statusIndex !== lastStatusIndex) {
+        lastStatusIndex = statusIndex;
+        updateGameStartLoadingStatus(statusIndex);
+      }
+
+      const targetProgress = calculateGameStartLoadingProgress(elapsed, duration);
+      if (elapsed >= nextProgressUpdateAt || targetProgress >= 100) {
+        const progressGap = Math.max(0, Math.floor(targetProgress) - displayedProgress);
+        if (progressGap > 0) {
+          const jump = targetProgress >= 100
+            ? progressGap
+            : randomBetween(1, Math.min(13, progressGap));
+          displayedProgress = Math.min(100, displayedProgress + jump);
+        }
+        nextProgressUpdateAt = elapsed + randomBetween(260, 900);
+      }
+      showGameStartLoadingProgress(displayedProgress);
+
+      if (elapsed >= duration) {
+        finish();
+        return;
+      }
+
+      window.requestAnimationFrame(tick);
+    };
+
+    window.requestAnimationFrame(tick);
+  });
+}
+
 function buildLoadingPoints(totalDurationMs = TOTAL_LOADING_TIME) {
   const duration = Math.max(1, Number(totalDurationMs || TOTAL_LOADING_TIME));
   const points = [];
@@ -3995,19 +4782,61 @@ function buildLoadingPoints(totalDurationMs = TOTAL_LOADING_TIME) {
 }
 
 function bootApp() {
+  if (!loadingScreen) {
+    showApp();
+    return;
+  }
+
+  const token = ++gameStartLoadingToken;
   const startedAt = performance.now();
-  const points = Array.isArray(loadingPoints) && loadingPoints.length > 0
-    ? loadingPoints
-    : buildLoadingPoints(TOTAL_LOADING_TIME);
+  const duration = Math.max(APP_START_LOADING_MIN_MS, TOTAL_LOADING_TIME);
+  let lastTipIndex = -1;
+  let lastStatusIndex = -1;
+  let displayedProgress = 0;
+  let nextProgressUpdateAt = 0;
+
+  showGameStartLoadingScreen();
+  showGameStartLoadingProgress(0);
+  updateGameStartLoadingStatus(0);
+  updateGameStartLoadingTip(0);
 
   const tick = () => {
-    const elapsed = performance.now() - startedAt;
-    const point = points.findLast((entry) => elapsed >= entry.at) || points[0];
-    updateProgress(clamp(point?.value || 0, 0, 100));
+    if (token !== gameStartLoadingToken) {
+      return;
+    }
 
-    if (elapsed >= TOTAL_LOADING_TIME) {
-      updateProgress(100);
-      showApp();
+    const elapsed = performance.now() - startedAt;
+    const tipIndex = Math.floor(elapsed / 2600);
+    const statusIndex = Math.floor(elapsed / 1800);
+    if (tipIndex !== lastTipIndex) {
+      lastTipIndex = tipIndex;
+      updateGameStartLoadingTip(tipIndex);
+    }
+    if (statusIndex !== lastStatusIndex) {
+      lastStatusIndex = statusIndex;
+      updateGameStartLoadingStatus(statusIndex);
+    }
+
+    const targetProgress = calculateGameStartLoadingProgress(elapsed, duration);
+    if (elapsed >= nextProgressUpdateAt || targetProgress >= 100) {
+      const progressGap = Math.max(0, Math.floor(targetProgress) - displayedProgress);
+      if (progressGap > 0) {
+        const jump = targetProgress >= 100
+          ? progressGap
+          : randomBetween(1, Math.min(13, progressGap));
+        displayedProgress = Math.min(100, displayedProgress + jump);
+      }
+      nextProgressUpdateAt = elapsed + randomBetween(220, 680);
+    }
+    showGameStartLoadingProgress(displayedProgress);
+
+    if (elapsed >= duration) {
+      showGameStartLoadingProgress(100);
+      window.setTimeout(() => {
+        if (token === gameStartLoadingToken) {
+          showApp();
+        }
+      }, 180);
       return;
     }
 
@@ -4018,20 +4847,488 @@ function bootApp() {
 }
 
 function showApp() {
-  if (loadingScreen) {
-    loadingScreen.classList.remove("active");
-    loadingScreen.hidden = true;
-    loadingScreen.setAttribute("aria-hidden", "true");
-  }
+  hideGameStartLoadingScreen();
 
   appScreen.classList.add("active");
   appScreen.setAttribute("aria-hidden", "false");
   backgroundMusicReady = true;
   showView("lobby");
   maybeAutoInitSocialProfile();
+  void handlePaidCheckoutReturn();
   maybeRunIntro();
   scheduleDailyGiftMidnightTimer();
   scheduleDailyGiftLobbyCheck();
+}
+
+function getPaymentFunctionUrl(functionName) {
+  const projectId = FIREBASE_SOCIAL_CONFIG?.projectId;
+
+  if (!projectId || !functionName) {
+    return "";
+  }
+
+  return `https://${PAYMENT_FUNCTIONS_REGION}-${projectId}.cloudfunctions.net/${functionName}`;
+}
+
+function buildPaymentReturnUrl() {
+  if (!/^https?:$/.test(window.location.protocol)) {
+    return "";
+  }
+
+  const returnUrl = new URL(window.location.href);
+  returnUrl.searchParams.delete("payment");
+  returnUrl.searchParams.delete("order_id");
+  returnUrl.searchParams.delete("session_id");
+  return returnUrl.toString();
+}
+
+function cleanPaymentReturnParams() {
+  if (!window.history?.replaceState || !/^https?:$/.test(window.location.protocol)) {
+    return;
+  }
+
+  const nextUrl = new URL(window.location.href);
+  nextUrl.searchParams.delete("payment");
+  nextUrl.searchParams.delete("order_id");
+  nextUrl.searchParams.delete("session_id");
+  window.history.replaceState({}, document.title, nextUrl.toString());
+}
+
+async function postPaymentFunction(functionName, payload) {
+  const functionUrl = getPaymentFunctionUrl(functionName);
+
+  if (!functionUrl) {
+    throw new Error("payment-functions-unavailable");
+  }
+
+  const response = await fetch(functionUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload || {}),
+  });
+  let body = null;
+
+  try {
+    body = await response.json();
+  } catch (error) {
+    body = null;
+  }
+
+  if (!response.ok) {
+    const requestError = new Error(body?.error || "payment-request-failed");
+    requestError.status = response.status;
+    requestError.payload = body;
+    throw requestError;
+  }
+
+  return body;
+}
+
+async function startPaidCheckout(productId, context = {}) {
+  const normalizedProductId = sanitizeStoredId(productId);
+  const returnUrl = buildPaymentReturnUrl();
+
+  if (!normalizedProductId) {
+    return;
+  }
+
+  if (!returnUrl) {
+    openModal({
+      title: "Płatności",
+      message: "Prawdziwe płatności działają po uruchomieniu gry z adresu http/https, np. z hostingu Firebase albo lokalnego serwera.",
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  try {
+    openModal({
+      title: "Płatność",
+      message: "Przekierowuję do bezpiecznej płatności...",
+      buttonText: "OK",
+      dismissible: true,
+      showSpinner: true,
+      onConfirm: closeModal,
+    });
+
+    const checkout = await postPaymentFunction("createCheckoutSession", {
+      productId: normalizedProductId,
+      profileId: sanitizeProfileId(state.profileId),
+      publicId: sanitizePublicPlayerId(state.publicId),
+      nickname: getPlayerNickname(),
+      context,
+      returnUrl,
+    });
+
+    if (!checkout?.url) {
+      throw new Error("checkout-url-missing");
+    }
+
+    window.location.href = checkout.url;
+  } catch (error) {
+    console.error("Nie udało się rozpocząć płatności", error);
+    openModal({
+      title: "Płatność",
+      message: "Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.",
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+  }
+}
+
+async function handlePaidCheckoutReturn() {
+  if (!/^https?:$/.test(window.location.protocol)) {
+    return;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const paymentStatus = params.get("payment");
+  const orderId = sanitizeStoredId(params.get("order_id"));
+
+  if (!paymentStatus) {
+    return;
+  }
+
+  cleanPaymentReturnParams();
+
+  if (paymentStatus === "cancelled") {
+    openModal({
+      title: "Płatność anulowana",
+      message: "Zakup został anulowany, więc nagroda nie została przyznana.",
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  if (paymentStatus !== "success" || !orderId) {
+    return;
+  }
+
+  await claimPaidCheckoutOrder(orderId);
+}
+
+async function claimPaidCheckoutOrder(orderId) {
+  const normalizedOrderId = sanitizeStoredId(orderId);
+
+  if (!normalizedOrderId) {
+    return;
+  }
+
+  if (Array.isArray(state.claimedPaidOrders) && state.claimedPaidOrders.includes(normalizedOrderId)) {
+    openModal({
+      title: "Zakup odebrany",
+      message: "Ta płatność została już odebrana na tym koncie.",
+      buttonText: "OK",
+      dismissible: true,
+      onConfirm: closeModal,
+    });
+    return;
+  }
+
+  openModal({
+    title: "Płatność",
+    message: "Sprawdzam potwierdzenie płatności...",
+    buttonText: "OK",
+    dismissible: true,
+    showSpinner: true,
+    onConfirm: closeModal,
+  });
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    try {
+      const purchase = await postPaymentFunction("claimPaidPurchase", {
+        orderId: normalizedOrderId,
+        profileId: sanitizeProfileId(state.profileId),
+      });
+
+      closeModal();
+      await applyPaidPurchaseGrant(purchase);
+      state.claimedPaidOrders = Array.isArray(state.claimedPaidOrders) ? state.claimedPaidOrders : [];
+      if (!state.claimedPaidOrders.includes(normalizedOrderId)) {
+        state.claimedPaidOrders.push(normalizedOrderId);
+      }
+      saveState();
+      renderAll();
+      return;
+    } catch (error) {
+      const retryable = error?.payload?.error === "payment-not-confirmed";
+
+      if (!retryable || attempt >= 7) {
+        console.error("Nie udało się odebrać płatności", error);
+        openModal({
+          title: "Płatność",
+          message: retryable
+            ? "Płatność jeszcze nie została potwierdzona przez Stripe. Wejdź ponownie za chwilę albo odśwież stronę."
+            : "Nie udało się odebrać zakupu. Jeśli płatność została pobrana, odśwież grę i spróbuj ponownie.",
+          buttonText: "OK",
+          dismissible: true,
+          onConfirm: closeModal,
+        });
+        return;
+      }
+
+      await wait(1500 + attempt * 450);
+    }
+  }
+}
+
+function setPaidGrantStoreFlag(flag, value = true) {
+  const normalizedFlag = sanitizeStoredId(flag);
+
+  if (!normalizedFlag) {
+    return;
+  }
+
+  if (normalizedFlag === "storeStarterPackPurchased") {
+    state.storeStarterPackPurchased = Boolean(value);
+    return;
+  }
+
+  state.storeOffers = {
+    ...(state.storeOffers || {}),
+    [normalizedFlag]: value,
+  };
+}
+
+async function showPaidCurrencyReward(type, amount) {
+  const safeAmount = Math.max(0, Math.floor(Number(amount || 0)));
+
+  if (safeAmount <= 0) {
+    return;
+  }
+
+  if (type === "diamonds") {
+    await showDiamondRewardScene(safeAmount, { title: "Klejnoty", autoCloseMs: 2500 });
+    return;
+  }
+
+  if (type === "elixirs") {
+    await showElixirRewardScene(safeAmount, { title: "Eliksiry", autoCloseMs: 2500 });
+    return;
+  }
+
+  await showCoinRewardScene(safeAmount, { title: "Monety", autoCloseMs: 2500 });
+  await animateCoinsToBalance();
+}
+
+async function grantPaidCharacter(itemId) {
+  const character = getCharacterById(itemId);
+
+  if (!character) {
+    return null;
+  }
+
+  if (!state.ownedCharacters.includes(character.id)) {
+    state.ownedCharacters.push(character.id);
+  }
+
+  state.equippedCharacter = character.id;
+  state.favoriteCharacterId = character.id;
+  return character;
+}
+
+async function grantPaidPet(itemId) {
+  const pet = getPetById(itemId);
+
+  if (!pet) {
+    return null;
+  }
+
+  if (!state.ownedPets.includes(pet.id)) {
+    state.ownedPets.push(pet.id);
+  }
+
+  state.equippedPet = pet.id;
+  state.favoritePetId = pet.id;
+  return pet;
+}
+
+async function applyPaidCharacterReward(itemId) {
+  const character = await grantPaidCharacter(itemId);
+
+  if (!character) {
+    return;
+  }
+
+  saveState();
+  renderAll();
+  await showRewardShowcase({
+    image: character.image,
+    name: character.name,
+    countLabel: "POSTAĆ",
+    mode: "character",
+    autoCloseMs: 2500,
+    soundEffectName: getCharacterVoiceEffect(character.id) || "characterUnlock",
+    characterVoiceId: character.id,
+  });
+}
+
+async function applyPaidPetReward(itemId) {
+  const pet = await grantPaidPet(itemId);
+
+  if (!pet) {
+    return;
+  }
+
+  saveState();
+  renderAll();
+  await showRewardShowcase({
+    image: pet.image,
+    name: pet.name,
+    countLabel: "PLATOYA",
+    mode: "character",
+    autoCloseMs: 2500,
+    soundEffectName: getPetVoiceEffect(pet.id) || "characterUnlock",
+  });
+}
+
+async function applyPaidBundleGrant(grant) {
+  const rewards = Array.isArray(grant?.rewards) ? grant.rewards : [];
+  const characterRewards = rewards.filter((reward) => reward?.type === "character");
+  const onlyCharacters = characterRewards.length > 1 && characterRewards.length === rewards.length;
+
+  if (grant.storeFlag) {
+    setPaidGrantStoreFlag(grant.storeFlag, true);
+  }
+
+  if (grant.dailyFlag) {
+    setPaidGrantStoreFlag(grant.dailyFlag, getStoreDailyPurchaseCycleKey());
+  }
+
+  if (onlyCharacters) {
+    const rewardCharacters = [];
+
+    for (const reward of characterRewards) {
+      const character = await grantPaidCharacter(reward.itemId);
+      if (character) {
+        rewardCharacters.push(character);
+      }
+    }
+
+    saveState();
+    renderAll();
+    if (rewardCharacters.length >= 2) {
+      playOneShotSound("characterUnlock", 0.8);
+      await showBundleUnlockScene(rewardCharacters);
+    }
+    return;
+  }
+
+  for (const reward of rewards) {
+    await applyPaidGrantReward(reward);
+    await wait(120);
+  }
+}
+
+async function applyPaidGrantReward(grant) {
+  if (!grant || typeof grant !== "object") {
+    return;
+  }
+
+  const amount = Math.max(0, Math.floor(Number(grant.amount || 0)));
+
+  if (grant.dailySpecialId) {
+    state.storeOffers = {
+      ...(state.storeOffers || {}),
+      specialCurrencyPurchasedId: sanitizeStoredId(grant.dailySpecialId),
+    };
+  }
+
+  if (grant.type === "bundle") {
+    await applyPaidBundleGrant(grant);
+    return;
+  }
+
+  if (grant.type === "coins" || grant.type === "diamonds" || grant.type === "elixirs") {
+    changeCurrencyBalance(grant.type, amount);
+    saveState();
+    renderAll();
+    await showPaidCurrencyReward(grant.type, amount);
+    return;
+  }
+
+  if (grant.type === "superAlley") {
+    const worldId = grant.worldId === "winter" ? "winter" : "alley";
+    setSuperAlleyActiveForWorld(worldId, true);
+    saveState();
+    renderAll();
+    await showSuperAlleySuccessScene(worldId);
+    return;
+  }
+
+  if (grant.type === "premiumBoost") {
+    const worldId = grant.worldId === "winter" ? "winter" : "alley";
+    setSuperAlleyActiveForWorld(worldId, true);
+    state.trophies = Math.max(0, Number(state.trophies || 0) + Math.max(0, Number(grant.trophyBoost || 0)));
+    saveState();
+    renderAll();
+    await showSuperAlleySuccessScene(worldId);
+    return;
+  }
+
+  if (grant.type === "rankingPremium") {
+    state.rankingPremiumActive = true;
+    saveState();
+    renderAll();
+    closeRankingPremiumOffer(false);
+    playOneShotSoundWithMusicDuck("rankingPremiumUnlock", 0.8);
+    return;
+  }
+
+  if (grant.type === "machineRoll") {
+    const worldId = grant.worldId === "winter" ? "winter" : "magicians";
+    const rewardPet = pickStorePlatoMachineRewardPet(worldId);
+    saveState();
+    renderAll();
+    if (rewardPet) {
+      await wait(120);
+      openStorePlatoMachineRoll(rewardPet, worldId);
+    }
+    return;
+  }
+
+  if (grant.type === "character") {
+    await applyPaidCharacterReward(grant.itemId);
+    return;
+  }
+
+  if (grant.type === "pet") {
+    await applyPaidPetReward(grant.itemId);
+    return;
+  }
+
+  if (grant.type === "highTowerSparkles") {
+    state.highTowerSparkles = getHighTowerSparkles() + amount;
+    saveState();
+    renderAll();
+    await showHighTowerSparklesRewardScene(amount, {
+      title: "Błyskotki",
+      countLabel: `+${amount}`,
+      autoCloseMs: 2100,
+    });
+    return;
+  }
+
+  if (grant.type === "highTowerChest") {
+    saveState();
+    renderAll();
+    await openHighTowerPurchasedChests(amount || 1);
+  }
+}
+
+async function applyPaidPurchaseGrant(purchase) {
+  if (!purchase?.grant) {
+    return;
+  }
+
+  await applyPaidGrantReward(purchase.grant);
 }
 
 function updateBalanceDisplays() {
@@ -4137,8 +5434,12 @@ function getPetRankTheme(pet) {
   return "";
 }
 
+function getPetRankMaxLevel(theme = "") {
+  return PET_RANK_MAX_LEVEL_BY_THEME[theme] || PET_RANK_MAX_LEVEL;
+}
+
 function getPetRankImagePath(theme, rankLevel) {
-  const safeRank = clamp(Math.round(rankLevel || 1), 1, PET_RANK_MAX_LEVEL);
+  const safeRank = clamp(Math.round(rankLevel || 1), 1, getPetRankMaxLevel(theme));
 
   if (theme === "winter") {
     return `./zimowy${safeRank}.png`;
@@ -4163,13 +5464,14 @@ function getPetRankInfo(pet) {
   }
 
   const trophies = getPetRankTrophies(pet.id);
+  const maxRankLevel = getPetRankMaxLevel(theme);
   const rankLevel = clamp(
     Math.floor(trophies / PET_RANK_STEP_TROPHIES) + 1,
     1,
-    PET_RANK_MAX_LEVEL
+    maxRankLevel
   );
   const rankStart = (rankLevel - 1) * PET_RANK_STEP_TROPHIES;
-  const rankProgress = rankLevel >= PET_RANK_MAX_LEVEL
+  const rankProgress = rankLevel >= maxRankLevel
     ? 100
     : clamp(((trophies - rankStart) / PET_RANK_STEP_TROPHIES) * 100, 0, 100);
 
@@ -4177,9 +5479,25 @@ function getPetRankInfo(pet) {
     theme,
     trophies,
     rankLevel,
+    maxRankLevel,
     rankProgress,
     image: getPetRankImagePath(theme, rankLevel),
   };
+}
+
+function getCurrentRunPetRankLevel() {
+  const petId = game?.runPetId || state.equippedPet;
+  const pet = getPetById(petId) || getPetById(getPetBaseId(petId)) || getEquippedPet();
+  const rankInfo = getPetRankInfo(pet);
+  return Math.max(1, Number(rankInfo?.rankLevel || 1));
+}
+
+function getRobotHpBonusFromPetRank() {
+  return Math.max(0, getCurrentRunPetRankLevel() - 1) * 20;
+}
+
+function getRobotProjectileSpeedMultiplierFromPetRank() {
+  return 1 + Math.max(0, getCurrentRunPetRankLevel() - 1) * 0.03;
 }
 
 function buildPetRankBadgeMarkup(pet, className = "") {
@@ -5607,6 +6925,10 @@ function showView(viewName) {
     return;
   }
 
+  if (previousView !== viewName && (previousView === "store" || previousView === "inventory")) {
+    stopMusicTrackPreview();
+  }
+
   if (lobbyViewTransitionTimer) {
     window.clearTimeout(lobbyViewTransitionTimer);
     lobbyViewTransitionTimer = 0;
@@ -5707,7 +7029,7 @@ function showView(viewName) {
   if (viewName === "ranking") {
     if (!isRankingAlleyUnlocked()) {
       triggerRankingLockFeedback(rankingAlleyEntry);
-      showTrophyNotice("WYMAGANE 500 PUCHARÓW");
+      showTrophyNotice(`WYMAGANE ${RANKING_ALLEY_UNLOCK_TROPHIES} PUCHARÓW`);
       return;
     }
 
@@ -6990,7 +8312,7 @@ async function openFriendProfileFromFriends(profileId) {
 function getProfileWorldProgressDetails(trophies = Number(state.trophies || 0)) {
   const currentTrophies = Math.max(0, Number(trophies || 0));
   const isWinterWorld = currentTrophies >= MAGICIANS_WORLD_END_TROPHIES;
-  const worldEnd = isWinterWorld ? 4000 : MAGICIANS_WORLD_END_TROPHIES;
+  const worldEnd = isWinterWorld ? WINTER_WORLD_END_TROPHIES : MAGICIANS_WORLD_END_TROPHIES;
 
   return {
     currentTrophies,
@@ -7428,7 +8750,7 @@ function renderProfilePanel() {
   const currentTrophies = Math.max(0, Number(isReadonlyProfile ? readonlyProfile.trophies : state.trophies || 0));
   const progressWorldTheme = currentTrophies >= MAGICIANS_WORLD_END_TROPHIES ? "winter" : "alley";
   const progressStart = progressWorldTheme === "winter" ? MAGICIANS_WORLD_END_TROPHIES : 0;
-  const progressEnd = progressWorldTheme === "winter" ? 4000 : MAGICIANS_WORLD_END_TROPHIES;
+  const progressEnd = progressWorldTheme === "winter" ? WINTER_WORLD_END_TROPHIES : MAGICIANS_WORLD_END_TROPHIES;
   const progressPercent = clamp((currentTrophies - progressStart) / Math.max(1, progressEnd - progressStart), 0, 1) * 100;
   const profileCreatedAt = isReadonlyProfile ? readonlyProfile.createdAt : state.profileCreatedAt;
   const ownedCharactersCount = isReadonlyProfile
@@ -8957,42 +10279,48 @@ async function submitFriendsAddIdTooltip() {
   }
 
   const playerId = sanitizePublicPlayerId(friendsAddIdInput.value);
-  if (playerId.length < 5) {
+  const secretCode = normalizeFriendsSecretCode(friendsAddIdInput.value);
+  if (playerId.length < 5 && secretCode.length < 5) {
     return;
   }
 
-  if (playerId === "12121") {
+  if (secretCode === "12121") {
     await redeemFriendsDiamondCode();
     return;
   }
 
-  if (playerId === "PUCHA") {
+  if (secretCode === "PUCHA") {
     await redeemFriendsTrophyCode();
     return;
   }
 
-  if (playerId === "RANKI") {
+  if (secretCode === "RANKI") {
     await redeemFriendsRankingCode();
     return;
   }
 
-  if (playerId === "TALIA") {
+  if (secretCode === "TALIA") {
     await redeemFriendsCardDeckCode();
     return;
   }
 
-  if (playerId === "BILET") {
+  if (secretCode === "BILET") {
     await redeemFriendsTicketCode();
     return;
   }
 
-  if (playerId === "PIESM") {
+  if (secretCode === "PIESM") {
     await redeemFriendsDogPointsCode();
     return;
   }
 
-  if (playerId === "FLARO") {
+  if (secretCode === "FLARO") {
     await redeemFriendsFlaroCode();
+    return;
+  }
+
+  if (secretCode === "BLYSK") {
+    await redeemFriendsSparklesCode();
     return;
   }
 
@@ -9233,6 +10561,37 @@ async function redeemFriendsFlaroCode() {
       soundEffectName: "characterUnlock",
     });
   }
+}
+
+async function redeemFriendsSparklesCode() {
+  if (friendsAddIdSubmitting) {
+    return;
+  }
+
+  const amount = 5000;
+  friendsAddIdSubmitting = true;
+  state.highTowerSparkles = getHighTowerSparkles() + amount;
+  updateBalanceDisplays();
+  renderHighTowerChallenge();
+  renderStore();
+  renderFriendsView();
+  saveState();
+
+  if (friendsAddIdStatus) {
+    friendsAddIdStatus.textContent = "+5000 BŁYSKOTEK";
+    friendsAddIdStatus.dataset.state = "success";
+  }
+
+  window.setTimeout(() => {
+    hideFriendsAddIdTooltip();
+    renderFriendsView();
+    syncTabs();
+  }, 450);
+
+  await showHighTowerSparklesRewardScene(amount, {
+    title: "Kod znajomych",
+    autoCloseMs: 2200,
+  });
 }
 
 async function copyOwnProfileId() {
@@ -10227,8 +11586,10 @@ function hideGameLaunchOverlay() {
 
 function cancelGameLaunchTransition() {
   gameLaunchTransitionToken += 1;
+  gameStartLoadingToken += 1;
   gameLaunchTransitionBusy = false;
   hideGameLaunchOverlay();
+  hideGameStartLoadingScreen();
 }
 
 async function startGameLaunchTransition() {
@@ -10236,6 +11597,19 @@ async function startGameLaunchTransition() {
     return;
   }
 
+  if (gameLaunchTransitionBusy) {
+    return;
+  }
+
+  gameLaunchTransitionBusy = true;
+  const token = ++gameLaunchTransitionToken;
+  await runGameStartLoadingScreen();
+
+  if (token !== gameLaunchTransitionToken) {
+    return;
+  }
+
+  gameLaunchTransitionBusy = false;
   showView("game");
 }
 
@@ -11455,6 +12829,7 @@ function renderStore(options = {}) {
       buildStarterPackBooth(),
       buildMaxPlatoyaBooth(),
       buildLunellaMagicBooth(),
+      buildMusicStoreBooths(),
       buildPetSkinOfferBooths(STORE_OFFER_TAB_MAGIC),
       buildDailyGiftStoreBooth(null, null),
       buildCreatorSupportBooth(),
@@ -12482,6 +13857,58 @@ function buildMaxPlatoyaBooth() {
   `;
 }
 
+function buildMusicAlbumVisualMarkup(track, className = "") {
+  if (!track) {
+    return "";
+  }
+
+  const safeName = escapeHtml(track.name || "Muzyka");
+  const safeImage = escapeHtml(track.image || "");
+
+  return `
+    <span class="music-album-visual ${escapeHtml(className)}">
+      <span class="music-album-disc" aria-hidden="true"></span>
+      <span class="music-album-cover-frame">
+        <img class="music-album-cover asset-image" src="${safeImage}" alt="${safeName}" data-fallback-text="MUZYKA" />
+        <span class="asset-fallback">MUZYKA</span>
+      </span>
+    </span>
+  `;
+}
+
+function buildMusicStoreBooth(track) {
+  if (!track?.storeOffer || isMusicTrackUnlocked(track.id)) {
+    return "";
+  }
+
+  return `
+    <section class="store-daily-offer-section store-music-offer-section">
+      <article
+        class="store-daily-offer-card store-daily-character-offer store-music-offer"
+        data-store-music-offer="${escapeHtml(track.id)}"
+        role="button"
+        tabindex="0"
+        aria-label="Kup muzykę ${escapeHtml(track.name)}"
+      >
+        <span class="store-daily-offer-badge store-magic-offer-badge"><span>MUZYCZKA DO GRY</span></span>
+        <span class="store-music-offer-art">
+          ${buildMusicAlbumVisualMarkup(track, "store-music-album-visual")}
+        </span>
+        <span class="store-music-offer-title">${escapeHtml(track.name)}</span>
+        <span class="store-daily-price store-daily-coin-price">${buildCurrencyAmountMarkup(track.price || STORE_MUSIC_OFFER_PRICE, "coins")}</span>
+      </article>
+    </section>
+  `;
+}
+
+function buildMusicStoreBooths() {
+  return MUSIC_TRACK_ITEMS
+    .filter((track) => track.storeOffer)
+    .map((track) => buildMusicStoreBooth(track))
+    .filter(Boolean)
+    .join("");
+}
+
 function buildRankingCardDeckStoreBooth() {
   if (isRankingCardDeckOfferPurchasedToday()) {
     return "";
@@ -12736,6 +14163,7 @@ function buildPlatoMachineDailyBooth(offer) {
   const refreshIn = formatStoreRefreshShortCountdown(getStoreRefreshRemainingMs());
   const machineImage = offer.image || MAGIC_MACHINE_IMAGE;
   const priceMarkup = buildCurrencyAmountMarkup(offer.price, "diamonds");
+  const badgeLabel = offer.worldId === "winter" ? "ZIMOWA OFERTA!" : "PLATOISTYCZNA OFERTA!";
 
   return `
     <section class="store-daily-offer-section">
@@ -12744,9 +14172,9 @@ function buildPlatoMachineDailyBooth(offer) {
         data-store-plato-machine-offer="${offer.id}"
         role="button"
         tabindex="0"
-        aria-label="Platoistyczna oferta ${escapeHtml(offer.name)}"
+        aria-label="${offer.worldId === "winter" ? "Zimowa oferta" : "Platoistyczna oferta"} ${escapeHtml(offer.name)}"
       >
-        <span class="store-daily-offer-badge store-special-offer-badge store-plato-machine-offer-badge"><span>PLATOISTYCZNA OFERTA!</span></span>
+        <span class="store-daily-offer-badge store-special-offer-badge store-plato-machine-offer-badge"><span>${badgeLabel}</span></span>
         ${buildDailyOfferTimerMarkup(refreshIn)}
         <span class="store-daily-character-name store-daily-currency-name">
           <span class="store-daily-character-name-fallback-only">${escapeHtml(offer.title)}</span>
@@ -13508,18 +14936,30 @@ function getCurrentStoreSpecialCurrencyOffer() {
   return STORE_SPECIAL_CURRENCY_OFFERS.find((offer) => offer.id === offerId) || STORE_SPECIAL_CURRENCY_OFFERS[0] || null;
 }
 
+function getPlatoMachinePetPoolForWorld(worldId = "magicians") {
+  return worldId === "winter" ? getWinterPetShopItems() : getMagiciansPetShopItems();
+}
+
+function hasUnownedPlatoYaForWorld(worldId = "magicians") {
+  return getPlatoMachinePetPoolForWorld(worldId).some((item) => !state.ownedPets.includes(item.id));
+}
+
 function hasUnownedMagiciansPlatoYa() {
-  return getMagiciansPetShopItems().some((item) => !state.ownedPets.includes(item.id));
+  return hasUnownedPlatoYaForWorld("magicians");
 }
 
 function getCurrentStorePlatoMachineOffer() {
   ensureStoreOffersCurrent();
-  if (getActiveStoreWorldId() !== "magicians" || !hasUnownedMagiciansPlatoYa()) {
+  const storeWorldId = getActiveStoreWorldId() === "winter" ? "winter" : "magicians";
+  if (!hasUnownedPlatoYaForWorld(storeWorldId)) {
     return null;
   }
 
-  const offerId = sanitizeStoredId(state.storeOffers?.platoKeyOfferId);
+  if (storeWorldId === "winter") {
+    return STORE_PLATOYA_MACHINE_OFFERS.find((offer) => offer.worldId === "winter") || null;
+  }
 
+  const offerId = sanitizeStoredId(state.storeOffers?.platoKeyOfferId);
   return STORE_PLATOYA_MACHINE_OFFERS.find((offer) => offer.id === offerId) || STORE_PLATOYA_MACHINE_OFFERS[0] || null;
 }
 
@@ -14292,6 +15732,29 @@ function buildTrophyWorldProgressLabels(rewards = [], options = {}) {
   `).join("");
 }
 
+function buildCurrentTrophyProgressBubble(world, progressPercent = 0) {
+  const currentTrophies = Math.max(0, Math.floor(Number(state.trophies || 0)));
+  const threshold = Math.max(0, Number(world?.threshold || 0));
+  const worldEnd = world?.id === "winter" ? WINTER_WORLD_END_TROPHIES : MAGICIANS_WORLD_END_TROPHIES;
+
+  if (
+    currentTrophies <= threshold ||
+    currentTrophies === MAGICIANS_WORLD_END_TROPHIES ||
+    currentTrophies >= worldEnd
+  ) {
+    return "";
+  }
+
+  const safeProgress = clamp(Number(progressPercent || 0), 8, 84);
+
+  return `
+    <div class="trophy-current-progress-bubble" style="--trophy-current-progress:${safeProgress.toFixed(2)}%;" aria-label="Aktualnie ${currentTrophies} pucharów">
+      <span class="trophy-current-progress-value">${currentTrophies}</span>
+      <img class="trophy-current-progress-icon asset-image" src="${TROPHY_ICON_IMAGE}" alt="" aria-hidden="true" data-fallback-text="P" />
+    </div>
+  `;
+}
+
 function buildClassicTrophyRewardCards(world, rewards = []) {
   return rewards.map((reward) => {
     const rewardUiState = getTrophyRewardUiState(world.id, reward);
@@ -14340,6 +15803,10 @@ function getTrophyRewardCountLabel(reward) {
 
   if (reward?.type === "profile-photo") {
     return reward.label || "Zdjęcie Profilu";
+  }
+
+  if (reward?.type === "loading-screen") {
+    return reward.label || "Ekran ładowania";
   }
 
   if (reward?.type === "card-deck") {
@@ -14438,6 +15905,18 @@ function getMagiciansRewardBundleTheme(reward) {
     return "mycelia";
   }
 
+  if (reward?.itemId === "linda" || reward?.skinItemId === "wata-cukrowa-linda") {
+    return "linda";
+  }
+
+  if (reward?.itemId === "lily" || reward?.skinItemId === "przebranko-lily") {
+    return "lily";
+  }
+
+  if (reward?.itemId === "zoya" || reward?.skinItemId === "zoya-vhalith-zeberka") {
+    return "zoya";
+  }
+
   return "";
 }
 
@@ -14477,9 +15956,8 @@ function buildMagiciansRewardCard(world, reward, rewardIndex = 0) {
   const rewardUiState = getTrophyRewardUiState(world.id, reward);
   const rewardImage = getTrophyRewardImage(reward);
   const isClaimable = rewardUiState.stateId === "ready";
-  const countLabel = reward.type === "character"
-    ? reward.label
-    : getTrophyRewardCountLabel(reward);
+  const hideCharacterAlleyText = reward.type === "character";
+  const countLabel = hideCharacterAlleyText ? "" : getTrophyRewardCountLabel(reward);
   const countTheme = getTrophyRewardCountTheme(reward);
   const cornerVisual = getMagiciansRewardCornerVisual(world.id, rewardUiState);
   const hasCountLabel = Boolean(countLabel);
@@ -14520,7 +15998,7 @@ function buildMagiciansRewardCard(world, reward, rewardIndex = 0) {
       ${isClaimable ? `data-trophy-claim="${world.id}:${reward.id}" role="button" tabindex="0" aria-label="Odbierz ${reward.label}"` : ""}
     >
       <div class="trophy-node-magicians-art">
-        ${hasCycleVisuals ? `<p class="trophy-node-magicians-bundle-label"><span>POSTAĆ + PRZEBRANIE</span></p>` : ""}
+        ${hasCycleVisuals && !hideCharacterAlleyText ? `<p class="trophy-node-magicians-bundle-label"><span>POSTAĆ + PRZEBRANIE</span></p>` : ""}
         ${cornerVisual ? `
           <div class="trophy-node-magicians-corner" data-corner-kind="${cornerVisual.kind}">
             <img
@@ -14535,7 +16013,7 @@ function buildMagiciansRewardCard(world, reward, rewardIndex = 0) {
           ${mediaMarkup}
           <div class="asset-fallback">${rewardImage.fallbackText}</div>
         </div>
-        ${hasCycleVisuals
+        ${hasCycleVisuals && !hideCharacterAlleyText
           ? buildMagiciansRewardCycleCountMarkup(cycleVisuals, countTheme)
           : hasCountLabel
             ? `<p class="trophy-node-magicians-count" data-count-theme="${countTheme}">${countLabel}</p>`
@@ -14733,7 +16211,7 @@ function buildMagiciansProgressPortal() {
   const essenceAmount = clamp(Math.floor(Number(state.silver || 0)), 0, WINTER_WORLD_SILVER_REQUIREMENT);
   const portalHint = hasRequiredTrophies
     ? `Naciśnij w portal, aby sprawdzić misje, oraz zbierz esencję potrzebną do przejścia do następnego Świata`
-    : `Ukończ Świat Magików, mając 2000 <img class="magicians-progress-portal-hint-icon asset-image" src="${TROPHY_ICON_IMAGE}" alt="Puchary" data-fallback-text="P" /> aby uaktywnić misje portalu, i zebrać 200 esencji`;
+    : `Ukończ Świat Magików, mając ${MAGICIANS_WORLD_END_TROPHIES} <img class="magicians-progress-portal-hint-icon asset-image" src="${TROPHY_ICON_IMAGE}" alt="Puchary" data-fallback-text="P" /> aby uaktywnić misje portalu, i zebrać 200 esencji`;
 
   return `
     <button
@@ -14779,8 +16257,8 @@ function buildMagiciansProgressPortal() {
 
 function isRankingAlleyUnlocked() {
   return Boolean(
-    state.rankingAlleyUnlocked ||
-    isTrophyRewardClaimed("alley", "alley-base-500")
+    (state.rankingAlleyUnlocked && state.trophies >= RANKING_ALLEY_UNLOCK_TROPHIES) ||
+    isTrophyRewardClaimed("alley", "alley-base-1000")
   );
 }
 
@@ -15846,6 +17324,7 @@ function renderTrophyRoad(options = {}) {
             <div class="trophy-world-progress-track">
               <div class="trophy-world-progress-fill" style="width:${worldProgress}%;"></div>
             </div>
+            ${buildCurrentTrophyProgressBubble(world, worldProgress)}
             <div class="trophy-world-progress-labels" style="${cardVars}">
               ${buildTrophyWorldProgressLabels(progressSlots)}
             </div>
@@ -15871,6 +17350,7 @@ function renderTrophyRoad(options = {}) {
             <div class="trophy-world-progress-track">
               <div class="trophy-world-progress-fill" style="width:${worldProgress}%;"></div>
             </div>
+            ${buildCurrentTrophyProgressBubble(world, worldProgress)}
             <div class="trophy-world-progress-labels" style="${cardVars}">
               ${buildTrophyWorldProgressLabels(progressRewards)}
             </div>
@@ -15896,7 +17376,7 @@ function renderTrophyRoad(options = {}) {
 }
 
 function renderInventory() {
-  if (ui.inventoryTab !== "characters" && ui.inventoryTab !== "pets") {
+  if (ui.inventoryTab !== "characters" && ui.inventoryTab !== "pets" && ui.inventoryTab !== "loadingScreens" && ui.inventoryTab !== "musicTracks") {
     ui.inventoryTab = "characters";
   }
 
@@ -15906,20 +17386,38 @@ function renderInventory() {
   if (viewNodes.inventory) {
     viewNodes.inventory.dataset.inventoryWorldFilter = activeWorldFilter;
   }
+  if (inventorySortSelect && inventorySortSelect.value !== ui.inventorySort) {
+    inventorySortSelect.value = ui.inventorySort;
+  }
+  if (inventorySearchInput && inventorySearchInput.value !== ui.inventorySearch) {
+    inventorySearchInput.value = ui.inventorySearch;
+  }
 
   renderWardrobeOverview();
-  const items = getOwnedItems(ui.inventoryTab);
+  const allItems = getWardrobeInventoryItems(ui.inventoryTab);
+  const filteredItems = filterWardrobeInventoryItems(ui.inventoryTab, allItems);
+  const sortedItems = sortWardrobeInventoryItems(ui.inventoryTab, filteredItems);
+  const totalPages = Math.max(1, Math.ceil(sortedItems.length / WARDROBE_ITEMS_PER_PAGE));
+  ui.inventoryPage = clamp(Math.floor(Number(ui.inventoryPage || 0)), 0, totalPages - 1);
+  const pageStart = ui.inventoryPage * WARDROBE_ITEMS_PER_PAGE;
+  const pageItems = sortedItems.slice(pageStart, pageStart + WARDROBE_ITEMS_PER_PAGE);
 
-  if (ui.inventoryTab === "characters" || ui.inventoryTab === "pets") {
-    inventoryGrid.className = "inventory-world-sections";
-    inventoryGrid.innerHTML = buildInventoryWorldSections(ui.inventoryTab);
+  if (ui.inventoryTab === "characters" || ui.inventoryTab === "pets" || ui.inventoryTab === "loadingScreens" || ui.inventoryTab === "musicTracks") {
+    inventoryGrid.className = `card-grid wardrobe-grid wardrobe-paged-grid ${ui.inventoryTab === "loadingScreens" ? "wardrobe-loading-screen-grid" : ""} ${ui.inventoryTab === "musicTracks" ? "wardrobe-music-grid" : ""}`;
+    inventoryGrid.innerHTML = pageItems.length > 0
+      ? buildInventoryCards(ui.inventoryTab, pageItems)
+      : buildInventoryWorldEmptyCard(ui.inventoryTab, getWardrobeEmptyLabelFromSearch());
+    renderWardrobePagination(totalPages);
     syncBrokenAssets(inventoryGrid);
     return;
   }
 
   inventoryGrid.className = "card-grid wardrobe-grid";
 
-  if (items.length === 0) {
+  if (allItems.length === 0) {
+    if (inventoryPagination) {
+      inventoryPagination.innerHTML = "";
+    }
     inventoryGrid.innerHTML = `
       <article class="empty-card wardrobe-empty-card">
         <div class="empty-card-art"></div>
@@ -15930,9 +17428,138 @@ function renderInventory() {
     return;
   }
 
-  inventoryGrid.innerHTML = buildInventoryCards(ui.inventoryTab, items);
+  inventoryGrid.innerHTML = buildInventoryCards(ui.inventoryTab, pageItems);
+  renderWardrobePagination(totalPages);
 
   syncBrokenAssets(inventoryGrid);
+}
+
+function getWardrobeInventoryItems(kind) {
+  if (kind === "characters") {
+    return getOwnedMainCharacterItems();
+  }
+
+  if (kind === "pets") {
+    return getOwnedMainPetItems();
+  }
+
+  if (kind === "loadingScreens") {
+    return getOwnedLoadingScreenItems();
+  }
+
+  if (kind === "musicTracks") {
+    return getOwnedMusicTrackItems();
+  }
+
+  return getOwnedItems(kind);
+}
+
+function getInventoryWorldGroupById(worldId) {
+  return INVENTORY_WORLD_GROUPS.find((entry) => entry.id === worldId) || INVENTORY_WORLD_GROUPS[0];
+}
+
+function getInventoryWorldLabel(kind, item) {
+  if (kind === "loadingScreens") {
+    return item?.worldLabel || "EKRAN ŁADOWANIA";
+  }
+
+  if (kind === "musicTracks") {
+    return item?.worldLabel || "MUZYKA";
+  }
+
+  return getInventoryWorldGroupById(getInventoryItemWorldFilterId(kind, item) || "magicians").label;
+}
+
+function normalizeWardrobeSearchText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function filterWardrobeInventoryItems(kind, items) {
+  const query = normalizeWardrobeSearchText(ui.inventorySearch);
+
+  if (!query) {
+    return items;
+  }
+
+  return items.filter((item) => {
+    const worldLabel = getInventoryWorldLabel(kind, item);
+    const haystack = normalizeWardrobeSearchText([
+      item?.name,
+      item?.id,
+      worldLabel,
+      worldLabel.replace("PIRACKIE PODBOJE", "ALEJA RANKINGOWA"),
+      worldLabel.replace("PIRACKIE PODBOJE", "RANKINGOWE"),
+    ].join(" "));
+
+    return haystack.includes(query);
+  });
+}
+
+function getInventoryOwnedOrderIndex(kind, itemId) {
+  const id = sanitizeStoredId(itemId);
+  const ownedIds = kind === "characters"
+    ? state.ownedCharacters
+    : kind === "pets"
+      ? state.ownedPets
+      : kind === "loadingScreens"
+        ? getOwnedLoadingScreenItems().map((item) => item.id)
+        : kind === "musicTracks"
+          ? getOwnedMusicTrackItems().map((item) => item.id)
+        : kind === "weapons"
+          ? state.ownedWeapons
+          : [];
+  const index = ownedIds.indexOf(id);
+  return index >= 0 ? index : Number.MAX_SAFE_INTEGER;
+}
+
+function getInventoryFrequencyScore(kind, itemId) {
+  const id = sanitizeStoredId(itemId);
+  const baseId = kind === "characters" ? getCharacterBaseId(id) : kind === "pets" ? getPetBaseId(id) : id;
+  const source = kind === "characters" ? state.characterPlayCounts : kind === "pets" ? state.petPlayCounts : {};
+  return Math.max(0, Number(source?.[baseId] || source?.[id] || 0));
+}
+
+function sortWardrobeInventoryItems(kind, items) {
+  const mode = ui.inventorySort === "obtained" || ui.inventorySort === "played"
+    ? ui.inventorySort
+    : "default";
+
+  return items.slice().sort((first, second) => {
+    if (mode === "obtained") {
+      return getInventoryOwnedOrderIndex(kind, first.id) - getInventoryOwnedOrderIndex(kind, second.id);
+    }
+
+    if (mode === "played") {
+      const scoreDiff = getInventoryFrequencyScore(kind, second.id) - getInventoryFrequencyScore(kind, first.id);
+      if (scoreDiff !== 0) {
+        return scoreDiff;
+      }
+    }
+
+    const catalog = kind === "loadingScreens" ? LOADING_SCREEN_ITEMS : CATALOG[kind] || [];
+    return catalog.findIndex((item) => item.id === first.id) - catalog.findIndex((item) => item.id === second.id);
+  });
+}
+
+function getWardrobeEmptyLabelFromSearch() {
+  return normalizeWardrobeSearchText(ui.inventorySearch) ? "Brak wyników" : "";
+}
+
+function renderWardrobePagination(totalPages) {
+  if (!inventoryPagination) {
+    return;
+  }
+
+  const page = clamp(Math.floor(Number(ui.inventoryPage || 0)), 0, Math.max(0, totalPages - 1));
+  inventoryPagination.innerHTML = `
+    <button class="wardrobe-page-button" data-inventory-page="${Math.max(0, page - 1)}" type="button" ${page <= 0 ? "disabled" : ""} aria-label="Poprzednia strona">‹</button>
+    <span class="wardrobe-page-label">${page + 1}/${totalPages}</span>
+    <button class="wardrobe-page-button" data-inventory-page="${Math.min(totalPages - 1, page + 1)}" type="button" ${page >= totalPages - 1 ? "disabled" : ""} aria-label="Następna strona">›</button>
+  `;
 }
 
 function getInventoryItemWorldFilterId(kind, item) {
@@ -16143,6 +17770,14 @@ function buildInventoryCards(kind, items) {
     return buildInventoryPetCards(items);
   }
 
+  if (kind === "loadingScreens") {
+    return buildInventoryLoadingScreenCards(items);
+  }
+
+  if (kind === "musicTracks") {
+    return buildInventoryMusicTrackCards(items);
+  }
+
   return items
     .map((item) => {
       const equipped = isEquipped(kind, item.id);
@@ -16189,9 +17824,11 @@ function buildInventoryCharacterCards(items) {
     .map((item) => {
       const equipped = isCharacterBaseEquipped(item.id);
       const visualItem = getInventoryCharacterVisual(item);
+      const worldId = getInventoryItemWorldFilterId("characters", item) || "magicians";
+      const worldLabel = getInventoryWorldLabel("characters", item);
 
       return `
-        <article class="wardrobe-character-tile ${equipped ? "active" : ""}">
+        <article class="wardrobe-character-tile ${equipped ? "active" : ""}" data-wardrobe-world="${escapeHtml(worldId)}">
           <button class="wardrobe-character-open" data-character-detail="${item.id}" type="button" aria-label="Pokaż szczegóły ${item.name}">
             <div class="wardrobe-character-art" ${getWardrobeVisualStyle("characters", visualItem, "list")}>
               ${buildPreviewAssetMarkup(visualItem, {
@@ -16202,6 +17839,7 @@ function buildInventoryCharacterCards(items) {
               })}
             </div>
             <p class="wardrobe-character-name">${item.name}</p>
+            <p class="wardrobe-item-world-badge">${escapeHtml(worldLabel)}</p>
           </button>
         </article>
       `;
@@ -16214,9 +17852,11 @@ function buildInventoryPetCards(items) {
     .map((item) => {
       const equipped = isPetBaseEquipped(item.id);
       const visualItem = getInventoryPetVisual(item);
+      const worldId = getInventoryItemWorldFilterId("pets", item) || "magicians";
+      const worldLabel = getInventoryWorldLabel("pets", item);
 
       return `
-        <article class="wardrobe-pet-tile ${equipped ? "active" : ""}">
+        <article class="wardrobe-pet-tile ${equipped ? "active" : ""}" data-wardrobe-world="${escapeHtml(worldId)}">
           <button class="wardrobe-pet-open" data-pet-detail="${item.id}" type="button" aria-label="Pokaż szczegóły ${item.name}">
             <div class="wardrobe-pet-art" data-pet-skin-tone="${getPetSkinTone(visualItem?.id)}" ${getWardrobeVisualStyle("pets", visualItem, "list")}>
               ${buildPreviewAssetMarkup(visualItem, {
@@ -16229,7 +17869,80 @@ function buildInventoryPetCards(items) {
               ${buildPetSkinSparkleMarkup(visualItem?.id)}
             </div>
             <p class="wardrobe-pet-name">${item.name}</p>
+            <p class="wardrobe-item-world-badge">${escapeHtml(worldLabel)}</p>
           </button>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function buildInventoryLoadingScreenCards(items) {
+  const selectedId = getSelectedLoadingScreenId();
+
+  return items
+    .map((item) => {
+      const selected = item.id === selectedId;
+      const worldLabel = getInventoryWorldLabel("loadingScreens", item);
+
+      return `
+        <article class="wardrobe-loading-screen-tile ${selected ? "active" : ""}" data-wardrobe-world="magicians">
+          <button
+            class="wardrobe-loading-screen-open"
+            data-loading-screen-equip="${item.id}"
+            type="button"
+            ${selected ? "disabled" : ""}
+            aria-label="${selected ? "Aktywny ekran" : "Ustaw ekran"} ${item.name}"
+          >
+            <div class="wardrobe-loading-screen-art">
+              <img
+                class="wardrobe-loading-screen-image asset-image"
+                src="${item.image}"
+                alt="${item.name}"
+                data-fallback-text="${item.fallbackText || "LOAD"}"
+              />
+              <div class="asset-fallback">${item.fallbackText || "LOAD"}</div>
+            </div>
+            <p class="wardrobe-loading-screen-name">${escapeHtml(item.name)}</p>
+            <p class="wardrobe-item-world-badge">${escapeHtml(worldLabel)}</p>
+            <span class="wardrobe-loading-screen-status">${selected ? "AKTYWNY" : "USTAW"}</span>
+          </button>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function buildInventoryMusicTrackCards(items) {
+  const selectedId = getSelectedMusicTrackId();
+
+  return items
+    .map((item) => {
+      const selected = item.id === selectedId;
+      const worldLabel = getInventoryWorldLabel("musicTracks", item);
+
+      return `
+        <article class="wardrobe-music-tile ${selected ? "active" : ""}" data-wardrobe-world="magicians">
+          <div class="wardrobe-music-open">
+            <div class="wardrobe-music-art">
+              ${buildMusicAlbumVisualMarkup(item, "wardrobe-music-visual")}
+            </div>
+            <p class="wardrobe-music-name">${escapeHtml(item.name)}</p>
+            <p class="wardrobe-item-world-badge">${escapeHtml(worldLabel)}</p>
+            <div class="wardrobe-music-actions">
+              <button class="pixel-button wardrobe-music-action" data-music-preview="${item.id}" data-music-preview-full="true" type="button">
+                POSŁUCHAJ
+              </button>
+              <button
+                class="pixel-button wardrobe-music-action"
+                data-music-track-equip="${item.id}"
+                type="button"
+                ${selected ? "disabled" : ""}
+              >
+                ${selected ? "AKTYWNA" : "USTAW"}
+              </button>
+            </div>
+          </div>
         </article>
       `;
     })
@@ -16261,7 +17974,13 @@ function buildInventoryWorldSections(kind) {
 }
 
 function buildInventoryWorldEmptyCard(kind, worldLabel) {
-  const title = kind === "pets" ? "BRAK PLATOYI" : "BRAK POSTACI";
+  const title = kind === "pets"
+    ? "BRAK PLATOYI"
+    : kind === "loadingScreens"
+      ? "BRAK EKRANÓW"
+      : kind === "musicTracks"
+        ? "BRAK MUZYKI"
+      : "BRAK POSTACI";
 
   return `
     <article class="wardrobe-empty-world-banner" data-empty-world="${escapeHtml(worldLabel)}">
@@ -16645,7 +18364,7 @@ function getPetDetailDescriptionContent(pet) {
       ability: abilityText,
     },
     "papuga-manipulantka": {
-      history: "Kiedyś Emerald była płochliwym dżunglowym ptakiem, jednak przy treningu i małej pomocy czarów Elfie i Lindy, stała się manipulantką o szalonym spojrzeniu na życie",
+      history: "Kiedyś Emerald była płochliwym dżunglowym ptakiem, jednak przy treningu i małej pomocy czarów Elli i Lindy, stała się manipulantką o szalonym spojrzeniu na życie",
       ability: abilityText,
     },
     "l-psotka": {
@@ -16653,7 +18372,7 @@ function getPetDetailDescriptionContent(pet) {
       ability: abilityText,
     },
     "el-kruk": {
-      history: "Ozzy to ulubiony towarzysz Elfie, z czasów kiedy jeszcze z Lindą za sobą nie przepadały. Kiedyś, dodawał jej wsparcia a teraz dodaje punkty życia w walce",
+      history: "Ozzy to ulubiony towarzysz Elli, z czasów kiedy jeszcze z Lindą za sobą nie przepadały. Kiedyś, dodawał jej wsparcia a teraz dodaje punkty życia w walce",
       ability: abilityText,
     },
     "malpka-jasnoksieznik": {
@@ -16661,7 +18380,7 @@ function getPetDetailDescriptionContent(pet) {
       ability: abilityText,
     },
     pluto: {
-      history: "Pluto został odnaleziony i przygarnięty przez Elfie, i chociaż na początku Ozzy był o niego nie mało zazdrosny, to finalnie zaczęli się dogadywać. Nie wiadomo jednak skąd pochodzi jego bransoletka na dłoni, której nie da się zdjąć…",
+      history: "Pluto został odnaleziony i przygarnięty przez Ellę, i chociaż na początku Ozzy był o niego nie mało zazdrosny, to finalnie zaczęli się dogadywać. Nie wiadomo jednak skąd pochodzi jego bransoletka na dłoni, której nie da się zdjąć…",
       ability: abilityText,
     },
     flaro: {
@@ -17184,6 +18903,48 @@ function getSelectedCharacterDetailItem() {
   return getCharacterById(baseId);
 }
 
+function renderCharacterSkinSwitcher(baseId) {
+  if (!characterDetailSkinSwitcher) {
+    return;
+  }
+
+  const baseItem = getCharacterById(baseId);
+  const ownedSkins = getOwnedCharacterSkins(baseId);
+
+  if (!baseItem || ownedSkins.length === 0) {
+    characterDetailSkinSwitcher.innerHTML = "";
+    characterDetailSkinSwitcher.hidden = true;
+    return;
+  }
+
+  const entries = [baseItem, ...ownedSkins];
+  characterDetailSkinSwitcher.hidden = false;
+  characterDetailSkinSwitcher.innerHTML = entries
+    .map((item) => {
+      const selected = (activeCharacterDetailSkinId || baseId) === item.id;
+
+      return `
+        <button
+          class="character-detail-skin-choice ${selected ? "active" : ""}"
+          data-character-skin="${item.id}"
+          type="button"
+          aria-label="${escapeHtml(item.name)}"
+        >
+          ${buildPreviewAssetMarkup(item, {
+            imageClass: "character-detail-skin-choice-image asset-image",
+            videoClass: "character-detail-skin-choice-image asset-video",
+            fallbackText: item.name,
+            alt: item.name,
+          })}
+        </button>
+      `;
+    })
+    .join("");
+
+  syncBrokenAssets(characterDetailSkinSwitcher);
+  syncAnimatedAssets(characterDetailSkinSwitcher);
+}
+
 function renderCharacterSkinTray(baseId) {
   if (!characterSkinTray || !characterSkinList) {
     return;
@@ -17261,6 +19022,11 @@ function renderCharacterDetailPanel() {
     characterDetailEquipButton.disabled = isActive;
   }
 
+  if (characterDetailHangerButton) {
+    characterDetailHangerButton.hidden = true;
+  }
+
+  renderCharacterSkinSwitcher(baseItem.id);
   renderCharacterSkinTray(baseItem.id);
   syncBrokenAssets(characterDetailBackdrop || characterDetailPanel);
   syncAnimatedAssets(characterDetailBackdrop || characterDetailPanel);
@@ -17426,6 +19192,7 @@ function renderWardrobeOverview() {
   const signature = [
     sanitizeStoredId(state.equippedPet),
     sanitizeStoredId(state.equippedCharacter),
+    ui.inventoryTab,
   ].join("|");
 
   if (wardrobeOverview.dataset.equippedSignature === signature && wardrobeOverview.childElementCount > 0) {
@@ -17434,18 +19201,18 @@ function renderWardrobeOverview() {
 
   const slots = [
     {
-      label: "PlatoYa",
-      kind: "pets",
-      item: getOwnedItem("pets", state.equippedPet),
-      emptyLabel: "Bez PlatoYasa",
-      emptyNote: "Mozesz grac bez pomocnika.",
-    },
-    {
       label: "Postac",
       kind: "characters",
       item: getOwnedItem("characters", state.equippedCharacter),
       emptyLabel: "Brak postaci",
       emptyNote: "Wybierz postac w szafie.",
+    },
+    {
+      label: "PlatoYa",
+      kind: "pets",
+      item: getOwnedItem("pets", state.equippedPet),
+      emptyLabel: "Bez PlatoYasa",
+      emptyNote: "Mozesz grac bez pomocnika.",
     },
   ];
 
@@ -17455,18 +19222,19 @@ function renderWardrobeOverview() {
       if (!item) {
         return `
           <article class="wardrobe-equipped-slot wardrobe-equipped-${slot.kind} wardrobe-equipped-empty">
-            <div class="wardrobe-equipped-platform" aria-label="${slot.emptyLabel}"></div>
+            <div class="wardrobe-equipped-card" aria-label="${slot.emptyLabel}"></div>
           </article>
         `;
       }
 
       const name = item?.name || slot.emptyLabel;
       const fallback = item?.name || slot.emptyLabel;
+      const worldId = getInventoryItemWorldFilterId(slot.kind, item) || "magicians";
+      const worldLabel = getInventoryWorldLabel(slot.kind, item);
 
       return `
-        <article class="wardrobe-equipped-slot wardrobe-equipped-${slot.kind}">
-          <p class="wardrobe-equipped-kind-bubble">${slot.kind === "pets" ? "PLATOYA" : "POSTAĆ"}</p>
-          <div class="wardrobe-equipped-platform">
+        <article class="wardrobe-equipped-slot wardrobe-equipped-${slot.kind}" data-wardrobe-world="${escapeHtml(worldId)}">
+          <div class="wardrobe-equipped-card">
             <div class="item-art wardrobe-slot-art${slot.kind === "pets" ? " wardrobe-slot-pet-art" : " wardrobe-slot-character-art"}" data-pet-skin-tone="${slot.kind === "pets" ? getPetSkinTone(item?.id) : ""}" ${getWardrobeVisualStyle(slot.kind, item, "left")}>
             ${item
               ? buildPreviewAssetMarkup(item, {
@@ -17489,6 +19257,7 @@ function renderWardrobeOverview() {
             </div>
           </div>
           <p class="wardrobe-equipped-title">${name}</p>
+          <p class="wardrobe-equipped-world-badge">${escapeHtml(worldLabel)}</p>
         </article>
       `;
     })
@@ -17666,6 +19435,13 @@ function handleStoreClick(event) {
     return;
   }
 
+  const musicOfferButton = event.target.closest("[data-store-music-offer]");
+
+  if (musicOfferButton) {
+    openStoreMusicPurchase(musicOfferButton.dataset.storeMusicOffer);
+    return;
+  }
+
   const cardDeckButton = event.target.closest("[data-store-card-deck-offer]");
 
   if (cardDeckButton) {
@@ -17737,7 +19513,7 @@ function handleStoreClick(event) {
     const item = CATALOG[kind].find((entry) => entry.id === itemId);
 
     if (item) {
-      buyCashUnlock(kind, item);
+      void startPaidCheckout(item.id, { kind });
     }
     return;
   }
@@ -17798,12 +19574,12 @@ function handleStoreClick(event) {
   }
 
   if (kind === "coins") {
-    buyCoinPack(item);
+    void startPaidCheckout(item.id);
     return;
   }
 
   if (kind === "diamonds") {
-    buyDiamondPack(item);
+    void startPaidCheckout(item.id);
     return;
   }
 
@@ -17875,6 +19651,45 @@ function confirmLogoutAccount() {
 }
 
 function handleInventoryClick(event) {
+  const musicPreviewButton = event.target.closest("[data-music-preview]");
+
+  if (musicPreviewButton) {
+    const trackId = sanitizeStoredId(musicPreviewButton.dataset.musicPreview);
+    if (isMusicTrackUnlocked(trackId)) {
+      playMusicTrackPreview(trackId, 0);
+    }
+    return;
+  }
+
+  const musicTrackEquipButton = event.target.closest("[data-music-track-equip]");
+
+  if (musicTrackEquipButton) {
+    const trackId = sanitizeStoredId(musicTrackEquipButton.dataset.musicTrackEquip);
+    if (!isMusicTrackUnlocked(trackId)) {
+      return;
+    }
+
+    state.selectedMusicTrack = trackId;
+    saveState();
+    renderInventory();
+    syncBackgroundMusic();
+    return;
+  }
+
+  const loadingScreenButton = event.target.closest("[data-loading-screen-equip]");
+
+  if (loadingScreenButton) {
+    const screenId = sanitizeStoredId(loadingScreenButton.dataset.loadingScreenEquip);
+    if (!isLoadingScreenUnlocked(screenId)) {
+      return;
+    }
+
+    state.selectedLoadingScreen = screenId || "default";
+    saveState();
+    renderInventory();
+    return;
+  }
+
   const characterDetailButton = event.target.closest("[data-character-detail]");
 
   if (characterDetailButton) {
@@ -17957,7 +19772,7 @@ function handleRankingEntryClick(event) {
 
   if (!isRankingAlleyUnlocked()) {
     triggerRankingLockFeedback(rankingAlleyEntry);
-    showTrophyNotice("WYMAGANE 500 PUCHARÓW");
+    showTrophyNotice(`WYMAGANE ${RANKING_ALLEY_UNLOCK_TROPHIES} PUCHARÓW`);
     return;
   }
 
@@ -18024,27 +19839,25 @@ function handleTrophyClick(event) {
 
   const claimButton = event.target.closest("[data-trophy-claim]");
 
-  if (!claimButton) {
-    const rewardNode = event.target.closest(".trophy-node[data-world-theme][data-reward-id]");
+	  if (!claimButton) {
+	    const rewardNode = event.target.closest(".trophy-node[data-world-theme][data-reward-id]");
+	
+	    if (!rewardNode || rewardNode.dataset.nodeState === "ready" || rewardNode.dataset.nodeState === "claimed") {
+	      return;
+	    }
+	
+	    const world = getTrophyWorldById(rewardNode.dataset.worldTheme);
+	    const reward = getTrophyWorldRewardById(world, rewardNode.dataset.rewardId);
+	
+	    if (!world || !reward) {
+	      return;
+	    }
 
-    if (!rewardNode || rewardNode.dataset.nodeState === "claimed" || rewardNode.dataset.nodeState === "ready") {
-      return;
-    }
-
-    const worldId = rewardNode.dataset.worldTheme;
-    const rewardId = rewardNode.dataset.rewardId;
-    const world = getTrophyWorldById(worldId);
-    const reward = getTrophyWorldRewardById(world, rewardId);
-
-    if (!world || !reward) {
-      return;
-    }
-
-    const isPremiumBlocked = isSuperAlleyReward(worldId, reward) && !isSuperAlleyActiveForWorld(worldId);
+	    const isPremiumBlocked = isSuperAlleyReward(world.id, reward) && !isSuperAlleyActiveForWorld(world.id);
     if (reward.type === "ranking-unlock" && state.trophies < RANKING_ALLEY_UNLOCK_TROPHIES) {
       triggerTrophyNodeLockFeedback(rewardNode);
       playPortalLockSound();
-      showTrophyNotice("WYMAGANE 500 PUCHARÓW");
+      showTrophyNotice(`WYMAGANE ${RANKING_ALLEY_UNLOCK_TROPHIES} PUCHARÓW`);
       return;
     }
 
@@ -18212,6 +20025,12 @@ function buyItem(kind, item, options = {}) {
       state.ownedPets.push(item.id);
     }
     state.equippedPet = item.id;
+  } else if (kind === "musicTracks") {
+    state.unlockedMusicTracks = Array.isArray(state.unlockedMusicTracks) ? state.unlockedMusicTracks : [];
+    if (!state.unlockedMusicTracks.includes(item.id)) {
+      state.unlockedMusicTracks.push(item.id);
+    }
+    state.selectedMusicTrack = item.id;
   }
 
   saveState();
@@ -18391,13 +20210,15 @@ function renderMagicWorldHeaderControls(world, worldProgress = 0) {
     return;
   }
 
-  const showMachineControls = world?.id === "alley";
+  const machineWorldId = world?.id === "winter" ? "winter" : "alley";
+  const showMachineControls = world?.id === "alley" || world?.id === "winter";
   const normalizedProgress = Math.max(0, Math.min(100, Number(worldProgress || 0)));
 
   worldHeaderActions.hidden = !showMachineControls;
   worldHeaderActions.setAttribute("aria-hidden", String(!showMachineControls));
   worldHeaderMachineButton.hidden = !showMachineControls;
   worldHeaderMachineButton.disabled = !showMachineControls;
+  worldHeaderMachineButton.dataset.machineTheme = machineWorldId;
   if (worldHeaderMiniProgress) {
     worldHeaderMiniProgress.hidden = true;
     worldHeaderMiniProgress.setAttribute("aria-hidden", "true");
@@ -18411,12 +20232,30 @@ function renderMagicWorldHeaderControls(world, worldProgress = 0) {
   }
 }
 
-function getMagicMachinePrizePool() {
-  return getMagiciansPetShopItems();
+function getMagicMachineWorldId() {
+  if (magicMachineSource === "winter" || magicMachineSource === "store-winter") {
+    return "winter";
+  }
+
+  return "alley";
+}
+
+function getMagicMachineImageForCurrentTheme() {
+  return getMagicMachineWorldId() === "winter" ? WINTER_MAGIC_MACHINE_IMAGE : MAGIC_MACHINE_IMAGE;
+}
+
+function getMagicMachineStoreWorldId() {
+  return getMagicMachineWorldId() === "winter" ? "winter" : "magicians";
+}
+
+function getMagicMachinePrizePool(worldId = getMagicMachineStoreWorldId()) {
+  return getPlatoMachinePetPoolForWorld(worldId);
 }
 
 function isMagicMachineFirstPurchase() {
-  return !state.magicMachineFirstPurchaseDone;
+  return getMagicMachineWorldId() === "winter"
+    ? !state.winterMagicMachineFirstPurchaseDone
+    : !state.magicMachineFirstPurchaseDone;
 }
 
 function getMagicMachineCurrentCost() {
@@ -18434,7 +20273,10 @@ function buildMagicMachineDiamondFallbackReward() {
 
 function pickMagicMachineRewardPet() {
   if (isMagicMachineFirstPurchase()) {
-    const firstReward = CATALOG.pets.find((item) => item.id === MAGIC_MACHINE_FIRST_REWARD_PET_ID) || null;
+    const firstRewardId = getMagicMachineWorldId() === "winter"
+      ? WINTER_MACHINE_FIRST_REWARD_PET_ID
+      : MAGIC_MACHINE_FIRST_REWARD_PET_ID;
+    const firstReward = CATALOG.pets.find((item) => item.id === firstRewardId) || null;
     if (firstReward && !state.ownedPets.includes(firstReward.id)) {
       return firstReward;
     }
@@ -18487,7 +20329,11 @@ function showMagicMachineMissingKeysMessage(missingCount = 1) {
       return;
     }
 
-    magicMachineLabel.textContent = magicMachineSource === "store" ? "MASZYNA PLATOI" : "MASZYNA PLATOYI";
+    magicMachineLabel.textContent = getMagicMachineWorldId() === "winter"
+      ? "ZIMOWA MASZYNA PLATOYI"
+      : magicMachineSource === "store"
+        ? "MASZYNA PLATOI"
+        : "MASZYNA PLATOYI";
     magicMachineLabel.classList.remove("missing-keys");
     magicMachineLabel.classList.remove("fade-out");
   }, 1520);
@@ -18505,7 +20351,7 @@ function setMagicMachineMessage(message = "", priceMarkup = "") {
 }
 
 function canCloseMagicMachineBackdrop() {
-  return magicMachineSource !== "store" && !magicMachineBusy && magicMachineStage === "buy";
+  return magicMachineSource !== "store" && magicMachineSource !== "store-winter" && !magicMachineBusy && magicMachineStage === "buy";
 }
 
 function setMagicMachineSceneMode(mode = "buy") {
@@ -18523,20 +20369,25 @@ function setMagicMachineSceneMode(mode = "buy") {
   }
 
   magicMachineStage = mode;
+  magicMachineScene.dataset.theme = getMagicMachineWorldId();
   magicMachineScene.dataset.machineStage = mode;
   magicMachineCard.dataset.machineStage = mode;
   magicMachineArt.dataset.visual = mode === "reward" ? "reward" : "machine";
   magicMachineArt.classList.remove("reward-visible");
   magicMachineArt.classList.remove("blink");
   magicMachineArt.setAttribute("aria-disabled", String(mode === "rolling" || mode === "reward"));
-  const machineTitle = magicMachineSource === "store" ? "MASZYNA PLATOI" : "MASZYNA PLATOYI";
+  const machineTitle = getMagicMachineWorldId() === "winter"
+    ? "ZIMOWA MASZYNA PLATOYI"
+    : magicMachineSource === "store"
+      ? "MASZYNA PLATOI"
+      : "MASZYNA PLATOYI";
   magicMachineLabel.textContent = machineTitle;
   magicMachineLabel.hidden = false;
   magicMachineLabel.classList.remove("missing-keys");
   magicMachineLabel.classList.remove("fade-out");
   magicMachineWord.hidden = true;
   if (magicMachineCloseButton) {
-    magicMachineCloseButton.hidden = magicMachineSource === "store";
+    magicMachineCloseButton.hidden = magicMachineSource === "store" || magicMachineSource === "store-winter";
   }
 
   if (magicMachineLaunchBall) {
@@ -18558,7 +20409,7 @@ function setMagicMachineSceneMode(mode = "buy") {
   }
 
   const fallback = magicMachineImage.nextElementSibling;
-  magicMachineImage.src = MAGIC_MACHINE_IMAGE;
+  magicMachineImage.src = getMagicMachineImageForCurrentTheme();
   magicMachineImage.alt = machineTitle;
   magicMachineImage.dataset.fallbackText = "AUTOMAT";
   magicMachineImage.classList.toggle("split-hidden", mode === "reward");
@@ -18588,16 +20439,20 @@ function openMagicMachine() {
     !magicMachineScene ||
     !magicMachineCard ||
     !magicMachineImage ||
-    getActiveTrophyWorldId() !== "alley" ||
     !magicMachineBackdrop.hidden
   ) {
     return;
   }
 
-  if (getMagicMachinePrizePool().length === 0) {
+  const worldId = getActiveTrophyWorldId() === "winter" ? "winter" : "alley";
+  const machinePoolWorldId = worldId === "winter" ? "winter" : "magicians";
+
+  if (getMagicMachinePrizePool(machinePoolWorldId).length === 0) {
     openModal({
       title: "Brak PlatoYI",
-      message: "Najpierw dodaj PlatoYe do świata magików, aby automat miał z czego losować.",
+      message: worldId === "winter"
+        ? "Najpierw dodaj zimowe PlatoYE, aby automat miał z czego losować."
+        : "Najpierw dodaj PlatoYe do świata magików, aby automat miał z czego losować.",
       buttonText: "OK",
       dismissible: true,
       onConfirm: closeModal,
@@ -18606,7 +20461,7 @@ function openMagicMachine() {
   }
 
   magicMachineSequenceId += 1;
-  magicMachineSource = "alley";
+  magicMachineSource = worldId;
   magicMachineBusy = false;
   magicMachineRewardPetId = "";
   magicMachineRewardPrize = null;
@@ -18617,7 +20472,7 @@ function openMagicMachine() {
   syncBackgroundMusic();
 }
 
-function openStorePlatoMachineRoll(rewardPet) {
+function openStorePlatoMachineRoll(rewardPet, worldId = "magicians") {
   if (
     !rewardPet ||
     !magicMachineBackdrop ||
@@ -18630,7 +20485,7 @@ function openStorePlatoMachineRoll(rewardPet) {
   }
 
   magicMachineSequenceId += 1;
-  magicMachineSource = "store";
+  magicMachineSource = worldId === "winter" ? "store-winter" : "store";
   magicMachineBusy = false;
   magicMachineRewardPetId = rewardPet.id;
   magicMachineRewardPrize = rewardPet;
@@ -18667,7 +20522,7 @@ async function handleMagicMachineAction() {
   }
 
   if (magicMachineStage === "buy") {
-    if (magicMachineSource === "store") {
+    if (magicMachineSource === "store" || magicMachineSource === "store-winter") {
       await startStorePlatoMachineRoll();
       return;
     }
@@ -18682,7 +20537,7 @@ async function startStorePlatoMachineRoll() {
     magicMachineBackdrop.hidden ||
     magicMachineBusy ||
     magicMachineStage !== "buy" ||
-    magicMachineSource !== "store"
+    (magicMachineSource !== "store" && magicMachineSource !== "store-winter")
   ) {
     return;
   }
@@ -18747,7 +20602,11 @@ async function startMagicMachineRoll() {
 
   changeCurrencyBalance("plato-keys", -currentCost);
   if (isMagicMachineFirstPurchase()) {
-    state.magicMachineFirstPurchaseDone = true;
+    if (getMagicMachineWorldId() === "winter") {
+      state.winterMagicMachineFirstPurchaseDone = true;
+    } else {
+      state.magicMachineFirstPurchaseDone = true;
+    }
   }
   saveState();
   renderAll();
@@ -18769,6 +20628,7 @@ async function startMagicMachineRoll() {
 
 async function grantMagicMachineReward(rewardPetOverride = null) {
   const rewardPet = rewardPetOverride || magicMachineRewardPrize || getMagicMachinePrizePool().find((item) => item.id === magicMachineRewardPetId) || pickMagicMachineRewardPet();
+  const rewardWorldId = getMagicMachineWorldId();
   magicMachineBusy = false;
 
   if (!rewardPet) {
@@ -18788,6 +20648,7 @@ async function grantMagicMachineReward(rewardPetOverride = null) {
   if (rewardPet.diamondFallback) {
     await showDiamondRewardScene(99, {
       title: "Masz już wszystkie PlatoYE",
+      superTheme: rewardWorldId === "winter" ? "winter" : "",
       autoCloseMs: 2500,
     });
   } else {
@@ -18795,6 +20656,7 @@ async function grantMagicMachineReward(rewardPetOverride = null) {
       image: rewardPet.image,
       name: rewardPet.name,
       mode: "magic",
+      superTheme: rewardWorldId === "winter" ? "winter" : "",
       autoCloseMs: 2500,
     });
   }
@@ -18931,6 +20793,11 @@ async function activateSuperAlley(paymentMethod) {
   const worldId = superAlleyBackdrop?.dataset.worldId || getActiveTrophyWorldId();
 
   if (isSuperAlleyActiveForWorld(worldId) || superAlleyBusy) {
+    return;
+  }
+
+  if (paymentMethod === "cash") {
+    await startPaidCheckout("premium-alley-cash", { worldId });
     return;
   }
 
@@ -19319,6 +21186,11 @@ async function activateRankingPremium(paymentMethod = "diamonds") {
     return;
   }
 
+  if (paymentMethod === "cash") {
+    await startPaidCheckout("ranking-premium-cash");
+    return;
+  }
+
   if (paymentMethod === "diamonds" && Number(state.diamonds || 0) < RANKING_ALLEY_PREMIUM_DIAMOND_PRICE) {
     openModal({
       title: "Za mało diamentów",
@@ -19510,21 +21382,34 @@ async function claimTrophyReward(world, reward, options = {}) {
       }
     }
     return;
-  } else if (reward.type === "pet") {
-    if (!state.ownedPets.includes(reward.itemId)) {
-      state.ownedPets.push(reward.itemId);
-    }
-  } else if (reward.type === "profile-photo") {
-    if (!state.ownedProfilePhotos.includes(reward.itemId)) {
-      state.ownedProfilePhotos.push(reward.itemId);
-    }
-  } else if (reward.type === "character") {
+	  } else if (reward.type === "pet") {
+	    if (!state.ownedPets.includes(reward.itemId)) {
+	      state.ownedPets.push(reward.itemId);
+	    }
+	  } else if (reward.type === "profile-photo") {
+	    if (!state.ownedProfilePhotos.includes(reward.itemId)) {
+	      state.ownedProfilePhotos.push(reward.itemId);
+	    }
+	    if (Number(reward.bonusElixirs || 0) > 0) {
+	      state.elixirs += Number(reward.bonusElixirs || 0);
+	    }
+	  } else if (reward.type === "character") {
     if (!state.ownedCharacters.includes(reward.itemId)) {
       state.ownedCharacters.push(reward.itemId);
     }
     if (reward.skinItemId && !state.ownedCharacters.includes(reward.skinItemId)) {
       state.ownedCharacters.push(reward.skinItemId);
     }
+  } else if (reward.type === "loading-screen") {
+    const loadingScreenId = sanitizeStoredId(reward.itemId || "ekran-ladowania");
+    if (!Array.isArray(state.unlockedLoadingScreens)) {
+      state.unlockedLoadingScreens = [];
+    }
+    if (loadingScreenId && !state.unlockedLoadingScreens.includes(loadingScreenId)) {
+      state.unlockedLoadingScreens.push(loadingScreenId);
+    }
+    state.unlockedLoadingScreen = loadingScreenId;
+    state.selectedLoadingScreen = loadingScreenId || "default";
   } else if (reward.type === "ranking-unlock") {
     state.rankingAlleyUnlocked = true;
   }
@@ -19627,6 +21512,15 @@ async function claimTrophyReward(world, reward, options = {}) {
     return;
   }
 
+  if (reward.type === "loading-screen") {
+    if (batchMode) {
+      await showLoadingScreenRewardScene(reward, { autoCloseMs: 2200 });
+    } else {
+      void showLoadingScreenRewardScene(reward);
+    }
+    return;
+  }
+
   openModal({
     title: "Nagroda odebrana",
     message: `${reward.label} trafia teraz na twoje konto.`,
@@ -19664,6 +21558,11 @@ function isWorldLockedItem(item) {
 function getTrophyRewardImage(reward) {
   if (reward.type === "ranking-unlock") {
     return { src: RANKING_ALLEY_UNLOCK_IMAGE, fallbackText: "RANKING" };
+  }
+
+  if (reward.type === "loading-screen") {
+    const loadingScreenItem = getLoadingScreenById(reward.itemId || "ekran-ladowania");
+    return { src: loadingScreenItem.image, fallbackText: loadingScreenItem.fallbackText || "LOADING" };
   }
 
   if (reward.type === "coins") {
@@ -19841,21 +21740,8 @@ async function confirmWinterBundlePurchase() {
   }
 
   const bundle = activeWinterBundle;
-  const rewardCharacters = getBundleRewardCharacters(bundle);
-
-  rewardCharacters.forEach((character) => {
-    if (!state.ownedCharacters.includes(character.id)) {
-      state.ownedCharacters.push(character.id);
-    }
-  });
-
-  saveState();
-  playOneShotSound("characterUnlock", 0.8);
-  setWinterBundleSceneMode("success", bundle);
-  syncBrokenAssets(winterBundleBackdrop);
-  await wait(2800);
   closeWinterBundlePurchase(false, { keepBundle: true, resetBusy: false });
-  await showBundleUnlockScene(rewardCharacters);
+  await startPaidCheckout(bundle.id, { kind: "bundles" });
   activeWinterBundle = null;
   winterBundleBusy = false;
   renderAll();
@@ -19975,6 +21861,7 @@ function setStoreCharacterPurchaseScene(item = activeStoreCharacterPurchase) {
   storeCharacterPurchaseCopy.textContent = item.purchaseCopy || "Potwierdz zakup tej postaci.";
   storeCharacterPurchaseCopy.hidden = false;
   storeCharacterPurchaseActions.hidden = false;
+  storeCharacterPurchaseActions.querySelectorAll("[data-store-music-preview]").forEach((node) => node.remove());
   storeCharacterPurchaseMissing.hidden = true;
   storeCharacterPurchaseMissing.textContent = "";
 
@@ -20059,6 +21946,19 @@ function setStoreOfferPurchaseScene(purchase = activeStoreOfferPurchase) {
     storeCharacterPurchaseConfirmButton.innerHTML = purchase.priceMarkup || escapeHtml(purchase.priceLabel || "KUP");
     syncBrokenAssets(storeCharacterPurchaseConfirmButton);
   }
+
+  storeCharacterPurchaseActions.querySelectorAll("[data-store-music-preview]").forEach((node) => node.remove());
+  if (purchase.previewAudioSources?.length && storeCharacterPurchaseConfirmButton) {
+    storeCharacterPurchaseConfirmButton.insertAdjacentHTML("beforebegin", `
+      <button
+        class="pixel-button super-alley-option store-music-preview-button"
+        data-store-music-preview="${escapeHtml(purchase.id)}"
+        type="button"
+      >
+        ${escapeHtml(purchase.previewLabel || "POSŁUCHAJ 15S")}
+      </button>
+    `);
+  }
 }
 
 function openStoreOfferPurchase(purchase) {
@@ -20099,6 +21999,7 @@ function openStorePlatoMachinePurchase(offer) {
   }
 
   const machineImage = offer.image || MAGIC_MACHINE_IMAGE;
+  const offerWorldId = offer.worldId === "winter" ? "winter" : "magicians";
 
   openStoreOfferPurchase({
     kind: "plato-machine",
@@ -20107,9 +22008,9 @@ function openStorePlatoMachinePurchase(offer) {
     image: machineImage,
     fallbackText: "MASZYNA",
     priceMarkup: buildCurrencyAmountMarkup(offer.price, "diamonds"),
-    kicker: "PLATOISTYCZNA OFERTA",
+    kicker: offerWorldId === "winter" ? "ZIMOWA OFERTA" : "PLATOISTYCZNA OFERTA",
     imageClass: "store-offer-modal-machine-image",
-    disabled: Number(state.diamonds || 0) < Number(offer.price || 0) || !hasUnownedMagiciansPlatoYa(),
+    disabled: Number(state.diamonds || 0) < Number(offer.price || 0) || !hasUnownedPlatoYaForWorld(offerWorldId),
   });
 }
 
@@ -20232,6 +22133,33 @@ function openStoreMaxPlatoyaPurchase() {
     priceLabel: STORE_MAX_PLATOYA_OFFER.priceLabel,
     kicker: "MAGICZNA OFERTA",
     imageClass: "store-offer-modal-currency-image",
+  });
+}
+
+function openStoreMusicPurchase(trackId) {
+  const track = getMusicTrackById(trackId);
+
+  if (!track?.storeOffer) {
+    return;
+  }
+
+  const price = Number(track.price || STORE_MUSIC_OFFER_PRICE);
+  const alreadyOwned = isMusicTrackUnlocked(track.id);
+
+  openStoreOfferPurchase({
+    kind: "music-track",
+    id: track.id,
+    title: track.name,
+    image: track.image,
+    fallbackText: "MUZYKA",
+    contentMarkup: buildMusicAlbumVisualMarkup(track, "store-offer-modal-music-visual"),
+    priceMarkup: alreadyOwned ? "POSIADASZ" : buildCurrencyAmountMarkup(price, "coins"),
+    kicker: "MUZYCZKA DO GRY",
+    imageClass: "store-offer-modal-music-image",
+    disabled: alreadyOwned || Number(state.coins || 0) < price,
+    previewAudioSources: track.sources || [],
+    previewLabel: "POSŁUCHAJ 15S",
+    previewMaxMs: 15000,
   });
 }
 
@@ -20425,6 +22353,7 @@ function closeStoreCharacterPurchase() {
     return;
   }
 
+  stopMusicTrackPreview();
   storeCharacterPurchaseBackdrop.hidden = true;
   delete storeCharacterPurchaseBackdrop.dataset.theme;
   delete storeCharacterPurchaseScene.dataset.theme;
@@ -20438,6 +22367,7 @@ function closeStoreCharacterPurchase() {
   if (storeCharacterPurchaseConfirmButton) {
     storeCharacterPurchaseConfirmButton.disabled = false;
   }
+  storeCharacterPurchaseActions?.querySelectorAll("[data-store-music-preview]").forEach((node) => node.remove());
 
   scheduleDailyGiftLobbyCheck();
 }
@@ -20470,8 +22400,7 @@ async function confirmStoreOfferPurchase() {
   closeStoreCharacterPurchase();
 
   if (purchase.kind === "special-currency") {
-    const offer = STORE_SPECIAL_CURRENCY_OFFERS.find((entry) => entry.id === purchase.id);
-    await buySpecialCurrencyOffer(offer);
+    await startPaidCheckout(purchase.id);
     return;
   }
 
@@ -20483,17 +22412,23 @@ async function confirmStoreOfferPurchase() {
 
   if (purchase.kind === "premium-alley") {
     const offer = STORE_PREMIUM_ALLEY_OFFERS.find((entry) => entry.id === purchase.id);
+
+    if (offer?.type === "cash") {
+      await startPaidCheckout(offer.id, { worldId: getStorePremiumAlleyWorldId() });
+      return;
+    }
+
     await buyStorePremiumAlleyOffer(offer);
     return;
   }
 
   if (purchase.kind === "premium-boost") {
-    await buyStorePremiumBoostOffer(STORE_WINTER_PREMIUM_BOOST_OFFER);
+    await startPaidCheckout(STORE_WINTER_PREMIUM_BOOST_OFFER.id);
     return;
   }
 
   if (purchase.kind === "starter-pack") {
-    await buyStoreStarterPackOffer();
+    await startPaidCheckout(STORE_STARTER_PACK_OFFER.id);
     return;
   }
 
@@ -20503,7 +22438,12 @@ async function confirmStoreOfferPurchase() {
   }
 
   if (purchase.kind === "max-platoya") {
-    await buyStoreMaxPlatoyaOffer();
+    await startPaidCheckout(STORE_MAX_PLATOYA_OFFER.id);
+    return;
+  }
+
+  if (purchase.kind === "music-track") {
+    await buyStoreMusicTrackOffer(purchase.id);
     return;
   }
 
@@ -20513,6 +22453,13 @@ async function confirmStoreOfferPurchase() {
   }
 
   if (purchase.kind === "high-tower-offer") {
+    const offer = getStoreHighTowerOfferById(purchase.id);
+
+    if (offer?.priceCurrency === "cash") {
+      await startPaidCheckout(offer.id);
+      return;
+    }
+
     await buyStoreHighTowerOffer(purchase.id);
     return;
   }
@@ -20554,54 +22501,35 @@ async function confirmStoreCharacterPurchase() {
 }
 
 async function buyCashUnlock(kind, item) {
-  if (kind === "bundles") {
-    if (
-      !item ||
-      isBundleOwned(item) ||
-      !hasCompletedMagiciansWorld()
-    ) {
-      return;
-    }
-
-    const rewardCharacters = getBundleRewardCharacters(item);
-    rewardCharacters.forEach((character) => {
-      if (!state.ownedCharacters.includes(character.id)) {
-        state.ownedCharacters.push(character.id);
-      }
-    });
-
-    saveState();
-    renderAll();
-    playOneShotSound("characterUnlock", 0.8);
-    await showBundleUnlockScene(rewardCharacters);
+  if (!item?.id) {
     return;
   }
 
-  buyItem(kind, { ...item, price: 0 });
+  await startPaidCheckout(item.id, { kind });
 }
 
 async function buyCoinPack(item) {
-  await showCoinRewardScene(item.amount, {
-    title: "Monety",
-    autoCloseMs: 2500,
-  });
-  await animateCoinsToBalance();
-  state.coins += item.amount;
-  saveState();
-  renderAll();
+  if (!item?.id) {
+    return;
+  }
+
+  await startPaidCheckout(item.id);
 }
 
 async function buyDiamondPack(item) {
-  await showDiamondRewardScene(item.amount, {
-    title: "Klejnoty",
-    autoCloseMs: 2500,
-  });
-  state.diamonds += item.amount;
-  saveState();
-  renderAll();
+  if (!item?.id) {
+    return;
+  }
+
+  await startPaidCheckout(item.id);
 }
 
 async function buySpecialCurrencyOffer(offer) {
+  if (offer?.id) {
+    await startPaidCheckout(offer.id);
+    return;
+  }
+
   if (
     !offer ||
     sanitizeStoredId(state.storeOffers?.specialCurrencyOfferId) !== offer.id ||
@@ -20637,8 +22565,8 @@ async function buySpecialCurrencyOffer(offer) {
   renderAll();
 }
 
-function pickStorePlatoMachineRewardPet() {
-  const unownedPool = getMagiciansPetShopItems().filter((item) => !state.ownedPets.includes(item.id));
+function pickStorePlatoMachineRewardPet(worldId = "magicians") {
+  const unownedPool = getPlatoMachinePetPoolForWorld(worldId).filter((item) => !state.ownedPets.includes(item.id));
 
   if (unownedPool.length === 0) {
     return null;
@@ -20648,16 +22576,17 @@ function pickStorePlatoMachineRewardPet() {
 }
 
 async function buyStorePlatoMachineOffer(offer) {
+  const offerWorldId = offer?.worldId === "winter" ? "winter" : "magicians";
   if (
     !offer ||
-    getActiveStoreWorldId() !== "magicians" ||
-    sanitizeStoredId(state.storeOffers?.platoKeyOfferId) !== offer.id ||
+    getActiveStoreWorldId() !== offerWorldId ||
+    (offerWorldId !== "winter" && sanitizeStoredId(state.storeOffers?.platoKeyOfferId) !== offer.id) ||
     Number(state.diamonds || 0) < Number(offer.price || 0)
   ) {
     return;
   }
 
-  const rewardPet = pickStorePlatoMachineRewardPet();
+  const rewardPet = pickStorePlatoMachineRewardPet(offerWorldId);
   if (!rewardPet) {
     renderAll();
     return;
@@ -20666,7 +22595,7 @@ async function buyStorePlatoMachineOffer(offer) {
   state.diamonds = Math.max(0, Number(state.diamonds || 0) - Number(offer.price || 0));
   saveState();
   renderAll();
-  openStorePlatoMachineRoll(rewardPet);
+  openStorePlatoMachineRoll(rewardPet, offerWorldId);
 }
 
 async function buyStorePremiumAlleyOffer(offer) {
@@ -20674,6 +22603,11 @@ async function buyStorePremiumAlleyOffer(offer) {
   const worldId = getStorePremiumAlleyWorldId();
 
   if (!offer || !currentOffer || currentOffer.id !== offer.id || isSuperAlleyActiveForWorld(worldId) || superAlleyBusy) {
+    return;
+  }
+
+  if (offer.type === "cash") {
+    await startPaidCheckout(offer.id, { worldId });
     return;
   }
 
@@ -20706,57 +22640,15 @@ async function buyStorePremiumAlleyOffer(offer) {
 }
 
 async function buyStorePremiumBoostOffer(offer) {
-  if (
-    !offer ||
-    offer.id !== STORE_WINTER_PREMIUM_BOOST_OFFER.id ||
-    getActiveStoreWorldId() !== "winter" ||
-    isSuperAlleyActiveForWorld("winter") ||
-    superAlleyBusy
-  ) {
+  if (offer?.id !== STORE_WINTER_PREMIUM_BOOST_OFFER.id) {
     return;
   }
 
-  superAlleyBusy = true;
-
-  try {
-    setSuperAlleyActiveForWorld("winter", true);
-    state.trophies = Math.max(0, Number(state.trophies || 0) + Number(offer.trophyBoost || 0));
-    saveState();
-    renderAll();
-    await showSuperAlleySuccessScene("winter");
-  } finally {
-    superAlleyBusy = false;
-    renderAll();
-  }
+  await startPaidCheckout(offer.id);
 }
 
 async function buyStoreStarterPackOffer() {
-  if (!isStarterPackAvailable()) {
-    renderAll();
-    return;
-  }
-
-  const rewardPet = pickStorePlatoMachineRewardPet();
-
-  state.storeStarterPackPurchased = true;
-  changeCurrencyBalance("coins", STORE_STARTER_PACK_OFFER.coins);
-  changeCurrencyBalance("elixirs", STORE_STARTER_PACK_OFFER.elixirs);
-  saveState();
-  renderAll();
-
-  await showCoinRewardScene(STORE_STARTER_PACK_OFFER.coins, {
-    title: "Monety",
-    autoCloseMs: 1800,
-  });
-  await showElixirRewardScene(STORE_STARTER_PACK_OFFER.elixirs, {
-    title: "Eliksir",
-    autoCloseMs: 1800,
-  });
-
-  if (rewardPet) {
-    await wait(120);
-    openStorePlatoMachineRoll(rewardPet);
-  }
+  await startPaidCheckout(STORE_STARTER_PACK_OFFER.id);
 }
 
 async function buyContentCreatorMachineOffer() {
@@ -20777,27 +22669,35 @@ async function buyContentCreatorMachineOffer() {
 }
 
 async function buyStoreMaxPlatoyaOffer() {
-  if (isMaxPlatoyaOfferPurchasedToday()) {
+  await startPaidCheckout(STORE_MAX_PLATOYA_OFFER.id);
+}
+
+async function buyStoreMusicTrackOffer(trackId) {
+  const track = getMusicTrackById(trackId);
+  const price = Number(track?.price || STORE_MUSIC_OFFER_PRICE);
+
+  if (!track?.storeOffer || isMusicTrackUnlocked(track.id) || Number(state.coins || 0) < price) {
     renderAll();
     return;
   }
 
-  changeCurrencyBalance("coins", STORE_MAX_PLATOYA_OFFER.coins);
-  changeCurrencyBalance("elixirs", STORE_MAX_PLATOYA_OFFER.elixirs);
-  state.storeOffers = {
-    ...(state.storeOffers || {}),
-    maxPlatoyaPurchasedCycleKey: getStoreDailyPurchaseCycleKey(),
-  };
+  changeCurrencyBalance("coins", -price);
+  state.unlockedMusicTracks = Array.isArray(state.unlockedMusicTracks) ? state.unlockedMusicTracks : [];
+  if (!state.unlockedMusicTracks.includes(track.id)) {
+    state.unlockedMusicTracks.push(track.id);
+  }
+  state.selectedMusicTrack = track.id;
   saveState();
   renderAll();
+  syncBackgroundMusic();
 
-  await showCoinRewardScene(STORE_MAX_PLATOYA_OFFER.coins, {
-    title: "Monety",
-    autoCloseMs: 1800,
-  });
-  await showElixirRewardScene(STORE_MAX_PLATOYA_OFFER.elixirs, {
-    title: "Eliksiry",
-    autoCloseMs: 1800,
+  await showRewardShowcase({
+    image: track.image,
+    name: track.name,
+    countLabel: "MUZYKA",
+    mode: "magic",
+    autoCloseMs: 2400,
+    soundEffectName: "characterUnlock",
   });
 }
 
@@ -20867,6 +22767,11 @@ async function buyStoreHighTowerOffer(offerId) {
 
   if (!offer || !isHighTowerStoreOfferVisible(offer) || isHighTowerStoreOfferDisabled(offer)) {
     renderAll();
+    return;
+  }
+
+  if (offer.priceCurrency === "cash") {
+    await startPaidCheckout(offer.id);
     return;
   }
 
@@ -21676,11 +23581,13 @@ function buildWoodenChestReward(chestNumber = 1, options = {}) {
       chance: 3,
       create: () => {
         const item = petSkinPool[randomBetween(0, petSkinPool.length - 1)];
-        return buildChestItemReward("pets", item, {
-          countLabel: "Przebranie ze skrzyni",
-          note: "Prestiżowe przebranie Emerald trafia do twojej kolekcji. Jeśli nie masz jeszcze Emerald, będzie dostępne po jej odblokowaniu.",
-        });
-      },
+	        return buildChestItemReward("pets", item, {
+	          countLabel: "PRZEBRANIE",
+	          note: "Prestiżowe przebranie Emerald trafia do twojej kolekcji. Jeśli nie masz jeszcze Emerald, będzie dostępne po jej odblokowaniu.",
+	          displayMode: "character",
+	          superTheme: "alley",
+	        });
+	      },
     });
   }
 
@@ -22914,6 +24821,7 @@ function showRewardShowcase({
   alleyRewardBackdrop.classList.toggle("ranking-unlock-mode", mode === "ranking-unlock");
   alleyRewardBackdrop.classList.toggle("ranking-prize-mode", mode === "ranking-prize");
   alleyRewardBackdrop.classList.toggle("ranking-profile-photo-mode", mode === "ranking-profile-photo");
+  alleyRewardBackdrop.classList.toggle("loading-screen-reward-mode", mode === "loading-screen-reward");
   alleyRewardBackdrop.classList.toggle("bundle-character-mode", safeBundleItems.length > 1);
   alleyRewardBackdrop.classList.toggle("daily-gift-mode", Boolean(kicker));
   if (superTheme) {
@@ -23054,7 +24962,7 @@ function getAlleyRewardBundleItems(reward) {
     .filter(Boolean);
 }
 
-function showAlleyRewardScene(reward, options = {}) {
+async function showAlleyRewardScene(reward, options = {}) {
   const item = getAlleyRewardItem(reward);
   const bundleItems = getAlleyRewardBundleItems(reward);
 
@@ -23069,14 +24977,48 @@ function showAlleyRewardScene(reward, options = {}) {
     return;
   }
 
+  if (reward.type === "profile-photo") {
+    return showRankingProfilePhotoRewardScene(item, {
+      autoCloseMs: options.autoCloseMs || 2500,
+      superTheme: options.superTheme || "alley",
+    });
+  }
+
+  if (bundleItems.length > 1) {
+    const [baseItem, skinItem] = bundleItems;
+    await showRewardShowcase({
+      image: baseItem.image,
+      name: baseItem.name,
+      previewVideo: baseItem.previewVideo || "",
+      superTheme: options.superTheme || getRewardSceneWorldTheme("characters", baseItem),
+      countLabel: "POSTAĆ",
+      mode: "character",
+      soundEffectName: "characterUnlock",
+      characterVoiceId: baseItem.id,
+    });
+    await wait(180);
+    return showRewardShowcase({
+      image: skinItem.image,
+      name: skinItem.name,
+      previewVideo: skinItem.previewVideo || "",
+      superTheme: options.superTheme || getRewardSceneWorldTheme("characters", skinItem),
+      countLabel: "PRZEBRANIE",
+      mode: "character",
+      soundEffectName: "characterUnlock",
+      characterVoiceId: "",
+    });
+  }
+
+  const defaultCharacterCountLabel = reward.type === "character" && CHARACTER_SKIN_BASE_BY_ID[item.id]
+    ? "PRZEBRANIE"
+    : "";
+
   return showRewardShowcase({
     image: item.image,
     name: item.name,
     previewVideo: item.previewVideo || "",
-    bundleItems,
     superTheme: options.superTheme || getRewardSceneWorldTheme(reward.type === "pet" ? "pets" : "characters", item),
-    hideName: bundleItems.length > 1,
-    countLabel: "",
+    countLabel: reward.countLabel || defaultCharacterCountLabel,
     mode: reward.type === "character" ? "character" : "default",
     soundEffectName:
       reward.type === "pet"
@@ -23230,6 +25172,20 @@ function showRankingProfilePhotoRewardScene(profilePhoto, options = {}) {
     name: "Odblokowano",
     countLabel: profilePhoto.name || "Zdjęcie Profilu",
     mode: "ranking-profile-photo",
+    superTheme: options.superTheme || "",
+    autoCloseMs: options.autoCloseMs || 2500,
+    soundEffectName: "coralFlash",
+  });
+}
+
+function showLoadingScreenRewardScene(reward = null, options = {}) {
+  const loadingScreenItem = getLoadingScreenById(reward?.itemId || "ekran-ladowania");
+
+  return showRewardShowcase({
+    image: loadingScreenItem.image,
+    name: "EKRAN ŁADOWANIA",
+    countLabel: loadingScreenItem.name || reward?.label || "Ekran ładowania",
+    mode: "loading-screen-reward",
     autoCloseMs: options.autoCloseMs || 2500,
     soundEffectName: "coralFlash",
   });
@@ -23759,6 +25715,7 @@ function closeAlleyRewardScene() {
   alleyRewardBackdrop.classList.remove("ranking-unlock-mode");
   alleyRewardBackdrop.classList.remove("ranking-prize-mode");
   alleyRewardBackdrop.classList.remove("ranking-profile-photo-mode");
+  alleyRewardBackdrop.classList.remove("loading-screen-reward-mode");
   alleyRewardBackdrop.classList.remove("bundle-character-mode");
   alleyRewardBackdrop.classList.remove("daily-gift-mode");
   delete alleyRewardBackdrop.dataset.superTheme;
@@ -24672,13 +26629,14 @@ function getProjectileKindForCharacterId(characterId) {
     return "player";
   }
 
-  if (
-    characterId === "elfie" ||
-    characterId === "elfie-wojowniczka" ||
-    characterId === "elfie-w-swojej-naturze"
-  ) {
-    return "elfie-shot";
-  }
+	  if (
+	    characterId === "elfie" ||
+	    characterId === "elfie-wojowniczka" ||
+	    characterId === "elfie-w-swojej-naturze" ||
+	    characterId === "pilna-studentka-ella"
+	  ) {
+	    return "elfie-shot";
+	  }
 
   if (characterId === "nora") {
     return "nora-shot";
@@ -24724,6 +26682,14 @@ function getProjectileKindForCharacterId(characterId) {
     return "shulla-shot";
   }
 
+  if (characterId === "zoya" || characterId === "zoya-vhalith-zeberka") {
+    return "zoya-shot";
+  }
+
+  if (characterId === "finley") {
+    return "finley-shot";
+  }
+
   if (characterId === "zlotowlosa") {
     return "zlotowlosa-shot";
   }
@@ -24743,26 +26709,28 @@ function getProjectileKindForCharacterId(characterId) {
     return "ptasia-shot";
   }
 
-  if (
-    characterId === "linda" ||
-    characterId === "roslinna-krolowa-linda"
-  ) {
-    return "linda-shot";
-  }
+	  if (
+	    characterId === "linda" ||
+	    characterId === "roslinna-krolowa-linda" ||
+	    characterId === "wata-cukrowa-linda"
+	  ) {
+	    return "linda-shot";
+	  }
 
   if (
     characterId === "lily" ||
     characterId === "leo" ||
     characterId === "leo-skoczek-narciarski" ||
     characterId === "lyzwiarka-lily" ||
+    characterId === "przebranko-lily" ||
     characterId === "lyzwiarz-leo" ||
     characterId === "mistrzyni-lyzwiarstwa-lily"
   ) {
     return "lily-shot";
   }
 
-  if (characterId === "tricky" || characterId === "tricky-renifer") {
-    return "tricky-shot";
+  if (characterId === "blizzy") {
+    return "blizzy-shot";
   }
 
   return "player";
@@ -26088,10 +28056,7 @@ function spawnTowerBot(waveConfig = getWaveConfig(game.currentWave || game.pendi
 
   const towerIndex = Math.abs(Number(game.nextTowerSpawnIndex || 0)) % towers.length;
   const tower = towers[towerIndex];
-  const robotStats = {
-    hp: Number(waveConfig.robotHp || TOWER_CONFIG.robotHp),
-    damage: Number(waveConfig.robotDamage || TOWER_CONFIG.robotDamage),
-  };
+  const robotStats = getRobotStats(waveConfig);
   game.nextTowerSpawnIndex = (towerIndex + 1) % towers.length;
 
   const spawnPoint = getSpacedTowerBotSpawnPoint(tower);
@@ -26268,13 +28233,14 @@ function spawnTowerBotProjectile(robot, targetX, targetY, targetType = "player",
 
 function getTowerBotProjectileSpeedMultiplier() {
   const petId = game.runPetId || getEquippedPet()?.id;
+  const rankSpeedMultiplier = getRobotProjectileSpeedMultiplierFromPetRank();
 
   if (getPetBaseId(petId) !== "pluto") {
-    return 1;
+    return rankSpeedMultiplier;
   }
 
   const power = getPlutoPowerStats();
-  return clamp(1 - Number(power.projectileSlow || 0), 0.35, 1);
+  return rankSpeedMultiplier * clamp(1 - Number(power.projectileSlow || 0), 0.35, 1);
 }
 
 function updateTowerBotProjectile(projectile, deltaSeconds, deltaMs) {
@@ -26283,17 +28249,10 @@ function updateTowerBotProjectile(projectile, deltaSeconds, deltaMs) {
   const vx = Number(projectile.vx || 0) * speedMultiplier;
   const vy = Number(projectile.vy || 0) * speedMultiplier;
   const step = Math.hypot(vx, vy) * deltaSeconds;
-
-  if (projectile.createsHazard) {
-    const dx = Number(projectile.targetX || projectile.x) - projectile.x;
-    const dy = Number(projectile.targetY || projectile.y) - projectile.y;
-    const distance = Math.hypot(dx, dy);
-
-    if (distance <= step + 8) {
-      spawnTowerHazard(Number(projectile.targetX || projectile.x), Number(projectile.targetY || projectile.y));
-      return false;
-    }
-  }
+  const previousX = Number(projectile.x || 0);
+  const previousY = Number(projectile.y || 0);
+  const projectileTargetX = Number(projectile.targetX || projectile.x);
+  const projectileTargetY = Number(projectile.targetY || projectile.y);
 
   projectile.x += vx * deltaSeconds;
   projectile.y += vy * deltaSeconds;
@@ -26318,7 +28277,7 @@ function updateTowerBotProjectile(projectile, deltaSeconds, deltaMs) {
     }
   }
 
-  if (!projectile.createsHazard && projectile.targetType !== "ranking-ship" && projectile.targetType !== "robot") {
+  if (projectile.targetType !== "ranking-ship" && projectile.targetType !== "robot") {
     const targetType = projectile.targetType === "pet" && isDogPetVulnerable() ? "pet" : "player";
     const hitTarget = targetType === "pet"
       ? { x: game.pet.x, y: game.pet.y }
@@ -26330,6 +28289,17 @@ function updateTowerBotProjectile(projectile, deltaSeconds, deltaMs) {
       } else {
         damagePlayer(Number(projectile.damage || TOWER_CONFIG.robotDamage));
       }
+      return false;
+    }
+  }
+
+  if (projectile.createsHazard) {
+    const previousDistance = Math.hypot(projectileTargetX - previousX, projectileTargetY - previousY);
+    const currentDistance = Math.hypot(projectileTargetX - projectile.x, projectileTargetY - projectile.y);
+    const reachedTargetPoint = currentDistance <= 12 || currentDistance > previousDistance + 2 || previousDistance <= step + 8;
+
+    if (reachedTargetPoint) {
+      spawnTowerHazard(projectileTargetX, projectileTargetY);
       return false;
     }
   }
@@ -27826,6 +29796,8 @@ function updateProjectiles(deltaSeconds) {
       return;
     }
 
+    projectile.ageMs = Number(projectile.ageMs || 0) + deltaSeconds * 1000;
+
     const target = projectile.targetType === "player"
       ? (
         projectile.targetPlayerId === multiplayer.selfId
@@ -27885,6 +29857,9 @@ function updateProjectiles(deltaSeconds) {
         damageRobot(target, Number(projectile.damage || getProjectileDamage()), "player");
         slowRobot(target, 3000, 0.5);
       } else {
+        if (projectile.kind === "grifos-shot") {
+          spawnGrifosJarShatter(target.x, target.y - 12);
+        }
         damageRobot(target, Number(projectile.damage || getProjectileDamage()), "player");
       }
       return;
@@ -28593,6 +30568,23 @@ function spawnDogFireBreath(startX, startY, targetX, targetY) {
   window.setTimeout(() => {
     node.remove();
   }, 620);
+}
+
+function spawnGrifosJarShatter(x, y) {
+  if (!effectsLayer) {
+    return;
+  }
+
+  const node = document.createElement("div");
+  node.className = "grifos-jar-shatter";
+  node.style.left = `${x}px`;
+  node.style.top = `${y}px`;
+  node.innerHTML = "<span></span><span></span><span></span><span></span><span></span><span></span><span></span>";
+  effectsLayer.appendChild(node);
+
+  window.setTimeout(() => {
+    node.remove();
+  }, 720);
 }
 
 function updateParrotPet(deltaSeconds, deltaMs) {
@@ -29322,6 +31314,7 @@ function concludeGameSession(status, note) {
   if (!game.statsCounted) {
     game.statsCounted = true;
     state.completedGamesTotal += 1;
+    incrementInventoryPlayCounts();
     state.robotsDefeatedTotal += Math.max(0, Number(game.robotsKilledTotal || 0));
     updatePortalMissionProgressForEvent("game-played", 1);
     const runPetBaseId = getPetBaseId(game.runPetId || state.equippedPet);
@@ -29364,6 +31357,7 @@ function concludeCoopGameSession(status, note, overrides = {}) {
   if (!game.statsCounted) {
     game.statsCounted = true;
     state.completedGamesTotal += 1;
+    incrementInventoryPlayCounts();
     state.robotsDefeatedTotal += robotsKilledTotal;
     updatePortalMissionProgressForEvent("game-played", 1);
     const runPetBaseId = getPetBaseId(game.runPetId || state.equippedPet);
@@ -29536,10 +31530,11 @@ function getWaveConfig(waveNumber) {
 
 function getRobotStats(waveConfig = getWaveConfig(game.currentWave || 1)) {
   const coopMultiplier = isCoopMatchActive() ? 2 : 1;
+  const rankHpBonus = getRobotHpBonusFromPetRank();
 
   if (getEquippedCharacter()?.id === "talia") {
     return {
-      hp: (waveConfig.robotHp + 500) * coopMultiplier,
+      hp: (waveConfig.robotHp + rankHpBonus + 500) * coopMultiplier,
       damage: (waveConfig.robotDamage + 20) * coopMultiplier,
       speed: GAME_RULES.robotSpeed,
       attackIntervalMs: Number(waveConfig.robotAttackIntervalMs || 100),
@@ -29547,7 +31542,7 @@ function getRobotStats(waveConfig = getWaveConfig(game.currentWave || 1)) {
   }
 
   return {
-    hp: waveConfig.robotHp * coopMultiplier,
+    hp: (waveConfig.robotHp + rankHpBonus) * coopMultiplier,
     damage: waveConfig.robotDamage * coopMultiplier,
     speed: GAME_RULES.robotSpeed,
     attackIntervalMs: Number(waveConfig.robotAttackIntervalMs || 100),
@@ -29572,6 +31567,8 @@ function getProjectileDamage() {
 function spawnProjectile(projectileConfig) {
   const projectile = {
     id: game.nextProjectileId++,
+    ageMs: 0,
+    effectSeed: Math.random(),
     ...projectileConfig,
   };
 
@@ -29594,10 +31591,25 @@ function playProjectileSound(projectile) {
     return;
   }
 
+  if (projectile.kind === "zoya-shot") {
+    playOneShotSound("shotZoya", getBoostedAttackSoundVolume(0.76));
+    return;
+  }
+
+  if (projectile.kind === "finley-shot") {
+    playOneShotSound("shotFinley", getBoostedAttackSoundVolume(0.76));
+    return;
+  }
+
+  if (projectile.kind === "blizzy-shot") {
+    playOneShotSound("shotBlizzy", getBoostedAttackSoundVolume(0.76));
+    return;
+  }
+
   const visual = getProjectileVisual(projectile);
 
   if (
-    visual.src === "./assets/attacks/atak_elfie.jpeg" ||
+    visual.src === "./assets/attacks/atak_elfie.png" ||
     visual.src === "./assets/attacks/atak_wojowniczka.jpeg"
   ) {
     playOneShotSound("shotElfie", getBoostedAttackSoundVolume(0.76));
@@ -29614,7 +31626,7 @@ function playProjectileSound(projectile) {
     return;
   }
 
-  if (visual.src === "./assets/attacks/atak_4.png") {
+  if (visual.src === "./assets/attacks/atak_4.png" || visual.src === "./pantercee.png") {
     playOneShotSound("shot4", getBoostedAttackSoundVolume(0.55));
     return;
   }
@@ -29708,13 +31720,14 @@ function getPlayerProjectileKind(ammoIndex) {
     return "snake-shot";
   }
 
-  if (
-    character?.id === "elfie" ||
-    character?.id === "elfie-wojowniczka" ||
-    character?.id === "elfie-w-swojej-naturze"
-  ) {
-    return "elfie-shot";
-  }
+	  if (
+	    character?.id === "elfie" ||
+	    character?.id === "elfie-wojowniczka" ||
+	    character?.id === "elfie-w-swojej-naturze" ||
+	    character?.id === "pilna-studentka-ella"
+	  ) {
+	    return "elfie-shot";
+	  }
 
   if (character?.id === "nora") {
     return "nora-shot";
@@ -29760,6 +31773,14 @@ function getPlayerProjectileKind(ammoIndex) {
     return "shulla-shot";
   }
 
+  if (character?.id === "zoya" || character?.id === "zoya-vhalith-zeberka") {
+    return "zoya-shot";
+  }
+
+  if (character?.id === "finley") {
+    return "finley-shot";
+  }
+
   if (character?.id === "zlotowlosa") {
     return "zlotowlosa-shot";
   }
@@ -29779,26 +31800,28 @@ function getPlayerProjectileKind(ammoIndex) {
     return "ptasia-shot";
   }
 
-  if (
-    character?.id === "linda" ||
-    character?.id === "roslinna-krolowa-linda"
-  ) {
-    return "linda-shot";
-  }
+	  if (
+	    character?.id === "linda" ||
+	    character?.id === "roslinna-krolowa-linda" ||
+	    character?.id === "wata-cukrowa-linda"
+	  ) {
+	    return "linda-shot";
+	  }
 
   if (
     character?.id === "lily" ||
     character?.id === "leo" ||
     character?.id === "leo-skoczek-narciarski" ||
     character?.id === "lyzwiarka-lily" ||
+    character?.id === "przebranko-lily" ||
     character?.id === "lyzwiarz-leo" ||
     character?.id === "mistrzyni-lyzwiarstwa-lily"
   ) {
     return "lily-shot";
   }
 
-  if (character?.id === "tricky" || character?.id === "tricky-renifer") {
-    return "tricky-shot";
+  if (character?.id === "blizzy") {
+    return "blizzy-shot";
   }
 
   return "player";
@@ -30339,6 +32362,117 @@ function buildTowerBotCounterMarkup() {
   `;
 }
 
+function getLoopProgress(ageMs, offsetMs, durationMs) {
+  const duration = Math.max(1, Number(durationMs || 1));
+  return (((Number(ageMs || 0) + Number(offsetMs || 0)) % duration) + duration) % duration / duration;
+}
+
+function buildProjectileBubbleMarkup(config) {
+  const progress = getLoopProgress(config.ageMs, config.offsetMs, config.durationMs);
+  const driftProgress = progress * progress * (3 - 2 * progress);
+  const opacity = progress < 0.16
+    ? progress / 0.16
+    : progress < 0.72
+      ? 1
+      : clamp((1 - progress) / 0.28, 0, 1);
+  const popScale = progress < 0.18
+    ? 0.16 + (progress / 0.18) * 0.76
+    : progress < 0.72
+      ? 0.9 + Math.sin(progress * Math.PI) * 0.18
+      : 1.08 + ((progress - 0.72) / 0.28) * 0.92;
+  const wobble = Math.sin(progress * Math.PI * 2 + Number(config.phase || 0)) * Number(config.wobble || 4);
+  const x = Number(config.startX || 0) + Number(config.driftX || -80) * driftProgress;
+  const y = Number(config.startY || 0) + Number(config.driftY || 0) * driftProgress + wobble;
+
+  return `<span style="--bubble-size:${Number(config.size || 10).toFixed(1)}px; --bubble-render-x:${x.toFixed(2)}px; --bubble-render-y:${y.toFixed(2)}px; --bubble-render-scale:${popScale.toFixed(3)}; --bubble-render-opacity:${(opacity * Number(config.maxOpacity || 1)).toFixed(3)};"></span>`;
+}
+
+function getProjectileBubbleTrailMarkup(kind, ageMs, seed = 0) {
+  if (kind === "elfie-shot") {
+    const bubbles = [
+      { size: 13, startX: -12, startY: -10, driftX: -84, driftY: -16, offsetMs: 0, durationMs: 820, phase: seed * 4 + 0.2 },
+      { size: 8, startX: -5, startY: 9, driftX: -66, driftY: 18, offsetMs: 150, durationMs: 720, phase: seed * 5 + 1.1 },
+      { size: 10, startX: -21, startY: 3, driftX: -96, driftY: 5, offsetMs: 300, durationMs: 880, phase: seed * 6 + 2.4 },
+      { size: 6, startX: 0, startY: -3, driftX: -50, driftY: 0, offsetMs: 430, durationMs: 680, phase: seed * 7 + 3.2 },
+      { size: 9, startX: -13, startY: 15, driftX: -86, driftY: 22, offsetMs: 560, durationMs: 900, phase: seed * 8 + 4.3 },
+    ];
+    return `
+      <span class="projectile-trail projectile-trail-ella" aria-hidden="true">
+        ${bubbles.map((bubble) => buildProjectileBubbleMarkup({ ...bubble, ageMs })).join("")}
+      </span>
+    `;
+  }
+
+  if (kind === "linda-shot") {
+    const mistProgress = getLoopProgress(ageMs, 0, 920);
+    const mistOpacity = Math.sin(mistProgress * Math.PI) * 0.82;
+    const mistShift = -12 - mistProgress * 34;
+    const bubbles = [
+      { size: 16, startX: -15, startY: -12, driftX: -112, driftY: -18, offsetMs: 0, durationMs: 980, phase: seed * 3 + 0.4 },
+      { size: 11, startX: -7, startY: 12, driftX: -80, driftY: 24, offsetMs: 140, durationMs: 820, phase: seed * 5 + 1.6 },
+      { size: 13, startX: -34, startY: 3, driftX: -136, driftY: 5, offsetMs: 280, durationMs: 1040, phase: seed * 6 + 2.1 },
+      { size: 8, startX: 0, startY: -1, driftX: -60, driftY: -5, offsetMs: 420, durationMs: 780, phase: seed * 7 + 2.9 },
+      { size: 10, startX: -23, startY: 18, driftX: -106, driftY: 30, offsetMs: 560, durationMs: 940, phase: seed * 8 + 3.7 },
+      { size: 7, startX: -46, startY: -15, driftX: -145, driftY: -30, offsetMs: 700, durationMs: 860, phase: seed * 9 + 4.6 },
+    ];
+    return `
+      <span class="projectile-trail projectile-trail-linda" style="--linda-mist-opacity:${mistOpacity.toFixed(3)}; --linda-mist-shift:${mistShift.toFixed(2)}px;" aria-hidden="true">
+        ${bubbles.map((bubble) => buildProjectileBubbleMarkup({ ...bubble, ageMs, maxOpacity: 0.94 })).join("")}
+      </span>
+    `;
+  }
+
+  if (kind === "mycelia-shot") {
+    const progress = getLoopProgress(ageMs, 0, 740);
+    const grow = progress < 0.42 ? progress / 0.42 : 1;
+    const fade = progress < 0.72 ? 1 : clamp((1 - progress) / 0.28, 0, 1);
+    const length = 42 + grow * 172;
+    const opacity = Math.max(0, fade * (0.48 + grow * 0.42));
+    const ribbonMarkup = [0, 1, 2].map((index) => {
+      const ribbonProgress = getLoopProgress(ageMs, index * 120, 620);
+      const ribbonOpacity = Math.sin(ribbonProgress * Math.PI) * opacity;
+      const ribbonX = 28 + ribbonProgress * 120;
+      const ribbonScale = 0.28 + ribbonProgress * 1.04;
+      const ribbonY = [-9, 2, 12][index] || 0;
+      return `<span style="--mycelia-ribbon-x:${ribbonX.toFixed(2)}px; --mycelia-ribbon-y:${ribbonY}px; --mycelia-ribbon-scale:${ribbonScale.toFixed(3)}; --mycelia-ribbon-opacity:${ribbonOpacity.toFixed(3)};"></span>`;
+    }).join("");
+    return `
+      <span class="projectile-trail projectile-trail-mycelia" style="--mycelia-trail-length:${length.toFixed(2)}px; --mycelia-trail-opacity:${opacity.toFixed(3)};" aria-hidden="true">
+        <span class="mycelia-trail-core"></span>
+        ${ribbonMarkup}
+      </span>
+    `;
+  }
+
+  return "";
+}
+
+function getProjectileEffectMarkup(projectile) {
+  return getProjectileBubbleTrailMarkup(projectile.kind, Number(projectile.ageMs || 0), Number(projectile.effectSeed || 0));
+}
+
+function getProjectileImageStyle(projectile) {
+  const ageMs = Math.max(0, Number(projectile.ageMs || 0));
+
+  if (projectile.kind === "zoya-shot" || projectile.kind === "sylas-shot") {
+    return `transform:rotate(${((ageMs / 2400) * 360).toFixed(2)}deg);`;
+  }
+
+  if (projectile.kind === "nerissa-shot") {
+    return `transform:rotate(${((ageMs / 220) * 360).toFixed(2)}deg);`;
+  }
+
+  if (projectile.kind === "lily-shot") {
+    const phase = (Math.sin(ageMs / 80) + 1) / 2;
+    const scaleX = 0.86 + phase * 0.38;
+    const scaleY = 1.1 - phase * 0.26;
+    const glow = 0.28 + phase * 0.46;
+    return `transform:scaleX(${scaleX.toFixed(3)}) scaleY(${scaleY.toFixed(3)});filter:brightness(${(1.02 + phase * 0.14).toFixed(3)}) drop-shadow(0 0 ${(5 + phase * 5).toFixed(1)}px rgba(255,255,255,${glow.toFixed(3)})) drop-shadow(0 0 ${(7 + phase * 8).toFixed(1)}px rgba(255,236,137,${(0.22 + phase * 0.34).toFixed(3)}));`;
+  }
+
+  return "";
+}
+
 function buildRankingShipMarkup() {
   const ship = game.rankingShip;
 
@@ -30815,7 +32949,16 @@ function renderGameScene() {
         const towerShotGlow = isTowerShot
           ? (0.52 + (1 - towerShotBirth) * 0.34 + 0.18 * Math.max(0, towerShotPulse)).toFixed(3)
           : "0";
-        const projectileShellStyle = `--projectile-angle:${Number(projectile.angle || 0)}rad; --tower-shot-scale-x:${towerShotScaleX}; --tower-shot-scale-y:${towerShotScaleY}; --tower-shot-glow:${towerShotGlow}; --tower-shot-spark-shift:${(Math.sin(towerShotAge / 70) * 6).toFixed(2)}px;`;
+        const projectileTarget = typeof projectile.targetId === "number"
+          ? game.robots.find((robot) => robot.id === projectile.targetId && !robot.dead)
+          : null;
+        const projectileTargetX = Number(projectileTarget?.x ?? projectile.targetX ?? projectile.x);
+        const projectileTargetY = Number(projectileTarget?.y ?? projectile.targetY ?? projectile.y);
+        const projectileAngle = Number.isFinite(Number(projectile.angle))
+          ? Number(projectile.angle)
+          : Math.atan2(projectileTargetY - Number(projectile.y || 0), projectileTargetX - Number(projectile.x || 0));
+        const projectileShellStyle = `--projectile-angle:${projectileAngle}rad; --tower-shot-scale-x:${towerShotScaleX}; --tower-shot-scale-y:${towerShotScaleY}; --tower-shot-glow:${towerShotGlow}; --tower-shot-spark-shift:${(Math.sin(towerShotAge / 70) * 6).toFixed(2)}px;`;
+        const projectileImageStyle = getProjectileImageStyle(projectile);
         const projectileBody = visual.cards?.length
           ? `
             <div class="shulla-card-fan" aria-label="${visual.alt}">
@@ -30836,17 +32979,22 @@ function renderGameScene() {
             </div>
           `
           : `
+            ${getProjectileEffectMarkup(projectile)}
             <img
               class="projectile-image asset-image"
               src="${visual.src}"
               alt="${visual.alt}"
               data-fallback-text="${visual.fallbackText}"
+              ${projectileImageStyle ? `style="${projectileImageStyle}"` : ""}
             />
             <div class="asset-fallback">${visual.fallbackText}</div>
           `;
-        return `
-        <div class="projectile" style="left:${projectile.x}px; top:${projectile.y}px;">
-          <div class="projectile-shell${projectile.kind === "snake-shot" ? " snake-shot" : projectile.kind === "elfie-shot" ? " elfie-shot" : projectile.kind === "lpsotka" ? " lpsotka-shot" : projectile.kind === "linda-shot" ? " linda-shot" : projectile.kind === "lily-shot" ? " lily-shot" : projectile.kind === "nora-shot" ? " nora-shot" : projectile.kind === "cloud-shot" ? " cloud-shot" : projectile.kind === "ann-shot" ? " ann-shot" : projectile.kind === "grifos-shot" ? " grifos-shot" : projectile.kind === "mycelia-shot" ? " mycelia-shot" : projectile.kind === "sylas-shot" ? " sylas-shot" : projectile.kind === "nerissa-shot" ? " nerissa-shot" : projectile.kind === "hookcrab-shot" ? " hookcrab-shot" : projectile.kind === "lunella-shot" ? " lunella-shot" : projectile.kind === "thalia-shot" ? " thalia-shot" : projectile.kind === "shulla-shot" ? " shulla-shot" : projectile.kind === "polar-bear-shot" ? " polar-bear-shot" : projectile.kind === "tricky-shot" ? " tricky-shot" : projectile.kind === "tower-bot-shot" ? " tower-bot-shot" : ""}" style="${projectileShellStyle}">
+	        const projectileVariantClass = projectile.kind === "linda-shot" && projectile.characterId === "wata-cukrowa-linda"
+	          ? " wata-cukrowa-linda-shot"
+	          : "";
+	        return `
+	        <div class="projectile" style="left:${projectile.x}px; top:${projectile.y}px;">
+	          <div class="projectile-shell${projectile.kind === "snake-shot" ? " snake-shot" : projectile.kind === "elfie-shot" ? " elfie-shot" : projectile.kind === "lpsotka" ? " lpsotka-shot" : projectile.kind === "linda-shot" ? " linda-shot" : projectile.kind === "lily-shot" ? " lily-shot" : projectile.kind === "nora-shot" ? " nora-shot" : projectile.kind === "cloud-shot" ? " cloud-shot" : projectile.kind === "ann-shot" ? " ann-shot" : projectile.kind === "grifos-shot" ? " grifos-shot" : projectile.kind === "mycelia-shot" ? " mycelia-shot" : projectile.kind === "sylas-shot" ? " sylas-shot" : projectile.kind === "nerissa-shot" ? " nerissa-shot" : projectile.kind === "hookcrab-shot" ? " hookcrab-shot" : projectile.kind === "lunella-shot" ? " lunella-shot" : projectile.kind === "thalia-shot" ? " thalia-shot" : projectile.kind === "shulla-shot" ? " shulla-shot" : projectile.kind === "zoya-shot" ? " zoya-shot" : projectile.kind === "finley-shot" ? " finley-shot" : projectile.kind === "blizzy-shot" ? " blizzy-shot" : projectile.kind === "polar-bear-shot" ? " polar-bear-shot" : projectile.kind === "tower-bot-shot" ? " tower-bot-shot" : ""}${projectileVariantClass}" style="${projectileShellStyle}">
             ${projectileBody}
           </div>
         </div>
@@ -31446,13 +33594,13 @@ function getProjectileVisual(projectile) {
     const isNatureVariant = projectileCharacterId === "elfie-w-swojej-naturze";
 
     return {
-      src: isWarriorVariant ? "./assets/attacks/atak_wojowniczka.jpeg" : "./assets/attacks/atak_elfie.jpeg",
+      src: isWarriorVariant ? "./assets/attacks/atak_wojowniczka.jpeg" : "./assets/attacks/atak_elfie.png",
       alt: isWarriorVariant
-        ? "Atak Elfie Wojowniczki"
+        ? "Atak Elli Wojowniczki"
         : isNatureVariant
-          ? "Atak Elfie w swojej naturze"
-          : "Atak Elfie",
-      fallbackText: isWarriorVariant ? "WOJOWNICZKA" : "ELFIE",
+          ? "Atak Elli w swojej naturze"
+          : "Atak Elli",
+      fallbackText: isWarriorVariant ? "WOJOWNICZKA" : "ELLA",
     };
   }
 
@@ -31460,9 +33608,15 @@ function getProjectileVisual(projectile) {
     return { src: "./assets/attacks/atak_3.png", alt: "Atak L'Psotki", fallbackText: "PSOTKA" };
   }
 
-  if (projectile.kind === "linda-shot") {
-    return { src: "./assets/attacks/atak_3.png", alt: "Atak Lindy", fallbackText: "LINDA" };
-  }
+	  if (projectile.kind === "linda-shot") {
+	    const projectileCharacterId = projectile.characterId || getEquippedCharacter()?.id;
+	    const isCottonCandyLinda = projectileCharacterId === "wata-cukrowa-linda";
+	    return {
+	      src: isCottonCandyLinda ? "./banieczka.png" : "./assets/attacks/atak_3.png",
+	      alt: isCottonCandyLinda ? "Atak Wata Cukrowa Linda" : "Atak Lindy",
+	      fallbackText: "LINDA",
+	    };
+	  }
 
   if (projectile.kind === "lily-shot") {
     const projectileCharacterId = projectile.characterId || getEquippedCharacter()?.id;
@@ -31470,13 +33624,16 @@ function getProjectileVisual(projectile) {
       projectileCharacterId === "leo" ||
       projectileCharacterId === "leo-skoczek-narciarski" ||
       projectileCharacterId === "lyzwiarz-leo";
+    const isWarmPantherVariant = projectileCharacterId === "przebranko-lily";
     const isLilySkaterVariant = projectileCharacterId === "lyzwiarka-lily";
     const isLilyMasterVariant = projectileCharacterId === "mistrzyni-lyzwiarstwa-lily";
     const isSkiJumperVariant = projectileCharacterId === "leo-skoczek-narciarski";
     const isSkaterLeoVariant = projectileCharacterId === "lyzwiarz-leo";
     const isIceSkaterVariant = isLilySkaterVariant || isSkaterLeoVariant;
     return {
-      src: isLilyMasterVariant
+      src: isWarmPantherVariant
+        ? "./pantercee.png"
+        : isLilyMasterVariant
         ? "./assets/attacks/atak_lilyrozowa.jpeg"
         : isIceSkaterVariant
           ? "./assets/attacks/atak_leołyżwiaż.jpeg"
@@ -31485,7 +33642,9 @@ function getProjectileVisual(projectile) {
         ? "Atak Leo Skoczek Narciarski"
         : isSkaterLeoVariant
           ? "Atak Łyżwiaża Leo"
-          : isLilyMasterVariant
+          : isWarmPantherVariant
+            ? "Atak Lily w Ciepłej Panterce"
+            : isLilyMasterVariant
             ? "Atak Mistrzyni Łyżwiarstwa Lily"
           : isLilySkaterVariant
             ? "Atak Łyżwiarki Lily"
@@ -31585,6 +33744,24 @@ function getProjectileVisual(projectile) {
     };
   }
 
+  if (projectile.kind === "zoya-shot") {
+    const projectileCharacterId = projectile.characterId || getEquippedCharacter()?.id;
+    const isZebraVariant = projectileCharacterId === "zoya-vhalith-zeberka";
+    return {
+      src: isZebraVariant ? "./zeberka.png" : "./voodoo.png",
+      alt: isZebraVariant ? "Atak Zoyi w Vhalith Zeberkę" : "Atak Zoyi",
+      fallbackText: "ZOYA",
+    };
+  }
+
+  if (projectile.kind === "finley-shot") {
+    return {
+      src: "./fini.png",
+      alt: "Atak Finleya",
+      fallbackText: "FINLEY",
+    };
+  }
+
   if (projectile.kind === "zlotowlosa-shot") {
     return {
       src: "./assets/attacks/atak_zlotowlosa.jpeg",
@@ -31630,13 +33807,11 @@ function getProjectileVisual(projectile) {
     };
   }
 
-  if (projectile.kind === "tricky-shot") {
-    const projectileCharacterId = projectile.characterId || getEquippedCharacter()?.id;
-    const isReindeerVariant = projectileCharacterId === "tricky-renifer";
+  if (projectile.kind === "blizzy-shot") {
     return {
-      src: "./assets/attacks/atak_5.png",
-      alt: isReindeerVariant ? "Atak Tricky Renifer" : "Atak Tricky",
-      fallbackText: isReindeerVariant ? "RENIFER" : "TRICKY",
+      src: "./blizz.png",
+      alt: "Atak Blizzy",
+      fallbackText: "BLIZZY",
     };
   }
 
@@ -31710,6 +33885,11 @@ function defaultState() {
     seenFirstRobotTutorial: false,
     seenTrophyRoadIntro: false,
     seenHighTowerStoryIntro: false,
+    unlockedLoadingScreen: "",
+    unlockedLoadingScreens: [],
+    selectedLoadingScreen: "default",
+    unlockedMusicTracks: [],
+    selectedMusicTrack: "",
     superAlleyActive: false,
     superAlleyWinterActive: false,
     rankingPoints: 0,
@@ -31738,6 +33918,8 @@ function defaultState() {
     favoriteCharacterId: "",
     favoritePetId: "",
     completedGamesTotal: 0,
+    characterPlayCounts: {},
+    petPlayCounts: {},
     trophyStreak: 0,
     petTrophies: {},
     petMiniAlleys: getDefaultPetMiniAlleyState(),
@@ -31745,8 +33927,10 @@ function defaultState() {
     petPowerLevels: {},
     dailyGiftClaimedDateKey: "",
     robotsDefeatedTotal: 0,
+    winterMagicMachineFirstPurchaseDone: false,
     storeStarterPackPurchased: false,
     supportedCreatorCode: "",
+    claimedPaidOrders: [],
     accountPasswordSet: false,
     accountPasswordHash: "",
     accountPasswordSalt: "",
@@ -31811,6 +33995,8 @@ function hydrateSavedState(saved) {
   const legacyCharacterReplacements = new Map([
     [["elfie", "jako", "linda"].join("-"), "sylas"],
     ["millo-jako-elfie", "magik-millo"],
+    ["tricky", "blizzy"],
+    ["tricky-renifer", "blizzy"],
   ]);
   const migrateRemovedCharacterId = (characterId) => legacyCharacterReplacements.get(characterId) || characterId;
   const savedOwnedCharacters = Array.isArray(saved.ownedCharacters)
@@ -31866,6 +34052,12 @@ function hydrateSavedState(saved) {
 
   merged.equippedCharacter = migrateRemovedCharacterId(merged.equippedCharacter);
   merged.claimedTrophyRewards = migrateClaimedTrophyRewards(saved.claimedTrophyRewards);
+  if (!Object.prototype.hasOwnProperty.call(saved, "unlockedLoadingScreen")) {
+    const remappedAlleyClaims = (merged.claimedTrophyRewards.alley || [])
+      .filter((rewardId) => rewardId !== "alley-base-500" && rewardId !== "alley-base-1100")
+      .map((rewardId) => rewardId === "alley-base-1000" ? "alley-base-1100" : rewardId);
+    merged.claimedTrophyRewards.alley = remappedAlleyClaims.filter((rewardId, index) => remappedAlleyClaims.indexOf(rewardId) === index);
+  }
   merged.activeTrophyWorld = normalizeTrophyWorldId(saved.activeTrophyWorld);
   merged.trophies = Math.max(0, Math.floor(Number(saved.trophies || 0)));
   if (merged.activeTrophyWorld !== "winter") {
@@ -31879,10 +34071,47 @@ function hydrateSavedState(saved) {
     : baseState.rankingTickets;
   merged.rankingLossStreak = Math.max(0, Math.floor(Number(saved.rankingLossStreak || 0)));
   merged.rankingAlleyUnlocked = Boolean(
-    saved.rankingAlleyUnlocked ||
-    (Array.isArray(merged.claimedTrophyRewards?.alley) && merged.claimedTrophyRewards.alley.includes("alley-base-500"))
+    (saved.rankingAlleyUnlocked && merged.trophies >= RANKING_ALLEY_UNLOCK_TROPHIES) ||
+    (Array.isArray(merged.claimedTrophyRewards?.alley) && merged.claimedTrophyRewards.alley.includes("alley-base-1000"))
   );
   merged.rankingPremiumActive = Boolean(saved.rankingPremiumActive);
+  {
+    const availableLoadingScreenIds = new Set(LOADING_SCREEN_ITEMS.map((item) => item.id).filter((id) => id !== "default"));
+    const loadingScreenIds = new Set();
+    const savedLoadingScreenIds = Array.isArray(saved.unlockedLoadingScreens) ? saved.unlockedLoadingScreens : [];
+    savedLoadingScreenIds.forEach((screenId) => {
+      const normalizedId = sanitizeStoredId(screenId);
+      if (availableLoadingScreenIds.has(normalizedId)) {
+        loadingScreenIds.add(normalizedId);
+      }
+    });
+    const legacyLoadingScreenId = sanitizeStoredId(saved.unlockedLoadingScreen);
+    if (availableLoadingScreenIds.has(legacyLoadingScreenId)) {
+      loadingScreenIds.add(legacyLoadingScreenId);
+    }
+    merged.unlockedLoadingScreens = Array.from(loadingScreenIds);
+    merged.unlockedLoadingScreen = merged.unlockedLoadingScreens[0] || "";
+    const selectedLoadingScreenId = sanitizeStoredId(saved.selectedLoadingScreen || "default");
+    merged.selectedLoadingScreen = selectedLoadingScreenId === "default" || loadingScreenIds.has(selectedLoadingScreenId)
+      ? selectedLoadingScreenId
+      : "default";
+  }
+  {
+    const availableMusicTrackIds = new Set(MUSIC_TRACK_ITEMS.map((item) => item.id));
+    const unlockedMusicTrackIds = new Set();
+    const savedMusicTrackIds = Array.isArray(saved.unlockedMusicTracks) ? saved.unlockedMusicTracks : [];
+    savedMusicTrackIds.forEach((trackId) => {
+      const normalizedId = sanitizeStoredId(trackId);
+      if (availableMusicTrackIds.has(normalizedId) && normalizedId !== "magiczna-kraina" && normalizedId !== "bialy-puch") {
+        unlockedMusicTrackIds.add(normalizedId);
+      }
+    });
+    merged.unlockedMusicTracks = Array.from(unlockedMusicTrackIds);
+    const selectedMusicTrackId = sanitizeStoredId(saved.selectedMusicTrack);
+    merged.selectedMusicTrack = selectedMusicTrackId && isMusicTrackUnlockedForState(merged, selectedMusicTrackId)
+      ? selectedMusicTrackId
+      : "";
+  }
   merged.platoKeys = Math.max(0, Number(saved.platoKeys || 0));
   merged.elixirs = Math.max(0, Number(saved.elixirs || 0));
   merged.silver = merged.activeTrophyWorld === "winter" ? 0 : Math.max(0, Math.floor(Number(saved.silver || 0)));
@@ -31893,6 +34122,7 @@ function hydrateSavedState(saved) {
   merged.highTowerVictoryChestsClaimedToday = Math.max(0, Math.floor(Number(saved.highTowerVictoryChestsClaimedToday || 0)));
   merged.highTowerDailyChestDateKey = sanitizeDateKey(saved.highTowerDailyChestDateKey);
   merged.magicMachineFirstPurchaseDone = Boolean(saved.magicMachineFirstPurchaseDone);
+  merged.winterMagicMachineFirstPurchaseDone = Boolean(saved.winterMagicMachineFirstPurchaseDone);
   merged.phoneModeEnabled = Boolean(saved.phoneModeEnabled);
   merged.musicVolumePercent = normalizeSettingsVolumePercent(saved.musicVolumePercent, SETTINGS_VOLUME_MAX);
   merged.soundVolumePercent = normalizeSettingsVolumePercent(saved.soundVolumePercent, SETTINGS_VOLUME_MAX);
@@ -31909,9 +34139,14 @@ function hydrateSavedState(saved) {
   merged.profileThemeWorldId = normalizeTrophyWorldId(saved.profileThemeWorldId);
   merged.nicknameChangeCount = Math.max(0, Number(saved.nicknameChangeCount || 0));
   merged.supportedCreatorCode = String(saved.supportedCreatorCode || "").trim().toLowerCase() === "natix" ? "NATIX" : "";
+  merged.claimedPaidOrders = Array.isArray(saved.claimedPaidOrders)
+    ? saved.claimedPaidOrders.map((orderId) => sanitizeStoredId(orderId)).filter(Boolean)
+    : [];
   merged.selectedProfilePhotoId = sanitizeStoredId(saved.selectedProfilePhotoId);
   merged.profileVisualKind = saved.profileVisualKind === "pet" ? "pet" : "character";
   merged.completedGamesTotal = Math.max(0, Number(saved.completedGamesTotal || 0));
+  merged.characterPlayCounts = normalizeInventoryPlayCounts(saved.characterPlayCounts, "characters");
+  merged.petPlayCounts = normalizeInventoryPlayCounts(saved.petPlayCounts, "pets");
   merged.trophyStreak = Math.max(0, Number(saved.trophyStreak || 0));
   merged.dailyGiftClaimedDateKey = sanitizeDateKey(saved.dailyGiftClaimedDateKey);
   merged.robotsDefeatedTotal = Math.max(0, Number(saved.robotsDefeatedTotal || 0));
@@ -32131,9 +34366,17 @@ function sanitizeProfileId(value) {
 }
 
 function sanitizePublicPlayerId(value) {
+  return normalizeFriendsSecretCode(value)
+    .slice(0, 5);
+}
+
+function normalizeFriendsSecretCode(value) {
   return String(value || "")
     .trim()
     .toUpperCase()
+    .replace(/Ł/g, "L")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^0-9A-Z]/g, "")
     .slice(0, 5);
 }
@@ -32224,9 +34467,40 @@ function getOwnedItems(kind) {
         ? state.ownedPets
         : kind === "weapons"
           ? state.ownedWeapons
-          : [];
+          : kind === "musicTracks"
+            ? getUnlockedMusicTrackIds()
+            : [];
 
   return CATALOG[kind].filter((item) => ownedIds.includes(item.id));
+}
+
+function normalizeInventoryPlayCounts(rawCounts, kind) {
+  const catalog = CATALOG[kind] || [];
+  return Object.fromEntries(
+    Object.entries(rawCounts || {})
+      .map(([itemId, count]) => [sanitizeStoredId(itemId), Math.max(0, Math.floor(Number(count || 0)))])
+      .filter(([itemId, count]) => catalog.some((item) => item.id === itemId) && count > 0)
+  );
+}
+
+function incrementInventoryPlayCounts() {
+  const characterBaseId = getCharacterBaseId(state.equippedCharacter);
+  const petBaseId = getPetBaseId(game.runPetId || state.equippedPet);
+
+  state.characterPlayCounts = state.characterPlayCounts && typeof state.characterPlayCounts === "object"
+    ? state.characterPlayCounts
+    : {};
+  state.petPlayCounts = state.petPlayCounts && typeof state.petPlayCounts === "object"
+    ? state.petPlayCounts
+    : {};
+
+  if (characterBaseId && CATALOG.characters.some((item) => item.id === characterBaseId)) {
+    state.characterPlayCounts[characterBaseId] = Math.max(0, Number(state.characterPlayCounts[characterBaseId] || 0)) + 1;
+  }
+
+  if (petBaseId && CATALOG.pets.some((item) => item.id === petBaseId)) {
+    state.petPlayCounts[petBaseId] = Math.max(0, Number(state.petPlayCounts[petBaseId] || 0)) + 1;
+  }
 }
 
 function getOwnedItem(kind, itemId) {
@@ -32246,7 +34520,7 @@ function isOwned(kind, itemId) {
 }
 
 function isSinglePurchaseStoreItem(kind) {
-  return kind === "characters" || kind === "pets" || kind === "weapons";
+  return kind === "characters" || kind === "pets" || kind === "weapons" || kind === "musicTracks";
 }
 
 function isEquipped(kind, itemId) {
@@ -32260,6 +34534,10 @@ function isEquipped(kind, itemId) {
 
   if (kind === "weapons") {
     return state.equippedWeapon === itemId;
+  }
+
+  if (kind === "musicTracks") {
+    return getSelectedMusicTrackId() === itemId;
   }
 
   return false;
